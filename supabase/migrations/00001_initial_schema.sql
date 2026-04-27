@@ -18,9 +18,17 @@ create or replace function public.handle_updated_at()
 returns trigger as $$
 begin
   new.updated_at = now();
-  return new;
 end;
 $$ language plpgsql;
+
+-- Function to get the current user's role
+create or replace function public.get_current_user_role()
+returns text
+language sql stable
+security definer
+as $$
+  select user_type from public.profiles where id = public.requesting_user_id();
+$$;
 
 -- 3. CLEANUP (Ensures fresh reconstruction)
 drop table if exists public.security_logs cascade;
@@ -158,7 +166,19 @@ create table if not exists public.tasks (
   description text,
   status text not null default 'pending',
   priority text default 'medium',
+  category text default 'general',
+  tags text[] default '{}',
+  progress_percentage int default 0,
+  estimated_time int,
+  time_spent int default 0,
+  timer_active boolean default false,
+  timer_start timestamptz,
+  parent_task_id uuid references public.tasks(id) on delete cascade,
+  course_id uuid references public.courses(id) on delete set null,
+  depends_on uuid[] default '{}',
+  is_favorited boolean default false,
   is_deleted boolean default false,
+  deleted_at timestamptz,
   due_date timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -212,6 +232,10 @@ create table if not exists public.grades (
   total_points decimal default 100,
   grade_type text, -- 'exam', 'assignment', 'quiz'
   semester text,
+  academic_year text,
+  weight decimal default 1.0,
+  notes text,
+  is_extra_credit boolean default false,
   date_recorded date default current_date,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -258,12 +282,34 @@ create table if not exists public.user_timetables (
   id uuid primary key default uuid_generate_v4(),
   user_id text references public.profiles(id) on delete cascade,
   title text not null,
+  description text,
   day int not null, -- 0-6
   start_time time not null,
   end_time time not null,
+  color text,
   location text,
   instructor text,
-  color text,
+  room_number text,
+  building text,
+  category text default 'class',
+  priority text default 'medium',
+  status text default 'active',
+  recurrence_type text default 'none',
+  week_type text default 'all',
+  semester text,
+  academic_year text default '2024-25',
+  credits int,
+  attendance_required boolean default true,
+  online_meeting_link text,
+  meeting_password text,
+  notes text,
+  reminder_minutes int default 15,
+  reminder_enabled boolean default true,
+  is_public boolean default false,
+  is_exam boolean default false,
+  exam_type text,
+  preparation_time int default 0,
+  tags text[] default '{}',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -557,9 +603,9 @@ create table if not exists public.timetable_events (
   recurrence_end date,
   week_type text default 'all',
   semester text,
-  academic_year text,
+  academic_year text default '2024-25',
   credits float,
-  attendance_required boolean default false,
+  attendance_required boolean default true,
   online_meeting_link text,
   meeting_password text,
   notes text,
@@ -569,7 +615,7 @@ create table if not exists public.timetable_events (
   is_exam boolean default false,
   exam_type text,
   preparation_time int default 0,
-  tags text[],
+  tags text[] default '{}',
   attachments text[],
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -658,6 +704,9 @@ create policy "Users can view their own profile" on public.profiles for select u
 
 drop policy if exists "Users can update their own profile" on public.profiles;
 create policy "Users can update their own profile" on public.profiles for update using ( id = requesting_user_id() );
+
+drop policy if exists "Users can insert their own profile" on public.profiles;
+create policy "Users can insert their own profile" on public.profiles for insert with check ( id = requesting_user_id() );
 
 -- NOTES POLICIES
 drop policy if exists "Users can manage their own notes" on public.notes;

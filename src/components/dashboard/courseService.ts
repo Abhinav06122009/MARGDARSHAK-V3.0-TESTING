@@ -36,7 +36,8 @@ export const courseService = {
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
@@ -46,14 +47,14 @@ export const courseService = {
     }
   },
 
-  createCourse: async (userId: string, formData: CourseFormData): Promise<Course | null> => {
+  createCourse: async (formData: CourseFormData, userId: string): Promise<Course | null> => {
     try {
       const { data, error } = await supabase
         .from('courses')
         .insert({
           user_id: userId,
           ...formData,
-          academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
+          academic_year: formData.academic_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
         })
         .select()
         .single();
@@ -62,11 +63,11 @@ export const courseService = {
       return data;
     } catch (error) {
       console.error('Error creating course:', error);
-      return null;
+      throw error;
     }
   },
 
-  updateCourse: async (userId: string, courseId: string, formData: CourseFormData): Promise<Course | null> => {
+  updateCourse: async (courseId: string, formData: CourseFormData, userId: string): Promise<Course | null> => {
     try {
       const { data, error } = await supabase
         .from('courses')
@@ -82,11 +83,11 @@ export const courseService = {
       return data;
     } catch (error) {
       console.error('Error updating course:', error);
-      return null;
+      throw error;
     }
   },
 
-  deleteCourse: async (userId: string, courseId: string): Promise<boolean> => {
+  deleteCourse: async (courseId: string, userId: string): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('courses')
@@ -97,7 +98,69 @@ export const courseService = {
       return true;
     } catch (error) {
       console.error('Error deleting course:', error);
-      return false;
+      throw error;
+    }
+  },
+
+  searchUserCourses: async (userId: string, query?: string, grade?: string, difficulty?: string): Promise<Course[]> => {
+    try {
+      let supabaseQuery = supabase
+        .from('courses')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (query) {
+        supabaseQuery = supabaseQuery.or(`name.ilike.%${query}%,code.ilike.%${query}%`);
+      }
+      if (grade && grade !== 'all') {
+        supabaseQuery = supabaseQuery.eq('grade_level', grade);
+      }
+      if (difficulty && difficulty !== 'all') {
+        supabaseQuery = supabaseQuery.eq('difficulty', difficulty);
+      }
+
+      const { data, error } = await supabaseQuery.order('name');
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error searching courses:', error);
+      return [];
+    }
+  },
+
+  getCourseStatistics: async (userId: string): Promise<CourseStats | null> => {
+    try {
+      const { data: courses, error: coursesError } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('user_id', userId);
+
+      if (coursesError) throw coursesError;
+
+      const { data: attendance, error: attError } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (attError) throw attError;
+
+      const total = attendance?.length || 0;
+      const present = attendance?.filter(a => a.status === 'present').length || 0;
+      const late = attendance?.filter(a => a.status === 'late').length || 0;
+      const excused = attendance?.filter(a => a.status === 'excused').length || 0;
+      const absent = attendance?.filter(a => a.status === 'absent').length || 0;
+
+      return {
+        totalSessions: total,
+        presentCount: present,
+        absentCount: absent,
+        lateCount: late,
+        excusedCount: excused,
+        percentage: total > 0 ? Math.round(((present + late * 0.5 + excused) / total) * 100) : 0
+      };
+    } catch (error) {
+      console.error('Error getting course statistics:', error);
+      return null;
     }
   },
 

@@ -64,7 +64,7 @@ export const dashboardService = {
         supabase.from('grades').select('*').eq('user_id', userId),
         supabase.from('notes').select('*').eq('user_id', userId),
         supabase.from('courses').select('*').eq('user_id', userId),
-        supabase.from('user_timetables').select('*').eq('user_id', userId)
+        supabase.from('timetable_events').select('*').eq('user_id', userId)
       ]);
 
       return {

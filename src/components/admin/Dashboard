@@ -289,7 +289,7 @@ const secureDataHelpers = {
     try {
       // Try the original structure first
       const { data, error } = await supabase
-        .from('user_timetables')
+        .from('timetable_events')
         .select('*')
         .eq('user_id', userId);
 

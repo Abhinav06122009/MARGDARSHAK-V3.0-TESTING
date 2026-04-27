@@ -147,7 +147,7 @@ export interface TimetableEvent {
     fetchUserTimetable: async (userId: string) => {
       try {
         const { data, error } = await supabase
-          .from('user_timetables')
+          .from('timetable_events')
           .select('*')
           .eq('user_id', userId)
           .eq('status', 'active')
@@ -245,7 +245,7 @@ export interface TimetableEvent {
         };
   
         const { data, error } = await supabase
-          .from('user_timetables')
+          .from('timetable_events')
           .insert([cleanData])
           .select()
           .single();
@@ -304,7 +304,7 @@ export interface TimetableEvent {
         });
   
         const { data, error } = await supabase
-          .from('user_timetables')
+          .from('timetable_events')
           .update(cleanData)
           .eq('id', eventId)
           .eq('user_id', userId)
@@ -322,7 +322,7 @@ export interface TimetableEvent {
     deleteEvent: async (eventId: string, userId: string) => {
       try {
         const { error } = await supabase
-          .from('user_timetables')
+          .from('timetable_events')
           .delete()
           .eq('id', eventId)
           .eq('user_id', userId);
@@ -338,7 +338,7 @@ export interface TimetableEvent {
     searchTimetableEvents: async (query: string, userId: string, day?: number, category?: string) => {
       try {
         let queryBuilder = supabase
-          .from('user_timetables')
+          .from('timetable_events')
           .select('*')
           .eq('user_id', userId)
           .eq('status', 'active');
