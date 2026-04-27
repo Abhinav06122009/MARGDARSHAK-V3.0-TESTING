@@ -16,7 +16,6 @@ import InteractiveBackground from '@/lib/InteractiveBackground';
 import { NOISE_TEXTURE_DATA_URI } from '@/lib/noiseTexture';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { courseService } from '@/components/dashboard/courseService';
 
 const Upgrade = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -27,14 +26,19 @@ const Upgrade = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const user = await courseService.getCurrentUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          setCurrentTier(user.profile?.subscription_tier || 'free');
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('subscription_tier')
+            .eq('id', user.id)
+            .maybeSingle();
+          setCurrentTier((profile as any)?.subscription_tier || 'free');
         } else {
           setCurrentTier('free');
         }
       } catch (err) {
-        console.error("Error fetching user tier:", err);
+        console.error("Error fetching user tier from Supabase:", err);
         setCurrentTier('free');
       }
     };
@@ -51,16 +55,15 @@ const Upgrade = () => {
         return;
       }
 
-      // Update Profile in Supabase
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .update({ 
           subscription_tier: tier,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       toast({
         title: "Upgrade Successful! 🎉",

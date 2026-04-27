@@ -28,7 +28,7 @@ export const useUserManagement = () => {
     try {
       const isBlocked = action === 'block';
       
-      // 1. Update the profile status
+      // 1. Update the profile status in Supabase
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ is_blocked: isBlocked })
@@ -36,16 +36,15 @@ export const useUserManagement = () => {
 
       if (profileError) throw profileError;
 
-      // 2. Synchronize with blocked_users table (for analytics/audit logs)
+      // 2. Synchronize with blocked_users collection in Supabase
       if (isBlocked) {
         const { data: { user: adminUser } } = await supabase.auth.getUser();
-        const { error: blockError } = await supabase
-          .from('blocked_users')
-          .insert({
-            user_id: userId,
-            blocked_by: adminUser?.id,
-            reason: 'Manual administrative block via Identity Matrix'
-          });
+        const { error: blockError } = await supabase.from('blocked_users').insert({
+          user_id: userId,
+          blocked_by: adminUser?.id,
+          reason: 'Manual administrative block via Identity Matrix',
+          created_at: new Date().toISOString()
+        });
         
         if (blockError) {
           console.warn("⚠️ Sync to blocked_users failed, but profile was updated:", blockError);
@@ -61,7 +60,7 @@ export const useUserManagement = () => {
         }
       }
 
-      // 3. Log the security event (calls the Edge Function that might 500 if SQL isn't run)
+      // 3. Log the security event
       try {
         await logSecurityEvent({
           eventType: action === 'block' ? 'admin_block_user' : 'admin_unblock_user',
@@ -74,7 +73,6 @@ export const useUserManagement = () => {
         });
       } catch (logErr) {
         console.error("🔒 Security logging failed (Check Supabase SQL):", logErr);
-        // We don't throw here so the UI still updates even if logging fails
       }
       
       toast.success(`Identity ${isBlocked ? 'restricted' : 'restored'} successfully`);

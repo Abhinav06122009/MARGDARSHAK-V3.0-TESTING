@@ -162,21 +162,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   // ADDED: State for Real DB Values (Role & Subscription)
   const [realSubscriptionTier, setRealSubscriptionTier] = useState<string | null>(null);
   const [realRole, setRealRole] = useState<string | null>(null);
+  const [realFullName, setRealFullName] = useState<string | null>(null);
 
   // FORCE FETCH: Get Role and Subscription Tier directly from DB on mount
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!currentUser?.id) return;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('subscription_tier, role') // Fetch both columns
-        .eq('id', currentUser.id)
-        .single();
-        
-      if (!error && data) {
-        setRealSubscriptionTier(data.subscription_tier);
-        setRealRole(data.role); // Store the real role
+      try {
+        // Try fetching all columns first, then fall back if it fails
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+          
+        if (!error && data) {
+          const profileData = data as any;
+          setRealSubscriptionTier(profileData.subscription_tier || 'free');
+          setRealRole(profileData.role || profileData.user_type || 'student'); 
+          if (profileData.full_name) setRealFullName(profileData.full_name);
+        }
+      } catch (err) {
+        console.error("Dashboard: Error fetching real profile data:", err);
       }
     };
     fetchProfileData();
@@ -323,7 +331,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             onOpenFeatureSpotlight={() => {}}
           />
           <WelcomeHeader 
-            fullName={currentUser.profile?.full_name} 
+            fullName={realFullName || currentUser.profile?.full_name || currentUser.user_metadata?.full_name} 
             totalTasks={dashboardStats.totalTasks} 
             totalCourses={dashboardStats.totalCourses} 
             totalStudySessions={dashboardStats.totalStudySessions} 

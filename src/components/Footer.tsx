@@ -4,6 +4,7 @@ import { ArrowUp, Twitter, Github, Linkedin, ShieldCheck, Zap, Globe } from 'luc
 import { motion, AnimatePresence } from 'framer-motion';
 // Ensure you have a logo image or remove the img tag
 import logo from "@/components/logo/logo.png"; 
+import { Instagram, Youtube } from 'lucide-react';
 
 const Footer = () => {
 
@@ -22,11 +23,16 @@ const Footer = () => {
           
           {/* Brand Column */}
           <div className="md:col-span-4 space-y-6">
-            <Link to="/" className="flex items-center gap-3 group">
+            <Link to="/" className="flex items-center gap-3 group relative">
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity" />
-                {/* Replace src with your actual logo path or use a fallback icon */}
-                <img src={logo} alt="Margdarshak Logo" className="w-12 h-12 rounded-xl relative z-10" />
+                {/* Enhanced Brand Glow */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 to-emerald-500 blur-xl opacity-0 group-hover:opacity-40 transition-all duration-700 rounded-full" />
+                <div className="absolute inset-0 bg-blue-500 blur-lg opacity-20 transition-opacity" />
+                
+                {/* Premium Logo Container */}
+                <div className="p-0.5 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm border border-white/10 relative z-10 group-hover:scale-110 transition-transform duration-500 shadow-2xl">
+                  <img src={logo} alt="Margdarshak Logo" className="w-14 h-14 rounded-xl object-contain bg-white/5" />
+                </div>
               </div>
               <div>
                 <h3 className="text-2xl font-black tracking-tight text-white group-hover:text-blue-400 transition-colors">
@@ -38,22 +44,26 @@ const Footer = () => {
             <p className="text-slate-400 leading-relaxed max-w-sm">
               Your comprehensive platform for academic success. We help students organize their studies, track progress, and achieve their goals with ease.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               {[
-                { icon: Twitter, href: "https://x.com/gyantappas" },
-                { icon: Github, href: "https://github.com" },
-                { icon: Linkedin, href: "https://linkedin.com" }
-              ].map((Social, idx) => (
-                <a 
+                { icon: Twitter, href: "https://x.com/gyantappas", color: "hover:bg-sky-500/20 hover:text-sky-400 hover:border-sky-500/50" },
+                { icon: Github, href: "https://github.com", color: "hover:bg-slate-700/20 hover:text-slate-100 hover:border-slate-500/50" },
+                { icon: Linkedin, href: "https://linkedin.com", color: "hover:bg-blue-600/20 hover:text-blue-400 hover:border-blue-500/50" },
+                { icon: Instagram, href: "https://instagram.com", color: "hover:bg-pink-600/20 hover:text-pink-400 hover:border-pink-500/50" },
+                { icon: Youtube, href: "https://youtube.com", color: "hover:bg-red-600/20 hover:text-red-400 hover:border-red-500/50" }
+              ].map((social, idx) => (
+                <motion.a 
                   key={idx}
-                  href={Social.href} 
+                  href={social.href} 
                   target="_blank" 
                   rel="noreferrer"
                   aria-label="Social Link"
-                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600/20 hover:border-blue-500/50 transition-all duration-300"
+                  whileHover={{ scale: 1.15, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 transition-all duration-300 shadow-xl ${social.color}`}
                 >
-                  <Social.icon size={18} />
-                </a>
+                  <social.icon size={22} />
+                </motion.a>
               ))}
             </div>
           </div>

@@ -50,8 +50,14 @@ const SmartTutorPage = () => {
   const checkSubscription = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
-      if (data?.subscription_tier) setSubscriptionTier(data.subscription_tier);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single();
+      if (profile?.subscription_tier) {
+        setSubscriptionTier(profile.subscription_tier);
+      }
     }
   };
 

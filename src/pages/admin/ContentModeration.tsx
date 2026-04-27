@@ -12,7 +12,10 @@ const ContentModeration = () => {
     try {
       const { error } = await supabase
         .from('moderation_queue')
-        .update({ status: action === 'approve' ? 'approved' : 'deleted' })
+        .update({ 
+          status: action === 'approve' ? 'approved' : 'deleted',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;

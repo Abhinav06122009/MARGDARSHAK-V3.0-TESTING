@@ -52,13 +52,12 @@ export const useSettings = () => {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('full_name, user_type, student_id')
+        .select('*')
         .eq('id', authUser.id)
         .single();
 
       if (profileError) {
-        toast({ title: "Error", description: "Could not fetch user profile.", variant: "destructive" });
-        throw profileError;
+        console.warn("useSettings: Profile fetch error (non-critical):", profileError);
       }
 
       const secureUser: SecureUser = {
@@ -66,9 +65,9 @@ export const useSettings = () => {
         email: authUser.email || '',
         last_sign_in_at: authUser.last_sign_in_at,
         profile: {
-          full_name: profile.full_name || '',
-          user_type: profile.user_type || 'student',
-          student_id: profile.student_id || ''
+          full_name: profile?.full_name || authUser.user_metadata?.full_name || '',
+          user_type: profile?.user_type || 'student',
+          student_id: profile?.student_id || ''
         }
       };
       

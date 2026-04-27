@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useClerk } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -41,9 +42,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
   const handleLogoMouseLeave = () => { logoX.set(0); logoY.set(0); };
 
+  const { signOut } = useClerk();
+
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) toast({ title: 'Logout Failed', variant: 'destructive' });
+    try {
+      await signOut();
+      navigate('/');
+      toast({ title: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({ title: 'Logout Failed', variant: 'destructive' });
+    }
   };
 
   const displayRole = (realRole || currentUser.profile?.role || 'STUDENT').toUpperCase();
@@ -72,21 +81,30 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="relative z-10 flex items-center gap-2 md:gap-4">
         {/* 3D Logo */}
         <motion.div
-          className="relative"
+          className="relative group"
           style={{ perspective: 600 }}
           onMouseMove={handleLogoMouseMove}
           onMouseLeave={handleLogoMouseLeave}
         >
           <motion.div
             style={{ rotateX: logoRotateX, rotateY: logoRotateY }}
-            className="bg-white/95 p-2 rounded-lg md:p-2.5 md:rounded-xl shadow-lg shadow-black/30 cursor-pointer"
+            className="relative p-2 md:p-2.5 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-2xl cursor-pointer overflow-hidden group-hover:border-blue-500/50 transition-colors"
             whileHover={{ scale: 1.08 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <img src={logo} alt="MARGDARSHAK" className="h-7 md:h-9 object-contain" draggable={false} />
+            {/* Animated background glow inside logo box */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <img 
+              src={logo} 
+              alt="MARGDARSHAK" 
+              className="h-8 md:h-10 w-auto object-contain relative z-10 brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" 
+              draggable={false} 
+            />
           </motion.div>
-          {/* Glow under logo */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-3 bg-white/20 rounded-full blur-md" />
+          
+          {/* Enhanced Glow under logo */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-3 bg-blue-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.div>
 
         {/* Brand name - Hidden on small mobile */}

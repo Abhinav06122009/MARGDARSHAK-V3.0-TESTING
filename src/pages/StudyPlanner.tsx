@@ -16,6 +16,8 @@ import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
 import { jsPDF } from 'jspdf';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
+import { dashboardService } from '@/lib/dashboardService';
 
 // Social Icons (Unified)
 
@@ -60,6 +62,33 @@ const StudyPlanner: React.FC = () => {
   const [completedSessions, setCompletedSessions] = useState<Set<string>>(new Set());
   const { isAIReady } = useAI();
   const { toast } = useToast();
+
+  // Load existing plan on mount
+  React.useEffect(() => {
+    const loadPlan = async () => {
+      const user = await dashboardService.getCurrentUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('study_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const latestPlan = data[0];
+        setPlan(latestPlan.plan as unknown as StudyPlan);
+        setCompletedSessions(new Set((latestPlan.completed_sessions as string[]) || []));
+        
+        // Restore config if available
+        if (latestPlan.config) {
+          setConfig(latestPlan.config as unknown as PlanConfig);
+        }
+      }
+    };
+    loadPlan();
+  }, []);
 
   const daysUntilExam = config.examDate
     ? Math.max(0, Math.ceil((new Date(config.examDate).getTime() - Date.now()) / 86400000))
@@ -126,23 +155,52 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
       if (result && result.schedule && Array.isArray(result.schedule)) {
         setPlan(result);
         setCompletedSessions(new Set());
+
+        // Save to Supabase
+        const user = await dashboardService.getCurrentUser();
+        if (user) {
+          await supabase.from('study_plans').insert({
+            user_id: user.id,
+            plan: result as any,
+            config: config as any,
+            completed_sessions: [],
+            created_at: new Date().toISOString()
+          });
+        }
       } else {
         throw new Error('Invalid plan structure');
       }
-    } catch {
+    } catch (err) {
+      console.error('Plan generation error:', err);
       toast({ title: 'Generation failed', description: 'Could not generate study plan. Please try again.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   }, [config, isAIReady, toast, daysUntilExam]);
 
-  const toggleSession = (sessionKey: string) => {
-    setCompletedSessions(prev => {
-      const next = new Set(prev);
-      if (next.has(sessionKey)) next.delete(sessionKey);
-      else next.add(sessionKey);
-      return next;
-    });
+  const toggleSession = async (sessionKey: string) => {
+    const nextSessions = new Set(completedSessions);
+    if (nextSessions.has(sessionKey)) nextSessions.delete(sessionKey);
+    else nextSessions.add(sessionKey);
+    
+    setCompletedSessions(nextSessions);
+
+    // Persist completed sessions to Supabase (Update the latest plan)
+    const user = await dashboardService.getCurrentUser();
+    if (user) {
+      const { data: plans } = await supabase
+        .from('study_plans')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (plans && plans.length > 0) {
+        await supabase.from('study_plans').update({
+          completed_sessions: Array.from(nextSessions)
+        }).eq('id', plans[0].id);
+      }
+    }
   };
 
   const totalSessions = plan?.schedule.reduce((sum, day) => sum + day.sessions.length, 0) || 0;

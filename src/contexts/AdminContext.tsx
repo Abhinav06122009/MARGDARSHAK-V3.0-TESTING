@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface AdminProfile {
   id: string;
@@ -46,31 +47,43 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     let role: string | null = null;
 
     try {
-      const { data } = await supabase.rpc('get_current_user_role');
-      if (data) role = data;
+      // First attempt to get role via RPC
+      const { data, error: rpcError } = await supabase.rpc('get_current_user_role');
+      if (!rpcError && data) role = data;
     } catch (error) {
       console.warn('Admin role RPC unavailable', error);
     }
 
+    // Fetch profile data. This will fail if id is still UUID in the DB.
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id, full_name, email, user_type')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
-      console.error("Failed to fetch admin profile:", profileError);
+      if (profileError.code === '22P02') {
+        console.error("ADMIN SYNC CRITICAL: Database 'profiles.id' is still UUID. Please run the SQL fix to convert to TEXT.");
+        toast.error('Admin System Blocked', {
+          description: 'Profiles table using UUID instead of Clerk TEXT ID. SQL fix required.',
+          id: 'admin-uuid-error'
+        });
+      } else {
+        console.error("Failed to fetch admin profile:", profileError);
+      }
     }
 
     setProfile(profileData || null);
     
-    // Check both the RPC role and the Profile role just in case one overrides the other with a generic "user" role
+    // Check both the RPC role and the Profile role
+    // Support Clerk-based roles in metadata as a fallback
+    const clerkRole = (clerkUser?.publicMetadata?.role as string) || '';
+    
     const isRpcAdmin = role ? ADMIN_ROLES.has(role.toLowerCase()) : false;
     const isProfileAdmin = profileData?.user_type ? ADMIN_ROLES.has(profileData.user_type.toLowerCase()) : false;
+    const isClerkAdmin = clerkRole ? ADMIN_ROLES.has(clerkRole.toLowerCase()) : false;
     
-    // Strict RBAC: Only allow specific roles
-    setIsAdmin(isRpcAdmin || isProfileAdmin);
-    
+    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin);
     setLoading(false);
   };
 
@@ -87,8 +100,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     profile,
     isAdmin,
     loading,
-    refresh: () => resolveAdmin(session),
-  }), [session, profile, isAdmin, loading]);
+    refresh: () => resolveAdmin(clerkUser?.id),
+  }), [session, profile, isAdmin, loading, clerkUser?.id]);
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 };

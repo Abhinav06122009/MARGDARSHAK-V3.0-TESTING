@@ -7,6 +7,7 @@ import { BackgroundScene } from '@/components/landing/BackgroundScene';
 import { Features, Testimonials, About } from '@/components/landing/LandingSections';
 import { GeminiFeatureDemo } from '@/components/landing/GeminiFeatureDemo';
 import { Pricing, CTA } from '@/components/landing/Pricing';
+import { TechStack } from '@/components/landing/TechStack';
 import Footer from '@/components/Footer';
 
 /**
@@ -55,6 +56,7 @@ const LandingPage: React.FC = () => {
           <Suspense fallback={<SectionPlaceholder />}>
             <Features />
             <GeminiFeatureDemo />
+            <TechStack />
             <Testimonials />
             <About />
             <Pricing />

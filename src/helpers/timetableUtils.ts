@@ -214,100 +214,111 @@ export const timetableUtils = {
   }
 };
 
-export const fetchUserTimetable = async (userId: string): Promise<TimetableEvent[]> => {
-  const { data, error } = await supabase
-    .from('timetable_events')
-    .select('*')
-    .eq('user_id', userId)
-    .order('day', { ascending: true })
-    .order('start_time', { ascending: true });
+import { supabase } from '@/integrations/supabase/client';
 
-  if (error) {
+export const fetchUserTimetable = async (userId: string): Promise<TimetableEvent[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('timetable_events')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    
+    return (data || []).sort((a: any, b: any) => {
+      if (a.day !== b.day) return a.day - b.day;
+      return a.start_time.localeCompare(b.start_time);
+    });
+  } catch (error) {
     console.error('Error fetching timetable:', error);
     throw error;
   }
-  return data || [];
 };
 
 export const getTimetableStatistics = async (userId: string): Promise<TimetableStats> => {
-    const { data: events, error } = await supabase
-        .from('timetable_events')
-        .select('category, day, start_time, end_time, location')
-        .eq('user_id', userId);
-
-    if (error) {
-        console.error('Error fetching stats:', error);
-        throw error;
-    }
+  try {
+    const events = await fetchUserTimetable(userId);
 
     if (!events || events.length === 0) {
-        return {
-            total_events: 0,
-            classes: 0,
-            meetings: 0,
-            exams: 0,
-            labs: 0,
-            total_weekly_hours: 0,
-            busiest_day: -1,
-            most_common_location: 'N/A',
-            categories: {},
-            daily_distribution: {},
-        };
-    }
-
-    const stats: TimetableStats = {
-        total_events: events.length,
+      return {
+        total_events: 0,
         classes: 0,
         meetings: 0,
         exams: 0,
         labs: 0,
         total_weekly_hours: 0,
-        busiest_day: 0,
+        busiest_day: -1,
         most_common_location: 'N/A',
         categories: {},
-        daily_distribution: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+        daily_distribution: {},
+      };
+    }
+
+    const stats: TimetableStats = {
+      total_events: events.length,
+      classes: 0,
+      meetings: 0,
+      exams: 0,
+      labs: 0,
+      total_weekly_hours: 0,
+      busiest_day: 0,
+      most_common_location: 'N/A',
+      categories: {},
+      daily_distribution: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
     };
 
     const locationCounts: Record<string, number> = {};
 
     events.forEach(event => {
-        stats.categories[event.category] = (stats.categories[event.category] || 0) + 1;
-        if (event.category === 'class') stats.classes++;
-        if (event.category === 'meeting') stats.meetings++;
-        if (event.category === 'exam') stats.exams++;
-        if (event.category === 'lab') stats.labs++;
+      stats.categories[event.category] = (stats.categories[event.category] || 0) + 1;
+      if (event.category === 'class') stats.classes++;
+      if (event.category === 'meeting') stats.meetings++;
+      if (event.category === 'exam') stats.exams++;
+      if (event.category === 'lab') stats.labs++;
 
-        stats.daily_distribution[event.day] = (stats.daily_distribution[event.day] || 0) + 1;
+      stats.daily_distribution[event.day] = (stats.daily_distribution[event.day] || 0) + 1;
 
-        const start = new Date(`1970-01-01T${event.start_time}`);
-        const end = new Date(`1970-01-01T${event.end_time}`);
-        const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-        stats.total_weekly_hours += durationHours;
+      const start = new Date(`1970-01-01T${event.start_time}`);
+      const end = new Date(`1970-01-01T${event.end_time}`);
+      const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      stats.total_weekly_hours += durationHours;
 
-        if (event.location) {
-            locationCounts[event.location] = (locationCounts[event.location] || 0) + 1;
-        }
+      if (event.location) {
+        locationCounts[event.location] = (locationCounts[event.location] || 0) + 1;
+      }
     });
 
     if (Object.keys(stats.daily_distribution).length > 0) {
       stats.busiest_day = Object.keys(stats.daily_distribution).reduce((a, b) => 
-          stats.daily_distribution[Number(a)] > stats.daily_distribution[Number(b)] ? Number(a) : Number(b)
+        stats.daily_distribution[Number(a)] > stats.daily_distribution[Number(b)] ? Number(a) : Number(b)
       , 0);
     }
 
     if (Object.keys(locationCounts).length > 0) {
-        stats.most_common_location = Object.keys(locationCounts).reduce((a, b) => 
-            locationCounts[a] > locationCounts[b] ? a : b
-        );
+      stats.most_common_location = Object.keys(locationCounts).reduce((a, b) => 
+        locationCounts[a] > locationCounts[b] ? a : b
+      );
     }
 
     return stats;
+  } catch (error) {
+    console.error('Error getting timetable stats:', error);
+    throw error;
+  }
 };
 
 export const createEvent = async (formData: EventFormData, userId: string): Promise<TimetableEvent> => {
+  const newEventData = {
+    ...formData,
+    user_id: userId,
+    tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+    status: 'active',
+    academic_year: '2024-25'
+  };
+  
   const { data, error } = await supabase
     .from('timetable_events')
-    .insert([{ ...formData, user_id: userId, tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean) }])
+    .insert(newEventData)
     .select()
     .single();
 
@@ -315,14 +326,19 @@ export const createEvent = async (formData: EventFormData, userId: string): Prom
     console.error('Error creating event:', error);
     throw error;
   }
-  return data;
+  return data as any;
 };
 
 export const updateEvent = async (eventId: string, formData: EventFormData, userId: string): Promise<TimetableEvent> => {
   const { data, error } = await supabase
     .from('timetable_events')
-    .update({ ...formData, user_id: userId, tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean) })
+    .update({ 
+      ...formData, 
+      tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+      updated_at: new Date().toISOString() 
+    })
     .eq('id', eventId)
+    .eq('user_id', userId)
     .select()
     .single();
 
@@ -330,7 +346,8 @@ export const updateEvent = async (eventId: string, formData: EventFormData, user
     console.error('Error updating event:', error);
     throw error;
   }
-  return data;
+  
+  return data as any;
 };
 
 export const deleteEvent = async (eventId: string, userId: string): Promise<void> => {
@@ -352,19 +369,32 @@ export const searchTimetableEvents = async (
   filterDay?: number,
   filterCategory?: string
 ): Promise<TimetableEvent[]> => {
-  let query = supabase.from('timetable_events').select('*').eq('user_id', userId);
-
+  let query = supabase
+    .from('timetable_events')
+    .select('*')
+    .eq('user_id', userId);
+  
   if (searchTerm) {
     query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,instructor.ilike.%${searchTerm}%,course_code.ilike.%${searchTerm}%`);
   }
-  if (filterDay !== undefined) query = query.eq('day', filterDay);
-  if (filterCategory && filterCategory !== 'all') query = query.eq('category', filterCategory);
+  
+  if (filterDay !== undefined) {
+    query = query.eq('day', filterDay);
+  }
 
-  const { data, error } = await query.order('day').order('start_time');
+  if (filterCategory && filterCategory !== 'all') {
+    query = query.eq('category', filterCategory);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error searching events:', error);
     throw error;
   }
-  return data || [];
+  
+  return (data || []).sort((a: any, b: any) => {
+    if (a.day !== b.day) return a.day - b.day;
+    return a.start_time.localeCompare(b.start_time);
+  });
 };

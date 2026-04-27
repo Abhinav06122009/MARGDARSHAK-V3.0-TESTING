@@ -1,4 +1,5 @@
 import { Bell, LogOut, ShieldAlert, Activity } from 'lucide-react';
+import { useClerk } from '@clerk/react';
 import { Button } from '@/components/ui/button';
 import { useContext } from 'react';
 import { AdminContext } from '@/contexts/AdminContext';
@@ -8,8 +9,14 @@ import { motion } from 'framer-motion';
 const AdminHeader = () => {
   const { profile } = useContext(AdminContext);
 
+  const { signOut } = useClerk();
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   return (

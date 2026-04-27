@@ -1,69 +1,86 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
 import { supabase, setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AuthContextValue {
   session: any | null;
   loading: boolean;
+  user: any | null;
 }
 
-export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true });
+export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true, user: null });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { session: clerkSession, isLoaded: sessionLoaded } = useSession();
-  const { user, isLoaded: userLoaded } = useUser();
+  const { user: clerkUser, isLoaded: userLoaded } = useUser();
   const [loading, setLoading] = useState(true);
 
+  // Sync Clerk Session with Supabase Client
   useEffect(() => {
     if (sessionLoaded && clerkSession) {
       setClerkTokenProvider(() => clerkSession.getToken({ template: 'supabase' }));
     }
-    if (userLoaded && user) {
-      setClerkUser(user);
+    if (userLoaded && clerkUser) {
+      setClerkUser(clerkUser);
     }
-  }, [clerkSession, sessionLoaded, user, userLoaded]);
+  }, [clerkSession, sessionLoaded, clerkUser, userLoaded]);
 
+  // Sync Profile with Supabase Database
   useEffect(() => {
     const syncProfile = async () => {
-      if (sessionLoaded && userLoaded && user) {
+      if (sessionLoaded && userLoaded && clerkUser) {
         try {
-          // 1. Check if profile exists
-          const { data: profile, error: fetchError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', user.id)
-            .single();
+          console.log('Supabase Sync: Syncing profile for', clerkUser.id);
+          
+          const metadata = clerkUser.publicMetadata || {};
+          const subscription = metadata.subscription || {};
 
-          // 2. If it doesn't exist (PGRST116), or if there was an error, try to create/sync it
-          if (fetchError && fetchError.code === 'PGRST116') {
-            console.log('Lazy Sync: Creating profile for user:', user.id);
-            await supabase.from('profiles').upsert({
-              id: user.id,
-              email: user.primaryEmailAddress?.emailAddress || '',
-              full_name: user.fullName || '',
-              user_type: 'student',
-              subscription_tier: 'free',
-              updated_at: new Date().toISOString()
-            });
+          const profileData: any = {
+            id: clerkUser.id,
+            email: clerkUser.primaryEmailAddress?.emailAddress || '',
+            full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
+            avatar_url: clerkUser.imageUrl,
+            user_type: metadata.role || 'student',
+            subscription_tier: subscription.tier || 'free',
+            subscription_status: subscription.status || 'inactive',
+            subscription_period_end: subscription.period_end ? new Date(subscription.period_end).toISOString() : null,
+            updated_at: new Date().toISOString()
+          };
+
+          // Upsert profile in Supabase
+          const { error } = await supabase.from('profiles').upsert(profileData);
+          
+          if (error) {
+            console.error('Supabase Sync Error:', error.message);
+            // We don't block the UI for sync errors, but we log them
+          } else {
+            console.log('Supabase Sync: Profile synced successfully');
           }
+          
         } catch (err) {
-          console.error('Lazy Sync Error:', err);
+          console.error('Unexpected sync error:', err);
         } finally {
           setLoading(false);
         }
-      } else if (sessionLoaded && userLoaded && !user) {
+      } else if (sessionLoaded && userLoaded && !clerkUser) {
         setLoading(false);
       }
     };
 
-    syncProfile();
-  }, [sessionLoaded, userLoaded, user]);
+    if (sessionLoaded && userLoaded) {
+      syncProfile();
+    }
+  }, [sessionLoaded, userLoaded, clerkUser]);
 
-  // Mock a Supabase-like session object for backward compatibility if needed,
-  // or just pass the Clerk session.
-  const session = clerkSession ? (clerkSession as any) : null;
+  // Provide the session and user globally
+  const value = {
+    session: clerkSession || null,
+    user: clerkUser || null,
+    loading: !sessionLoaded || !userLoaded || loading,
+  };
 
-  return <AuthContext.Provider value={{ session, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -11,9 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import aiService from '@/lib/aiService';
-import { useAuth } from '@/contexts/AuthContext';
+import { dashboardService } from '@/lib/dashboardService';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Footer from '@/components/Footer';
@@ -108,8 +106,6 @@ const TiltCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // ─── Main Wellness Component ────────────────────────────────────────────────
 const Wellness: React.FC = () => {
-  const { session } = useAuth();
-  const user = session?.user;
   const { toast } = useToast();
 
   // State Persistence Fallback to LocalStorage
@@ -140,10 +136,8 @@ const Wellness: React.FC = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      fetchWellnessData();
-    }
-  }, [user]);
+    fetchWellnessData();
+  }, []);
 
   // Audio Playback Effect
   useEffect(() => {
@@ -173,26 +167,26 @@ const Wellness: React.FC = () => {
 
   const fetchWellnessData = async () => {
     try {
-      const { data: tasks } = await supabase
-        .from('tasks')
-        .select('status, due_date')
-        .eq('user_id', user?.id);
+      const user = await dashboardService.getCurrentUser();
+      if (!user) return;
 
-      if (tasks) {
-        const active = tasks.filter(t => t.status !== 'completed').length;
-        const overdue = tasks.filter(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) < new Date()).length;
-        const completed = tasks.filter(t => t.status === 'completed').length;
-        const rate = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+      const data = await dashboardService.fetchAllUserData(user.id);
+      const calculatedStats = dashboardService.calculateSecureStats(data);
 
-        setStats({
-          activeTasks: active,
-          overdueTasks: overdue,
-          studyStreak: 5,
-          completionRate: rate
-        });
+      setStats({
+        activeTasks: calculatedStats.totalTasks - calculatedStats.completedTasks,
+        overdueTasks: calculatedStats.overdueTasksCount,
+        studyStreak: calculatedStats.currentStreak,
+        completionRate: calculatedStats.totalTasks > 0 
+          ? Math.round((calculatedStats.completedTasks / calculatedStats.totalTasks) * 100) 
+          : 0
+      });
 
-        analyzeWellness(active, overdue, rate);
-      }
+      analyzeWellness(
+        calculatedStats.totalTasks - calculatedStats.completedTasks, 
+        calculatedStats.overdueTasksCount, 
+        calculatedStats.totalTasks > 0 ? Math.round((calculatedStats.completedTasks / calculatedStats.totalTasks) * 100) : 0
+      );
     } catch (error) {
       console.error('Error fetching wellness data:', error);
     }

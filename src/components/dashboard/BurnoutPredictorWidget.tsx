@@ -91,12 +91,30 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
     return (
       <div 
         onClick={() => navigate('/upgrade')}
-        className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-900/60 backdrop-blur-2xl shadow-xl p-6 h-full flex flex-col items-center justify-center min-h-[250px] group cursor-pointer"
+        className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl p-7 h-full flex flex-col items-center justify-center min-h-[280px] group cursor-pointer transition-all duration-500 hover:border-amber-500/30"
       >
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center transition-all duration-300">
-          <Lock className="w-8 h-8 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
-          <h3 className="text-white font-bold text-sm mb-1">AI Burnout Predictor</h3>
-          <p className="text-amber-400/80 text-[11px] uppercase tracking-widest font-semibold mt-1">Premium Feature</p>
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-amber-500/10 rounded-full blur-[80px] pointer-events-none group-hover:scale-150 transition-transform duration-700" />
+        
+        <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
+          <div className="relative">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              className="absolute -inset-4 border border-dashed border-amber-500/20 rounded-full"
+            />
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center border border-amber-500/30">
+              <Lock className="w-7 h-7 text-amber-400 group-hover:scale-110 transition-transform" />
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <h3 className="text-white font-black text-sm uppercase tracking-wider italic">Burnout Predictor</h3>
+            <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-bold">A.I. Powered Analysis</p>
+          </div>
+          
+          <div className="px-4 py-1.5 rounded-full bg-amber-500 text-black text-[9px] font-black uppercase tracking-widest group-hover:bg-white transition-colors">
+            Upgrade to Premium
+          </div>
         </div>
       </div>
     );
@@ -118,61 +136,80 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
     'from-emerald-400 to-teal-400';
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-900/60 backdrop-blur-2xl shadow-xl p-6 h-full flex flex-col group">
-      <div className={`absolute top-0 right-0 w-48 h-48 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-20 ${
-        analysis.status === 'critical' ? 'bg-red-500' : analysis.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
-      }`} />
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl p-7 h-full flex flex-col group transition-all duration-500 hover:border-white/20">
+      {/* Background Glow */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[100px] pointer-events-none ${
+          analysis.status === 'critical' ? 'bg-red-500' : analysis.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
+        }`} 
+      />
       
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-          <Brain className="w-4 h-4 text-indigo-400" /> AI Burnout Predictor
-        </h3>
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${colorClasses}`}>
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <div className="space-y-0.5">
+          <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-tight italic">
+            <Brain className="w-4 h-4 text-indigo-400" /> Neural Predictor
+          </h3>
+          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Cognitive Load Analysis</p>
+        </div>
+        <motion.span 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border backdrop-blur-md shadow-lg ${colorClasses}`}
+        >
           {analysis.status}
-        </span>
+        </motion.span>
       </div>
 
-      <div className="flex items-center gap-4 mb-6 relative z-10">
-        <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center">
+      <div className="flex items-center gap-6 mb-8 relative z-10">
+        <div className="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
           <svg className="w-full h-full transform -rotate-90">
-            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="none" className="text-zinc-800" />
+            <circle cx="40" cy="40" r="35" stroke="currentColor" strokeWidth="8" fill="none" className="text-white/5" />
             <motion.circle 
-              cx="32" cy="32" r="28" 
-              stroke="url(#gradient)" 
-              strokeWidth="6" 
+              cx="40" cy="40" r="35" 
+              stroke="url(#burnout-gradient)" 
+              strokeWidth="8" 
               fill="none" 
-              strokeDasharray="175.93" 
-              initial={{ strokeDashoffset: 175.93 }}
-              animate={{ strokeDashoffset: 175.93 - (175.93 * analysis.score) / 100 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              strokeDasharray="219.91" 
+              initial={{ strokeDashoffset: 219.91 }}
+              animate={{ strokeDashoffset: 219.91 - (219.91 * analysis.score) / 100 }}
+              transition={{ duration: 2, type: 'spring', bounce: 0 }}
+              strokeLinecap="round"
+              className="drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
             />
             <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="burnout-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" className={analysis.status === 'critical' ? 'text-red-500' : analysis.status === 'warning' ? 'text-amber-400' : 'text-emerald-400'} stopColor="currentColor" />
-                <stop offset="100%" className={analysis.status === 'critical' ? 'text-orange-500' : analysis.status === 'warning' ? 'text-orange-400' : 'text-teal-400'} stopColor="currentColor" />
+                <stop offset="100%" className={analysis.status === 'critical' ? 'text-orange-600' : analysis.status === 'warning' ? 'text-orange-500' : 'text-teal-500'} stopColor="currentColor" />
               </linearGradient>
             </defs>
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center flex-col">
-            <span className="text-sm font-black">{analysis.score}%</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-black text-white tracking-tighter">{analysis.score}<span className="text-[10px] text-zinc-500">%</span></span>
           </div>
         </div>
         
-        <div>
-          <p className="text-xs text-zinc-300 leading-relaxed font-medium">
-            {analysis.message}
+        <div className="flex-1 space-y-2">
+          <p className="text-[11px] text-zinc-300 leading-relaxed font-semibold italic">
+            "{analysis.message}"
           </p>
         </div>
       </div>
 
-      <div className="mt-auto bg-black/40 rounded-xl p-3 border border-white/5 relative z-10 flex items-start gap-3">
-        <div className={`mt-0.5 ${colorClasses.split(' ')[0]}`}>
-          <StatusIcon className="w-4 h-4" />
-        </div>
-        <div>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-1">AI Recommendation</p>
-          <p className="text-xs text-zinc-300">{analysis.action}</p>
+      <div className="mt-auto relative z-10 group/rec overflow-hidden">
+        <div className={`absolute inset-0 opacity-10 bg-current transition-all duration-500 group-hover/rec:opacity-20 ${colorClasses.split(' ')[0].replace('text-', 'bg-')}`} />
+        <div className={`relative bg-white/[0.03] backdrop-blur-md rounded-2xl p-4 border border-white/5 flex items-start gap-4 transition-transform duration-500 group-hover/rec:translate-y-[-2px]`}>
+          <div className={`mt-0.5 p-1.5 rounded-lg bg-black/40 border border-white/10 ${colorClasses.split(' ')[0]}`}>
+            <StatusIcon className="w-4 h-4" />
+          </div>
+          <div className="space-y-1">
+            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] block">Recommended Protocol</span>
+            <p className="text-xs text-white font-medium leading-relaxed">{analysis.action}</p>
+          </div>
         </div>
       </div>
     </div>

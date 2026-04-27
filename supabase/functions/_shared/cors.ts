@@ -1,5 +1,5 @@
 // supabase/functions/_shared/cors.ts
-export const PRODUCTION_ORIGIN = 'https://margdarshak-ai.netlify.app';
+export const PRODUCTION_ORIGIN = 'https://margdarshan.tech';
 const PREVIEW_ORIGIN_REGEX = /^https:\/\/[a-zA-Z0-9-]+--margdarshak-ai\.netlify\.app$/;
 
 const isAllowedOrigin = (origin: string) =>

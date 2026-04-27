@@ -1,4 +1,3 @@
-// src/lib/courseService.ts
 import { supabase } from '@/integrations/supabase/client';
 import type { Course, CourseFormData, SecureUser, CourseStats } from './course';
 
@@ -12,110 +11,166 @@ export const courseService = {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+
+      const fullName = profile?.full_name || user.user_metadata?.full_name || 'User';
 
       return {
         id: user.id,
         email: user.email || '',
-        profile: profile ? {
-          full_name: profile.full_name || 'User',
-          user_type: profile.user_type || 'student',
-          department: profile.department,
-          academic_year: profile.academic_year || '2024-25',
-          
-          // --- FIX: Explicitly map these fields ---
-          role: profile.role || 'student', 
-          subscription_tier: profile.subscription_tier || 'free'
-          
-        } : undefined
+        profile: {
+          full_name: fullName,
+          user_type: profile?.user_type || 'student',
+          role: profile?.user_type || 'student',
+          subscription_tier: profile?.subscription_tier || 'free'
+        }
       };
     } catch (error) {
-      console.error('Error getting current user:', error);
+      console.error('courseService: Error getting current user:', error);
       return null;
     }
   },
 
-  fetchUserCourses: async (userId: string) => {
+  fetchUserCourses: async (userId: string): Promise<Course[]> => {
     try {
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .eq('user_id', userId);
 
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching user courses:', error);
+      console.error('Error fetching courses:', error);
       return [];
     }
   },
 
-  getCourseStatistics: async (userId: string): Promise<CourseStats | null> => {
+  createCourse: async (userId: string, formData: CourseFormData): Promise<Course | null> => {
     try {
-      const courses = await courseService.fetchUserCourses(userId);
-      
-      const stats: CourseStats = {
-        total_courses: courses.length,
-        active_courses: courses.filter(c => c.status === 'active').length,
-        completed_courses: courses.filter(c => c.status === 'completed').length,
-        total_credits: courses.reduce((sum, course) => sum + (course.credits || 0), 0),
-        categories: courses.reduce((acc, course) => {
-          const type = courseService.getCourseType(course);
-          acc[type] = (acc[type] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>),
-        difficulty_distribution: courses.reduce((acc, course) => {
-          const difficulty = course.difficulty || 'intermediate';
-          acc[difficulty] = (acc[difficulty] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      };
+      const { data, error } = await supabase
+        .from('courses')
+        .insert({
+          user_id: userId,
+          ...formData,
+          academic_year: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
+        })
+        .select()
+        .single();
 
-      return stats;
+      if (error) throw error;
+      return data;
     } catch (error) {
-      console.error('Error fetching course statistics:', error);
+      console.error('Error creating course:', error);
       return null;
     }
   },
 
-  createCourse: async (courseData: CourseFormData, userId: string) => {
-    const { data, error } = await supabase
-      .from('courses')
-      .insert([{ ...courseData, user_id: userId, teacher_id: userId, is_active: true }])
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+  updateCourse: async (userId: string, courseId: string, formData: CourseFormData): Promise<Course | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .update({
+          ...formData,
+          updated_at: new Date().toISOString()
+        })
+        .match({ id: courseId, user_id: userId })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating course:', error);
+      return null;
+    }
   },
 
-  updateCourse: async (courseId: string, courseData: Partial<CourseFormData>, userId: string) => {
-    const { data, error } = await supabase
-      .from('courses')
-      .update({ ...courseData, updated_at: new Date().toISOString() })
-      .eq('id', courseId)
-      .eq('user_id', userId)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+  deleteCourse: async (userId: string, courseId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .match({ id: courseId, user_id: userId });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      return false;
+    }
   },
 
-  deleteCourse: async (courseId: string, userId: string) => {
-    const { error } = await supabase.from('courses').delete().eq('id', courseId).eq('user_id', userId);
-    if (error) throw error;
-    return true;
+  getCourseStats: async (userId: string, courseId: string): Promise<CourseStats | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .match({ course_id: courseId, user_id: userId });
+
+      if (error) throw error;
+
+      const total = data.length;
+      const present = data.filter(a => a.status === 'present').length;
+      const late = data.filter(a => a.status === 'late').length;
+      const excused = data.filter(a => a.status === 'excused').length;
+      const absent = data.filter(a => a.status === 'absent').length;
+
+      return {
+        totalSessions: total,
+        presentCount: present,
+        absentCount: absent,
+        lateCount: late,
+        excusedCount: excused,
+        percentage: total > 0 ? Math.round(((present + late * 0.5 + excused) / total) * 100) : 0
+      };
+    } catch (error) {
+      console.error('Error getting course stats:', error);
+      return null;
+    }
   },
 
-  searchUserCourses: async (userId: string, searchTerm?: string, gradeFilter?: string, difficultyFilter?: string) => {
-    let query = supabase.from('courses').select('*').eq('user_id', userId).eq('is_active', true);
-    if (searchTerm) query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-    if (gradeFilter && gradeFilter !== 'all') query = query.eq('grade_level', gradeFilter);
-    if (difficultyFilter && difficultyFilter !== 'all') query = query.eq('difficulty', difficultyFilter);
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+  getCourseBackgroundColor: (course: Partial<Course>) => {
+    const categories = courseService.getCourseCategories();
+    const cat = categories.find(c => c.id === (course as any).category);
+    return cat ? cat.color : '#3B82F6';
+  },
+
+  getPriorityColorIntensity: (priority?: string) => {
+    switch (priority) {
+      case 'urgent': return '100';
+      case 'high': return '85';
+      case 'medium': return '70';
+      case 'low': return '50';
+      default: return '70';
+    }
+  },
+
+  getDifficultyColor: (difficulty?: string) => {
+    switch (difficulty) {
+      case 'hard': return '#EF4444';
+      case 'medium': return '#F59E0B';
+      case 'easy': return '#10B981';
+      default: return '#6B7280';
+    }
+  },
+
+  getCompleteCourseStyle: (course: Partial<Course>) => {
+    const backgroundColor = courseService.getCourseBackgroundColor(course);
+    const priorityIntensity = courseService.getPriorityColorIntensity(course.priority);
+    const difficultyColor = courseService.getDifficultyColor(course.difficulty);
+    return {
+      backgroundColor: backgroundColor,
+      opacity: parseInt(priorityIntensity) / 100,
+      borderLeft: `4px solid ${backgroundColor}`,
+      borderTop: `2px solid ${difficultyColor}`,
+      boxShadow: course.priority === 'urgent' ? `0 0 12px ${backgroundColor}80, 0 4px 8px rgba(0,0,0,0.2)` : '0 2px 4px rgba(0,0,0,0.1)',
+      color: 'white',
+      padding: '8px',
+      borderRadius: '6px',
+      margin: '2px 0',
+      transition: 'all 0.2s ease'
+    };
   },
 
   getCourseCategories: () => [
@@ -141,41 +196,5 @@ export const courseService = {
     if (name.includes('geography') || name.includes('social') || name.includes('economics')) return 'social';
     if (name.includes('physical') || name.includes('sports') || name.includes('gym')) return 'physical';
     return 'humanities';
-  },
-
-  getCourseBackgroundColor: (course: Partial<Course>) => {
-    if (course.color) return course.color;
-    const categories = courseService.getCourseCategories();
-    const courseType = courseService.getCourseType(course as Course);
-    const category = categories.find(c => c.id === courseType);
-    return category?.color || '#3B82F6';
-  },
-
-  getPriorityColorIntensity: (priority: string = 'medium') => {
-    const intensities: Record<string, string> = { 'low': '70', 'medium': '85', 'high': '90', 'urgent': '95' };
-    return intensities[priority] || '85';
-  },
-
-  getDifficultyColor: (difficulty?: string) => {
-    const colors: Record<string, string> = { 'beginner': '#10B981', 'intermediate': '#3B82F6', 'advanced': '#F59E0B', 'expert': '#EF4444' };
-    return colors[difficulty || 'intermediate'];
-  },
-
-  getCompleteCourseStyle: (course: Partial<Course>) => {
-    const backgroundColor = courseService.getCourseBackgroundColor(course);
-    const priorityIntensity = courseService.getPriorityColorIntensity(course.priority);
-    const difficultyColor = courseService.getDifficultyColor(course.difficulty);
-    return {
-      backgroundColor: backgroundColor,
-      opacity: parseInt(priorityIntensity) / 100,
-      borderLeft: `4px solid ${backgroundColor}`,
-      borderTop: `2px solid ${difficultyColor}`,
-      boxShadow: course.priority === 'urgent' ? `0 0 12px ${backgroundColor}80, 0 4px 8px rgba(0,0,0,0.2)` : '0 2px 4px rgba(0,0,0,0.1)',
-      color: 'white',
-      padding: '8px',
-      borderRadius: '6px',
-      margin: '2px 0',
-      transition: 'all 0.2s ease'
-    };
   }
 };

@@ -22,11 +22,14 @@ const AdminSettings = () => {
 
   const handleSave = async () => {
     setSubmitting(true);
-    const { error } = await supabase.from('security_settings').upsert({
-      id: 'global',
-      rate_limit: Number(rateLimit),
-      ai_sensitivity: Number(aiSensitivity),
-    });
+    const { error } = await supabase
+      .from('security_settings')
+      .update({
+        rate_limit: Number(rateLimit),
+        ai_sensitivity: Number(aiSensitivity),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 'global');
 
     setSubmitting(false);
 

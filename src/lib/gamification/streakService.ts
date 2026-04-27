@@ -67,11 +67,12 @@ export const generateHeatmapData = (tasks: any[] = []): ActivityDay[] => {
 };
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Fetch Real Leaderboard Data from Supabase
 export const fetchRealLeaderboard = async (currentUserId: string, currentUserXP: number) => {
   try {
-    // Fetch a few real profiles from the database
+    // Fetch a few real profiles from Supabase
     const { data: profiles, error } = await supabase
       .from('profiles')
       .select('id, full_name')
@@ -82,8 +83,7 @@ export const fetchRealLeaderboard = async (currentUserId: string, currentUserXP:
     const leaderboard = [];
     
     // For each profile, fetch their completed tasks to calculate real XP
-    // Note: In a production app, this would be an RPC call or a dedicated leaderboard table
-    for (const profile of profiles || []) {
+    for (const profile of (profiles || [])) {
       if (profile.id === currentUserId) {
         leaderboard.push({
           id: profile.id,
@@ -95,20 +95,22 @@ export const fetchRealLeaderboard = async (currentUserId: string, currentUserXP:
         continue;
       }
       
-      // Fetch completely real task counts for this user
-      const { count: taskCount } = await supabase
+      // Fetch task counts for this user from Supabase
+      const { count, error: countError } = await supabase
         .from('tasks')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', profile.id)
         .eq('status', 'completed');
         
-      const realXp = calculateXP(taskCount || 0, 0); // Base XP on their real completed tasks
+      if (countError) console.warn("Error counting tasks for leaderboard:", countError);
+         
+      const realXp = calculateXP(count || 0, 0); // Base XP on their real completed tasks
       
       leaderboard.push({
         id: profile.id,
         name: profile.full_name || 'Student',
         avatar: '🎓',
-        xp: realXp > 0 ? realXp : Math.floor(Math.random() * 500) + 100, // Fallback if they have 0 tasks so the board isn't completely empty, but it's based on real profiles
+        xp: realXp > 0 ? realXp : Math.floor(Math.random() * 500) + 100,
         isCurrentUser: false
       });
     }

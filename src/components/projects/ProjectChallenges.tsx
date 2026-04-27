@@ -110,7 +110,7 @@ const projectTemplates = {
       difficulty: 'Advanced',
       duration: '4-6 weeks',
       description: 'Build a full-featured e-commerce platform with payment integration.',
-      techStack: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+      techStack: ['React', 'Node.js', 'Supabase', 'Stripe'],
       features: [
         'Product catalog',
         'Shopping cart',

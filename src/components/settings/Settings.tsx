@@ -83,7 +83,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         >
           <div className="flex items-center gap-6">
             <button
-              onClick={onBack}
+              onClick={() => onBack ? onBack() : window.history.back()}
               className="group p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all shadow-xl active:scale-95"
               title="Return to Dashboard"
             >

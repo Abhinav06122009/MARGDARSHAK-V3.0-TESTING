@@ -262,12 +262,12 @@ const syllabusHelpers = {
       return {
         id: user.id,
         email: user.email || '',
-        profile: profile ? {
-          full_name: profile.full_name || 'User',
-          user_type: profile.user_type || 'student',
-          student_id: profile.student_id,
-          department: profile.department
-        } : undefined
+        profile: {
+          full_name: profile?.full_name || user.user_metadata?.full_name || 'Scholar',
+          user_type: profile?.user_type || 'student',
+          student_id: profile?.student_id,
+          department: profile?.department
+        }
       };
     } catch (error) {
       console.error('Error getting current user:', error);

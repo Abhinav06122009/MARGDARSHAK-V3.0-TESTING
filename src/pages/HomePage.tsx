@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useClerk } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Clock, Calendar, CheckSquare, BookOpen, Trophy, Timer, Calculator, LogOut, User, TrendingUp, Target, Zap, Star, Bell, Sparkles, Search, Plus, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +49,8 @@ interface UserProfile {
   };
 }
 
+import { dashboardService } from '@/lib/dashboardService';
+
 const Dashboard = ({ onNavigate }: DashboardProps) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -62,76 +65,42 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { signOut } = useClerk();
 
   const getCurrentUser = React.useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      setUser({ ...user, profile });
+    const secureUser = await dashboardService.getCurrentUser();
+    if (secureUser) {
+      setUser({
+        id: secureUser.id,
+        email: secureUser.email,
+        profile: {
+          full_name: secureUser.profile?.full_name,
+          subscription_tier: secureUser.profile?.subscription_tier,
+          role: secureUser.profile?.role
+        }
+      });
     }
   }, []);
 
   const fetchDashboardData = React.useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const secureUser = await dashboardService.getCurrentUser();
+      if (!secureUser) return;
 
-      // Fetch tasks
-      const { data: tasks } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      // Fetch study sessions
-      const { data: studySessions } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_time', { ascending: false })
-        .limit(3);
-
-      // Fetch grades
-      const { data: grades } = await supabase
-        .from('grades')
-        .select('*')
-        .eq('user_id', user.id);
-
-      // Fetch timetable
-      const { data: timetable } = await supabase
-        .from('user_timetables')
-        .select('*')
-        .eq('user_id', user.id);
-
-      // Fetch notes
-      const { data: notes } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', user.id);
-
-      // Calculate stats
-      const totalTasks = tasks?.length || 0;
-      const completedTasks = tasks?.filter(task => task.status === 'completed').length || 0;
-      const totalStudyTime = studySessions?.reduce((total, session) => total + session.duration, 0) || 0;
-      const averageGrade = grades?.length ? 
-        grades.reduce((sum, grade) => sum + (grade.grade / grade.total_points * 100), 0) / grades.length : 0;
+      const data = await dashboardService.fetchAllUserData(secureUser.id);
+      const calculatedStats = dashboardService.calculateSecureStats(data);
 
       setStats({
-        totalTasks,
-        completedTasks,
-        totalStudyTime,
-        averageGrade,
-        upcomingClasses: timetable?.length || 0,
-        totalNotes: notes?.length || 0,
+        totalTasks: calculatedStats.totalTasks,
+        completedTasks: calculatedStats.completedTasks,
+        totalStudyTime: calculatedStats.totalStudyTime,
+        averageGrade: calculatedStats.averageGrade,
+        upcomingClasses: calculatedStats.totalClassesCount,
+        totalNotes: calculatedStats.totalNotes,
       });
 
-      setRecentTasks(tasks?.slice(0, 3) || []);
-      setRecentSessions(studySessions || []);
+      setRecentTasks(data.tasks?.slice(0, 3) || []);
+      setRecentSessions(data.studySessions?.slice(0, 3) || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
@@ -151,12 +120,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
 
   const handleTaskStatusUpdate = async (taskId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('tasks')
-        .update({ status: newStatus })
-        .eq('id', taskId);
-
-      if (error) throw error;
+      if (!user) return;
+      await dashboardService.updateTaskStatus(taskId, newStatus, user.id);
 
       toast({
         title: "Success",
@@ -176,12 +141,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId);
-
-      if (error) throw error;
+      if (!user) return;
+      await dashboardService.deleteTask(taskId, user.id);
 
       toast({
         title: "Success",
@@ -201,19 +162,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
 
   const handleCreateQuickTask = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
-      const { error } = await supabase
-        .from('tasks')
-        .insert([{
-          title: 'New Quick Task',
-          description: 'Click to edit this task',
-          status: 'pending',
-          user_id: user.id
-        }]);
-
-      if (error) throw error;
+      await dashboardService.createQuickTask(user.id);
 
       toast({
         title: "Success",
@@ -232,8 +182,14 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      await signOut();
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
       toast({
         title: "Error",
         description: "Failed to logout",

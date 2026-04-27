@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 import logo from "@/components/logo/logo.png";
 
 // --- Social Icons ---
@@ -54,14 +54,13 @@ const ContactUsPage = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([{
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          message: formData.message,
-        }]);
+      const { error } = await supabase.from('contact_messages').insert({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        message: formData.message,
+        status: 'pending'
+      });
 
       if (error) throw error;
       toast.success("Received", { description: "Our team will reach out shortly." });

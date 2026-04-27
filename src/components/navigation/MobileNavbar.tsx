@@ -6,7 +6,8 @@ import {
   CheckSquare, 
   Book, 
   Settings,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 

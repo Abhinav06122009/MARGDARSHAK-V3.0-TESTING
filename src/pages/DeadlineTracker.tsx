@@ -9,6 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
+import { dashboardService } from '@/lib/dashboardService';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -128,6 +129,8 @@ const DeadlineCard = React.forwardRef<HTMLDivElement, { exam: ExamDeadline; onDe
 
 DeadlineCard.displayName = 'DeadlineCard';
 
+// ... (types and helper functions stay the same)
+
 const DeadlineTracker = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -140,17 +143,17 @@ const DeadlineTracker = () => {
 
   const fetchDeadlines = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await dashboardService.getCurrentUser();
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('deadlines' as any)
+        .from('deadlines')
         .select('*')
-        .order('date', { ascending: true });
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
-      const mappedExams: ExamDeadline[] = (data as any[] || []).map(d => ({
+      const mappedExams: ExamDeadline[] = (data || []).map((d: any) => ({
         id: d.id,
         name: d.name,
         category: d.category as ExamCategory,
@@ -159,7 +162,8 @@ const DeadlineTracker = () => {
         notes: d.notes,
         isCompleted: d.is_completed
       }));
-      setExams(mappedExams);
+      
+      setExams(mappedExams.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     } catch (err) {
       console.error("Error fetching deadlines:", err);
       toast({ title: "Error", description: "Failed to load deadlines.", variant: "destructive" });
@@ -168,7 +172,6 @@ const DeadlineTracker = () => {
     }
   };
 
-  // Load from Supabase
   useEffect(() => {
     fetchDeadlines();
   }, []);
@@ -177,10 +180,10 @@ const DeadlineTracker = () => {
     if (!form.name || !form.date) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await dashboardService.getCurrentUser();
       if (!user) return;
 
-      const newDbExam = {
+      const { data, error } = await supabase.from('deadlines').insert({
         user_id: user.id,
         name: form.name,
         category: form.category,
@@ -188,27 +191,21 @@ const DeadlineTracker = () => {
         registration_deadline: form.registrationDeadline || null,
         notes: form.notes || null,
         is_completed: false
-      };
-
-      const { data, error } = await supabase
-        .from('deadlines' as any)
-        .insert(newDbExam)
-        .select()
-        .single();
+      }).select().single();
 
       if (error) throw error;
 
       const newExam: ExamDeadline = {
-        id: (data as any).id,
-        name: (data as any).name,
-        category: (data as any).category as ExamCategory,
-        date: (data as any).date,
-        registrationDeadline: (data as any).registration_deadline,
-        notes: (data as any).notes,
-        isCompleted: (data as any).is_completed
+        id: data.id,
+        name: data.name,
+        category: data.category as ExamCategory,
+        date: data.date,
+        registrationDeadline: data.registration_deadline,
+        notes: data.notes,
+        isCompleted: data.is_completed
       };
 
-      setExams([...exams, newExam]);
+      setExams([...exams, newExam].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
       setForm({ name: '', category: 'engineering', date: '', registrationDeadline: '', notes: '' });
       setShowForm(false);
       toast({ title: "Deadline Added", description: `${form.name} added to your tracker.` });
@@ -220,28 +217,39 @@ const DeadlineTracker = () => {
 
   const handleDelete = async (id: string) => {
     try {
+      const user = await dashboardService.getCurrentUser();
+      if (!user) return;
+
+      const originalExams = [...exams];
       setExams(exams.filter(e => e.id !== id)); // Optimistic update
-      const { error } = await supabase.from('deadlines' as any).delete().eq('id', id);
-      if (error) throw error;
+      
+      const { error } = await supabase.from('deadlines').delete().eq('id', id).eq('user_id', user.id);
+      if (error) {
+        setExams(originalExams);
+        throw error;
+      }
+      toast({ title: "Deleted", description: "Deadline removed successfully." });
     } catch (err) {
       console.error("Error deleting deadline:", err);
       toast({ title: "Error", description: "Failed to delete deadline.", variant: "destructive" });
-      fetchDeadlines(); // Revert
     }
   };
 
   const handleToggle = async (id: string) => {
     try {
+      const user = await dashboardService.getCurrentUser();
+      if (!user) return;
+
       const exam = exams.find(e => e.id === id);
       if (!exam) return;
 
       const newStatus = !exam.isCompleted;
       setExams(exams.map(e => e.id === id ? { ...e, isCompleted: newStatus } : e)); // Optimistic update
 
-      const { error } = await supabase
-        .from('deadlines' as any)
-        .update({ is_completed: newStatus } as any)
-        .eq('id', id);
+      const { error } = await supabase.from('deadlines').update({ 
+        is_completed: newStatus, 
+        updated_at: new Date().toISOString() 
+      }).eq('id', id).eq('user_id', user.id);
 
       if (error) throw error;
     } catch (err) {

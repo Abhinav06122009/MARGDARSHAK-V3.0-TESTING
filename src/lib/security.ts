@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, createContext } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 /**
  * UTILITY: Device Fingerprinting

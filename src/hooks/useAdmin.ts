@@ -66,6 +66,7 @@ export interface SecuritySettings {
   ai_sensitivity: number;
 }
 
+
 export const useAdmin = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [threats, setThreats] = useState<AdminThreat[]>([]);
@@ -80,80 +81,97 @@ export const useAdmin = () => {
   const fetchAdminData = useCallback(async () => {
     setLoading(true);
 
-    const responses = await Promise.all([
-      supabase.from('profiles').select('id, full_name, email, user_type, risk_level, is_blocked'),
-      supabase.from('security_threats').select('id, created_at, event_type, threat_level, threat_score, summary, ip_address').order('created_at', { ascending: false }).limit(5),
-      supabase.from('admin_reports').select('id, created_at, category, severity, status, user_id').order('created_at', { ascending: false }).limit(5),
-      supabase.from('blocked_users').select('id'),
-      supabase.from('contact_messages').select('id, created_at, first_name, last_name, email, message, status').order('created_at', { ascending: false }).limit(20),
-      supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle(),
-      supabase.from('moderation_queue').select('*').order('created_at', { ascending: false }).limit(10),
-      supabase.from('daily_metrics').select('*').order('date', { ascending: false }).limit(7)
-    ]);
-
-    const [
-      usersResponse, 
-      threatsResponse, 
-      reportsResponse, 
-      blockedResponse, 
-      ticketsResponse,
-      settingsResponse,
-      moderationResponse,
-      analyticsResponse
-    ] = responses;
-
-    // Log errors with context but don't stop execution
-    responses.forEach((res, i) => {
-      if (res.error) {
-        const tableNames = ['profiles', 'security_threats', 'admin_reports', 'blocked_users', 'contact_messages', 'security_settings', 'moderation_queue', 'daily_metrics'];
-        console.warn(`[ADMIN DATA] Fetch failed for ${tableNames[i]}:`, res.error.message);
-      }
-    });
-
-    if (!usersResponse.error) setUsers(usersResponse.data || []);
-    if (!threatsResponse.error) setThreats(threatsResponse.data || []);
-    if (!reportsResponse.error) setReports(reportsResponse.data || []);
-    if (!ticketsResponse.error) setTickets(ticketsResponse.data || []);
-    
-    if (!settingsResponse.error && settingsResponse.data) {
-      setSettings(settingsResponse.data);
-    }
-    
-    if (!moderationResponse.error && moderationResponse.data) {
-      setModerationQueue(moderationResponse.data);
-    }
-
-    if (!analyticsResponse.error && analyticsResponse.data && analyticsResponse.data.length > 0) {
-      const formattedAnalytics = analyticsResponse.data.map((item: any) => {
-        const date = new Date(item.date);
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        return {
-          name: days[date.getDay()],
-          threats: item.threats_count || 0,
-          logins: item.logins_count || 0
-        };
-      }).reverse();
-      setAnalyticsData(formattedAnalytics);
-    } else {
-      setAnalyticsData([
-        { name: 'Mon', threats: 0, logins: 0 },
-        { name: 'Tue', threats: 0, logins: 0 },
-        { name: 'Wed', threats: 0, logins: 0 },
-        { name: 'Thu', threats: 0, logins: 0 },
-        { name: 'Fri', threats: 0, logins: 0 },
-        { name: 'Sat', threats: 0, logins: 0 },
-        { name: 'Sun', threats: 0, logins: 0 }
+    try {
+      const [
+        usersRes, 
+        threatsRes, 
+        reportsRes, 
+        blockedRes, 
+        ticketsRes,
+        settingsRes,
+        moderationRes,
+        analyticsRes
+      ] = await Promise.all([
+        supabase.from('profiles').select('*'),
+        supabase.from('security_logs').select('*'),
+        supabase.from('admin_reports').select('*'),
+        supabase.from('blocked_users').select('*'),
+        supabase.from('contact_messages').select('*'),
+        supabase.from('security_settings').select('*').eq('id', 'global').single(),
+        supabase.from('moderation_queue').select('*'),
+        supabase.from('daily_metrics').select('*')
       ]);
+
+      if (usersRes.data) setUsers(usersRes.data);
+      
+      if (threatsRes.data) {
+        setThreats(threatsRes.data
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5)
+        );
+      }
+
+      if (reportsRes.data) {
+        setReports(reportsRes.data
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5)
+        );
+      }
+
+      if (ticketsRes.data) {
+        setTickets(ticketsRes.data
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 20)
+        );
+      }
+
+      if (settingsRes.data) setSettings(settingsRes.data as any);
+
+      if (moderationRes.data) {
+        setModerationQueue(moderationRes.data
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 10)
+        );
+      }
+
+      if (analyticsRes.data && analyticsRes.data.length > 0) {
+        const formattedAnalytics = analyticsRes.data
+          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 7)
+          .map((item: any) => {
+            const date = new Date(item.date);
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return {
+              name: days[date.getDay()],
+              threats: item.threats_count || 0,
+              logins: item.logins_count || 0
+            };
+          }).reverse();
+        setAnalyticsData(formattedAnalytics);
+      } else {
+        setAnalyticsData([
+          { name: 'Mon', threats: 0, logins: 0 },
+          { name: 'Tue', threats: 0, logins: 0 },
+          { name: 'Wed', threats: 0, logins: 0 },
+          { name: 'Thu', threats: 0, logins: 0 },
+          { name: 'Fri', threats: 0, logins: 0 },
+          { name: 'Sat', threats: 0, logins: 0 },
+          { name: 'Sun', threats: 0, logins: 0 }
+        ]);
+      }
+
+      setStats({
+        totalUsers: usersRes.data?.length || 0,
+        activeThreats: threatsRes.data?.length || 0,
+        reportsOpen: reportsRes.data?.filter((r: any) => r.status !== 'resolved').length || 0,
+        blockedUsers: blockedRes.data?.length || 0,
+      });
+
+    } catch (error) {
+      console.error('[ADMIN DATA] Fetch from Supabase failed:', error);
+    } finally {
+      setLoading(false);
     }
-
-    setStats({
-      totalUsers: usersResponse.data?.length || 0,
-      activeThreats: threatsResponse.data?.length || 0,
-      reportsOpen: reportsResponse.data?.filter(r => r.status !== 'resolved').length || 0,
-      blockedUsers: blockedResponse.data?.length || 0,
-    });
-
-    setLoading(false);
   }, []);
 
   useEffect(() => {

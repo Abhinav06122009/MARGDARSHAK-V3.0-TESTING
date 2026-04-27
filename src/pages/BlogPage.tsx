@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import logo from "@/components/logo/logo.png";
 import { Helmet } from "react-helmet-async";
-import AdUnit from '@/components/AdUnit';
 
 // --- Social Icons ---
 const LinkedinLogo = () => (

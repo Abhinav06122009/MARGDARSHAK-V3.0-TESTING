@@ -14,7 +14,10 @@ const SupportCenter = () => {
     try {
       const { error } = await supabase
         .from('contact_messages')
-        .update({ status: 'completed' })
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;

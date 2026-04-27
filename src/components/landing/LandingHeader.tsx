@@ -52,9 +52,23 @@ export const LandingHeader: React.FC = () => {
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
         {/* Brand */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleLinkClick('home')}>
-          <img src={logo} alt="Margdarshak Logo" className="h-6 w-6 rounded-md" />
-          <h1 className="text-2xl font-black tracking-wider text-white">MARGDARSHAK</h1>
+        <div className="flex items-center gap-4 cursor-pointer group" onClick={() => handleLinkClick('home')}>
+          <div className="relative">
+            {/* Logo Glow */}
+            <div className="absolute -inset-2 bg-blue-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
+            
+            {/* Logo Glass Container */}
+            <div className="p-1 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 relative z-10 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+              <img src={logo} alt="Margdarshak Logo" className="h-10 w-10 rounded-lg object-contain" />
+            </div>
+          </div>
+          
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
+              MARGDARSHAK
+            </h1>
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered</span>
+          </div>
         </div>
 
         {/* Desktop Nav */}

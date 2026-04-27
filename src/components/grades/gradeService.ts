@@ -11,7 +11,7 @@ export const gradeService = {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       return {
         id: user.id,
@@ -36,10 +36,10 @@ export const gradeService = {
         .eq('user_id', userId)
         .order('date_recorded', { ascending: false });
 
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data || [];
     } catch (error) {
-      console.error('Error fetching user grades:', error);
+      console.error('Error fetching user grades from Supabase:', error);
       return [];
     }
   },
@@ -91,16 +91,23 @@ export const gradeService = {
 
   async createGrade(gradeData: GradeFormData, userId: string): Promise<Grade> {
     try {
+      const newGrade = {
+        ...gradeData,
+        id: crypto.randomUUID(),
+        user_id: userId,
+        created_at: new Date().toISOString()
+      };
+      
       const { data, error } = await supabase
         .from('grades')
-        .insert([{ ...gradeData, user_id: userId }])
+        .insert(newGrade)
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (error) throw new Error(error.message);
+      return data as Grade;
     } catch (error) {
-      console.error('Error creating grade:', error);
+      console.error('Error creating grade in Supabase:', error);
       throw error;
     }
   },
@@ -109,40 +116,46 @@ export const gradeService = {
     try {
       const { data, error } = await supabase
         .from('grades')
-        .update(gradeData)
-        .eq('id', gradeId)
-        .eq('user_id', userId)
+        .update({ ...gradeData, updated_at: new Date().toISOString() })
+        .match({ id: gradeId, user_id: userId })
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (error) throw new Error(error.message);
+      return data as Grade;
     } catch (error) {
-      console.error('Error updating grade:', error);
+      console.error('Error updating grade in Supabase:', error);
       throw error;
     }
   },
 
   async deleteGrade(gradeId: string, userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase.from('grades').delete().eq('id', gradeId).eq('user_id', userId);
+      const { error } = await supabase
+        .from('grades')
+        .delete()
+        .match({ id: gradeId, user_id: userId });
 
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return true;
     } catch (error) {
-      console.error('Error deleting grade:', error);
+      console.error('Error deleting grade from Supabase:', error);
       throw error;
     }
   },
 
   async bulkDeleteGrades(gradeIds: string[], userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase.from('grades').delete().in('id', gradeIds).eq('user_id', userId);
+      const { error } = await supabase
+        .from('grades')
+        .delete()
+        .in('id', gradeIds)
+        .eq('user_id', userId);
 
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return true;
     } catch (error) {
-      console.error('Error bulk deleting grades:', error);
+      console.error('Error bulk deleting grades from Supabase:', error);
       throw error;
     }
   },
@@ -203,7 +216,7 @@ export const gradeService = {
         `"${grade.grade_type}"`, 
         `"${grade.academic_year || ''}"`, 
         grade.weight || 1.0,
-        `"${(grade.notes || '').replace(/"/g, '""')}"`, // Escape double quotes
+        `"${(grade.notes || '').replace(/"/g, '""')}"`, 
         grade.is_extra_credit ? 'Yes' : 'No'
       ];
       csvRows.push(row.join(","));

@@ -46,16 +46,14 @@ const AdminMessages = () => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('contact_messages').delete().eq('id', id);
 
       if (error) throw error;
       
       setMessages(prev => prev.filter(msg => msg.id !== id));
       toast.success('Message deleted');
     } catch (error) {
+      console.error('Error deleting message:', error);
       toast.error('Failed to delete message');
     }
   };

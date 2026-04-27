@@ -94,22 +94,17 @@ export const aiService = {
    */
   getNeuralContext: async (userId: string) => {
     try {
-      // 1. Validate UUID to prevent database errors
-      const uuidFormat = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidFormat.test(userId)) return [];
-
-      // 2. Fetch history from Supabase
       const { data, error } = await supabase
-        .from("ai_neural_memory")
-        .select("role, content")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(10); // Limit context to save tokens
+        .from('ai_neural_memory')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       if (error) throw error;
       
-      // 3. Reverse to chronological order (Oldest -> Newest)
-      return data?.reverse() || [];
+      // Reverse to chronological order (Oldest -> Newest)
+      return (data || []).reverse();
 
     } catch (e) {
       console.error("Failed to recall memory:", e);
@@ -179,14 +174,25 @@ export const aiService = {
    * Saves the interaction to the database for future context.
    */
   persistMessage: async (userId: string, userMsg: string, aiMsg: string) => {
-    // strict UUID check
-    const uuidFormat = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidFormat.test(userId)) return;
+    try {
+      const records = [
+        { 
+          user_id: userId, 
+          role: "user", 
+          content: userMsg
+        },
+        { 
+          user_id: userId, 
+          role: "assistant", 
+          content: aiMsg
+        }
+      ];
 
-    await supabase.from("ai_neural_memory").insert([
-      { user_id: userId, role: "user", content: userMsg },
-      { user_id: userId, role: "assistant", content: aiMsg }
-    ]);
+      const { error } = await supabase.from('ai_neural_memory').insert(records);
+      if (error) throw error;
+    } catch (error) {
+      console.error("Failed to persist message:", error);
+    }
   },
 
   /**

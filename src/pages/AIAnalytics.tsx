@@ -69,35 +69,40 @@ const AIAnalytics: React.FC = () => {
   const { isPremium, isAIReady } = useAI();
 
   const fetchAnalytics = async (): Promise<Analytics> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
 
-    const [tasksResult, gradesResult, profileResult, coursesResult] = await Promise.allSettled([
-      supabase.from('tasks').select('status').eq('user_id', user.id).eq('is_deleted', false),
-      supabase.from('grades').select('grade, total_points').eq('user_id', user.id),
-      supabase.from('profiles').select('study_streak').eq('id', user.id).single(),
-      supabase.from('courses').select('id').eq('user_id', user.id),
-    ]);
+      const [tasksRes, gradesRes, profileRes, coursesRes] = await Promise.all([
+        supabase.from('tasks').select('*').eq('user_id', user.id),
+        supabase.from('grades').select('*').eq('user_id', user.id),
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('courses').select('*').eq('user_id', user.id),
+      ]);
 
-    const tasks = tasksResult.status === 'fulfilled' ? tasksResult.value.data || [] : [];
-    const grades = gradesResult.status === 'fulfilled' ? gradesResult.value.data || [] : [];
-    const profile = profileResult.status === 'fulfilled' ? profileResult.value.data : null;
-    const courses = coursesResult.status === 'fulfilled' ? coursesResult.value.data || [] : [];
+      const tasks = tasksRes.data || [];
+      const grades = gradesRes.data || [];
+      const profile = profileRes.data;
+      const courses = coursesRes.data || [];
 
-    const completed = tasks.filter((t: any) => t.status === 'completed').length;
-    const avgGrade = grades.length > 0
-      ? grades.reduce((sum: number, g: any) => sum + (g.grade / g.total_points) * 100, 0) / grades.length
-      : 0;
+      const completed = tasks.filter((t: any) => t.status === 'completed').length;
+      const avgGrade = grades.length > 0
+        ? grades.reduce((sum: number, g: any) => sum + (Number(g.grade) / Number(g.total_points)) * 100, 0) / grades.length
+        : 0;
 
-    return {
-      taskCompletionRate: tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0,
-      totalTasks: tasks.length,
-      completedTasks: completed,
-      avgGrade: Math.round(avgGrade),
-      totalGrades: grades.length,
-      studyStreak: profile?.study_streak || 0,
-      coursesEnrolled: courses.length,
-    };
+      return {
+        taskCompletionRate: tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0,
+        totalTasks: tasks.length,
+        completedTasks: completed,
+        avgGrade: Math.round(avgGrade),
+        totalGrades: grades.length,
+        studyStreak: (profile as any)?.study_streak || 0,
+        coursesEnrolled: courses.length,
+      };
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+      return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
+    }
   };
 
   const generateInsights = async (data: Analytics, force = false) => {

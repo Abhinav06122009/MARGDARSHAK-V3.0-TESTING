@@ -9,10 +9,9 @@ import {
   Volume2, VolumeX, ChevronUp, ChevronDown, X, Brain,
   AlertTriangle, CheckCircle, Sunrise, Wind, Upload, Trash2, FolderOpen
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { dashboardService } from '@/lib/dashboardService';
 import aiService from '@/lib/aiService';
 import { useNavigate } from 'react-router-dom';
-import { courseService } from '@/components/dashboard/courseService';
 import { useToast } from '@/hooks/use-toast';
 import { Lock } from 'lucide-react';
 
@@ -132,7 +131,7 @@ export const GlobalWellnessBar: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    courseService.getCurrentUser().then(user => {
+    dashboardService.getCurrentUser().then(user => {
       const tier = user?.profile?.subscription_tier;
       if (tier === 'premium' || tier === 'premium_elite') setIsPremium(true);
     });
@@ -220,45 +219,46 @@ export const GlobalWellnessBar: React.FC = () => {
 
   // ── Burnout check ────────────────────────────────────────────────────────
   const checkBurnout = useCallback(async () => {
-    const user = await courseService.getCurrentUser();
+    const user = await dashboardService.getCurrentUser();
     if (!user) return;
     setIsLoggedIn(true);
 
-    const currentUser = await courseService.getCurrentUser();
-    const tier = currentUser?.profile?.subscription_tier;
+    const tier = user.profile?.subscription_tier;
     if (tier !== 'premium' && tier !== 'premium_elite') {
-      // Do not run burnout logic or show popups for non-premium users
       return;
     }
 
-    const { data: tasks } = await supabase
-      .from('tasks').select('status, due_date').eq('user_id', user.id);
-    if (!tasks || tasks.length === 0) return;
+    const data = await dashboardService.fetchAllUserData(user.id);
+    const calculatedStats = dashboardService.calculateSecureStats(data);
+    
+    if (calculatedStats.totalTasks === 0) return;
 
-    const pending = tasks.filter(t => t.status !== 'completed');
-    const overdue = tasks.filter(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) < new Date());
-    const done = tasks.filter(t => t.status === 'completed');
-    const completionRate = Math.round((done.length / tasks.length) * 100);
+    const pendingCount = calculatedStats.totalTasks - calculatedStats.completedTasks;
+    const overdueCount = calculatedStats.overdueTasksCount;
+    const completionRate = calculatedStats.totalTasks > 0 ? Math.round((calculatedStats.completedTasks / calculatedStats.totalTasks) * 100) : 0;
 
     let score = 0;
-    if (pending.length > 15) score += 30; else if (pending.length > 8) score += 15;
-    if (overdue.length > 5) score += 25;   else if (overdue.length > 2) score += 10;
-    if (completionRate < 40 && tasks.length > 5) score += 20;
+    if (pendingCount > 15) score += 30; else if (pendingCount > 8) score += 15;
+    if (overdueCount > 5) score += 25;   else if (overdueCount > 2) score += 10;
+    if (completionRate < 40 && calculatedStats.totalTasks > 5) score += 20;
     score = Math.min(100, score);
 
     if (score >= 45) {
       const aiResult = await aiService.predictBurnout({
-        todayStudyTime: 0, studyStreak: 0,
-        inProgressTasks: pending.length, pendingTasks: pending.length,
-        overdueTasks: overdue.length, completionRate
+        todayStudyTime: calculatedStats.totalStudyTime, 
+        studyStreak: calculatedStats.currentStreak,
+        inProgressTasks: pendingCount, 
+        pendingTasks: pendingCount,
+        overdueTasks: overdueCount, 
+        completionRate
       });
       const finalScore = aiResult?.score ?? score;
       if (finalScore >= 45) {
         setBurnoutAlert({
           score: finalScore,
-          message: aiResult?.message ?? `You have ${pending.length} pending tasks, ${overdue.length} of which are overdue.`,
+          message: aiResult?.message ?? `You have ${pendingCount} pending tasks, ${overdueCount} of which are overdue.`,
           action: aiResult?.action ?? 'Consider taking a short break and rescheduling lower-priority tasks.',
-          tasks_count: pending.length, overdue: overdue.length
+          tasks_count: pendingCount, overdue: overdueCount
         });
         setTimeout(() => setShowModal(true), 3000);
       }

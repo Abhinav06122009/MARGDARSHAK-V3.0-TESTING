@@ -12,23 +12,25 @@ import autoTable from 'jspdf-autotable';
 const notesHelpers = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return null;
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id) // Ensure this matches your profiles table schema
+        .eq('id', user.id)
         .single();
+
+      if (profileError) return null;
 
       return {
         id: user.id,
         email: user.email || '',
-        profile: profile ? {
+        profile: {
           full_name: profile.full_name || 'User',
-          role: profile.role || 'student', // Using 'role' for consistency
+          role: profile.role || 'student',
           student_id: profile.student_id
-        } : undefined
+        }
       };
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -42,15 +44,15 @@ const notesHelpers = {
         .from('notes')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_deleted', false)
-        .order('last_accessed', { ascending: false });
+        .eq('is_deleted', false);
 
       if (folder && folder !== 'all') {
         query = query.eq('folder', folder);
       }
 
-      const { data, error } = await query;
+      const { data, error } = await query.order('last_accessed', { ascending: false });
       if (error) throw error;
+      
       return data || [];
     } catch (error) {
       console.error('Error fetching user notes:', error);
@@ -64,7 +66,7 @@ const notesHelpers = {
         .from('note_folders')
         .select('*')
         .eq('user_id', userId)
-        .order('sort_order');
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data || [];
@@ -74,29 +76,53 @@ const notesHelpers = {
     }
   },
 
-  getNotesStatistics: async () => {
+  getNotesStatistics: async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .rpc('get_notes_statistics');
+      const { data: notes } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_deleted', false);
 
-      if (error) throw error;
-      return data;
+      const { data: folders } = await supabase
+        .from('note_folders')
+        .select('*')
+        .eq('user_id', userId);
+      
+      const stats = {
+        total_notes: notes?.length || 0,
+        total_folders: folders?.length || 0,
+        favorites: notes?.filter((n: any) => n.is_favorite).length || 0,
+        highlighted: notes?.filter((n: any) => n.is_highlighted).length || 0,
+        by_folder: (notes || []).reduce((acc: any, n: any) => {
+          acc[n.folder || 'none'] = (acc[n.folder || 'none'] || 0) + 1;
+          return acc;
+        }, {})
+      };
+
+      return stats;
     } catch (error) {
       console.error('Error fetching notes statistics:', error);
       return null;
     }
   },
 
-  searchNotes: async (query: string, folder?: string, tags?: string[]) => {
+  searchNotes: async (userId: string, query: string, folder?: string, tags?: string[]) => {
     try {
-      const { data, error } = await supabase
-        .rpc('search_notes', {
-          p_query: query || null,
-          p_folder: folder || null,
-          p_tags: tags || null,
-          p_limit: 50
-        });
+      let q = supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_deleted', false);
+      
+      if (query) {
+        q = q.or(`title.ilike.%${query}%,content.ilike.%${query}%`);
+      }
+      
+      if (folder && folder !== 'all') q = q.eq('folder', folder);
+      if (tags && tags.length > 0) q = q.contains('tags', tags);
 
+      const { data, error } = await q;
       if (error) throw error;
       return data || [];
     } catch (error) {
@@ -106,31 +132,35 @@ const notesHelpers = {
   },
 
   createNote: async (noteData: any, userId: string) => {
-    const { data, error } = await supabase
-      .from('notes')
-      .insert([{
-        ...noteData,
-        user_id: userId,
-        tags: noteData.tags ? noteData.tags.split(',').map((tag: string) => tag.trim()) : []
-      }])
-      .select()
-      .single();
+    const newNote = {
+      ...noteData,
+      user_id: userId,
+      tags: typeof noteData.tags === 'string' ? noteData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : (noteData.tags || []),
+      is_deleted: false,
+      last_accessed: new Date().toISOString()
+    };
+    
+    const { data, error } = await supabase.from('notes').insert(newNote).select().single();
     if (error) throw error;
     return data;
   },
 
   updateNote: async (noteId: string, noteData: any, userId: string) => {
+    const update = {
+      ...noteData,
+      tags: typeof noteData.tags === 'string' ? noteData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : (noteData.tags || []),
+      updated_at: new Date().toISOString(),
+      last_accessed: new Date().toISOString()
+    };
+    
     const { data, error } = await supabase
       .from('notes')
-      .update({
-        ...noteData,
-        tags: noteData.tags ? noteData.tags.split(',').map((tag: string) => tag.trim()) : [],
-        last_accessed: new Date().toISOString()
-      })
+      .update(update)
       .eq('id', noteId)
       .eq('user_id', userId)
       .select()
       .single();
+
     if (error) throw error;
     return data;
   },
@@ -141,6 +171,7 @@ const notesHelpers = {
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .eq('id', noteId)
       .eq('user_id', userId);
+
     if (error) throw error;
     return true;
   },
@@ -151,6 +182,7 @@ const notesHelpers = {
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .in('id', noteIds)
       .eq('user_id', userId);
+
     if (error) throw error;
     return true;
   },
@@ -164,6 +196,7 @@ const notesHelpers = {
       })
       .eq('id', noteId)
       .eq('user_id', userId);
+
     if (error) throw error;
     return true;
   }
@@ -246,7 +279,7 @@ export const useSecureNotes = () => {
       const [userNotes, userFolders, stats] = await Promise.all([
         notesHelpers.fetchUserNotes(user.id),
         notesHelpers.fetchUserFolders(user.id),
-        notesHelpers.getNotesStatistics()
+        notesHelpers.getNotesStatistics(user.id)
       ]);
       setNotes(userNotes);
       if (userFolders.length > 0) setFolders(userFolders);
@@ -389,7 +422,7 @@ export const useSecureNotes = () => {
 
   const handleSearch = async () => {
     if (!currentUser || !searchTerm.trim()) return;
-    const results = await notesHelpers.searchNotes(searchTerm, selectedFolder !== 'all' ? selectedFolder : undefined);
+    const results = await notesHelpers.searchNotes(currentUser.id, searchTerm, selectedFolder !== 'all' ? selectedFolder : undefined);
     setNotes(results);
     setCurrentView('search');
   };

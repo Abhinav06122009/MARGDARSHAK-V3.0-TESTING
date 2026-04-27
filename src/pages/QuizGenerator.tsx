@@ -13,9 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
-import { supabase } from '@/integrations/supabase/client';
+import { dashboardService } from '@/lib/dashboardService';
 import { AuthContext } from '@/contexts/AuthContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
 
 // Social Icons (Unified)
 const linkedinLogo = () => (
@@ -75,16 +76,19 @@ const QuizGenerator: React.FC = () => {
   const { session } = React.useContext(AuthContext);
 
   React.useEffect(() => {
-    if (session?.user?.id) {
-      supabase.from('syllabi')
-        .select('id, course_name, topics, objectives')
-        .eq('user_id', session.user.id)
-        .eq('is_deleted', false)
-        .then(({ data }) => {
-          if (data) setSyllabi(data);
-        });
-    }
-  }, [session]);
+    const fetchSyllabi = async () => {
+      const user = await dashboardService.getCurrentUser();
+      if (user?.id) {
+        const { data } = await supabase
+          .from('syllabi')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_deleted', false);
+        if (data) setSyllabi(data);
+      }
+    };
+    fetchSyllabi();
+  }, []);
 
   React.useEffect(() => {
     let timer: NodeJS.Timeout;

@@ -1,5 +1,3 @@
-// src/components/tasks/taskService.ts
-
 import { Briefcase, Heart, GraduationCap, PiggyBank, Home, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Task, TaskFormData, SecureUser, TaskStats, TaskTemplate, TaskTemplateFormData } from './types';
@@ -11,9 +9,9 @@ export const taskService = {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, role, student_id')
+      .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     return {
       id: user.id,
@@ -27,63 +25,61 @@ export const taskService = {
       .from('tasks')
       .select('*')
       .eq('user_id', userId)
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+      .eq('is_deleted', false);
 
     if (error) throw new Error(error.message);
     return data || [];
   },
 
   async getTaskStatistics(userId: string): Promise<TaskStats> {
-    const { data, error } = await supabase.rpc('get_user_task_stats', { p_user_id: userId });
-    if (error) {
-        // Fallback calculation if RPC fails
-        const tasks = await this.fetchUserTasks(userId);
-        return {
-            total_tasks: tasks.length,
-            pending_tasks: tasks.filter(t => t.status === 'pending').length,
-            in_progress_tasks: tasks.filter(t => t.status === 'in_progress').length,
-            completed_tasks: tasks.filter(t => t.status === 'completed').length,
-            review_tasks: tasks.filter(t => t.status === 'review').length,
-        };
-    }
-    const stats = data[0];
-    // The user's RPC might not return review_tasks, so we calculate it if missing.
-    if (stats && stats.review_tasks === undefined) {
-        const tasks = await this.fetchUserTasks(userId);
-        stats.review_tasks = tasks.filter(t => t.status === 'review').length;
-    }
-    return stats;
+    const tasks = await this.fetchUserTasks(userId);
+    return {
+      total_tasks: tasks.length,
+      pending_tasks: tasks.filter(t => t.status === 'pending').length,
+      in_progress_tasks: tasks.filter(t => t.status === 'in_progress').length,
+      completed_tasks: tasks.filter(t => t.status === 'completed').length,
+      review_tasks: tasks.filter(t => t.status === 'review').length,
+    };
   },
 
   async createTask(taskData: TaskFormData, userId: string): Promise<Task> {
+    const newTask = {
+      ...taskData,
+      id: crypto.randomUUID(),
+      user_id: userId,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
     const { data, error } = await supabase
       .from('tasks')
-      .insert([{ ...taskData, user_id: userId }])
+      .insert(newTask)
       .select()
       .single();
+
     if (error) throw new Error(error.message);
-    return data;
+    return data as Task;
   },
 
   async updateTask(taskId: string, taskData: Partial<TaskFormData>, userId: string): Promise<Task> {
     const { data, error } = await supabase
       .from('tasks')
-      .update(taskData)
-      .eq('id', taskId)
-      .eq('user_id', userId)
+      .update({ ...taskData, updated_at: new Date().toISOString() })
+      .match({ id: taskId, user_id: userId })
       .select()
       .single();
+
     if (error) throw new Error(error.message);
-    return data;
+    return data as Task;
   },
 
   async deleteTask(taskId: string, userId: string): Promise<void> {
     const { error } = await supabase
       .from('tasks')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq('id', taskId)
-      .eq('user_id', userId);
+      .match({ id: taskId, user_id: userId });
+
     if (error) throw new Error(error.message);
   },
   
@@ -91,12 +87,12 @@ export const taskService = {
     const { data, error } = await supabase
       .from('tasks')
       .update({ is_favorited: !currentStatus })
-      .eq('id', taskId)
-      .eq('user_id', userId)
+      .match({ id: taskId, user_id: userId })
       .select()
       .single();
+
     if (error) throw new Error(error.message);
-    return data;
+    return data as Task;
   },
 
   async bulkUpdateTasks(taskIds: string[], updates: Partial<TaskFormData>, userId: string): Promise<Task[]> {
@@ -106,6 +102,7 @@ export const taskService = {
       .in('id', taskIds)
       .eq('user_id', userId)
       .select();
+
     if (error) throw new Error(error.message);
     return data || [];
   },
@@ -116,27 +113,35 @@ export const taskService = {
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .in('id', taskIds)
       .eq('user_id', userId);
+
     if (error) throw new Error(error.message);
   },
 
   async fetchTaskTemplates(): Promise<TaskTemplate[]> {
     const { data, error } = await supabase
       .from('task_templates')
-      .select('*')
-      .order('name', { ascending: true });
+      .select('*');
 
     if (error) throw new Error(error.message);
     return data || [];
   },
 
   async createTaskTemplate(templateData: TaskTemplateFormData, userId: string): Promise<TaskTemplate> {
+    const newTemplate = {
+      ...templateData,
+      id: crypto.randomUUID(),
+      user_id: userId,
+      created_at: new Date().toISOString()
+    };
+    
     const { data, error } = await supabase
       .from('task_templates')
-      .insert([{ ...templateData, user_id: userId }])
+      .insert(newTemplate)
       .select()
       .single();
+
     if (error) throw new Error(error.message);
-    return data;
+    return data as TaskTemplate;
   },
 
   getTaskCategories: () => {

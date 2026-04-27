@@ -14,7 +14,10 @@ const ReportsInvestigation = () => {
     try {
       const { error } = await supabase
         .from('admin_reports')
-        .update({ status: action === 'resolve' ? 'resolved' : 'escalated' })
+        .update({ 
+          status: action === 'resolve' ? 'resolved' : 'escalated',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id);
 
       if (error) throw error;

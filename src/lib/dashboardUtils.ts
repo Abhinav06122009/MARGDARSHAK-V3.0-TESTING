@@ -26,17 +26,15 @@ export const handleTaskStatusUpdate = async (taskId: string, newStatus: 'pending
  */
 export const handleCreateQuickTask = async (userId: string, title: string, priority: 'high' | 'medium' | 'low') => {
   try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([{ 
-        user_id: userId, 
-        title, 
-        priority, 
-        status: 'pending',
-        is_deleted: false
-      }])
-      .select()
-      .single();
+    const newTask = { 
+      user_id: userId, 
+      title, 
+      priority, 
+      status: 'pending',
+      is_deleted: false
+    };
+
+    const { data, error } = await supabase.from('tasks').insert(newTask).select().single();
 
     if (error) throw error;
     return data;
@@ -53,7 +51,7 @@ export const handleDeleteTask = async (taskId: string) => {
   try {
     const { error } = await supabase
       .from('tasks')
-      .update({ is_deleted: true }) 
+      .update({ is_deleted: true, updated_at: new Date().toISOString() })
       .eq('id', taskId);
 
     if (error) throw error;
@@ -71,7 +69,7 @@ export const handleBulkDeleteTasks = async (taskIds: string[]) => {
   try {
     const { error } = await supabase
       .from('tasks')
-      .update({ is_deleted: true })
+      .update({ is_deleted: true, updated_at: new Date().toISOString() })
       .in('id', taskIds);
 
     if (error) throw error;

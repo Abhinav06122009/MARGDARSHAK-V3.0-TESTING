@@ -76,23 +76,25 @@ interface SecureUser {
 const secureAttendanceHelpers = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return null;
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
+      if (profileError) return null;
+
       return {
         id: user.id,
         email: user.email || '',
-        profile: profile ? {
+        profile: {
           full_name: profile.full_name || 'Unknown User',
           user_type: profile.user_type || 'student',
           student_id: profile.student_id
-        } : undefined
+        }
       };
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -100,40 +102,33 @@ const secureAttendanceHelpers = {
     }
   },
 
-fetchUserCourses: async (userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('courses')
-      .select('id, name, code, description, user_id, academic_year')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching user courses:', error);
-    return [];
-  }
-},
+  fetchUserCourses: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('user_id', userId);
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching user courses:', error);
+      return [];
+    }
+  },
 
   fetchUserAttendance: async (userId: string, courseId?: string, date?: string) => {
     try {
       let query = supabase
         .from('attendance')
         .select('*')
-        .eq('user_id', userId)
-        .order('marked_at', { ascending: false });
-
-      if (courseId) {
-        query = query.eq('course_id', courseId);
-      }
+        .eq('user_id', userId);
       
-      if (date) {
-        query = query.eq('date', date);
-      }
+      if (courseId) query = query.eq('course_id', courseId);
+      if (date) query = query.eq('date', date);
 
-      const { data, error } = await query;
+      const { data, error } = await query.order('marked_at', { ascending: false });
       if (error) throw error;
+      
       return data || [];
     } catch (error) {
       console.error('Error fetching user attendance:', error);
@@ -143,21 +138,14 @@ fetchUserCourses: async (userId: string) => {
 
   fetchAllUserAttendance: async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: attendanceData, error: attendanceError } = await supabase
         .from('attendance')
-        .select(`
-          *,
-          courses:course_id (
-            name,
-            code,
-            description
-          )
-        `)
-        .eq('user_id', userId)
-        .order('date', { ascending: false });
+        .select('*, courses(*)')
+        .eq('user_id', userId);
+      
+      if (attendanceError) throw attendanceError;
 
-      if (error) throw error;
-      return data || [];
+      return (attendanceData || []).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
       console.error('Error fetching all user attendance:', error);
       return [];
@@ -166,19 +154,16 @@ fetchUserCourses: async (userId: string) => {
 
   createAttendanceRecord: async (userId: string, courseId: string, date: string, status: string, notes?: string) => {
     try {
-      const { data, error } = await supabase
-        .from('attendance')
-        .insert({
-          user_id: userId,
-          course_id: courseId,
-          date,
-          status,
-          notes: notes || null,
-          marked_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      const newRecord = {
+        user_id: userId,
+        course_id: courseId,
+        date,
+        status,
+        notes: notes || null,
+        marked_at: new Date().toISOString()
+      };
 
+      const { data, error } = await supabase.from('attendance').insert(newRecord).select().single();
       if (error) throw error;
       return data;
     } catch (error) {
@@ -191,7 +176,7 @@ fetchUserCourses: async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('attendance')
-        .update({ status, notes: notes || null })
+        .update({ status, notes: notes || null, updated_at: new Date().toISOString() })
         .eq('id', recordId)
         .eq('user_id', userId)
         .select()
@@ -204,7 +189,6 @@ fetchUserCourses: async (userId: string) => {
       throw error;
     }
   },
-  
 
   deleteAttendanceRecord: async (recordId: string, userId: string) => {
     try {
@@ -213,7 +197,7 @@ fetchUserCourses: async (userId: string) => {
         .delete()
         .eq('id', recordId)
         .eq('user_id', userId);
-
+        
       if (error) throw error;
     } catch (error) {
       console.error('Error deleting attendance record:', error);
@@ -572,11 +556,10 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
     try {
       setIsBulkSubmitting(true);
 
-      // Create records with unique timestamps to avoid constraint violation
+      // Create records with unique timestamps to avoid conflict resolution
       const baseTime = new Date(`${bulkDate}T09:00:00`).getTime();
       const validatedRecords = bulkAttendanceRecords.map((record, index) => {
-        // Add minutes to make each record unique (Session 1: 09:00, Session 2: 09:01, etc.)
-        const sessionTime = new Date(baseTime + (index * 60000)); // Add 1 minute per session
+        const sessionTime = new Date(baseTime + (index * 60000));
         
         return {
           user_id: currentUser.id,
@@ -588,87 +571,27 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
         };
       });
 
-      // Log for debugging
-      console.log('Submitting records with unique timestamps:', validatedRecords);
+      // Insert records into Supabase
+      const { data, error } = await supabase.from('attendance').insert(validatedRecords).select();
+      
+      if (error) throw error;
 
-      // Insert records one by one to handle any remaining conflicts gracefully
-      const insertedRecords = [];
-      const failedRecords = [];
+      toast({
+        title: "Bulk Attendance Recorded",
+        description: `Successfully recorded ${data.length} sessions.`,
+      });
 
-      for (let i = 0; i < validatedRecords.length; i++) {
-        try {
-          const record = validatedRecords[i];
-          const { data, error } = await supabase
-            .from('attendance')
-            .insert(record)
-            .select();
-
-          if (error) {
-            console.error(`Error inserting record ${i + 1}:`, error);
-            failedRecords.push({
-              sessionNumber: i + 1,
-              error: error.message
-            });
-          } else if (data && data[0]) {
-            insertedRecords.push(data[0]);
-          }
-        } catch (recordError) {
-          console.error(`Exception inserting record ${i + 1}:`, recordError);
-          failedRecords.push({
-            sessionNumber: i + 1,
-            error: recordError.message
-          });
-        }
-
-        // Add small delay between insertions to avoid rate limiting
-        if (i < validatedRecords.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-      }
-
-      // Provide detailed feedback
-      if (insertedRecords.length > 0) {
-        toast({
-          title: "Bulk Attendance Recorded",
-          description: `Successfully recorded ${insertedRecords.length} out of ${bulkAttendanceRecords.length} attendance sessions for ${courses.find(c => c.id === bulkCourseId)?.name}.${failedRecords.length > 0 ? ` ${failedRecords.length} records failed.` : ''}`,
-        });
-
-        if (failedRecords.length > 0) {
-          console.log('Failed records:', failedRecords);
-        }
-      } else {
-        toast({
-          title: "No Records Created",
-          description: "All records may already exist or there were errors. Please check your data and try again.",
-          variant: "destructive",
-        });
-      }
-
-      // Reset and close modal if at least some records were successful
-      if (insertedRecords.length > 0) {
-        initializeBulkRecords(bulkCourseId);
-        setShowBulkModal(false);
-      }
-
-      // Refresh attendance data
+      initializeBulkRecords(bulkCourseId);
+      setShowBulkModal(false);
       fetchAttendance();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting bulk attendance:', error);
-      
-      if (error.code === '23505') {
-        toast({
-          title: "Duplicate Records",
-          description: "Some attendance records already exist for this course and date. Try modifying the session times or check existing records.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: `Failed to record bulk attendance: ${error.message || 'Please try again.'}`,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: `Failed to record bulk attendance: ${error.message}`,
+        variant: "destructive",
+      });
     } finally {
       setIsBulkSubmitting(false);
     }
@@ -681,7 +604,6 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
       setIsAddingAttendance(true);
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       
-      // For single attendance, we don't check for existing records to allow multiple sessions
       await secureAttendanceHelpers.createAttendanceRecord(
         currentUser.id,
         selectedCourse,
@@ -698,22 +620,13 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
       fetchAttendance();
       setAttendanceForm({ status: 'present', notes: '' });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error managing attendance:', error);
-      
-      if (error.code === '23505') {
-        toast({
-          title: "Duplicate Record",
-          description: "An identical attendance record already exists for this course and time.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to record attendance. Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: "Failed to record attendance. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsAddingAttendance(false);
     }
@@ -733,7 +646,8 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
           name: courseForm.name,
           code: courseForm.code,
           description: courseForm.description,
-          academic_year: academicYear  // Add this line
+          academic_year: academicYear,
+          updated_at: new Date().toISOString()
         })
         .eq('id', editingCourse.id)
         .eq('user_id', currentUser.id);
@@ -745,14 +659,13 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
         description: 'Course updated successfully in your private workspace.',
       });
     } else {
-      const { error } = await supabase
-        .from('courses')
-        .insert([{
-          ...courseForm,
-          user_id: currentUser.id,
-          academic_year: academicYear  // Add this line
-        }]);
+      const newCourse = {
+        ...courseForm,
+        user_id: currentUser.id,
+        academic_year: academicYear
+      };
 
+      const { error } = await supabase.from('courses').insert(newCourse);
       if (error) throw error;
       
       toast({
@@ -768,7 +681,7 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
     const userCourses = await secureAttendanceHelpers.fetchUserCourses(currentUser.id);
     setCourses(userCourses);
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error saving course:', error);
     toast({
       title: "Error",
@@ -783,13 +696,20 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
     if (!confirm('Are you sure you want to delete this course? All related attendance records will be deleted.')) return;
     
     try {
-      const { error } = await supabase
+      const { error: courseError } = await supabase
         .from('courses')
         .delete()
         .eq('id', courseId)
         .eq('user_id', currentUser.id);
 
-      if (error) throw error;
+      if (courseError) throw courseError;
+
+      // Note: CASCADE should handle this if configured in DB, but being explicit for safety
+      await supabase
+        .from('attendance')
+        .delete()
+        .eq('course_id', courseId)
+        .eq('user_id', currentUser.id);
       
       toast({
         title: "Course Deleted",

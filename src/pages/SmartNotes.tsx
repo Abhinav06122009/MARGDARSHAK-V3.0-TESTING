@@ -4,6 +4,8 @@ import { Headphones, Plus, FileText, Play, Pause, Square, Save, Trash2, ArrowLef
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
+import { dashboardService } from '@/lib/dashboardService';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -40,27 +42,36 @@ const SmartNotes = () => {
   const [content, setContent] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load notes from local storage for demo
+  // Load user and notes from Supabase
   useEffect(() => {
-    const savedNotes = localStorage.getItem('smart_notes');
-    if (savedNotes) {
-      try {
-        const parsed = JSON.parse(savedNotes);
-        setNotes(parsed);
-        if (parsed.length > 0) {
-          loadNote(parsed[0]);
+    const init = async () => {
+      const user = await dashboardService.getCurrentUser();
+      if (user) {
+        setUserId(user.id);
+        const { data, error } = await supabase
+          .from('smart_notes')
+          .select('*')
+          .eq('user_id', user.id);
+        if (!error && data) {
+          const formattedNotes = data.map((n: any) => ({
+            id: n.id,
+            title: n.title,
+            content: n.content,
+            lastEdited: new Date(n.updated_at || n.created_at).getTime()
+          }));
+          setNotes(formattedNotes);
+          if (formattedNotes.length > 0) {
+            loadNote(formattedNotes[0]);
+          }
         }
-      } catch (e) {
-        console.error("Failed to parse notes", e);
+      } else {
+        toast({ title: "Authentication Required", description: "Please log in to save your notes.", variant: "destructive" });
       }
-    }
-  }, [loadNote]);
-
-  const saveNotesToStorage = (newNotes: Note[]) => {
-    localStorage.setItem('smart_notes', JSON.stringify(newNotes));
-    setNotes(newNotes);
-  };
+    };
+    init();
+  }, [loadNote, toast]);
 
   const loadNote = React.useCallback((note: Note) => {
     stopSpeaking();
@@ -76,33 +87,61 @@ const SmartNotes = () => {
     setContent('');
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!userId) {
+      toast({ title: "Login Required", description: "You must be logged in to save notes.", variant: "destructive" });
+      return;
+    }
     if (!title.trim() && !content.trim()) return;
 
-    const newNote: Note = {
-      id: activeNoteId || Date.now().toString(),
+    const noteId = activeNoteId || crypto.randomUUID();
+    const newNoteData = {
+      id: noteId,
+      user_id: userId,
       title: title || 'Untitled Note',
       content,
-      lastEdited: Date.now()
+      updated_at: new Date().toISOString()
     };
 
-    let updatedNotes;
-    if (activeNoteId) {
-      updatedNotes = notes.map(n => n.id === activeNoteId ? newNote : n);
-    } else {
-      updatedNotes = [newNote, ...notes];
-      setActiveNoteId(newNote.id);
-    }
+    try {
+      if (activeNoteId) {
+        await supabase
+          .from('smart_notes')
+          .update(newNoteData)
+          .match({ id: noteId, user_id: userId });
+      } else {
+        await supabase
+          .from('smart_notes')
+          .insert({ ...newNoteData, created_at: new Date().toISOString() });
+        setActiveNoteId(noteId);
+      }
 
-    saveNotesToStorage(updatedNotes);
-    toast({ title: "Note Saved", description: "Your note has been saved successfully." });
+      const updatedNotes = activeNoteId 
+        ? notes.map(n => n.id === activeNoteId ? { ...n, title: newNoteData.title, content, lastEdited: Date.now() } : n)
+        : [{ id: noteId, title: newNoteData.title, content, lastEdited: Date.now() }, ...notes];
+      
+      setNotes(updatedNotes);
+      toast({ title: "Note Saved", description: "Your note has been saved to Supabase." });
+    } catch (err) {
+      toast({ title: "Save Failed", description: "Could not save to database.", variant: "destructive" });
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const updatedNotes = notes.filter(n => n.id !== id);
-    saveNotesToStorage(updatedNotes);
-    if (activeNoteId === id) {
-      createNewNote();
+  const handleDelete = async (id: string) => {
+    if (!userId) return;
+    try {
+      await supabase
+        .from('smart_notes')
+        .delete()
+        .match({ id: id, user_id: userId });
+      const updatedNotes = notes.filter(n => n.id !== id);
+      setNotes(updatedNotes);
+      if (activeNoteId === id) {
+        createNewNote();
+      }
+      toast({ title: "Note Deleted", description: "Note removed from Supabase." });
+    } catch (err) {
+      toast({ title: "Delete Failed", description: "Could not delete from database.", variant: "destructive" });
     }
   };
 
