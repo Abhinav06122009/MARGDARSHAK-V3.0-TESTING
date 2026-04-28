@@ -5,7 +5,7 @@ import UserRow from './UserRow';
 interface UserListProps {
   loading: boolean;
   users: any[];
-  onAction: (action: 'block' | 'unblock', userId: string) => void;
+  onAction: (action: 'block' | 'unblock' | 'set_tier', userId: string, extra?: any) => void;
 }
 
 const UserList: React.FC<UserListProps> = ({ loading, users, onAction }) => {
@@ -49,6 +49,7 @@ const UserList: React.FC<UserListProps> = ({ loading, users, onAction }) => {
             role={user.user_type}
             risk={user.risk_level}
             blocked={user.is_blocked}
+            tier={user.subscription_tier}
             onAction={onAction}
           />
         ))}

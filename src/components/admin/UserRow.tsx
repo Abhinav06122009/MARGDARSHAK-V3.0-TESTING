@@ -8,12 +8,19 @@ interface UserRowProps {
   role?: string | null;
   risk?: string | null;
   blocked?: boolean | null;
-  onAction?: (action: 'block' | 'unblock', userId: string) => void;
+  tier?: string | null;
+  onAction?: (action: 'block' | 'unblock' | 'set_tier', userId: string, extra?: any) => void;
 }
 
-const UserRow = ({ id, name, email, role, risk, blocked, onAction }: UserRowProps) => {
+const UserRow = ({ id, name, email, role, risk, blocked, tier, onAction }: UserRowProps) => {
   const isHighRisk = risk?.toLowerCase() === 'high';
   
+  const tiers = [
+    { id: 'free', label: 'Free', color: 'text-zinc-400 border-zinc-500/20 bg-zinc-500/5' },
+    { id: 'premium', label: 'Premium', color: 'text-amber-400 border-amber-500/20 bg-amber-500/5' },
+    { id: 'premium_elite', label: 'Elite', color: 'text-purple-400 border-purple-500/20 bg-purple-500/5' },
+  ];
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -31,12 +38,39 @@ const UserRow = ({ id, name, email, role, risk, blocked, onAction }: UserRowProp
           {blocked ? <UserX className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
         </div>
         <div>
-          <p className="text-sm font-bold text-white tracking-wide">{name || 'Unknown Identity'}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-white tracking-wide">{name || 'Unknown Identity'}</p>
+            {tier && (
+              <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${
+                tier === 'premium_elite' ? 'text-purple-400 border-purple-500/20' : 
+                tier === 'premium' ? 'text-amber-400 border-amber-500/20' : 'text-zinc-500 border-white/5'
+              }`}>
+                {tier}
+              </span>
+            )}
+          </div>
           <p className="text-xs font-mono text-zinc-500 mt-0.5">{email || 'No email on file'}</p>
         </div>
       </div>
       
       <div className="flex flex-wrap items-center gap-3">
+        {/* Tier Selector */}
+        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+          {tiers.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onAction?.('set_tier', id, { tier: t.id })}
+              className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter transition-all ${
+                tier === t.id 
+                  ? 'bg-white/10 text-white shadow-lg' 
+                  : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
         <div className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[9px] font-black uppercase tracking-widest text-zinc-400">
           {role || 'MEMBER'}
         </div>
@@ -57,7 +91,7 @@ const UserRow = ({ id, name, email, role, risk, blocked, onAction }: UserRowProp
           }`}
         >
           {blocked ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
-          {blocked ? 'Restore Access' : 'Revoke Access'}
+          {blocked ? 'Restore' : 'Revoke'}
         </button>
       </div>
     </motion.div>

@@ -25,6 +25,8 @@ export interface AdminUser {
   user_type?: string | null;
   risk_level?: string | null;
   is_blocked?: boolean | null;
+  subscription_tier?: string | null;
+  subscription_status?: string | null;
 }
 
 export interface AdminReport {

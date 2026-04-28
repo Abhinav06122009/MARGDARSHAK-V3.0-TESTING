@@ -19,8 +19,8 @@ const AdminDashboard = () => {
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard title="Total Users" value={stats?.totalUsers ?? '—'} icon={<User className="h-5 w-5" />} />
-          <StatCard title="Detected Risks" value={stats?.activeThreats ?? '—'} icon={<AlertTriangle className="h-5 w-5" />} />
-          <StatCard title="Open Reports" value={stats?.reportsOpen ?? '—'} icon={<ShieldCheck className="h-5 w-5" />} />
+          <StatCard title="Elite Members" value={users.filter(u => u.subscription_tier === 'premium_elite').length} icon={<DatabaseZap className="h-5 w-5 text-purple-400" />} />
+          <StatCard title="Premium Users" value={users.filter(u => u.subscription_tier === 'premium').length} icon={<ShieldCheck className="h-5 w-5 text-amber-400" />} />
           <StatCard title="Blocked Users" value={stats?.blockedUsers ?? '—'} icon={<Ban className="h-5 w-5" />} />
         </div>
 

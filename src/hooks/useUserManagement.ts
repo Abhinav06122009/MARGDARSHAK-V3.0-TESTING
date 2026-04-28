@@ -24,8 +24,42 @@ export const useUserManagement = () => {
   /**
    * Toggles a user's access (block/unblock)
    */
-  const handleAction = async (action: 'block' | 'unblock', userId: string) => {
+  const handleAction = async (action: 'block' | 'unblock' | 'set_tier', userId: string, extra?: any) => {
     try {
+      if (action === 'set_tier') {
+        const tier = extra?.tier;
+        if (!tier) return;
+
+        const { error: tierError } = await supabase
+          .from('profiles')
+          .update({ 
+            subscription_tier: tier,
+            subscription_status: 'active'
+          })
+          .eq('id', userId);
+
+        if (tierError) throw tierError;
+
+        // Try to sync with Clerk via admin function if possible
+        try {
+          const { authedFetch } = await import('@/lib/ai/authedFetch');
+          await authedFetch('/.netlify/functions/admin-manage-user', {
+            method: 'POST',
+            body: JSON.stringify({
+              targetUserId: userId,
+              action: 'update_subscription',
+              data: { tier, status: 'active' }
+            })
+          });
+        } catch (syncErr) {
+          console.warn("⚠️ Admin backend sync failed, but Supabase was updated:", syncErr);
+        }
+
+        toast.success(`Subscription tier updated to ${tier.toUpperCase()}`);
+        refresh();
+        return;
+      }
+
       const isBlocked = action === 'block';
       
       // 1. Update the profile status in Supabase
