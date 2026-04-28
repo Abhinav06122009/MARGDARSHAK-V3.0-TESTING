@@ -142,15 +142,14 @@ const SmartTutorPage = () => {
        userImage: imageToSend ? URL.createObjectURL(imageToSend) : undefined
      }]);
  
-+    // Trace AI Action
-+    import('@/lib/security/activityTracker').then(({ trackActivity }) => {
-+      trackActivity('ai_request', { 
-+        mode: modeToUse, 
-+        hasImage: !!imageToSend,
-+        promptLength: textToSend.length 
-+      });
-+    });
-+
+    // Trace AI Action
+    import('@/lib/security/activityTracker').then(({ trackActivity }) => {
+      trackActivity('ai_request', { 
+        mode: modeToUse, 
+        hasImage: !!imageToSend,
+        promptLength: textToSend.length 
+      });
+    });
      // Identity intercept
     const identityTriggers = ["who are you", "what is your name", "who made you", "your name", "tell me about yourself"];
     if (identityTriggers.some(t => textToSend.toLowerCase().includes(t)) && !imageToSend) {
