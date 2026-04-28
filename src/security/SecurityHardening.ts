@@ -247,8 +247,6 @@ export const initSecurityHardening = () => {
       document.body.innerHTML = '<h1>Access Denied: Bot detected</h1>';
       throw new Error('Bot detected');
     }
-  }
-
   // Debugger Protection (Infinite loop)
   if (!isDev) {
     setInterval(() => {
@@ -271,35 +269,45 @@ export const initSecurityHardening = () => {
     }, 1000);
   }
 
+   // --- 2. PREVENTION OF COPYING AND INSPECTION ---
+  document.addEventListener('keydown', (e) => {
+    const forbiddenKeys = ['F12', 'u', 'i', 'j', 'c', 's', 'p', 'a'];
+    const isInspection = e.key === 'F12' ||
+      (e.ctrlKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
+      (e.ctrlKey && e.shiftKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
+      (e.metaKey && forbiddenKeys.includes(e.key.toLowerCase()));
+
+    if (isInspection) {
+      e.preventDefault();
+      logViolation('Tamper Attempt', { key: e.key, combo: e.ctrlKey ? 'CTRL' : 'META' });
+      return false;
+    }
+  }, false);
+
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  }, false);
 
   // --- 5. DEVTOOLS DETECTION ---
-
-  if (!isDev) {
-    let devtoolsOpen = false;
-    const threshold = 160;
+  let devtoolsOpen = false;
+  const threshold = 160;
+  
+  const checkDevTools = () => {
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
     
-    const checkDevTools = () => {
-      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-      
-      if (widthThreshold || heightThreshold) {
-        if (!devtoolsOpen) {
-          devtoolsOpen = true;
-          createOverlay('Developer tools detected. Access restricted.');
-          logViolation('DevTools Access Attempt', { state: 'detected' });
-        }
-      } else {
-        if (devtoolsOpen) {
-          devtoolsOpen = false;
-          const overlay = document.getElementById('security-overlay');
-          if (overlay) overlay.remove();
-        }
+    if (widthThreshold || heightThreshold) {
+      if (!devtoolsOpen) {
+        devtoolsOpen = true;
+        logViolation('DevTools Opened', { state: 'detected' });
       }
-    };
-    
-    window.addEventListener('resize', checkDevTools);
-    setInterval(checkDevTools, 1000);
-  }
+    } else {
+      devtoolsOpen = false;
+    }
+  };
+  
+  window.addEventListener('resize', checkDevTools);
+  setInterval(checkDevTools, 1000);
 
 
   // --- 6. VISUAL LOCKDOWN ---

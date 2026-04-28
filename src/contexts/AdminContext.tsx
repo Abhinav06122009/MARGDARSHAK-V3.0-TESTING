@@ -26,7 +26,11 @@ export const AdminContext = createContext<AdminContextValue>({
   refresh: async () => undefined,
 });
 
-const ADMIN_ROLES = new Set(['admin', 'superadmin', 'super_admin', 'owner']);
+const ADMIN_ROLES = new Set([
+  'admin', 'superadmin', 'super_admin', 'owner',
+  'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio',
+  'moderator', 'staff', 'manager', 'executive'
+]);
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   const { session: clerkSession, isLoaded: sessionLoaded } = useSession();
