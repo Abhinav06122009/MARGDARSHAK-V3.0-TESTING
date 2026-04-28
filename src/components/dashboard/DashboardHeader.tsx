@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useClerk } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
