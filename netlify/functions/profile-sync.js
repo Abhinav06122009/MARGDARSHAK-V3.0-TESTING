@@ -66,24 +66,35 @@ exports.handler = async (event) => {
   const fullName = metadata.full_name || metadata.fullName || clerkMetadata.full_name || 'Scholar';
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  // --- PREVENT ADMIN DOWNGRADE ---
+  // Fetch existing profile to check current role
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', auth.user.id)
+    .maybeSingle();
+
+  const newUserType = clerkMetadata.role || metadata.role || 'student';
+  
+  // If the user is already an admin in Supabase, preserve it unless the sync explicitly provides a role
+  const finalUserType = (existingProfile?.user_type === 'admin' && newUserType === 'student') 
+    ? 'admin' 
+    : newUserType;
+
   const profileRow = {
     id: auth.user.id,
     email: auth.user.email || metadata.email || '',
     full_name: fullName,
     avatar_url: metadata.avatar_url || null,
-    user_type: clerkMetadata.role || metadata.role || 'student',
+    user_type: finalUserType,
     subscription_tier: subscription.tier || clerkMetadata.subscription_tier || 'free',
     subscription_status: subscription.status || 'inactive',
     subscription_period_end: subscription.period_end ? new Date(subscription.period_end).toISOString() : null,
     updated_at: new Date().toISOString(),
   };
 
-  console.log('[profile-sync] Attempting upsert for user:', auth.user.id, 'with row:', {
-    id: profileRow.id,
-    email: profileRow.email,
-    full_name: profileRow.full_name,
-    user_type: profileRow.user_type,
-  });
+  console.log('[profile-sync] Attempting upsert for user:', auth.user.id, 'with role:', finalUserType);
 
   const { data, error } = await supabase.from('profiles').upsert(profileRow).select();
   if (error) {

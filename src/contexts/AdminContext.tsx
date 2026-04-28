@@ -88,7 +88,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     // MASTER OVERRIDES
     const MASTER_IDS = [
       'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
-      'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+      'user_3CylWpMJnNbVpgJcpk9eSIf73gS',
+      'user_3CyueymOUFein248UifL5xSPBOU'
     ];
     
     const isMaster = MASTER_IDS.includes(clerkUser?.id || '');
