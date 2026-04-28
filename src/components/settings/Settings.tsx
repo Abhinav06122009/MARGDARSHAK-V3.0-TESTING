@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Settings as SettingsIcon, ShieldCheck, Zap, Globe, Cpu, Radio, Target, Activity, Layout, Layers, Terminal, Box, Sparkles, Command, CloudLightning } from 'lucide-react';
+import { ArrowLeft, Settings as SettingsIcon, ShieldCheck, Zap, Globe, Cpu, Radio, Target, Activity, Layout, Layers, Terminal, Box, Sparkles, Command } from 'lucide-react';
 
 // Hooks & Components
 import { useSettings } from '@/hooks/useSettings';
@@ -11,45 +11,19 @@ import Passkeys from "@/components/settings/Passkeys";
 import SecurityAdvisor from "@/components/settings/SecurityAdvisor";
 import PremiumIDCard from './PremiumIDCard';
 
-// SPEED OPTIMIZED NOISE
+// FAST LOADING NOISE
 const NoiseOverlay = () => (
-  <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.03] mix-blend-overlay">
+  <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.02] mix-blend-overlay">
     <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <filter id="noise">
-        <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch" />
       </filter>
       <rect width="100%" height="100%" filter="url(#noise)" />
     </svg>
   </div>
 );
 
-// DYNAMIC LIGHTNING BACKGROUND
-const LightningAura = () => (
-  <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-[0.04]">
-    {[...Array(6)].map((_, i) => (
-      <motion.div
-        key={i}
-        className="absolute text-emerald-500"
-        initial={{ opacity: 0 }}
-        animate={{ 
-          opacity: [0, 1, 0, 0.8, 0],
-          x: Math.random() * 100 + "%",
-          y: Math.random() * 100 + "%",
-          scale: Math.random() * 1.5 + 1
-        }}
-        transition={{ 
-          duration: 0.4, 
-          delay: Math.random() * 15, 
-          repeat: Infinity, 
-          repeatDelay: Math.random() * 10 
-        }}
-      >
-        <CloudLightning size={48} />
-      </motion.div>
-    ))}
-  </div>
-);
-
+// FAST LOADING CURSOR
 const NexusCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -70,12 +44,11 @@ const NexusCursor = () => {
       animate={{
         x: position.x - 16,
         y: position.y - 16,
-        scale: isHovering ? 2.2 : 1,
+        scale: isHovering ? 2 : 1,
       }}
-      transition={{ type: "spring", damping: 40, stiffness: 350, mass: 0.5 }}
+      transition={{ type: "spring", damping: 50, stiffness: 400, mass: 0.4 }}
     >
-      <div className={`w-full h-full rounded-full border-2 transition-all duration-300 ${isHovering ? 'border-emerald-400 bg-emerald-400/20 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-white/10'}`} />
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full transition-all duration-300 ${isHovering ? 'bg-emerald-400 shadow-[0_0_10px_white]' : 'bg-white/20'}`} />
+      <div className={`w-full h-full rounded-full border-2 transition-all duration-300 ${isHovering ? 'border-emerald-400 bg-emerald-400/10' : 'border-white/10'}`} />
     </motion.div>
   );
 };
@@ -98,9 +71,9 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, []);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#010101] flex flex-col items-center justify-center gap-10">
-      <div className="w-20 h-20 border-t-2 border-emerald-500 rounded-full animate-spin shadow-[0_0_50px_rgba(16,185,129,0.3)]" />
-      <span className="text-[12px] font-black text-emerald-500 uppercase tracking-[1.5em] animate-pulse">INIT_NEXUS</span>
+    <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center gap-8">
+      <div className="w-12 h-12 border-t-2 border-emerald-500 rounded-full animate-spin" />
+      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[1.5em]">INITIALIZING</span>
     </div>
   );
 
@@ -110,78 +83,66 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     <div className="min-h-screen bg-[#020202] text-gray-300 selection:bg-emerald-500/30 overflow-x-hidden cursor-none">
       <NexusCursor />
       <NoiseOverlay />
-      <LightningAura />
       
-      {/* AMBIENT LIGHTING */}
+      {/* FAST LOADING AMBIENT LIGHT */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div 
-           className="absolute w-[1200px] h-[1200px] bg-emerald-500/[0.04] blur-[250px] rounded-full"
-           animate={{ x: mousePos.x - 600, y: mousePos.y - 600 }}
-           transition={{ type: "spring", damping: 100, stiffness: 15 }}
+           className="absolute w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[200px] rounded-full"
+           animate={{ x: mousePos.x - 400, y: mousePos.y - 400 }}
+           transition={{ type: "spring", damping: 100, stiffness: 20 }}
         />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.06),transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 max-w-[1800px] mx-auto px-8 lg:px-20 py-20 lg:py-32">
+      <div className="relative z-10 max-w-[1700px] mx-auto px-8 lg:px-16 py-16 lg:py-24">
         
-        {/* HEADER: Surgical Alignment */}
+        {/* HEADER: Geometric Perfection */}
         <motion.header
-          initial={{ opacity: 0, y: -50 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col lg:flex-row lg:items-end justify-between gap-20 mb-40"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-24"
         >
-          <div className="flex items-center gap-12 lg:gap-20">
+          <div className="flex items-center gap-10 lg:gap-14">
             <button
               onClick={() => onBack ? onBack() : window.history.back()}
-              className="group relative w-24 h-24 flex items-center justify-center rounded-[3rem] bg-zinc-950 border-2 border-white/5 hover:border-emerald-500/50 transition-all duration-700 shadow-[0_40px_80px_rgba(0,0,0,1)]"
+              className="group relative w-16 h-16 flex items-center justify-center rounded-2xl bg-zinc-950 border border-white/5 hover:border-emerald-500/40 transition-all shadow-xl"
             >
-              <ArrowLeft size={36} className="text-white/20 group-hover:text-emerald-400 group-hover:-translate-x-2 transition-all" />
-              <div className="absolute inset-0 rounded-[3rem] border-2 border-emerald-500/0 group-hover:border-emerald-500/20 transition-all scale-125 group-hover:scale-100" />
+              <ArrowLeft size={24} className="text-white/20 group-hover:text-emerald-400 group-hover:-translate-x-1 transition-all" />
             </button>
             
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-12">
-                 <h1 className="text-8xl lg:text-[11rem] font-black text-white tracking-[-0.08em] uppercase italic leading-none drop-shadow-2xl">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-6">
+                 <h1 className="text-7xl lg:text-[9rem] font-black text-white tracking-[-0.08em] uppercase italic leading-none">
                     NEXUS
                  </h1>
-                 <div className="p-6 bg-zinc-950 border-2 border-emerald-500/20 rounded-[2rem] hidden xl:block shadow-2xl">
-                    <SettingsIcon size={48} className="text-emerald-400 animate-spin-slow" />
+                 <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl hidden xl:block">
+                    <SettingsIcon size={28} className="text-emerald-400 animate-spin-slow" />
                  </div>
               </div>
-              <div className="flex items-center gap-6 ml-4">
-                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                 <p className="text-white/20 font-black uppercase tracking-[1.5em] text-[11px] italic">Universal_Config_Matrix</p>
-              </div>
+              <p className="text-white/20 font-black uppercase tracking-[1em] text-[9px] italic ml-1">Configuration_Interface</p>
             </div>
           </div>
 
-          {/* STATUS PILL */}
-          <div className="flex items-center gap-10 p-8 bg-zinc-950/80 border-2 border-white/10 rounded-[4rem] backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,1)]">
-             <div className="flex items-center gap-10 px-12 py-5 bg-emerald-500/5 border-2 border-emerald-500/20 rounded-[2rem] group transition-all hover:bg-emerald-500/10">
-                <Cpu size={32} className="text-emerald-400 group-hover:scale-110 transition-transform" />
-                <div className="flex flex-col">
-                   <span className="text-[16px] font-black text-white tracking-widest uppercase leading-none">CORE_SYNC</span>
-                   <span className="text-[10px] font-bold text-emerald-500/40 uppercase tracking-widest mt-2">Relay_Secure</span>
-                </div>
+          {/* STATUS CONSOLE: Aligned Pill */}
+          <div className="flex items-center gap-4 p-3 bg-zinc-950/40 border border-white/5 rounded-full backdrop-blur-3xl shadow-2xl">
+             <div className="flex items-center gap-6 px-10 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+                <Cpu size={20} className="text-emerald-400" />
+                <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">CORE_ACTIVE</span>
              </div>
-             <div className="flex items-center gap-10 px-12 py-5 bg-white/[0.02] border-2 border-white/5 rounded-[2rem] group transition-all hover:bg-white/[0.05]">
-                <Layers size={32} className="text-white/40 group-hover:scale-110 transition-transform" />
-                <div className="flex flex-col">
-                   <span className="text-[16px] font-black text-white/50 tracking-widest uppercase leading-none">NODE_READY</span>
-                   <span className="text-[10px] font-bold text-white/10 uppercase tracking-widest mt-2">Matrix_Link</span>
-                </div>
+             <div className="flex items-center gap-6 px-10 py-3 bg-white/[0.01] border border-white/5 rounded-full">
+                <Layers size={20} className="text-white/20" />
+                <span className="text-[11px] font-black text-white/30 tracking-widest uppercase leading-none">NODE_READY</span>
              </div>
           </div>
         </motion.header>
 
-        {/* GRID LAYOUT */}
-        <div className="grid grid-cols-1 xl:grid-cols-[480px_1fr] gap-32 lg:gap-48 items-start">
+        {/* CONTENT GRID: Mathematical Balance */}
+        <div className="grid grid-cols-1 xl:grid-cols-[440px_1fr] gap-20 lg:gap-32 items-start">
           
-          {/* LEFT: ID */}
-          <div className="flex flex-col gap-24 xl:sticky xl:top-16">
-             <div className="flex items-center gap-10 px-4">
-                <Box size={24} className="text-emerald-500/60" />
-                <h3 className="text-[13px] font-black uppercase tracking-[1em] text-white/20">IDENTIFICATION</h3>
+          {/* LEFT: ID Component */}
+          <div className="flex flex-col gap-16 xl:sticky xl:top-12">
+             <div className="flex items-center gap-6 px-4">
+                <Box size={20} className="text-emerald-500/40" />
+                <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">IDENTIFICATION</h3>
                 <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
              </div>
              
@@ -190,29 +151,17 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                studentId={studentId} setStudentId={setStudentId}
                isSubmitting={isSubmittingProfile} onSubmit={handleProfileUpdate} onRefresh={refreshUser}
              />
-
-             <div className="p-16 bg-zinc-950/80 border-2 border-white/5 rounded-[4rem] backdrop-blur-[40px] shadow-2xl relative overflow-hidden group">
-                <div className="absolute -top-20 -left-20 w-80 h-80 bg-emerald-500/[0.03] blur-[120px] rounded-full" />
-                <div className="relative z-10 space-y-10">
-                   <div className="flex items-center gap-6">
-                      <Sparkles size={20} className="text-emerald-500 animate-pulse" />
-                      <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.6em]">Quantum_Sync</span>
-                   </div>
-                   <h4 className="text-4xl font-black text-white italic tracking-tight uppercase leading-none">Matrix_Persistence</h4>
-                   <p className="text-lg text-white/40 leading-relaxed font-medium">Your biometric node is synchronized across the Margdarshak cloud lattice. Secure, lightning-fast, and visible on all universal devices.</p>
-                </div>
-             </div>
           </div>
 
           {/* RIGHT: Modules */}
-          <div className="flex flex-col gap-24">
-            <div className="flex items-center gap-10 px-4">
+          <div className="flex flex-col gap-16">
+            <div className="flex items-center gap-6 px-4">
                <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
-               <h3 className="text-[13px] font-black uppercase tracking-[1em] text-white/20">SYSTEM_CONFIG</h3>
-               <Activity size={24} className="text-emerald-500/60" />
+               <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">CONFIG_STACK</h3>
+               <Activity size={20} className="text-emerald-500/40" />
             </div>
 
-            <div className="grid gap-16">
+            <div className="grid gap-12">
                {[
                  { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
                  { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
@@ -221,10 +170,10 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                ].map(({ Component, props }, i) => (
                  <motion.div
                    key={i}
-                   initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                   viewport={{ once: true, margin: "-100px" }}
-                   transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                   initial={{ opacity: 0, y: 20 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   viewport={{ once: true }}
+                   transition={{ duration: 0.5, delay: i * 0.05 }}
                  >
                     <Component {...props} />
                  </motion.div>
@@ -233,7 +182,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           </div>
         </div>
 
-        <div className="mt-80 pt-40 border-t border-white/5 text-center">
+        <div className="mt-64 pt-24 border-t border-white/5 text-center">
            <SettingsFooter />
         </div>
       </div>
