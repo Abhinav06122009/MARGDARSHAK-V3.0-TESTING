@@ -10,50 +10,90 @@ export const initSecurityHardening = () => {
     .then(data => userIP = data.ip)
     .catch(() => {});
 
+  const getFingerprint = () => {
+    return {
+      ua: navigator.userAgent,
+      lang: navigator.language,
+      platform: navigator.platform,
+      cores: navigator.hardwareConcurrency,
+      mem: (navigator as any).deviceMemory,
+      res: `${window.screen.width}x${window.screen.height}`,
+      depth: window.screen.colorDepth,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      touch: navigator.maxTouchPoints,
+    };
+  };
+
   const logViolation = async (type: string, metadata: any = {}) => {
     try {
+      // Attempt to get user from multiple sources for maximum tracing
+      let userId: string | null = null;
+      let userEmail: string | null = null;
+      
       const user = await supabaseHelpers.getCurrentUser();
+      if (user) {
+        userId = user.id;
+        userEmail = user.email;
+      }
+
+      // If user ID is still missing, check Clerk directly from window if available
+      if (!userId && (window as any).Clerk?.user) {
+        userId = (window as any).Clerk.user.id;
+        userEmail = (window as any).Clerk.user.primaryEmailAddress?.emailAddress;
+      }
+
+      const fingerprint = getFingerprint();
       const payload = {
         event_type: type,
-        user_id: user?.id || null,
+        user_id: userId,
         ip_address: userIP,
         risk_level: 'critical',
         metadata: {
           ...metadata,
-          userAgent: navigator.userAgent,
+          ...fingerprint,
+          user_email: userEmail,
           url: window.location.href,
           timestamp: new Date().toISOString(),
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          platform: navigator.platform
+          persistent_id: localStorage.getItem('mg_sid') || 'new-trace-' + Math.random().toString(36).slice(2)
         },
-        summary: `Security Violation: ${type} detected from ${userIP}`
+        summary: `SECURITY ALERT: ${type} from ${userIP} (User: ${userId || 'Anonymous'})`
       };
 
-      // Log to security_logs table
+      // Store a persistent tracker on their device for subsequent identification
+      if (!localStorage.getItem('mg_sid')) {
+        localStorage.setItem('mg_sid', payload.metadata.persistent_id);
+      }
+
+      // Log to security_logs
       await supabase.from('security_logs').insert(payload);
       
-      // Log to security_threats table for immediate visibility
+      // Log to security_threats for admin panel visibility
       await supabase.from('security_threats').insert({
         event_type: type,
-        user_id: user?.id || null,
+        user_id: userId,
         ip_address: userIP,
         threat_level: 'critical',
-        threat_score: 95,
-        summary: `CRITICAL: ${type} detected from ${userIP}. User Auto-Blocked.`,
+        threat_score: 98,
+        summary: `CRITICAL: ${type} by ${userId ? 'Identified User' : 'Anonymous Guest'}. IP: ${userIP}`,
         metadata: payload.metadata
       });
 
-      // If user is identified, auto-block them
-      if (user?.id) {
+      // If user is identified, perform immediate lockdown and ban
+      if (userId) {
         await supabase.from('profiles').update({ 
           risk_level: 'critical',
           security_score: 0,
           is_blocked: true,
-          blocked_reason: `System Auto-Block: ${type} detected at ${new Date().toLocaleString()}`
-        }).eq('id', user.id);
+          blocked_reason: `AUTOMATED BAN: ${type} detected. Security forensic trace: ${payload.metadata.persistent_id}`
+        }).eq('id', userId);
+        
+        console.warn('🛡️ Security trace completed. User identity confirmed and restricted.');
+      } else {
+        console.warn('🛡️ Security trace completed. IP logged for administrative review.');
       }
     } catch (err) {
-      console.error('Failed to log security violation:', err);
+      // Fail silently to the user but log to console in dev if needed
+      if (isDev) console.error('Tracing error:', err);
     }
   };
 
