@@ -254,6 +254,14 @@ export default {
                                         '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
                                         '33%': { transform: 'translateY(-20px) rotate(120deg)' },
                                         '66%': { transform: 'translateY(10px) rotate(240deg)' }
+                                },
+                                scanline: {
+                                        '0%': { transform: 'translateY(-100%)' },
+                                        '100%': { transform: 'translateY(100%)' }
+                                },
+                                'ping-slow': {
+                                        '0%': { transform: 'scale(1)', opacity: '0.8' },
+                                        '100%': { transform: 'scale(1.5)', opacity: '0' }
                                 }
                         },
                         animation: {
@@ -277,7 +285,9 @@ export default {
                                 shimmer: 'shimmer 2s infinite',
                                 typing: 'typing 3s steps(30, end), blink 0.5s step-end infinite alternate',
                                 matrix: 'matrix 3s linear infinite',
-                                'particle-float': 'particle-float 4s ease-in-out infinite'
+                                'particle-float': 'particle-float 4s ease-in-out infinite',
+                                scanline: 'scanline 4s linear infinite',
+                                'ping-slow': 'ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite'
                         },
                         backdropBlur: {
                                 xs: '2px',
