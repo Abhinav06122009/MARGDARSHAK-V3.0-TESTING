@@ -65,12 +65,18 @@ exports.handler = async (event) => {
     .eq('id', user.id)
     .single();
 
-  const userTier = profile?.subscription_tier || 'free';
+  let userTier = profile?.subscription_tier || 'free';
+  
+  // MASTER OVERRIDE for Abhinav Jha
+  if (user.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+    userTier = 'premium_elite';
+  }
+
   const userApiKey = event.headers?.["x-user-api-key"] || event.headers?.["X-User-API-Key"];
 
   // Logic: Elite can use inbuilt key. Premium MUST use their own.
-  const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite'];
-  const isElite = ELITE_TIERS.includes(userTier);
+  const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'elite'];
+  const isElite = ELITE_TIERS.includes(userTier.toLowerCase());
 
   let apiKeyToUse = userApiKey;
   

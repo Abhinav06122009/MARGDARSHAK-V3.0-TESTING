@@ -45,7 +45,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const unsafeMetadata = clerkUser.unsafeMetadata || {};
         const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
         
-        let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier).toLowerCase() || 'free';
+        let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
 
         // FUZZY FALLBACK
         const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();

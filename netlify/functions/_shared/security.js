@@ -3,6 +3,8 @@
 
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://margdarshak-ai.netlify.app",
+  "https://margdarshan.tech",
+  "https://www.margdarshan.tech",
 ];
 
 const parseAllowedOrigins = () => {
