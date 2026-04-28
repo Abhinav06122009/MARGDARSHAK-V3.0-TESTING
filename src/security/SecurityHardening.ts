@@ -86,11 +86,11 @@ export const initSecurityHardening = () => {
   };
 
   // If it's a Google bot, we bypass
-  const checkBot = () => {
+  const isGoogleBot = () => {
     const ua = navigator.userAgent.toLowerCase();
     return ua.includes('googlebot') || ua.includes('adsense') || ua.includes('google-adwords');
   };
-  if (checkBot()) return;
+  if (isGoogleBot()) return;
 
   // --- SCREENSHOT PROTECTION (ANTI-STEAL) ---
   const addScreenshotDefense = () => {
