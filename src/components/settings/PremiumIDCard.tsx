@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { 
-  Shield, CreditCard, Cpu, QrCode, Sparkles, 
-  Camera, Save, CheckCircle2, User, Mail, 
-  Hash, Globe, Award, Zap, Fingerprint, 
-  Binary, Activity, Wifi, Battery, Lock,
-  ChevronRight, RefreshCw, Layers, Boxes,
-  Hexagon, Target, Radio
+  Shield, Camera, Save, User, Hash, Globe, 
+  Cpu, QrCode, Zap, Fingerprint, Target, Radio,
+  Activity, RefreshCw
 } from 'lucide-react';
 import { SecureUser } from '@/hooks/useSettings';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,17 +35,18 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Ultimate 3D Physics with Parallax
+  // High-Precision 3D Physics
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-200, 200], [20, -20]), { stiffness: 150, damping: 30 });
-  const rotateY = useSpring(useTransform(x, [-200, 200], [-20, 20]), { stiffness: 150, damping: 30 });
+  const rotateX = useSpring(useTransform(y, [-300, 300], [15, -15]), { stiffness: 200, damping: 40 });
+  const rotateY = useSpring(useTransform(x, [-300, 300], [-15, 15]), { stiffness: 200, damping: 40 });
 
-  // Parallax offsets for different layers
-  const photoZ = useSpring(useTransform(y, [-200, 200], [40, -40]), { stiffness: 200, damping: 40 });
-  const photoX = useSpring(useTransform(x, [-200, 200], [-10, 10]), { stiffness: 200, damping: 40 });
-  const chipZ = useSpring(useTransform(y, [-200, 200], [80, -80]), { stiffness: 250, damping: 30 });
+  // Depth-Offset Constants
+  const DEPTH_BASE = 0;
+  const DEPTH_AVATAR = 60;
+  const DEPTH_CHIP = 100;
+  const DEPTH_TEXT = 40;
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -74,7 +72,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${user.id}/${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -93,279 +91,223 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
       if (updateError) throw updateError;
 
-      toast({
-        title: "CORE SYNC COMPLETE",
-        description: "Bio-metric data has been re-indexed.",
-      });
+      toast({ title: "CRYPTO-SYNC COMPLETE", description: "Identity image re-encrypted." });
       onRefresh();
     } catch (error: any) {
-      toast({
-        title: "SYNC INTERRUPTED",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "SYNC ERROR", description: error.message, variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center py-10 perspective-2000">
+    <div className="flex flex-col items-center justify-center py-6 w-full max-w-md mx-auto">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        initial={{ opacity: 0, y: 100, rotateY: -30 }}
-        animate={{ opacity: 1, y: 0, rotateY: 0 }}
-        className="relative w-full max-w-[440px] aspect-[1/1.6] rounded-[4rem] overflow-hidden shadow-[0_80px_160px_rgba(0,0,0,1)] border border-white/20 group bg-[#020202]"
+        className="relative w-full aspect-[1/1.58] rounded-[3.5rem] overflow-hidden shadow-[0_60px_120px_-20px_rgba(0,0,0,1)] border border-white/15 bg-[#010101] group selection:bg-emerald-500/30"
       >
-        {/* INSANE HOLOGRAPHIC LAYERS */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-black to-purple-500/20" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 mix-blend-overlay" />
+        {/* PHYSICAL BASE LAYERS */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-950" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-soft-light" />
         
-        {/* Animated Cybergrid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.05)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]" />
-
-        {/* Floating Particles in Card */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-           {[...Array(20)].map((_, i) => (
-             <motion.div 
-               key={i}
-               animate={{ 
-                  y: [0, -100, 0],
-                  x: [0, Math.random() * 50 - 25, 0],
-                  opacity: [0, 0.4, 0]
-               }}
-               transition={{ duration: Math.random() * 10 + 10, repeat: Infinity, ease: "linear" }}
-               className="absolute w-1 h-1 bg-emerald-500 rounded-full"
-               style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-             />
-           ))}
-        </div>
-
-        {/* Dynamic Light Sweep */}
+        {/* DYNAMIC AMBIENCE */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_center,black,transparent_80%)]" />
+        
         <motion.div 
           animate={{ x: [-1000, 1000] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 4 }}
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent skew-x-[45deg] z-10"
+          transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/[0.05] to-transparent skew-x-12 z-10 pointer-events-none"
         />
 
-        <div className="relative h-full flex flex-col p-12 z-20" style={{ transform: "translateZ(80px)" }}>
-          {/* Header Area */}
-          <div className="flex justify-between items-start mb-14" style={{ transform: "translateZ(40px)" }}>
+        <div className="relative h-full flex flex-col z-20 p-10 lg:p-12" style={{ transform: `translateZ(${DEPTH_BASE}px)` }}>
+          
+          {/* HEADER: Perfect Alignment */}
+          <div className="flex items-start justify-between mb-12">
             <div className="flex items-center gap-5">
-              <div className="relative">
-                 <div className="absolute -inset-4 bg-emerald-500/40 blur-3xl rounded-full animate-pulse" />
-                 <div className="p-4 bg-zinc-950 border border-emerald-500/50 rounded-[2rem] relative shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                   <Shield className="w-9 h-9 text-emerald-400" />
-                 </div>
-              </div>
-              <div className="flex flex-col">
-                <h2 className="text-3xl font-black text-white tracking-[-0.08em] italic uppercase leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">MARGDARSHAK</h2>
-                <div className="flex items-center gap-2 mt-2">
-                   <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                      <div className="w-1.5 h-1.5 bg-emerald-500/20 rounded-full" />
-                   </div>
-                   <span className="text-[10px] font-black tracking-[0.4em] text-emerald-500/60 uppercase">System Active</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-end gap-3">
-               <div className="px-4 py-1.5 bg-zinc-950 border border-white/5 rounded-xl flex items-center gap-3 backdrop-blur-xl">
-                  <Radio size={12} className="text-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-black text-white/40 tracking-widest uppercase">CORE-LINK-99</span>
-               </div>
-               <div className="px-5 py-2 bg-gradient-to-r from-emerald-600/20 to-emerald-800/20 border border-emerald-500/30 rounded-xl backdrop-blur-md">
-                  <span className="text-[10px] font-black text-emerald-400 tracking-[0.3em] italic uppercase">{tier}</span>
-               </div>
-            </div>
-          </div>
-
-          {/* Bio-Metric Display (PARALLAX LAYER) */}
-          <div className="flex flex-col items-center mb-14 relative" style={{ transform: "translateZ(100px)" }}>
-            <motion.div 
-               style={{ x: photoX, y: photoZ }}
-               className="relative group/avatar"
-            >
-              <div className="absolute -inset-16 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-1000" />
-              
-              {/* Spinning Orbital Rings */}
-              <div className="absolute inset-[-20px] border border-emerald-500/10 rounded-full animate-spin-slow pointer-events-none" />
-              <div className="absolute inset-[-30px] border border-emerald-500/5 rounded-full animate-reverse-spin pointer-events-none" />
-
-              <div className="w-60 h-60 rounded-[4rem] border border-white/20 overflow-hidden relative z-10 bg-black shadow-[0_50px_100px_rgba(0,0,0,0.9)] transition-all duration-1000 group-hover/avatar:scale-[1.05] group-hover/avatar:shadow-emerald-500/20">
-                <img 
-                  src={user.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover group-hover/avatar:scale-110 transition-all duration-1000 grayscale-[0.2] group-hover/avatar:grayscale-0"
-                />
-                
-                {/* HUD Camera Aperture Overlay */}
-                <div className="absolute inset-0 pointer-events-none opacity-20 group-hover/avatar:opacity-40 transition-opacity">
-                   <div className="absolute top-10 left-10 w-8 h-8 border-t-2 border-l-2 border-emerald-500" />
-                   <div className="absolute top-10 right-10 w-8 h-8 border-t-2 border-r-2 border-emerald-500" />
-                   <div className="absolute bottom-10 left-10 w-8 h-8 border-b-2 border-l-2 border-emerald-500" />
-                   <div className="absolute bottom-10 right-10 w-8 h-8 border-b-2 border-r-2 border-emerald-500" />
-                   <Target className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 text-emerald-500/30 animate-pulse" />
-                </div>
-
-                {/* Interaction Overlay */}
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-500 cursor-pointer z-20 backdrop-blur-sm"
-                >
-                  <Camera className="w-14 h-14 text-white mb-4 animate-bounce" />
-                  <span className="text-[12px] font-black text-white uppercase tracking-[0.4em] px-10 text-center">Update Identity Seed</span>
-                </button>
-                
-                {isUploading && (
-                  <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-30">
-                    <RefreshCw className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
-                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Re-Encoding...</span>
+               <div className="relative">
+                  <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl rounded-full animate-pulse" />
+                  <div className="p-3.5 bg-zinc-950 border border-emerald-500/40 rounded-2xl relative shadow-2xl">
+                     <Shield className="w-8 h-8 text-emerald-400" />
                   </div>
-                )}
-              </div>
-              
-              {/* ADVANCED QUANTUM CHIP (PARALLAX LAYER) */}
-              <motion.div 
-                style={{ translateZ: chipZ }}
-                className="absolute -bottom-8 -right-8 p-5 bg-zinc-950 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,1)] border border-emerald-500/40 z-20 group-hover/avatar:rotate-12 transition-transform duration-700"
-              >
-                 <div className="relative">
-                    <Cpu className="w-10 h-10 text-emerald-400" />
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-xl animate-pulse" />
-                 </div>
-              </motion.div>
-            </motion.div>
-            <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
+               </div>
+               <div className="flex flex-col gap-1">
+                  <h2 className="text-2xl font-black text-white tracking-[-0.05em] uppercase italic leading-none">MARGDARSHAK</h2>
+                  <div className="flex items-center gap-2">
+                     <div className="flex gap-1">
+                        <div className="w-1 h-1 bg-emerald-500 rounded-full animate-ping" />
+                        <div className="w-1 h-1 bg-emerald-500/20 rounded-full" />
+                     </div>
+                     <span className="text-[9px] font-black tracking-[0.4em] text-emerald-500/50 uppercase">Identity Verified</span>
+                  </div>
+               </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+               <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                  <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase italic">{tier}</span>
+               </div>
+               <div className="flex items-center gap-2 text-[8px] font-mono text-white/20 uppercase tracking-tighter">
+                  <Radio size={10} className="animate-pulse" />
+                  NODE-ALPHA-7
+               </div>
+            </div>
           </div>
 
-          {/* Data Fields with Neomorphic Glass */}
-          <form onSubmit={onSubmit} className="flex-1 flex flex-col gap-8" style={{ transform: "translateZ(60px)" }}>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center px-2">
-                 <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] flex items-center gap-3">
-                    <User size={14} className="text-emerald-500/30" /> Identification
-                 </label>
-                 <Activity size={14} className="text-emerald-500/10" />
-              </div>
-              <div className="relative group/input">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-purple-500/30 blur-2xl opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-700" />
+          {/* BIO-METRIC CENTERPIECE: Layered Parallax */}
+          <div className="flex flex-col items-center mb-12" style={{ transform: `translateZ(${DEPTH_AVATAR}px)` }}>
+             <div className="relative group/avatar">
+                {/* Orbital Decoration */}
+                <div className="absolute inset-[-15px] border border-white/5 rounded-full animate-spin-slow pointer-events-none" />
+                <div className="absolute inset-[-25px] border border-emerald-500/10 rounded-full animate-reverse-spin pointer-events-none" />
+                
+                <div className="w-52 h-52 rounded-[3.5rem] border border-white/10 overflow-hidden relative z-10 bg-black shadow-2xl transition-all duration-700 group-hover/avatar:scale-[1.02] group-hover/avatar:border-emerald-500/40">
+                   <img 
+                      src={user.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-1000 grayscale-[0.1] group-hover/avatar:grayscale-0"
+                   />
+                   
+                   {/* HUD Overlays */}
+                   <div className="absolute inset-0 opacity-20 pointer-events-none">
+                      <Target className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 text-emerald-500/40 animate-pulse-slow" />
+                      <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/20 animate-scanline" />
+                   </div>
+
+                   {/* Upload Interaction */}
+                   <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-500 z-20 backdrop-blur-sm cursor-pointer"
+                   >
+                      <Camera className="w-12 h-12 text-white mb-3" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] px-8 text-center">Update Bio-Link</span>
+                   </button>
+                   
+                   {isUploading && (
+                      <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-30">
+                         <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mb-3" />
+                         <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Encrypting...</span>
+                      </div>
+                   )}
+                </div>
+
+                {/* ADVANCED QUANTUM CHIP: Parallax Offset */}
+                <div 
+                   className="absolute -bottom-6 -right-6 p-4 bg-zinc-950 rounded-[2rem] border border-emerald-500/30 shadow-2xl z-20 group-hover/avatar:rotate-12 transition-all duration-500"
+                   style={{ transform: `translateZ(${DEPTH_CHIP}px)` }}
+                >
+                   <Cpu className="w-8 h-8 text-emerald-400 animate-pulse-slow" />
+                </div>
+             </div>
+             <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
+          </div>
+
+          {/* DATA FIELDS: Precision Sizing */}
+          <form onSubmit={onSubmit} className="flex-1 flex flex-col gap-7" style={{ transform: `translateZ(${DEPTH_TEXT}px)` }}>
+             <div className="space-y-3">
+                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
+                   <User size={12} className="text-emerald-500/20" /> Identifier
+                </label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-8 py-5 bg-zinc-950 border border-white/5 rounded-[2.5rem] text-2xl font-black text-white placeholder-white/5 focus:outline-none focus:border-emerald-500/30 focus:bg-black transition-all tracking-tight uppercase shadow-inner"
-                  placeholder="ID ENTITY NAME"
+                  className="w-full px-7 py-4.5 bg-white/[0.02] border border-white/5 rounded-3xl text-xl font-black text-white placeholder-white/5 focus:outline-none focus:border-emerald-500/30 transition-all tracking-tight uppercase"
+                  placeholder="IDENTITY_NAME"
                 />
-              </div>
-            </div>
+             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
-                   <Hash size={14} className="text-emerald-500/30" /> Registry
-                </label>
-                <input
-                  type="text"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className="w-full px-6 py-4.5 bg-zinc-950 border border-white/5 rounded-[2rem] text-sm font-mono text-white/80 placeholder-white/10 focus:outline-none focus:border-emerald-500/30 transition-all uppercase"
-                  placeholder="ID-CORE"
-                />
-              </div>
-              <div className="space-y-4">
-                <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
-                   <Globe size={14} className="text-emerald-500/30" /> Established
-                </label>
-                <div className="px-6 py-4.5 bg-black border border-white/5 rounded-[2rem] text-[10px] font-mono text-emerald-400/40 uppercase tracking-[0.4em] flex items-center justify-center font-black">
-                  {joinDate}
+             <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-3">
+                   <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
+                      <Hash size={12} className="text-emerald-500/20" /> Registry
+                   </label>
+                   <input
+                     type="text"
+                     value={studentId}
+                     onChange={(e) => setStudentId(e.target.value)}
+                     className="w-full px-6 py-4 bg-white/[0.01] border border-white/5 rounded-2xl text-xs font-mono text-white/70 placeholder-white/10 focus:outline-none focus:border-emerald-500/30 transition-all uppercase"
+                     placeholder="ID-CORE"
+                   />
                 </div>
-              </div>
-            </div>
+                <div className="space-y-3">
+                   <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
+                      <Globe size={12} className="text-emerald-500/20" /> Matrix
+                   </label>
+                   <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-[9px] font-black text-emerald-500/30 uppercase tracking-[0.3em] flex items-center justify-center">
+                     {joinDate}
+                   </div>
+                </div>
+             </div>
 
-            {/* Quantum Signature Area */}
-            <div className="mt-4 p-8 border border-white/5 rounded-[3rem] bg-zinc-950 relative overflow-hidden group/sig backdrop-blur-3xl">
-               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-               <div className="flex justify-between items-center mb-6">
-                  <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.6em]">Encrypted Signature</span>
-                  <div className="flex gap-1">
-                     <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                     <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse delay-75" />
-                     <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse delay-150" />
-                  </div>
-               </div>
-               <div className="h-20 flex items-center justify-center italic font-signature text-emerald-400/40 text-5xl select-none group-hover/sig:text-emerald-400 group-hover/sig:scale-110 transition-all duration-1000 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-                  {fullName || 'Nexus Scholar'}
-               </div>
-               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-white/5" />
-            </div>
+             <div className="flex-1" />
 
-            {/* Bottom Sync Control */}
-            <div className="flex items-center justify-between mt-auto pt-10 border-t border-white/5" style={{ transform: "translateZ(80px)" }}>
-               <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-5">
-                     <QrCode className="w-16 h-16 text-white/10 hover:text-emerald-500 hover:scale-110 transition-all duration-500" />
-                     <div className="flex flex-col">
-                        <div className="h-8 w-44 bg-[url('https://www.transparenttextures.com/patterns/barcode-1.png')] opacity-10" />
-                        <span className="text-[9px] font-mono text-white/10 tracking-[0.6em] uppercase mt-2">UUID_NODESTACK_{user.id.substring(0, 12).toUpperCase()}</span>
-                     </div>
-                  </div>
-               </div>
-               
-               <button
-                 type="submit"
-                 disabled={isSubmitting}
-                 className={`group relative flex items-center justify-center w-24 h-24 rounded-[2.5rem] transition-all active:scale-90 ${
-                   isSubmitting 
-                     ? 'bg-zinc-900' 
-                     : 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_60px_rgba(16,185,129,0.6)] hover:shadow-emerald-400/90'
-                 }`}
-               >
-                 <AnimatePresence mode="wait">
-                    {isSubmitting ? (
-                       <motion.div
-                         key="loading"
-                         initial={{ rotate: 0 }}
-                         animate={{ rotate: 360 }}
-                         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                       >
-                          <Zap className="w-10 h-10 text-emerald-200" />
-                       </motion.div>
-                    ) : (
-                       <motion.div
-                         key="idle"
-                         initial={{ scale: 0.8, opacity: 0 }}
-                         animate={{ scale: 1, opacity: 1 }}
-                         exit={{ scale: 0.8, opacity: 0 }}
-                         className="flex flex-col items-center gap-1"
-                       >
-                          <Save className="w-10 h-10 text-black" />
-                          <span className="text-[10px] font-black text-black uppercase tracking-tighter">Sync</span>
-                       </motion.div>
-                    )}
-                 </AnimatePresence>
-               </button>
-            </div>
+             {/* SIGNATURE: High Contrast */}
+             <div className="p-6 border border-white/5 rounded-[2.5rem] bg-white/[0.01] relative group/sig overflow-hidden">
+                <div className="flex justify-between items-center mb-3">
+                   <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.5em]">Auth Signature</span>
+                   <Fingerprint size={12} className="text-white/5 group-hover/sig:text-emerald-500/20 transition-colors" />
+                </div>
+                <div className="h-16 flex items-center justify-center italic font-signature text-emerald-500/30 text-4xl group-hover/sig:text-emerald-400 group-hover/sig:scale-110 transition-all duration-700 select-none">
+                   {fullName || 'Nexus_User'}
+                </div>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] h-px bg-white/5" />
+             </div>
+
+             {/* BOTTOM BAR: Alignment Perfection */}
+             <div className="flex items-center justify-between pt-6 mt-auto border-t border-white/5">
+                <div className="flex items-center gap-4">
+                   <QrCode className="w-14 h-14 text-white/5 hover:text-white/20 transition-colors" />
+                   <div className="flex flex-col">
+                      <div className="h-6 w-32 bg-[url('https://www.transparenttextures.com/patterns/barcode-1.png')] opacity-10" />
+                      <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest mt-1">UUID_{user.id.substring(0, 12).toUpperCase()}</span>
+                   </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`group relative flex items-center justify-center w-20 h-20 rounded-[2.25rem] transition-all active:scale-95 ${
+                    isSubmitting ? 'bg-zinc-900' : 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_20px_40px_-10px_rgba(16,185,129,0.4)]'
+                  }`}
+                >
+                  <AnimatePresence mode="wait">
+                     {isSubmitting ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ rotate: 0 }}
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        >
+                           <Zap className="w-8 h-8 text-emerald-200" />
+                        </motion.div>
+                     ) : (
+                        <motion.div
+                          key="idle"
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="flex flex-col items-center gap-1"
+                        >
+                           <Save className="w-8 h-8 text-black" />
+                           <span className="text-[9px] font-black text-black uppercase">SYNC</span>
+                        </motion.div>
+                     )}
+                  </AnimatePresence>
+                </button>
+             </div>
           </form>
         </div>
 
-        {/* TRIPLE REINFORCED EDGES */}
-        <div className="absolute inset-0 pointer-events-none border-[3px] border-white/20 rounded-[4rem] z-50" />
-        <div className="absolute inset-[10px] pointer-events-none border border-white/5 rounded-[3.5rem] z-40 shadow-[inset_0_0_60px_rgba(255,255,255,0.05)]" />
+        {/* REINFORCED BORDER GLOW */}
+        <div className="absolute inset-0 pointer-events-none border-[2px] border-white/10 rounded-[3.5rem] z-50 group-hover:border-emerald-500/20 transition-colors duration-700" />
       </motion.div>
       
-      {/* Dynamic 3D Perspective Ground Shadow */}
+      {/* PERFECTED GROUND SHADOW */}
       <motion.div 
-         style={{ 
-            scaleX: useTransform(rotateY, [-20, 20], [1.3, 0.7]),
-            rotateX: "80deg",
-            translateZ: "-100px"
-         }}
-         className="w-[500px] h-12 bg-black/90 blur-[50px] rounded-[100%] mt-12 opacity-80" 
+         animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.7, 0.5] }}
+         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+         className="w-[90%] h-8 bg-black/80 blur-[40px] rounded-[100%] mt-12" 
       />
     </div>
   );
