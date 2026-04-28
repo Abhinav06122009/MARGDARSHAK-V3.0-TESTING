@@ -100,23 +100,10 @@ export const initSecurityHardening = () => {
       @media print {
         body { display: none !important; }
       }
-      .security-blur {
-        filter: blur(25px) !important;
-        pointer-events: none !important;
-        user-select: none !important;
-      }
     `;
     document.head.appendChild(style);
 
-    // 2. Blur on Focus Loss (When Snipping Tool opens)
-    window.addEventListener('blur', () => {
-      document.body.classList.add('security-blur');
-    });
-    window.addEventListener('focus', () => {
-      document.body.classList.remove('security-blur');
-    });
-
-    // 3. Key Detection (PrintScreen / Win+Shift+S)
+    // 2. Key Detection (PrintScreen / Win+Shift+S)
     window.addEventListener('keyup', (e) => {
       if (e.key === 'PrintScreen') {
         // Just clear clipboard and notify, NO strike/ban
