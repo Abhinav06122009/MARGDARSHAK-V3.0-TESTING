@@ -185,6 +185,29 @@ export const useAdmin = () => {
 
   useEffect(() => {
     fetchAdminData();
+
+    // --- REALTIME SUBSCRIPTIONS ---
+    // Subscribe to new contact messages and support tickets
+    const contactChannel = supabase
+      .channel('admin-contacts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, () => {
+        console.log('🔔 [REALTIME] New contact message received');
+        fetchAdminData();
+      })
+      .subscribe();
+
+    const supportChannel = supabase
+      .channel('admin-support')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => {
+        console.log('🔔 [REALTIME] New support ticket received');
+        fetchAdminData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(contactChannel);
+      supabase.removeChannel(supportChannel);
+    };
   }, [fetchAdminData]);
 
   return {
