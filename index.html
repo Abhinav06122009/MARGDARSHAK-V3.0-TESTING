@@ -5,29 +5,71 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://margdarshan.tech/" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <title>MARGDARSHAK: The Ultimate Student Learning Platform</title>
-    <meta name="description" content="MARGDARSHAK is the ultimate student learning platform. Manage tasks, track grades, create timetables, and boost productivity with our free tools." />
-    <meta name="keywords" content="student planner, grade tracker, study timer, pomodoro timer, scientific calculator, online timetable maker, student dashboard, academic success" />
+    <title>MARGDARSHAK | The Ultimate Student Learning Platform & Productivity Suite</title>
+    <meta name="description" content="Boost your academic productivity with MARGDARSHAK. The all-in-one student platform for task management, grade tracking, automated timetables, and AI-powered study tools." />
+    <meta name="keywords" content="student learning platform, academic productivity, grade tracker, task manager, study timer, pomodoro, scientific calculator, online timetable maker, AI tutor, MARGDARSHAK" />
     <meta name="author" content="ABHINAV JHA" />
     
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://margdarshan.tech/" />
-    <meta property="og:title" content="MARGDARSHAK: The Ultimate Student Learning Platform" />
-    <meta property="og:description" content="Boost academic productivity with MARGDARSHAK. Free tools for students including grade tracking, task management, and study timers." />
+    <meta property="og:title" content="MARGDARSHAK | The Ultimate Student Learning Platform" />
+    <meta property="og:description" content="Manage your academic life with MARGDARSHAK. Tools for grades, tasks, focus, and AI-driven success." />
     <meta property="og:image" content="https://margdarshan.tech/logo.png" />
 
+    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://margdarshan.tech/" />
-    <meta property="twitter:title" content="MARGDARSHAK: Student Productivity Tools" />
-    <meta property="twitter:description" content="Manage your academic life with MARGDARSHAK. Tools for grades, tasks, and focus." />
+    <meta property="twitter:title" content="MARGDARSHAK | Student Productivity Suite" />
+    <meta property="twitter:description" content="Everything a student needs in one place. Tasks, grades, and focus tools for academic excellence." />
     <meta property="twitter:image" content="https://margdarshan.tech/logo.png" />
-    
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MARGDARSHAK",
+      "operatingSystem": "Web",
+      "applicationCategory": "EducationalApplication",
+      "description": "An all-in-one academic productivity platform for students to track grades, manage tasks, and optimize study time.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Abhinav Jha"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MARGDARSHAK",
+      "url": "https://margdarshan.tech/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://margdarshan.tech/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+  </head>
+  <body>
     <div id="app"></div>
-    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

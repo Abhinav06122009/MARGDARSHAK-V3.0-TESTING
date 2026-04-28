@@ -64,9 +64,9 @@ export const LandingHeader: React.FC = () => {
           </div>
           
           <div className="flex flex-col">
-            <h1 className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
+            <span className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
               MARGDARSHAK
-            </h1>
+            </span>
             <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered</span>
           </div>
         </div>

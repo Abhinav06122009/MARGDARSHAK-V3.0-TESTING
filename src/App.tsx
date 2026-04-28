@@ -120,43 +120,43 @@ const App = () => {
                         <AnimatePresence mode="wait">
                           <Routes>
                             {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
-                            <Route path="/" element={<><SEO title="MARGDARSHAK | AI Student Platform" description="The ultimate AI-powered student management platform with smart tutoring, quiz generator, study planner, and more." /><LandingPage /></>} />
+                            <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform. Use our smart tutoring, quiz generator, study planner, and grade tracker for academic excellence." /><LandingPage /></>} />
                             <Route path="/auth" element={<Index />} />
 
                             {/* Free Tools (Public Access for AdSense) */}
-                            <Route path="/calculator" element={<Calculator onBack={() => window.history.back()} />} />
-                            <Route path="/timer" element={<StudyTimer />} />
-                            <Route path="/blog/*" element={<BlogPage />} />
+                            <Route path="/calculator" element={<><SEO title="Scientific Calculator Online | MARGDARSHAK" description="Free online scientific calculator for students. Solve complex math and physics problems easily." /><Calculator onBack={() => window.history.back()} /></>} />
+                            <Route path="/timer" element={<><SEO title="Pomodoro Study Timer | MARGDARSHAK" description="Boost your focus with our customizable Pomodoro study timer. Track your study sessions and stay productive." /><StudyTimer /></>} />
+                            <Route path="/blog/*" element={<><SEO title="Student Success Blog | MARGDARSHAK" description="Expert advice on study techniques, exam preparation, and academic productivity." /><BlogPage /></>} />
 
                             {/* Legal & Info */}
-                            <Route path="/about" element={<AboutUsPage />} />
-                            <Route path="/contact" element={<ContactUsPage />} />
-                            <Route path="/help" element={<HelpPage />} />
-                            <Route path="/privacy" element={<PrivacyPolicy />} />
-                            <Route path="/terms" element={<TermsAndConditions />} />
-                            <Route path="/cookies" element={<CookiePolicy />} />
-                            <Route path="/gdpr" element={<GDPRCompliance />} />
+                            <Route path="/about" element={<><SEO title="About Us | The MARGDARSHAK Mission" description="Learn about the vision behind MARGDARSHAK and how we are empowering students worldwide with AI." /><AboutUsPage /></>} />
+                            <Route path="/contact" element={<><SEO title="Contact Support | MARGDARSHAK" description="Need help? Contact the MARGDARSHAK support team for any queries or feedback." /><ContactUsPage /></>} />
+                            <Route path="/help" element={<><SEO title="Help Center | MARGDARSHAK Knowledge Base" description="Find answers to common questions and learn how to use MARGDARSHAK tools effectively." /><HelpPage /></>} />
+                            <Route path="/privacy" element={<><SEO title="Privacy Policy | MARGDARSHAK" description="How we protect your data and maintain your privacy at MARGDARSHAK." /><PrivacyPolicy /></>} />
+                            <Route path="/terms" element={<><SEO title="Terms & Conditions | MARGDARSHAK" description="The legal agreement for using the MARGDARSHAK platform." /><TermsAndConditions /></>} />
+                            <Route path="/cookies" element={<><SEO title="Cookie Policy | MARGDARSHAK" description="Information about how we use cookies to improve your experience." /><CookiePolicy /></>} />
+                            <Route path="/gdpr" element={<><SEO title="GDPR Compliance | MARGDARSHAK" description="Our commitment to GDPR and data protection standards." /><GDPRCompliance /></>} />
                             <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                             {/* --- PROTECTED ROUTES (Dashboard) --- */}
                             <Route path="/dashboard" element={<ProtectedRoute><SEO title="Dashboard | MARGDARSHAK" description="Your AI-powered command center." /><Dashboard onNavigate={() => { }} /></ProtectedRoute>} />
                             <Route path="/achievements" element={<ProtectedRoute><SEO title="Achievements | MARGDARSHAK" description="Your progress and badges." /><AchievementsPage /></ProtectedRoute>} />
                             <Route path="/ai-assistant" element={<ProtectedRoute><SEO title="SAARTHI | MARGDARSHAK" description="24/7 AI-powered academic assistance." /><AIPage /></ProtectedRoute>} />
-                            <Route path="/upgrade" element={<ProtectedRoute><Upgrade /></ProtectedRoute>} />
+                            <Route path="/upgrade" element={<ProtectedRoute><SEO title="Upgrade to Premium | MARGDARSHAK" description="Unlock advanced AI features and study tools with MARGDARSHAK Premium." /><Upgrade /></ProtectedRoute>} />
 
                             {/* Core Features */}
-                            <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
-                            <Route path="/grades" element={<ProtectedRoute><Grades /></ProtectedRoute>} />
-                            <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-                            <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
-                            <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
-                            <Route path="/timetable" element={<ProtectedRoute><Timetable /></ProtectedRoute>} />
-                            <Route path="/courses" element={<ProtectedRoute><CourseManagement /></ProtectedRoute>} />
-                            <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
+                            <Route path="/tasks" element={<ProtectedRoute><SEO title="Task Manager | MARGDARSHAK" description="Organize your academic tasks and deadlines efficiently." /><Tasks /></ProtectedRoute>} />
+                            <Route path="/grades" element={<ProtectedRoute><SEO title="Grade Tracker | MARGDARSHAK" description="Track your academic performance and calculate your GPA automatically." /><Grades /></ProtectedRoute>} />
+                            <Route path="/attendance" element={<ProtectedRoute><SEO title="Attendance Tracker | MARGDARSHAK" description="Stay on top of your class attendance and requirements." /><Attendance /></ProtectedRoute>} />
+                            <Route path="/notes" element={<ProtectedRoute><SEO title="Digital Notes | MARGDARSHAK" description="Create and organize your study notes in one secure place." /><Notes /></ProtectedRoute>} />
+                            <Route path="/calendar" element={<ProtectedRoute><SEO title="Academic Calendar | MARGDARSHAK" description="Sync your schedule and never miss an important event." /><Calendar /></ProtectedRoute>} />
+                            <Route path="/timetable" element={<ProtectedRoute><SEO title="Timetable Maker | MARGDARSHAK" description="Create a perfect study schedule with our automated timetable generator." /><Timetable /></ProtectedRoute>} />
+                            <Route path="/courses" element={<ProtectedRoute><SEO title="Course Management | MARGDARSHAK" description="Manage your subjects and courses with ease." /><CourseManagement /></ProtectedRoute>} />
+                            <Route path="/syllabus" element={<ProtectedRoute><SEO title="Syllabus Tracker | MARGDARSHAK" description="Track your progress through your course syllabus." /><Syllabus /></ProtectedRoute>} />
 
-                            <Route path="/progress" element={<ProtectedRoute><ProgressTracker /></ProtectedRoute>} />
-                            <Route path="/wellness" element={<PremiumRoute><Wellness /></PremiumRoute>} />
-                            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                            <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker /></ProtectedRoute>} />
+                            <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness /></PremiumRoute>} />
+                            <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings /></ProtectedRoute>} />
                             <Route path="/admin/login" element={<AdminAuthPage />} />
                             <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
                             <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />

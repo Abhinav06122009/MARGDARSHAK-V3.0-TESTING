@@ -276,7 +276,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900 mb-2">
-              Manage and track your studies
+              MARGDARSHAK | Student Study Management
             </h1>
             <h2 className="text-4xl font-bold text-slate-900">Study Dashboard</h2>
           </div>
