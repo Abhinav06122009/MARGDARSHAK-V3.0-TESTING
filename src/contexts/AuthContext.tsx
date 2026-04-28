@@ -3,6 +3,9 @@ import { useSession, useUser } from '@clerk/react';
 import { supabase, setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface AuthContextValue {
+  session: any | null;
+  loading: boolean;
   user: any | null;
   isBlocked: boolean;
   blockedReason: string | null;
