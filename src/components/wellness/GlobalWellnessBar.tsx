@@ -2,7 +2,7 @@
  * GlobalWellnessBar — persistent floating mini-player + AI burnout detector.
  * Supports built-in stations AND user-imported local MP3 files.
  */
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Music, CloudRain, Coffee, Headphones, Play, Pause,
@@ -14,6 +14,7 @@ import aiService from '@/lib/aiService';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Station {
@@ -112,6 +113,7 @@ const BurnoutModal: React.FC<{ alert: BurnoutAlert; onDismiss: () => void }> = (
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export const GlobalWellnessBar: React.FC = () => {
+  const { user: authUser, session } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeId, setActiveId] = useState('lofi');
@@ -125,17 +127,14 @@ export const GlobalWellnessBar: React.FC = () => {
   // Burnout
   const [burnoutAlert, setBurnoutAlert] = useState<BurnoutAlert | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    dashboardService.getCurrentUser().then(user => {
-      const tier = user?.profile?.subscription_tier;
-      if (tier === 'premium' || tier === 'premium_elite') setIsPremium(true);
-    });
-  }, []);
+  const isLoggedIn = !!authUser;
+  const isPremium = useMemo(() => {
+    const tier = authUser?.profile?.subscription_tier || authUser?.user_metadata?.subscription_tier;
+    return tier === 'premium' || tier === 'premium_elite';
+  }, [authUser]);
 
   // All stations = built-in + custom
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
@@ -219,16 +218,14 @@ export const GlobalWellnessBar: React.FC = () => {
 
   // ── Burnout check ────────────────────────────────────────────────────────
   const checkBurnout = useCallback(async () => {
-    const user = await dashboardService.getCurrentUser();
-    if (!user) return;
-    setIsLoggedIn(true);
+    if (!authUser) return;
 
-    const tier = user.profile?.subscription_tier;
+    const tier = authUser.profile?.subscription_tier;
     if (tier !== 'premium' && tier !== 'premium_elite') {
       return;
     }
 
-    const data = await dashboardService.fetchAllUserData(user.id);
+    const data = await dashboardService.fetchAllUserData(authUser.id);
     const calculatedStats = dashboardService.calculateSecureStats(data);
     
     if (calculatedStats.totalTasks === 0) return;
@@ -263,9 +260,15 @@ export const GlobalWellnessBar: React.FC = () => {
         setTimeout(() => setShowModal(true), 3000);
       }
     }
-  }, []);
+  }, [authUser]);
 
-  useEffect(() => { checkBurnout(); }, [checkBurnout]);
+  useEffect(() => { 
+    if (isLoggedIn) checkBurnout(); 
+    else {
+      setBurnoutAlert(null);
+      setShowModal(false);
+    }
+  }, [checkBurnout, isLoggedIn]);
 
   if (!isLoggedIn) return null;
 

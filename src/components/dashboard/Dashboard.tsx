@@ -28,6 +28,7 @@ import QuickActions from './QuickActions';
 import SecurityPanel from './SecurityPanel';
 import AIBriefingWidget from './AIBriefingWidget';
 import UpgradeCard from '@/components/dashboard/UpgradeCard';
+import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 import { VirtualPet } from './VirtualPet';
 import { LeaderboardWidget } from './LeaderboardWidget';
 import { BurnoutPredictorWidget } from './BurnoutPredictorWidget';
@@ -464,6 +465,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </main>
 
           <aside className="xl:col-span-4 flex flex-col gap-6 h-full xl:sticky xl:top-6">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="w-full">
+               <AmbientSoundPlayer />
+            </motion.div>
+
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="w-full">
                <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
             </motion.div>
