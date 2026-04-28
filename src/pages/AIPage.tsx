@@ -48,16 +48,23 @@ const SmartTutorPage = () => {
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, loading]);
 
   const checkSubscription = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_tier')
-        .eq('id', user.id)
-        .single();
-      if (profile?.subscription_tier) {
-        setSubscriptionTier(profile.subscription_tier);
+    try {
+      const { supabaseHelpers } = await import('@/integrations/supabase/client');
+      const user = await supabaseHelpers.getCurrentUser();
+      
+      if (user?.profile?.subscription_tier) {
+        console.log('[AI Page] Subscription check from Clerk:', user.profile.subscription_tier);
+        setSubscriptionTier(user.profile.subscription_tier);
+      } else {
+        // Fallback to direct supabase auth user metadata if helper is not yet ready
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const tier = authUser?.user_metadata?.subscription?.tier || 
+                     authUser?.user_metadata?.subscription_tier || 
+                     'free';
+        setSubscriptionTier(tier);
       }
+    } catch (err) {
+      console.error('Error checking subscription:', err);
     }
   };
 

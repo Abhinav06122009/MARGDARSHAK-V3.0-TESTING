@@ -108,16 +108,30 @@ export const supabaseHelpers = {
                        (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || '');
 
       const metadata = clerkUser.publicMetadata || {};
+      const subscription = (metadata.subscription as any) || {};
+      const role = metadata.role || (metadata as any).user_type || 'student';
+      const tier = subscription.tier || (metadata as any).subscription_tier || 'free';
 
       return {
         id: clerkUser.id,
         email: email,
-        role: metadata.role || 'student',
-        subscription: metadata.subscription || { tier: 'free', status: 'inactive' },
+        role: role,
+        subscription: {
+          tier: tier,
+          status: subscription.status || (metadata as any).subscription_status || 'inactive'
+        },
         user_metadata: {
           full_name: fullName,
           avatar_url: clerkUser.imageUrl,
           ...metadata
+        },
+        profile: {
+          id: clerkUser.id,
+          full_name: fullName,
+          user_type: role,
+          role: role,
+          subscription_tier: tier,
+          subscription_status: subscription.status || 'inactive'
         }
       } as any;
     } catch (error) {

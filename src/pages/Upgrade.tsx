@@ -26,19 +26,27 @@ const Upgrade = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('subscription_tier')
-            .eq('id', user.id)
-            .maybeSingle();
-          setCurrentTier((profile as any)?.subscription_tier || 'free');
+        const { supabaseHelpers } = await import('@/integrations/supabase/client');
+        const user = await supabaseHelpers.getCurrentUser();
+        
+        if (user?.profile?.subscription_tier) {
+          setCurrentTier(user.profile.subscription_tier);
         } else {
-          setCurrentTier('free');
+          // Fallback to Supabase direct check
+          const { data: { user: authUser } } = await supabase.auth.getUser();
+          if (authUser) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('subscription_tier')
+              .eq('id', authUser.id)
+              .maybeSingle();
+            setCurrentTier((profile as any)?.subscription_tier || 'free');
+          } else {
+            setCurrentTier('free');
+          }
         }
       } catch (err) {
-        console.error("Error fetching user tier from Supabase:", err);
+        console.error("Error fetching user tier:", err);
         setCurrentTier('free');
       }
     };

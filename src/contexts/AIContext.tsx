@@ -40,6 +40,18 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const fetchTier = async () => {
       if (clerkUser) {
+        // PRIORITY 1: Check Clerk Public Metadata directly (Instant)
+        const metadata = clerkUser.publicMetadata || {};
+        const subscription = (metadata.subscription as any) || {};
+        const tier = subscription.tier || (metadata as any).subscription_tier;
+
+        if (tier) {
+          console.log('[AI Context] Tier from Clerk:', tier);
+          setSubscriptionTier(tier);
+          return;
+        }
+
+        // PRIORITY 2: Check Supabase Profile (Fallback)
         const { data } = await supabase
           .from('profiles')
           .select('subscription_tier')
