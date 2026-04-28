@@ -44,20 +44,22 @@ export const initSecurityHardening = () => {
       const persistentId = localStorage.getItem('mg_sid') || 'trace-' + Math.random().toString(36).slice(2);
       if (!localStorage.getItem('mg_sid')) localStorage.setItem('mg_sid', persistentId);
 
-      // Identification
+      // 1. Identification & Unified Strike Logic
       let userId: string | null = null;
       const user = await supabaseHelpers.getCurrentUser();
       if (user) userId = user.id;
       if (!userId && (window as any).Clerk?.user) userId = (window as any).Clerk.user.id;
 
-      // Heavy Strike Check
-      const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
+      // Only count threats from the last 24 hours to prevent "Old Strike" bans
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
       const { data: dbThreats } = await supabase
         .from('security_threats')
         .select('id')
         .or(`ip_address.eq.${currentIP},metadata->>persistent_id.eq.${persistentId}${userId ? `,user_id.eq.${userId}` : ''}`)
-        .eq('event_type', type);
+        .gt('created_at', oneDayAgo); // Unified across ALL event types
 
+      const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
       const dbStrikeCount = dbThreats?.length || 0;
       const strikes = Math.max(localStrikes, dbStrikeCount) + 1;
       
