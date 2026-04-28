@@ -70,6 +70,7 @@ const isOriginAllowed = (origin: string | null) => {
     if (u.hostname.endsWith(".replit.dev")) return true;
     if (u.hostname.endsWith(".replit.app")) return true;
     if (u.hostname.endsWith(".netlify.app")) return true;
+    if (u.hostname === "margdarshan.tech" || u.hostname.endsWith(".margdarshan.tech")) return true;
   } catch {
     return false;
   }
@@ -222,6 +223,11 @@ const aiPlugin = (): Plugin => ({
         }
       } catch (e) {
         console.error("[ai] Tier check failed:", e);
+      }
+
+      // MASTER OVERRIDE: If it's Abhinav Jha, force elite tier in backend
+      if (auth.user.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+        userTier = 'premium_elite';
       }
 
       const userApiKey = (req.headers["x-user-api-key"] as string) || undefined;

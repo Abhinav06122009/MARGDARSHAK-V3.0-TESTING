@@ -76,14 +76,19 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     setProfile(profileData || null);
     
     // Check both the RPC role and the Profile role
-    // Support Clerk-based roles in metadata as a fallback
-    const clerkRole = (clerkUser?.publicMetadata?.role as string) || '';
+    // Support Clerk-based roles in metadata as a fallback (public AND unsafe)
+    const metadata = clerkUser?.publicMetadata || {};
+    const unsafeMetadata = clerkUser?.unsafeMetadata || {};
+    const clerkRole = (metadata.role as string) || (unsafeMetadata.role as string) || (metadata as any).user_type || (unsafeMetadata as any).user_type || '';
     
     const isRpcAdmin = role ? ADMIN_ROLES.has(role.toLowerCase()) : false;
     const isProfileAdmin = profileData?.user_type ? ADMIN_ROLES.has(profileData.user_type.toLowerCase()) : false;
     const isClerkAdmin = clerkRole ? ADMIN_ROLES.has(clerkRole.toLowerCase()) : false;
     
-    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin);
+    // MASTER OVERRIDE for Abhinav Jha
+    const isMaster = clerkUser?.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L';
+    
+    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster);
     setLoading(false);
   };
 

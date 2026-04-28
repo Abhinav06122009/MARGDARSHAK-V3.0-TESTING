@@ -40,13 +40,27 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const fetchTier = async () => {
       if (clerkUser) {
-        // PRIORITY 1: Check Clerk Public Metadata directly (Instant)
+        // ROBUST CLERK EXTRACTION
         const metadata = clerkUser.publicMetadata || {};
-        const subscription = (metadata.subscription as any) || {};
-        const tier = subscription.tier || (metadata as any).subscription_tier;
+        const unsafeMetadata = clerkUser.unsafeMetadata || {};
+        const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+        
+        let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier).toLowerCase() || 'free';
 
-        if (tier) {
-          console.log('[AI Context] Tier from Clerk:', tier);
+        // FUZZY FALLBACK
+        const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+        if (tier === 'free') {
+          if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+          else if (rawMetadataStr.includes('premium')) tier = 'premium';
+        }
+
+        // MASTER OVERRIDE
+        if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+          tier = 'premium_elite';
+        }
+
+        if (tier !== 'free') {
+          console.log('[AI Context] Live Clerk Subscription:', tier);
           setSubscriptionTier(tier);
           return;
         }

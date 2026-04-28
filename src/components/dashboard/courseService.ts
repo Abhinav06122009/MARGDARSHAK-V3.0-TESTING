@@ -1,28 +1,45 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
 import type { Course, CourseFormData, SecureUser, CourseStats } from './course';
 
 export const courseService = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
+      const clerkUser = await supabaseHelpers.getCurrentUser();
+      if (!clerkUser?.id) return null;
 
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', clerkUser.id)
         .maybeSingle();
 
-      const fullName = profile?.full_name || user.user_metadata?.full_name || 'User';
+      // Robust Metadata Extraction
+      const metadata = clerkUser.user_metadata || {};
+      const subscription = (clerkUser.subscription as any) || {};
+      
+      const fullName = clerkUser.fullName || clerkUser.user_metadata?.full_name || profile?.full_name || 'User';
+      const role = clerkUser.role || metadata.role || (metadata as any).user_type || profile?.user_type || 'student';
+      
+      let tier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free').toLowerCase();
+
+      // Fuzzy Fallback
+      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(subscription).toLowerCase();
+      if (tier === 'free') {
+        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      }
+
+      // MASTER OVERRIDE
+      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
 
       return {
-        id: user.id,
-        email: user.email || '',
+        id: clerkUser.id,
+        email: clerkUser.email || '',
         profile: {
           full_name: fullName,
-          user_type: profile?.user_type || 'student',
-          role: profile?.user_type || 'student',
-          subscription_tier: profile?.subscription_tier || 'free'
+          user_type: role,
+          role: role,
+          subscription_tier: tier
         }
       };
     } catch (error) {

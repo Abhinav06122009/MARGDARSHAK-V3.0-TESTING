@@ -32,31 +32,35 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
  * Ensures user has Premium Elite subscription.
  */
 export const PremiumEliteRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading: authLoading } = useContext(AuthContext);
+  const { user: clerkUser, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isElite, setIsElite] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
-    if (!session) {
+    if (!clerkUser) {
       navigate('/auth', { replace: true });
       return;
     }
 
-    const checkElite = async () => {
-      try {
-        const user = await courseService.getCurrentUser();
-        if (user?.profile?.subscription_tier === 'premium_elite') {
-          setIsElite(true);
-        } else {
-          navigate('/upgrade', { replace: true });
-        }
-      } catch (err) {
-        navigate('/upgrade', { replace: true });
-      }
-    };
-    checkElite();
-  }, [session, authLoading, navigate]);
+    const metadata = clerkUser.publicMetadata || {};
+    const unsafeMetadata = clerkUser.unsafeMetadata || {};
+    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+    let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
+    
+    // Fuzzy Fallback
+    const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+    if (tier === 'free' && rawMetadataStr.includes('elite')) tier = 'premium_elite';
+
+    // MASTER OVERRIDE
+    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+
+    if (tier.includes('elite')) {
+      setIsElite(true);
+    } else {
+      navigate('/upgrade', { replace: true });
+    }
+  }, [clerkUser, authLoading, navigate]);
 
   if (authLoading || isElite === null) return <PageLoader />;
   return isElite ? <>{children}</> : null;
@@ -66,32 +70,38 @@ export const PremiumEliteRoute = ({ children }: { children: React.ReactNode }) =
  * Ensures user has at least a Premium subscription.
  */
 export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, loading: authLoading } = useContext(AuthContext);
+  const { user: clerkUser, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
-    if (!session) {
+    if (!clerkUser) {
       navigate('/auth', { replace: true });
       return;
     }
 
-    const checkPremium = async () => {
-      try {
-        const user = await courseService.getCurrentUser();
-        const tier = (user?.profile?.subscription_tier || '').toLowerCase();
-        if (tier.includes('premium') || tier.includes('elite')) {
-          setIsPremium(true);
-        } else {
-          navigate('/upgrade', { replace: true });
-        }
-      } catch (err) {
-        navigate('/upgrade', { replace: true });
-      }
-    };
-    checkPremium();
-  }, [session, authLoading, navigate]);
+    const metadata = clerkUser.publicMetadata || {};
+    const unsafeMetadata = clerkUser.unsafeMetadata || {};
+    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+    let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
+    
+    // Fuzzy Fallback
+    const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+    if (tier === 'free') {
+      if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+      else if (rawMetadataStr.includes('premium')) tier = 'premium';
+    }
+
+    // MASTER OVERRIDE
+    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+
+    if (tier.includes('premium') || tier.includes('elite')) {
+      setIsPremium(true);
+    } else {
+      navigate('/upgrade', { replace: true });
+    }
+  }, [clerkUser, authLoading, navigate]);
 
   if (authLoading || isPremium === null) return <PageLoader />;
   return isPremium ? <>{children}</> : null;

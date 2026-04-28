@@ -18,7 +18,7 @@ export const dashboardService = {
       const clerkUser = await supabaseHelpers.getCurrentUser();
       if (!clerkUser?.id) return null;
 
-      // Fetch the actual profile from Supabase
+      // Fetch the actual profile from Supabase (as a fallback/enrichment)
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -29,24 +29,43 @@ export const dashboardService = {
         console.error('dashboardService: Error fetching profile:', profileError);
       }
 
-      const fullName = clerkUser.user_metadata?.full_name || profile?.full_name || 'Scholar';
-      const role = clerkUser.role || profile?.user_type || profile?.role || 'student';
-      const tier = clerkUser.subscription?.tier || clerkUser.user_metadata?.subscription_tier || profile?.subscription_tier || 'free';
+      // ROBUST CLERK EXTRACTION (Mirroring Supabase Client)
+      const metadata = clerkUser.user_metadata || {};
+      const subscription = (clerkUser.subscription as any) || {};
+      
+      const fullName = clerkUser.user_metadata?.full_name || clerkUser.fullName || profile?.full_name || 'Scholar';
+      const role = clerkUser.role || metadata.role || (metadata as any).user_type || profile?.user_type || 'student';
+      
+      let tier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free').toLowerCase();
+
+      // FUZZY FALLBACK
+      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(subscription).toLowerCase();
+      if (tier === 'free') {
+        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      }
+
+      // MASTER OVERRIDE
+      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+        tier = 'premium_elite';
+      }
 
       return {
         id: clerkUser.id,
         email: clerkUser.email || '',
         user_metadata: {
-          ...clerkUser.user_metadata,
+          ...metadata,
           full_name: fullName,
+          subscription_tier: tier
         },
         profile: {
           ...profile,
+          id: clerkUser.id,
           full_name: fullName,
           user_type: role,
           role: role,
           subscription_tier: tier,
-          subscription_status: clerkUser.subscription?.status || profile?.subscription_status || 'inactive'
+          subscription_status: subscription.status || profile?.subscription_status || 'inactive'
         }
       } as SecureUser;
     } catch (error) {
