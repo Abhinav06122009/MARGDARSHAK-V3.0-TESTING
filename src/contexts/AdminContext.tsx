@@ -81,30 +81,22 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     const isProfileAdmin = profileData?.user_type ? ADMIN_ROLES.has(profileData.user_type.toLowerCase()) : false;
     const isClerkAdmin = clerkRole ? ADMIN_ROLES.has(clerkRole.toLowerCase()) : false;
     
-    // MASTER OVERRIDES
-    const MASTER_IDS = [
-      'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
-      'user_3CylWpMJnNbVpgJcpk9eSIf73gS',
-      'user_3CyueymOUFein248UifL5xSPBOU'
-    ];
-    
     const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
     const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
-    
-    const isMaster = MASTER_IDS.includes(clerkUser?.id || '') || 
-                     MASTER_EMAILS.includes(userEmail);
+    const isMaster = MASTER_EMAILS.includes(userEmail);
     
     const finalAdminStatus = isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster;
 
-    console.log(`🛡️ [ADMIN ACCESS] Identity: ${userEmail} | Status: ${finalAdminStatus ? 'GRANTED' : 'DENIED'}`);
-    if (finalAdminStatus) {
-      console.log('--- Verification Matrix ---');
-      console.log(`> RPC Verified: ${isRpcAdmin}`);
-      console.log(`> Profile Verified: ${isProfileAdmin} (Role: ${profileData?.user_type})`);
-      console.log(`> Metadata Verified: ${isClerkAdmin} (Role: ${clerkRole})`);
-      console.log(`> Master Override: ${isMaster}`);
-      console.log('---------------------------');
+    console.group(`🛡️ [ADMIN AUDIT] ${userEmail}`);
+    console.log(`STATUS: ${finalAdminStatus ? '✅ GRANTED' : '❌ DENIED'}`);
+    console.log(`1. RPC Role [${role}]: ${isRpcAdmin}`);
+    console.log(`2. Profile Role [${profileData?.user_type}]: ${isProfileAdmin}`);
+    console.log(`3. Clerk Metadata [${clerkRole}]: ${isClerkAdmin}`);
+    console.log(`4. Master Override: ${isMaster}`);
+    if (finalAdminStatus && !isMaster) {
+      console.warn('⚠️ WARNING: Admin access granted via non-master role. Verify DB/Metadata integrity.');
     }
+    console.groupEnd();
 
     setIsAdmin(finalAdminStatus);
     setLoading(false);

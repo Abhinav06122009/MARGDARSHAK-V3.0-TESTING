@@ -52,7 +52,7 @@ export const initSecurityHardening = () => {
 
       // Only count threats from the last 24 hours to prevent "Old Strike" bans
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      
+
       const { data: dbThreats } = await supabase
         .from('security_threats')
         .select('id')
@@ -62,7 +62,7 @@ export const initSecurityHardening = () => {
       const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
       const dbStrikeCount = dbThreats?.length || 0;
       const strikes = Math.max(localStrikes, dbStrikeCount) + 1;
-      
+
       localStorage.setItem('mg_security_strikes', strikes.toString());
       const fingerprint = getFingerprint();
 
@@ -249,12 +249,12 @@ export const initSecurityHardening = () => {
   // Debugger Protection (Infinite loop)
   if (!isDev) {
     setInterval(() => {
-      (function() {
+      (function () {
         (function a() {
           try {
             (function b(i) {
               if (('' + i / i).length !== 1 || i % 20 === 0) {
-                (function() {}).constructor('debugger')();
+                (function () { }).constructor('debugger')();
               } else {
                 debugger;
               }
@@ -268,7 +268,7 @@ export const initSecurityHardening = () => {
     }, 1000);
   }
 
-   // --- 2. PREVENTION OF COPYING AND INSPECTION ---
+  // --- 2. PREVENTION OF COPYING AND INSPECTION ---
   document.addEventListener('keydown', (e) => {
     const forbiddenKeys = ['F12', 'u', 'i', 'j', 'c', 's', 'p', 'a'];
     const isInspection = e.key === 'F12' ||
@@ -290,11 +290,11 @@ export const initSecurityHardening = () => {
   // --- 5. DEVTOOLS DETECTION ---
   let devtoolsOpen = false;
   const threshold = 160;
-  
+
   const checkDevTools = () => {
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-    
+
     if (widthThreshold || heightThreshold) {
       if (!devtoolsOpen) {
         devtoolsOpen = true;
@@ -304,7 +304,7 @@ export const initSecurityHardening = () => {
       devtoolsOpen = false;
     }
   };
-  
+
   window.addEventListener('resize', checkDevTools);
   setInterval(checkDevTools, 1000);
 
