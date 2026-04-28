@@ -80,8 +80,8 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
     const checkPremium = async () => {
       try {
         const user = await courseService.getCurrentUser();
-        const tier = user?.profile?.subscription_tier;
-        if (tier === 'premium' || tier === 'premium_elite') {
+        const tier = (user?.profile?.subscription_tier || '').toLowerCase();
+        if (tier.includes('premium') || tier.includes('elite')) {
           setIsPremium(true);
         } else {
           navigate('/upgrade', { replace: true });

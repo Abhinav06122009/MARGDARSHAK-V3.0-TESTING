@@ -196,8 +196,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const hasPremiumAccess = useMemo(() => {
     const tierFromHook = currentUser?.profile?.subscription_tier;
-    const effectiveTier = realSubscriptionTier || tierFromHook;
-    return effectiveTier === 'premium' || effectiveTier === 'premium_elite';
+    const effectiveTier = (realSubscriptionTier || tierFromHook || '').toLowerCase();
+    return effectiveTier.includes('premium') || effectiveTier.includes('elite');
   }, [currentUser, realSubscriptionTier]);
 
   const filteredTasks = useMemo(() => {

@@ -34,17 +34,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log('Supabase Sync: Syncing profile for', clerkUser.id);
           
           const metadata = clerkUser.publicMetadata || {};
-          const subscription = metadata.subscription || {};
+          const subscription = (metadata.subscription as any) || {};
 
           const profileData: any = {
             id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
-            user_type: metadata.role || 'student',
-            subscription_tier: subscription.tier || 'free',
-            subscription_status: subscription.status || 'inactive',
-            subscription_period_end: subscription.period_end ? new Date(subscription.period_end).toISOString() : null,
+            user_type: metadata.role || (metadata as any).user_type || 'student',
+            subscription_tier: subscription.tier || (metadata as any).subscription_tier || 'free',
+            subscription_status: subscription.status || (metadata as any).subscription_status || 'inactive',
+            subscription_period_end: subscription.period_end || (metadata as any).subscription_period_end || null,
             updated_at: new Date().toISOString()
           };
 
