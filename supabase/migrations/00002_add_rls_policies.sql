@@ -94,7 +94,14 @@ DROP POLICY IF EXISTS "Users can manage their own note_folders" ON public.note_f
 CREATE POLICY "Users can manage their own folders" ON public.note_folders FOR ALL USING (user_id = requesting_user_id());
 
 -- 6. Enrollments & Courses Policies
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage their own courses" ON public.courses;
+CREATE POLICY "Users can manage their own courses" ON public.courses FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Students can view enrolled courses" ON public.courses;
+CREATE POLICY "Students can view enrolled courses" ON public.courses FOR SELECT USING (EXISTS (SELECT 1 FROM public.enrollments WHERE course_id = public.courses.id AND student_id = requesting_user_id()));
 
 -- Allow students to view their own enrollments
 DROP POLICY IF EXISTS "Users can view their own enrollments" ON public.enrollments;
@@ -131,6 +138,12 @@ CREATE POLICY "Users can delete their own exams" ON public.exams FOR DELETE USIN
 
 DROP POLICY IF EXISTS "Users can view their own grades" ON public.grades;
 CREATE POLICY "Users can view their own grades" ON public.grades FOR SELECT USING (user_id = requesting_user_id());
+DROP POLICY IF EXISTS "Users can insert their own grades" ON public.grades;
+CREATE POLICY "Users can insert their own grades" ON public.grades FOR INSERT WITH CHECK (user_id = requesting_user_id());
+DROP POLICY IF EXISTS "Users can update their own grades" ON public.grades;
+CREATE POLICY "Users can update their own grades" ON public.grades FOR UPDATE USING (user_id = requesting_user_id());
+DROP POLICY IF EXISTS "Users can delete their own grades" ON public.grades;
+CREATE POLICY "Users can delete their own grades" ON public.grades FOR DELETE USING (user_id = requesting_user_id());
 
 -- 8. Study Sessions & Timetables
 ALTER TABLE public.study_sessions ENABLE ROW LEVEL SECURITY;
@@ -147,9 +160,47 @@ DROP POLICY IF EXISTS "Users can manage their own timetable events" ON public.ti
 DROP POLICY IF EXISTS "Users can manage their own timetable" ON public.timetable_events;
 CREATE POLICY "Users can manage their own timetable events" ON public.timetable_events FOR ALL USING (user_id = requesting_user_id());
 
--- 9. Support & Activity Logs
+-- 9. Attendance, Todos & Learning Tools
+ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.todos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.smart_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.syllabi ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.deadlines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.study_plans ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage their own attendance" ON public.attendance;
+CREATE POLICY "Users can manage their own attendance" ON public.attendance FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own todos" ON public.todos;
+CREATE POLICY "Users can manage their own todos" ON public.todos FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own smart notes" ON public.smart_notes;
+CREATE POLICY "Users can manage their own smart notes" ON public.smart_notes FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own syllabi" ON public.syllabi;
+CREATE POLICY "Users can manage their own syllabi" ON public.syllabi FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own deadlines" ON public.deadlines;
+CREATE POLICY "Users can manage their own deadlines" ON public.deadlines FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own study plans" ON public.study_plans;
+CREATE POLICY "Users can manage their own study plans" ON public.study_plans FOR ALL USING (user_id = requesting_user_id());
+
+-- 10. Health & Support Logs
+ALTER TABLE public.medications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.symptoms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_activity_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage their own medications" ON public.medications;
+CREATE POLICY "Users can manage their own medications" ON public.medications FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own symptoms" ON public.symptoms;
+CREATE POLICY "Users can manage their own symptoms" ON public.symptoms FOR ALL USING (user_id = requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can manage their own reports" ON public.reports;
+CREATE POLICY "Users can manage their own reports" ON public.reports FOR ALL USING (user_id = requesting_user_id());
 ALTER TABLE public.security_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_reports ENABLE ROW LEVEL SECURITY;
 
