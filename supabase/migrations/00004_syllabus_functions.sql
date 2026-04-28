@@ -1,6 +1,7 @@
 -- Syllabus Statistics & Search RPCs
 
 -- 1. Get Syllabus Statistics
+DROP FUNCTION IF EXISTS public.get_syllabus_statistics();
 CREATE OR REPLACE FUNCTION public.get_syllabus_statistics()
 RETURNS json
 LANGUAGE plpgsql
@@ -49,6 +50,7 @@ END;
 $$;
 
 -- 2. Search Syllabi
+DROP FUNCTION IF EXISTS public.search_syllabi(text, text, text, int);
 CREATE OR REPLACE FUNCTION public.search_syllabi(
     p_query text,
     p_semester text DEFAULT NULL,
@@ -79,6 +81,7 @@ AS $$
 $$;
 
 -- 3. Create Syllabus Revision
+DROP FUNCTION IF EXISTS public.create_syllabus_revision(uuid, text);
 CREATE OR REPLACE FUNCTION public.create_syllabus_revision(
     p_syllabus_id uuid,
     p_changes_summary text
