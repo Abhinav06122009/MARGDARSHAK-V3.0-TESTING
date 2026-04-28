@@ -56,7 +56,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const displayRole = (realRole || currentUser.profile?.role || 'STUDENT').toUpperCase();
-  const initials = (currentUser.profile?.full_name || currentUser.email || 'U')
+  const nameToUse = currentUser.user_metadata?.full_name || currentUser.profile?.full_name || currentUser.email || 'User';
+  const initials = nameToUse
     .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
   const roleColor = displayRole === 'ADMIN' ? 'from-red-500 to-orange-600'
@@ -212,7 +213,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               />
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-white font-bold text-sm leading-none">{currentUser.profile?.full_name?.split(' ')[0] || 'User'}</p>
+              <p className="text-white font-bold text-sm leading-none">{nameToUse.split(' ')[0]}</p>
               <p className={`text-xs font-bold mt-0.5 flex items-center gap-1 bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
                 <Shield className="w-2.5 h-2.5 text-emerald-400" />
                 {displayRole}
@@ -233,7 +234,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               >
                 {/* User info header */}
                 <div className="px-4 py-3 border-b border-white/5">
-                  <p className="text-white font-bold text-sm">{currentUser.profile?.full_name || 'User'}</p>
+                  <p className="text-white font-bold text-sm">{nameToUse}</p>
                   <p className="text-zinc-500 text-xs truncate">{currentUser.email}</p>
                 </div>
                 <div className="p-1.5">

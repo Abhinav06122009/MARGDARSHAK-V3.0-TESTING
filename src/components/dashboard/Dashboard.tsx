@@ -158,9 +158,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
   const [showBackToTop, setShowBackToTop] = useState(false);
   
-  const realSubscriptionTier = currentUser?.profile?.subscription_tier || null;
+  const realSubscriptionTier = (currentUser?.user_metadata?.subscription as any)?.tier || (currentUser?.user_metadata as any)?.subscription_tier || currentUser?.profile?.subscription_tier || null;
   const realRole = currentUser?.profile?.role || currentUser?.profile?.user_type || null;
-  const realFullName = currentUser?.profile?.full_name || currentUser?.user_metadata?.full_name || null;
+  const realFullName = currentUser?.user_metadata?.full_name || currentUser?.profile?.full_name || 'Scholar';
   
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 400);
@@ -195,13 +195,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }, [analytics, realIncompleteTasksCount, dashboardStats]);
 
   const hasPremiumAccess = useMemo(() => {
-    const tierFromHook = currentUser?.profile?.subscription_tier;
-    const effectiveTier = (realSubscriptionTier || tierFromHook || 'free').toLowerCase();
+    const metadataTier = (currentUser?.user_metadata?.subscription as any)?.tier || (currentUser?.user_metadata as any)?.subscription_tier;
+    const effectiveTier = (realSubscriptionTier || metadataTier || 'free').toLowerCase();
     
     console.log('[Dashboard] Access Check:', {
       effectiveTier,
       realSubscriptionTier,
-      tierFromHook,
+      metadataTier,
       hasAccess: effectiveTier.includes('premium') || effectiveTier.includes('elite')
     });
 

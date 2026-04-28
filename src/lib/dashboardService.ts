@@ -29,9 +29,9 @@ export const dashboardService = {
         console.error('dashboardService: Error fetching profile:', profileError);
       }
 
-      const fullName = profile?.full_name || clerkUser.user_metadata?.full_name || 'Scholar';
-      const role = profile?.user_type || profile?.role || clerkUser.role || 'student';
-      const tier = profile?.subscription_tier || clerkUser.subscription?.tier || 'free';
+      const fullName = clerkUser.user_metadata?.full_name || profile?.full_name || 'Scholar';
+      const role = clerkUser.role || profile?.user_type || profile?.role || 'student';
+      const tier = clerkUser.subscription?.tier || profile?.subscription_tier || 'free';
 
       return {
         id: clerkUser.id,
@@ -46,6 +46,7 @@ export const dashboardService = {
           user_type: role,
           role: role,
           subscription_tier: tier,
+          subscription_status: clerkUser.subscription?.status || profile?.subscription_status || 'inactive'
         }
       } as SecureUser;
     } catch (error) {
