@@ -48,12 +48,18 @@ export const PremiumEliteRoute = ({ children }: { children: React.ReactNode }) =
     const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
     let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
     
-    // Fuzzy Fallback
-    const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
-    if (tier === 'free' && rawMetadataStr.includes('elite')) tier = 'premium_elite';
+    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
+    if (tier === 'free') {
+      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
+      if (fullUserStr.includes('elite')) tier = 'premium_elite';
+    }
 
-    // MASTER OVERRIDE
-    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+    // MASTER OVERRIDES
+    const MASTER_IDS = [
+      'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
+      'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+    ];
+    if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
 
     if (tier.includes('elite')) {
       setIsElite(true);
@@ -86,15 +92,21 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
     const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
     let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
     
-    // Fuzzy Fallback
-    const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
     if (tier === 'free') {
-      if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
-      else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
+      if (fullUserStr.includes('elite')) tier = 'premium_elite';
+      else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
+        tier = 'premium';
+      }
     }
 
-    // MASTER OVERRIDE
-    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+    // MASTER OVERRIDES
+    const MASTER_IDS = [
+      'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
+      'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+    ];
+    if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
 
     if (tier.includes('premium') || tier.includes('elite')) {
       setIsPremium(true);

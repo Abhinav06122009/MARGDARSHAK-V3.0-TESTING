@@ -21,10 +21,11 @@ interface ActionDef {
   glow: string;         // shadow color
   badge?: string;
   badgeColor?: string;
+  isPremium?: boolean;
   onClick: () => void;
 }
 
-const ActionCard = ({ icon: Icon, title, subtitle, color, glow, badge, badgeColor, onClick }: ActionDef) => (
+const ActionCard = ({ icon: Icon, title, subtitle, color, glow, badge, badgeColor, isPremium, onClick }: ActionDef) => (
   <motion.button
     onClick={onClick}
     whileHover={{ scale: 1.02, x: 4 }}
@@ -38,7 +39,7 @@ const ActionCard = ({ icon: Icon, title, subtitle, color, glow, badge, badgeColo
 
     {/* Icon */}
     <div className={`relative flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${color} mr-3.5 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
-      <Icon className="w-4 h-4 text-white" />
+      {isPremium ? <Lock className="w-4 h-4 text-white" /> : <Icon className="w-4 h-4 text-white" />}
       {/* Shimmer on icon */}
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
@@ -52,6 +53,11 @@ const ActionCard = ({ icon: Icon, title, subtitle, color, glow, badge, badgeColo
         {badge && (
           <span className={`flex-shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide border ${badgeColor}`}>
             {badge}
+          </span>
+        )}
+        {isPremium && (
+          <span className="flex-shrink-0 text-[8px] font-black px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-tighter">
+            PRO
           </span>
         )}
       </div>
@@ -77,24 +83,24 @@ const QuickActions: React.FC<QuickActionsProps> = ({ stats, onNavigate }) => {
   const ACTIONS: ActionDef[] = [
     // ── AI Tools ──
     { icon: BrainCircuit, title: 'AI Tutor', subtitle: 'Ask any academic question', color: 'from-amber-500 to-orange-500', glow: '#f59e0b', badge: 'AI', badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30', onClick: () => navigate('/ai-assistant') },
-    { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition', color: 'from-amber-400 to-lime-500', glow: '#84cc16', badge: 'New', badgeColor: 'bg-lime-500/15 text-lime-400 border-lime-500/20', onClick: () => navigate('/flashcards') },
-    { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve problems', color: 'from-indigo-500 to-blue-500', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', onClick: () => navigate('/doubt-solver') },
-    { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Test your knowledge with AI', color: 'from-purple-600 to-violet-600', glow: '#7c3aed', badge: 'New', badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30', onClick: () => navigate('/quiz') },
-    { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance', color: 'from-sky-500 to-blue-600', glow: '#0ea5e9', badge: 'New', badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/30', onClick: () => navigate('/essay-helper') },
-    { icon: Sparkles, title: 'Study Planner', subtitle: 'AI-generated schedules', color: 'from-emerald-500 to-teal-600', glow: '#10b981', badge: 'New', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', onClick: () => navigate('/study-planner') },
-    { icon: BarChart3, title: 'AI Analytics', subtitle: 'Performance insights', color: 'from-indigo-500 to-purple-600', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', onClick: () => navigate('/ai-analytics') },
+    { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition', color: 'from-amber-400 to-lime-500', glow: '#84cc16', badge: 'New', badgeColor: 'bg-lime-500/15 text-lime-400 border-lime-500/20', isPremium: true, onClick: () => navigate('/flashcards') },
+    { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve problems', color: 'from-indigo-500 to-blue-500', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', isPremium: true, onClick: () => navigate('/doubt-solver') },
+    { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Test your knowledge with AI', color: 'from-purple-600 to-violet-600', glow: '#7c3aed', badge: 'New', badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30', isPremium: true, onClick: () => navigate('/quiz') },
+    { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance', color: 'from-sky-500 to-blue-600', glow: '#0ea5e9', badge: 'New', badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/30', isPremium: true, onClick: () => navigate('/essay-helper') },
+    { icon: Sparkles, title: 'Study Planner', subtitle: 'AI-generated schedules', color: 'from-emerald-500 to-teal-600', glow: '#10b981', badge: 'New', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', isPremium: true, onClick: () => navigate('/study-planner') },
+    { icon: BarChart3, title: 'AI Analytics', subtitle: 'Performance insights', color: 'from-indigo-500 to-purple-600', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', isPremium: true, onClick: () => navigate('/ai-analytics') },
     // ── Campus ──
     { icon: Trophy, title: 'Achievements', subtitle: 'Badges & Leaderboard', color: 'from-amber-400 to-yellow-500', glow: '#f59e0b', onClick: () => navigate('/achievements') },
     { icon: Calendar, title: 'Schedule', subtitle: 'Timetable & events', color: 'from-cyan-500 to-sky-600', glow: '#06b6d4', onClick: () => navigate('/timetable') },
     { icon: Book, title: 'Courses', subtitle: 'Manage your courses', color: 'from-pink-500 to-rose-600', glow: '#ec4899', onClick: () => navigate('/courses') },
-    { icon: Headphones, title: 'Wellness', subtitle: 'Mental & Physical health', color: 'from-emerald-400 to-cyan-500', glow: '#10b981', onClick: () => navigate('/wellness') },
+    { icon: Headphones, title: 'Wellness', subtitle: 'Mental & Physical health', color: 'from-emerald-400 to-cyan-500', glow: '#10b981', isPremium: true, onClick: () => navigate('/wellness') },
     { icon: Settings, title: 'Settings', subtitle: 'Account & preferences', color: 'from-zinc-500 to-zinc-600', glow: '#71717a', onClick: () => navigate('/settings') },
   ];
 
   const CAREER_ACTIONS: ActionDef[] = [
-    { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Auto-generate resume from data', color: 'from-indigo-500 to-violet-600', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', onClick: () => navigate('/portfolio') },
-    { icon: Timer, title: 'Exam Deadlines', subtitle: 'JEE · NEET · SAT · University', color: 'from-amber-500 to-orange-600', glow: '#f59e0b', badge: 'New', badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30', onClick: () => navigate('/deadlines') },
-    { icon: Headphones, title: 'Smart Notes (TTS)', subtitle: 'Listen to your notes hands-free', color: 'from-sky-400 to-blue-600', glow: '#38bdf8', badge: 'New', badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/30', onClick: () => navigate('/smart-notes') },
+    { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Auto-generate resume from data', color: 'from-indigo-500 to-violet-600', glow: '#6366f1', badge: 'New', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', isPremium: true, onClick: () => navigate('/portfolio') },
+    { icon: Timer, title: 'Exam Deadlines', subtitle: 'JEE · NEET · SAT · University', color: 'from-amber-500 to-orange-600', glow: '#f59e0b', badge: 'New', badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30', isPremium: true, onClick: () => navigate('/deadlines') },
+    { icon: Headphones, title: 'Smart Notes (TTS)', subtitle: 'Listen to your notes hands-free', color: 'from-sky-400 to-blue-600', glow: '#38bdf8', badge: 'New', badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/30', isPremium: true, onClick: () => navigate('/smart-notes') },
   ];
 
   return (

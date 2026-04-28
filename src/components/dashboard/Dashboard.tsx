@@ -120,6 +120,42 @@ const LockedTrendChart = () => {
   );
 };
 
+const LockedBurnoutWidget = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-900 shadow-2xl p-8 flex flex-col items-center justify-center text-center group h-[220px]">
+      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-rose-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50" />
+      
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="p-4 rounded-full bg-white/5 border border-white/10 shadow-inner-soft group-hover:scale-110 transition-transform duration-500">
+          <BrainCircuit className="w-6 h-6 text-zinc-400" />
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
+            Burnout Predictor
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase tracking-wide">
+              Premium
+            </span>
+          </h3>
+          <p className="text-zinc-500 text-sm mt-2 max-w-sm mx-auto">
+            AI analysis of your study patterns to predict and prevent academic exhaustion.
+          </p>
+        </div>
+
+        <button 
+          onClick={() => navigate('/upgrade')}
+          className="mt-2 px-5 py-2 rounded-full bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 cursor-pointer"
+        >
+          <Sparkles className="w-3 h-3 text-rose-600 fill-rose-600" />
+          Unlock Health AI
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const getLast7Days = () => {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -411,7 +447,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </motion.div>
             
             <motion.div className="w-full" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-               <BurnoutPredictorWidget stats={dashboardStats} />
+               {hasPremiumAccess ? (
+                 <BurnoutPredictorWidget stats={dashboardStats} />
+               ) : (
+                 <LockedBurnoutWidget />
+               )}
             </motion.div>
 
 

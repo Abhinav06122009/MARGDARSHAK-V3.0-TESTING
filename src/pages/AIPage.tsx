@@ -284,7 +284,7 @@ const SmartTutorPage = () => {
           </div>
 
           <div className="flex items-center gap-2 mt-3 md:mt-0">
-            {isPremiumUser() && (
+            {(isPremiumUser() || isPremiumPlusUser() || isEliteUser()) && (
               <button onClick={() => setShowByokModal(true)} className={`h-9 px-3 border rounded-lg text-xs font-semibold flex items-center gap-2 ${byokKey ? 'border-green-500/30 text-green-400' : 'border-red-500/30 text-red-400 animate-pulse'}`}>
                 <KeyRound size={12} /> {byokKey ? 'Key Active' : 'Add Key'}
               </button>
