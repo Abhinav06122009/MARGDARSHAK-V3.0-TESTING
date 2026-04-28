@@ -63,6 +63,11 @@ const SmartTutorPage = () => {
         else if (rawMetadataStr.includes('premium')) tier = 'premium';
       }
 
+      // SUPER OVERRIDE for Abhinav Jha
+      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+        tier = 'premium_elite';
+      }
+
       console.log('[AI Page] Live Clerk Subscription:', tier);
       setSubscriptionTier(tier);
     }

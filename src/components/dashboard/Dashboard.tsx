@@ -174,6 +174,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
       else if (rawMetadataStr.includes('premium')) tier = 'premium';
     }
+
+    // SUPER OVERRIDE for Abhinav Jha
+    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+      tier = 'premium_elite';
+    }
     
     return tier;
   }, [clerkUser, clerkLoaded, currentUser]);

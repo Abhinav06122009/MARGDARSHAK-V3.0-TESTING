@@ -133,6 +133,12 @@ export const supabaseHelpers = {
         if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
         else if (rawMetadataStr.includes('premium')) tier = 'premium';
       }
+      
+      // SUPER OVERRIDE: Hardcoded bypass for Abhinav Jha
+      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+        console.log('👑 [Super Override] Master access granted for user_3CwM4tAD...');
+        tier = 'premium_elite';
+      }
 
       return {
         id: clerkUser.id,
