@@ -25,20 +25,10 @@ export const initSecurityHardening = () => {
     mem: (navigator as any).deviceMemory
   });
 
-  // --- 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO) ---
-  const isGoogleBot = () => {
-    const ua = navigator.userAgent.toLowerCase();
-    return (
-      ua.includes('googlebot') || 
-      ua.includes('mediapartners-google') || 
-      ua.includes('adsbot-google') ||
-      ua.includes('google-adwords') ||
-      ua.includes('adsense')
-    );
-  };
-
   const logViolation = async (type: string, metadata: any = {}) => {
-    if (isGoogleBot()) return;
+    // 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO)
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('googlebot') || ua.includes('adsense') || ua.includes('google-adwords')) return;
 
     try {
       const currentIP = await resolveIP();
@@ -63,13 +53,10 @@ export const initSecurityHardening = () => {
       const dbStrikeCount = dbThreats?.length || 0;
       const strikes = Math.max(localStrikes, dbStrikeCount) + 1;
       
-      // Update Local Cache immediately
       localStorage.setItem('mg_security_strikes', strikes.toString());
-
       const fingerprint = getFingerprint();
 
       if (strikes === 1) {
-        // --- STRIKE 1: YELLOW ALERT ---
         await supabase.from('security_threats').insert({
           event_type: type,
           user_id: userId,
@@ -79,48 +66,75 @@ export const initSecurityHardening = () => {
           summary: `STRIKE 1: ${type} detected. Forensic ID: ${persistentId}`,
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 1 }
         });
-
         window.dispatchEvent(new CustomEvent('security-warning', { detail: { type, ip: currentIP } }));
-        console.warn('🛡️ SECURITY STRIKE 1: LOGGED.');
       } else {
-        // --- STRIKE 2: RED ALERT (BAN) ---
         await supabase.from('security_threats').insert({
           event_type: type,
           user_id: userId,
           ip_address: currentIP,
           threat_level: 'critical',
           threat_score: 100,
-          summary: `STRIKE 2: Persistent ${type}. PERMANENT BAN EXECUTED. Forensic ID: ${persistentId}`,
+          summary: `STRIKE 2: Persistent ${type}. PERMANENT BAN. Forensic ID: ${persistentId}`,
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 2 }
         });
-
         if (userId) {
-          await supabase.from('profiles').update({ 
-            is_blocked: true,
-            blocked_reason: `STRIKE 2: Persistent security violation (${type}). Forensic ID: ${persistentId}`
-          }).eq('id', userId);
+          await supabase.from('profiles').update({ is_blocked: true, blocked_reason: `STRIKE 2: Security violation (${type})` }).eq('id', userId);
         }
-
-        // Trigger Ban Overlay & Force Lockdown
         window.dispatchEvent(new CustomEvent('security-ban', { detail: { type, ip: currentIP } }));
-        console.error('🛡️ SECURITY STRIKE 2: BAN EXECUTED.');
       }
-    } catch (err) {
-      if (isDev) console.error('Tracing error:', err);
-    }
+    } catch (err) { if (isDev) console.error('Tracing error:', err); }
   };
 
-  // --- 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO) ---
-  const isGoogleBot = () => {
+  // If it's a Google bot, we bypass
+  const checkBot = () => {
     const ua = navigator.userAgent.toLowerCase();
-    return (
-      ua.includes('googlebot') || 
-      ua.includes('mediapartners-google') || 
-      ua.includes('adsbot-google') ||
-      ua.includes('google-adwords') ||
-      ua.includes('adsense')
-    );
+    return ua.includes('googlebot') || ua.includes('adsense') || ua.includes('google-adwords');
   };
+  if (checkBot()) return;
+
+  // --- SCREENSHOT PROTECTION (ANTI-STEAL) ---
+  const addScreenshotDefense = () => {
+    // 1. Blackout on Print
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        body { display: none !important; }
+      }
+      .security-blur {
+        filter: blur(25px) !important;
+        pointer-events: none !important;
+        user-select: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Blur on Focus Loss (When Snipping Tool opens)
+    window.addEventListener('blur', () => {
+      document.body.classList.add('security-blur');
+    });
+    window.addEventListener('focus', () => {
+      document.body.classList.remove('security-blur');
+    });
+
+    // 3. Key Detection (PrintScreen / Win+Shift+S)
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('Security Policy: Screenshots are prohibited on MARGDARSHAK.');
+        logViolation('screenshot_attempt');
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      // Win + Shift + S or Cmd + Shift + 4
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4')) {
+        logViolation('screenshot_shortcut');
+      }
+    });
+  };
+
+  addScreenshotDefense();
+
+  // --- 1. GLOBAL OVERLAYS & DETECTION ---
 
   // If it's a Google bot, we bypass the aggressive anti-bot/anti-debugger measures
   // to ensure AdSense eligibility and SEO ranking.
