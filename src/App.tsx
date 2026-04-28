@@ -98,9 +98,21 @@ const AIWidgetWrapper = () => {
 };
 
 const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
-  const { isBlocked, blockedReason, loading } = useContext(AuthContext);
+  const { isBlocked, blockedReason } = useContext(AuthContext);
   
-  if (isBlocked) {
+  // WHITE-LIST GOOGLE BOTS FROM GLOBAL BLOCK
+  const isGoogleBot = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    return (
+      ua.includes('googlebot') || 
+      ua.includes('mediapartners-google') || 
+      ua.includes('adsbot-google') ||
+      ua.includes('google-adwords') ||
+      ua.includes('adsense')
+    );
+  };
+
+  if (isBlocked && !isGoogleBot()) {
     return (
       <>
         <BlockedUserOverlay reason={blockedReason} />

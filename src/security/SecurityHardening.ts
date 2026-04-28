@@ -104,7 +104,8 @@ export const initSecurityHardening = () => {
       ua.includes('googlebot') || 
       ua.includes('mediapartners-google') || 
       ua.includes('adsbot-google') ||
-      ua.includes('google-adwords')
+      ua.includes('google-adwords') ||
+      ua.includes('adsense')
     );
   };
 
