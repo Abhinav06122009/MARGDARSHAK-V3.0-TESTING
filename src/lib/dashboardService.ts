@@ -29,49 +29,21 @@ export const dashboardService = {
         console.error('dashboardService: Error fetching profile:', profileError);
       }
 
-      // ROBUST TIER DETECTION (CLERK-FIRST) ---
-      const metadata = clerkUser.publicMetadata || {};
-      const unsafeMetadata = clerkUser.unsafeMetadata || {};
-      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-      
-      let userTier = (
-        subscription.tier || 
-        (metadata as any).subscription_tier || 
-        (unsafeMetadata as any).subscription_tier || 
-        (metadata as any).tier || 
-        (unsafeMetadata as any).tier || 
-        profile?.subscription_tier || 
-        'free'
-      ).toLowerCase();
+      // --- UNIVERSAL TIER DETECTION (CLERK-FIRST) ---
+      // The clerkUser object here is already formatted by supabaseHelpers.getCurrentUser()
+      const userTier = clerkUser.profile?.subscription_tier || clerkUser.user_metadata?.subscription_tier || 'free';
+      const userRole = clerkUser.profile?.role || clerkUser.user_metadata?.role || 'student';
+      const subscription = clerkUser.subscription || {};
 
-      // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
-      if (userTier === 'free') {
-        const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-        if (fullUserStr.includes('elite')) userTier = 'premium_elite';
-        else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
-          userTier = 'premium';
-        }
-      }
-
-      // MASTER OVERRIDES
-      const MASTER_IDS = [
-        'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
-        'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
-      ];
-      if (MASTER_IDS.includes(clerkUser.id)) {
-        userTier = 'premium_elite';
-      }
-
-      console.log(`[dashboardService] Resolved Tier: ${userTier} for ${clerkUser.id}`);
+      console.log(`[dashboardService] Verified Tier: ${userTier} for ${clerkUser.id}`);
 
       const fullName = clerkUser.user_metadata?.full_name || clerkUser.fullName || profile?.full_name || 'Scholar';
-      const userRole = (metadata.role || (metadata as any).user_type || profile?.user_type || 'student').toLowerCase();
 
       return {
         id: clerkUser.id,
         email: clerkUser.email || '',
         user_metadata: {
-          ...metadata,
+          ...clerkUser.user_metadata,
           full_name: fullName,
           subscription_tier: userTier
         },
