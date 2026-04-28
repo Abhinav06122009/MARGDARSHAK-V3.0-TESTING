@@ -108,13 +108,25 @@ export const supabaseHelpers = {
                        (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || clerkUser.username || '');
 
       const metadata = clerkUser.publicMetadata || {};
-      console.log('🛡️ [Clerk Metadata Raw]:', metadata);
+      const unsafeMetadata = clerkUser.unsafeMetadata || {};
       
-      const subscription = (metadata.subscription as any) || {};
-      const role = metadata.role || (metadata as any).user_type || 'student';
+      console.log('🛡️ [Clerk Metadata Full Scan]:', {
+        public: metadata,
+        unsafe: unsafeMetadata,
+        rawUser: clerkUser ? 'Available' : 'Missing',
+        clerkId: clerkUser?.id
+      });
+      
+      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+      const role = metadata.role || (unsafeMetadata as any).role || (metadata as any).user_type || (unsafeMetadata as any).user_type || 'student';
       
       // Support multiple metadata formats (flat or nested)
-      const tier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
+      const tier = subscription.tier || 
+                   (metadata as any).subscription_tier || 
+                   (unsafeMetadata as any).subscription_tier || 
+                   (metadata as any).tier || 
+                   (unsafeMetadata as any).tier || 
+                   'free';
 
       return {
         id: clerkUser.id,

@@ -52,8 +52,9 @@ const SmartTutorPage = () => {
   useEffect(() => {
     if (clerkLoaded && clerkUser) {
       const metadata = clerkUser.publicMetadata || {};
-      const subscription = (metadata.subscription as any) || {};
-      const tier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
+      const unsafeMetadata = clerkUser.unsafeMetadata || {};
+      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+      const tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free');
       
       console.log('[AI Page] Live Clerk Subscription:', tier);
       setSubscriptionTier(tier.toLowerCase());
