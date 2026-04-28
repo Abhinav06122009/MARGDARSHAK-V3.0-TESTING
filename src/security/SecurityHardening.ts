@@ -247,6 +247,8 @@ export const initSecurityHardening = () => {
       document.body.innerHTML = '<h1>Access Denied: Bot detected</h1>';
       throw new Error('Bot detected');
     }
+  }
+
   // Debugger Protection (Infinite loop)
   if (!isDev) {
     setInterval(() => {
