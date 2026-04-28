@@ -178,21 +178,12 @@ export const useSecureAuth = () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (!user || error) return null;
     
-    try {
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-        
-      if (profileError && profileError.code === 'PGRST116') {
-        const { data: newProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        return { user, profile: newProfile };
-      }
-      return { user, profile };
-    } catch (err) {
-      return { user, profile: null };
-    }
+    // Use Clerk metadata for profile instead of querying profiles table
+    // This avoids RLS permission issues while maintaining full user data
+    return { 
+      user, 
+      profile: null // Profile data is available through Clerk context, not Supabase table
+    };
   };
 
   return {

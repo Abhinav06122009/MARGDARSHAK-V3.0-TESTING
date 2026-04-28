@@ -11,34 +11,40 @@ exports.handler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin || null;
   const headers = { ...corsHeaders(origin), 'Content-Type': 'application/json' };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers, body: '' };
-  }
+  try {
+    if (event.httpMethod === 'OPTIONS') {
+      return { statusCode: 204, headers, body: '' };
+    }
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
+    if (event.httpMethod !== 'POST') {
+      return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+    }
 
-  const ip = getClientIp(event);
-  const rl = rateLimit(`profile-sync:${ip}`);
-  if (!rl.allowed) {
-    return {
-      statusCode: 429,
-      headers: { ...headers, 'Retry-After': String(rl.retryAfter || 60) },
-      body: JSON.stringify({ error: 'Too many requests. Please slow down.' }),
-    };
-  }
+    const ip = getClientIp(event);
+    const rl = rateLimit(`profile-sync:${ip}`);
+    if (!rl.allowed) {
+      return {
+        statusCode: 429,
+        headers: { ...headers, 'Retry-After': String(rl.retryAfter || 60) },
+        body: JSON.stringify({ error: 'Too many requests. Please slow down.' }),
+      };
+    }
 
-  const auth = await verifyClerkUser(event.headers?.authorization || event.headers?.Authorization);
-  if (!auth.ok) {
-    return { statusCode: auth.status, headers, body: JSON.stringify({ error: auth.message, code: auth.code }) };
-  }
+    const auth = await verifyClerkUser(event.headers?.authorization || event.headers?.Authorization);
+    if (!auth.ok) {
+      console.log('[profile-sync] Auth verification failed:', auth.code);
+      return { statusCode: auth.status, headers, body: JSON.stringify({ error: auth.message, code: auth.code }) };
+    }
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[profile-sync] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    console.error('[profile-sync] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!serviceRoleKey,
+      url: supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'undefined'
+    });
     return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server misconfigured' }) };
   }
 
@@ -49,8 +55,9 @@ exports.handler = async (event) => {
       return { statusCode: 413, headers, body: JSON.stringify({ error: 'Request body too large' }) };
     }
     body = JSON.parse(raw);
-  } catch {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+  } catch (e) {
+    console.error('[profile-sync] Failed to parse body:', e.message);
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body: ' + e.message }) };
   }
 
   const metadata = body && typeof body === 'object' ? body : {};
@@ -71,15 +78,47 @@ exports.handler = async (event) => {
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase.from('profiles').upsert(profileRow);
+  console.log('[profile-sync] Attempting upsert for user:', auth.user.id, 'with row:', {
+    id: profileRow.id,
+    email: profileRow.email,
+    full_name: profileRow.full_name,
+    user_type: profileRow.user_type,
+  });
+
+  const { data, error } = await supabase.from('profiles').upsert(profileRow).select();
   if (error) {
-    console.error('[profile-sync] Upsert failed:', error);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
+    console.error('[profile-sync] Upsert failed:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
+    return { statusCode: 500, headers, body: JSON.stringify({ 
+      error: error.message,
+      code: error.code,
+      details: 'Check Netlify function logs for details'
+    }) };
   }
+
+  console.log('[profile-sync] Upsert successful for user:', auth.user.id);
 
   return {
     statusCode: 200,
     headers,
     body: JSON.stringify({ ok: true, profile: profileRow }),
   };
+  } catch (err) {
+    console.error('[profile-sync] Unhandled error:', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined
+    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: 'Unexpected server error',
+        details: err instanceof Error ? err.message : String(err)
+      })
+    };
+  }
 };

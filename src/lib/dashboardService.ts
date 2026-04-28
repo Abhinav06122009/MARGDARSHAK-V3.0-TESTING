@@ -1,4 +1,4 @@
-import { supabaseHelpers } from '@/integrations/supabase/client';
+import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type {
   SecureUser,

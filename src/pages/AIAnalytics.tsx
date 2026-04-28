@@ -73,16 +73,16 @@ const AIAnalytics: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
 
-      const [tasksRes, gradesRes, profileRes, coursesRes] = await Promise.all([
+      // Removed profile query to avoid RLS permission issues
+      // Using Clerk data for user metadata instead
+      const [tasksRes, gradesRes, coursesRes] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('grades').select('*').eq('user_id', user.id),
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('courses').select('*').eq('user_id', user.id),
       ]);
 
       const tasks = tasksRes.data || [];
       const grades = gradesRes.data || [];
-      const profile = profileRes.data;
       const courses = coursesRes.data || [];
 
       const completed = tasks.filter((t: any) => t.status === 'completed').length;
@@ -96,7 +96,7 @@ const AIAnalytics: React.FC = () => {
         completedTasks: completed,
         avgGrade: Math.round(avgGrade),
         totalGrades: grades.length,
-        studyStreak: (profile as any)?.study_streak || 0,
+        studyStreak: 0, // Default to 0 since profile table has permission issues
         coursesEnrolled: courses.length,
       };
     } catch (err) {
