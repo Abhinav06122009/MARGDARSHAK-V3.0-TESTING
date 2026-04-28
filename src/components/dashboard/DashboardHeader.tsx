@@ -203,6 +203,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Settings className="w-4 h-4" />
         </motion.button>
 
+        {/* Direct Logout Button */}
+        <motion.button
+          onClick={handleLogout}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all text-red-400 group"
+          title="Sign Out"
+        >
+          <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+        </motion.button>
+
         {/* User pill */}
         <div className="relative">
           <motion.button
