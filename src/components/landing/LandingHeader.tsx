@@ -28,10 +28,15 @@ export const LandingHeader: React.FC = () => {
     { name: 'margdarshak-ai', label: 'AI Assistant' },
     { name: 'testimonials', label: 'Success' },
     { name: 'about', label: 'Mission' },
+    { name: 'blog', label: 'Blog', path: '/blog' },
     { name: 'pricing', label: 'Pricing' }
   ];
 
-  const handleLinkClick = (id: string) => {
+  const handleLinkClick = (id: string, path?: string) => {
+    if (path) {
+      window.location.href = path;
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -39,6 +44,7 @@ export const LandingHeader: React.FC = () => {
     setIsMobileMenuOpen(false);
     playSound('click');
   };
+
 
   return (
     <motion.nav
@@ -76,7 +82,7 @@ export const LandingHeader: React.FC = () => {
           {navItems.map(item => (
             <li key={item.name}>
               <button
-                onClick={() => handleLinkClick(item.name)}
+                onClick={() => handleLinkClick(item.name, item.path)}
                 onMouseEnter={() => playSound('hover')}
                 className="capitalize text-gray-300 hover:text-blue-400 transition-colors relative group"
               >
@@ -134,7 +140,7 @@ export const LandingHeader: React.FC = () => {
               {navItems.map(item => (
                 <li key={item.name}>
                   <button
-                    onClick={() => handleLinkClick(item.name)}
+                    onClick={() => handleLinkClick(item.name, item.path)}
                     className="text-lg text-gray-300 hover:text-blue-400 w-full text-left"
                   >
                     {item.label}

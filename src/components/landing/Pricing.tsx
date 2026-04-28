@@ -124,15 +124,26 @@ export const CTA: React.FC = () => (
       <p className="text-xl text-gray-300 mb-10">
         Join thousands of students who are using MARGDARSHAK to master their studies.
       </p>
-      <MagneticButton>
-        <a 
-          href="/auth" 
-          className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl shadow-blue-500/40 transition-all duration-300 group"
-        >
-          Get Started for Free 
-          <Rocket className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-        </a>
-      </MagneticButton>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <MagneticButton>
+          <a 
+            href="/auth" 
+            className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl shadow-blue-500/40 transition-all duration-300 group"
+          >
+            Get Started for Free 
+            <Rocket className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+          </a>
+        </MagneticButton>
+        <MagneticButton>
+          <a 
+            href="/blog" 
+            className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-4 px-12 rounded-full text-lg transition-all duration-300"
+          >
+            Read Our Blog
+          </a>
+        </MagneticButton>
+      </div>
+
     </div>
   </SectionWrapper>
 );
