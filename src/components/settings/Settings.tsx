@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Settings as SettingsIcon, ShieldCheck, Zap, Globe, Cpu, Radio, Target, Activity, Layout, Layers, Terminal, Box, Sparkles, Command } from 'lucide-react';
+import { ArrowLeft, Settings as SettingsIcon, ShieldCheck, Zap, Globe, Cpu, Radio, Target, Activity, Layout, Layers, Terminal, Box, Sparkles } from 'lucide-react';
 
 // Hooks & Components
 import { useSettings } from '@/hooks/useSettings';
@@ -11,17 +11,19 @@ import Passkeys from "@/components/settings/Passkeys";
 import SecurityAdvisor from "@/components/settings/SecurityAdvisor";
 import PremiumIDCard from './PremiumIDCard';
 
+// PERFORMANCE OPTIMIZED NOISE
 const NoiseOverlay = () => (
-  <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.04] mix-blend-overlay">
+  <div className="fixed inset-0 pointer-events-none z-[100] opacity-[0.02] mix-blend-overlay">
     <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <filter id="noise">
-        <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="4" stitchTiles="stitch" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch" />
       </filter>
       <rect width="100%" height="100%" filter="url(#noise)" />
     </svg>
   </div>
 );
 
+// PERFORMANCE OPTIMIZED CURSOR
 const NexusCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -38,16 +40,15 @@ const NexusCursor = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-10 h-10 pointer-events-none z-[9999] hidden lg:block"
+      className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[9999] hidden lg:block"
       animate={{
-        x: position.x - 20,
-        y: position.y - 20,
-        scale: isHovering ? 2.5 : 1,
+        x: position.x - 16,
+        y: position.y - 16,
+        scale: isHovering ? 2 : 1,
       }}
-      transition={{ type: "spring", damping: 30, stiffness: 400, mass: 0.6 }}
+      transition={{ type: "spring", damping: 50, stiffness: 400, mass: 0.3 }}
     >
-      <div className={`w-full h-full rounded-full border-2 transition-all duration-500 ${isHovering ? 'border-emerald-400 bg-emerald-400/20 blur-[1px]' : 'border-white/20 bg-transparent'}`} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_15px_white]" />
+      <div className={`w-full h-full rounded-full border-2 transition-all duration-300 ${isHovering ? 'border-emerald-400 bg-emerald-400/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-white/10'}`} />
     </motion.div>
   );
 };
@@ -70,90 +71,79 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, []);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center gap-12">
-      <div className="w-24 h-24 border-t-4 border-emerald-500 rounded-full animate-spin shadow-[0_0_60px_rgba(16,185,129,0.4)]" />
-      <span className="text-[14px] font-black text-emerald-500 uppercase tracking-[2em] animate-pulse">INIT_COMMAND</span>
+    <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center gap-8">
+      <div className="w-12 h-12 border-t-2 border-emerald-500 rounded-full animate-spin" />
+      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[1em]">INITIALIZING</span>
     </div>
   );
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#000000] text-gray-100 selection:bg-emerald-500/40 overflow-x-hidden cursor-none">
+    <div className="min-h-screen bg-[#020202] text-gray-300 selection:bg-emerald-500/30 overflow-x-hidden cursor-none">
       <NexusCursor />
       <NoiseOverlay />
       
-      {/* EXTREME AMBIENT LIGHTING */}
+      {/* PERFORMANCE AMBIENT LIGHT */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div 
-           className="absolute w-[1500px] h-[1500px] bg-emerald-500/[0.05] blur-[300px] rounded-full"
-           animate={{ x: mousePos.x - 750, y: mousePos.y - 750 }}
-           transition={{ type: "spring", damping: 120, stiffness: 10 }}
+           className="absolute w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[200px] rounded-full"
+           animate={{ x: mousePos.x - 400, y: mousePos.y - 400 }}
+           transition={{ type: "spring", damping: 100, stiffness: 20 }}
         />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-fuchsia-600/[0.03] blur-[250px] rounded-full" />
       </div>
 
-      <div className="relative z-10 max-w-[1850px] mx-auto px-10 lg:px-24 py-24 lg:py-36">
+      <div className="relative z-10 max-w-[1700px] mx-auto px-6 lg:px-16 py-16 lg:py-24">
         
-        {/* HEADER: Extreme OS Aesthetic */}
+        {/* HEADER: Surgical Alignment */}
         <motion.header
-          initial={{ opacity: 0, y: -60 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col lg:flex-row lg:items-end justify-between gap-24 mb-48"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-24"
         >
-          <div className="flex items-center gap-16 lg:gap-24">
+          <div className="flex items-center gap-10 lg:gap-14">
             <button
               onClick={() => onBack ? onBack() : window.history.back()}
-              className="group relative w-24 h-24 flex items-center justify-center rounded-[3rem] bg-zinc-950 border-2 border-white/5 hover:border-emerald-500/50 transition-all duration-700 shadow-[0_40px_80px_rgba(0,0,0,1)]"
+              className="group relative w-16 h-16 flex items-center justify-center rounded-2xl bg-zinc-950 border border-white/5 hover:border-emerald-500/40 transition-all shadow-xl"
             >
-              <ArrowLeft size={36} className="text-white/20 group-hover:text-emerald-400 group-hover:-translate-x-2 transition-all" />
-              <div className="absolute inset-0 rounded-[3rem] border-2 border-emerald-500/0 group-hover:border-emerald-500/30 transition-all scale-125 group-hover:scale-100" />
+              <ArrowLeft size={24} className="text-white/20 group-hover:text-emerald-400 group-hover:-translate-x-1 transition-all" />
             </button>
             
-            <div className="flex flex-col gap-8">
-              <div className="flex items-center gap-12">
-                 <h1 className="text-9xl lg:text-[13rem] font-black text-white tracking-[-0.1em] uppercase italic leading-none drop-shadow-[0_30px_60px_rgba(0,0,0,1)]">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-6">
+                 <h1 className="text-6xl lg:text-[8rem] font-black text-white tracking-[-0.08em] uppercase italic leading-none">
                     NEXUS
                  </h1>
-                 <div className="p-6 bg-zinc-950 border-2 border-white/10 rounded-3xl hidden xl:block shadow-2xl">
-                    <Command size={48} className="text-emerald-400 animate-pulse" />
+                 <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl hidden xl:block shadow-lg">
+                    <SettingsIcon size={24} className="text-emerald-400 animate-spin-slow" />
                  </div>
               </div>
-              <div className="flex items-center gap-8 ml-6">
-                 <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
-                 <p className="text-white/40 font-black uppercase tracking-[1.5em] text-[12px] italic">System_Overseer_Interface_v3.0</p>
-              </div>
+              <p className="text-white/20 font-black uppercase tracking-[0.8em] text-[8px] italic ml-1">Configuration_Matrix</p>
             </div>
           </div>
 
-          {/* STATUS MONITOR: Perfectly Aligned Pill */}
-          <div className="flex items-center gap-10 p-10 bg-zinc-950/80 border-2 border-white/5 rounded-[4rem] backdrop-blur-3xl shadow-[0_40px_100px_rgba(0,0,0,1)]">
-             <div className="flex items-center gap-10 px-14 py-6 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-[2.5rem]">
-                <Cpu size={32} className="text-emerald-400" />
-                <div className="flex flex-col">
-                   <span className="text-[16px] font-black text-white tracking-widest leading-none">CORE_SYNC</span>
-                   <span className="text-[11px] font-bold text-emerald-500/40 uppercase tracking-widest mt-2">Active_Pulse</span>
-                </div>
+          {/* STATUS PILL: Perfect Symmetry */}
+          <div className="flex items-center gap-4 p-3 bg-zinc-950/40 border border-white/5 rounded-full backdrop-blur-3xl shadow-2xl">
+             <div className="flex items-center gap-6 px-8 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+                <Cpu size={18} className="text-emerald-400" />
+                <span className="text-[10px] font-black text-white/60 tracking-widest uppercase">CORE_ACTIVE</span>
              </div>
-             <div className="flex items-center gap-10 px-14 py-6 bg-white/[0.02] border-2 border-white/5 rounded-[2.5rem]">
-                <Activity size={32} className="text-white/40" />
-                <div className="flex flex-col">
-                   <span className="text-[16px] font-black text-white/50 tracking-widest leading-none">NODE_READY</span>
-                   <span className="text-[11px] font-bold text-white/10 uppercase tracking-widest mt-2">Stability: Max</span>
-                </div>
+             <div className="flex items-center gap-6 px-8 py-3 bg-white/[0.01] border border-white/5 rounded-full">
+                <Layers size={18} className="text-white/20" />
+                <span className="text-[10px] font-black text-white/30 tracking-widest uppercase">NODE_READY</span>
              </div>
           </div>
         </motion.header>
 
-        {/* LAYOUT GRID: Surgical Balance */}
-        <div className="grid grid-cols-1 xl:grid-cols-[540px_1fr] gap-32 lg:gap-56 items-start">
+        {/* CONTENT GRID: Balanced & Universal */}
+        <div className="grid grid-cols-1 xl:grid-cols-[460px_1fr] gap-16 lg:gap-24 items-start">
           
-          {/* LEFT: Identity Column */}
-          <div className="flex flex-col gap-24 xl:sticky xl:top-16">
-             <div className="flex items-center gap-10 px-6">
-                <Target size={28} className="text-emerald-500/60" />
-                <h3 className="text-[14px] font-black uppercase tracking-[1.2em] text-white/30">IDENTITY_ENCLAVE</h3>
-                <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
+          {/* LEFT: ID Component */}
+          <div className="flex flex-col gap-12 xl:sticky xl:top-12">
+             <div className="flex items-center gap-6 px-4">
+                <Box size={18} className="text-emerald-500/40" />
+                <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white/20">IDENTIFICATION</h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
              </div>
              
              <PremiumIDCard 
@@ -161,29 +151,17 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                studentId={studentId} setStudentId={setStudentId}
                isSubmitting={isSubmittingProfile} onSubmit={handleProfileUpdate} onRefresh={refreshUser}
              />
-
-             <div className="p-16 bg-zinc-950/80 border-2 border-white/5 rounded-[4rem] backdrop-blur-[60px] shadow-[0_60px_120px_rgba(0,0,0,1)] relative overflow-hidden group">
-                <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-emerald-500/[0.04] blur-[120px] rounded-full" />
-                <div className="relative z-10 space-y-10">
-                   <div className="flex items-center gap-6">
-                      <Sparkles size={20} className="text-emerald-500" />
-                      <span className="text-[12px] font-black text-emerald-400 uppercase tracking-[0.8em]">Secure_Matrix</span>
-                   </div>
-                   <h4 className="text-4xl font-black text-white italic tracking-tight uppercase leading-none">Global_Persistence</h4>
-                   <p className="text-lg text-white/40 leading-relaxed font-medium">Your identity node is anchored to the Margdarshak cloud lattice. Secure, colorful, and synchronized across all universal terminals.</p>
-                </div>
-             </div>
           </div>
 
-          {/* RIGHT: Modules Column */}
-          <div className="flex flex-col gap-24">
-            <div className="flex items-center gap-10 px-6">
-               <div className="h-px flex-1 bg-gradient-to-l from-white/20 to-transparent" />
-               <h3 className="text-[14px] font-black uppercase tracking-[1.2em] text-white/30">SYSTEM_CONFIG</h3>
-               <Layers size={28} className="text-emerald-500/60" />
+          {/* RIGHT: Modules */}
+          <div className="flex flex-col gap-12">
+            <div className="flex items-center gap-6 px-4">
+               <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
+               <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white/20">SYSTEM_CONFIG</h3>
+               <Activity size={18} className="text-emerald-500/40" />
             </div>
 
-            <div className="grid gap-16">
+            <div className="grid gap-10">
                {[
                  { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
                  { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
@@ -192,10 +170,10 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                ].map(({ Component, props }, i) => (
                  <motion.div
                    key={i}
-                   initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                   viewport={{ once: true, margin: "-100px" }}
-                   transition={{ duration: 1, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                   initial={{ opacity: 0, y: 15 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   viewport={{ once: true }}
+                   transition={{ duration: 0.4, delay: i * 0.05 }}
                  >
                     <Component {...props} />
                  </motion.div>
@@ -204,8 +182,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           </div>
         </div>
 
-        {/* FOOTER */}
-        <div className="mt-80 pt-40 border-t border-white/5 text-center">
+        <div className="mt-48 pt-24 border-t border-white/5 text-center">
            <SettingsFooter />
         </div>
       </div>
