@@ -1,10 +1,61 @@
-/**
- * SecurityHardening.ts
- * "Maxxed" security measures with a whitelist for Google AdSense and Search bots.
- */
+import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
 
 export const initSecurityHardening = () => {
   const isDev = import.meta.env.DEV;
+  let userIP = 'unknown';
+
+  // Get IP address on load
+  fetch('https://api.ipify.org?format=json')
+    .then(res => res.json())
+    .then(data => userIP = data.ip)
+    .catch(() => {});
+
+  const logViolation = async (type: string, metadata: any = {}) => {
+    try {
+      const user = await supabaseHelpers.getCurrentUser();
+      const payload = {
+        event_type: type,
+        user_id: user?.id || null,
+        ip_address: userIP,
+        risk_level: 'critical',
+        metadata: {
+          ...metadata,
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+          timestamp: new Date().toISOString(),
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          platform: navigator.platform
+        },
+        summary: `Security Violation: ${type} detected from ${userIP}`
+      };
+
+      // Log to security_logs table
+      await supabase.from('security_logs').insert(payload);
+      
+      // Log to security_threats table for immediate visibility
+      await supabase.from('security_threats').insert({
+        event_type: type,
+        user_id: user?.id || null,
+        ip_address: userIP,
+        threat_level: 'critical',
+        threat_score: 95,
+        summary: `CRITICAL: ${type} detected from ${userIP}. User Auto-Blocked.`,
+        metadata: payload.metadata
+      });
+
+      // If user is identified, auto-block them
+      if (user?.id) {
+        await supabase.from('profiles').update({ 
+          risk_level: 'critical',
+          security_score: 0,
+          is_blocked: true,
+          blocked_reason: `System Auto-Block: ${type} detected at ${new Date().toLocaleString()}`
+        }).eq('id', user.id);
+      }
+    } catch (err) {
+      console.error('Failed to log security violation:', err);
+    }
+  };
 
   // --- 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO) ---
   const isGoogleBot = () => {
@@ -164,6 +215,7 @@ export const initSecurityHardening = () => {
         if (!devtoolsOpen) {
           devtoolsOpen = true;
           createOverlay('Developer tools detected. Access restricted.');
+          logViolation('DevTools Access Attempt', { state: 'detected' });
         }
       } else {
         if (devtoolsOpen) {

@@ -1,20 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
-import { setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
+import { supabase, setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface AuthContextValue {
-  session: any | null;
-  loading: boolean;
   user: any | null;
+  isBlocked: boolean;
+  blockedReason: string | null;
 }
 
-export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true, user: null });
+export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true, user: null, isBlocked: false, blockedReason: null });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { session: clerkSession, isLoaded: sessionLoaded } = useSession();
   const { user: clerkUser, isLoaded: userLoaded } = useUser();
   const [loading, setLoading] = useState(true);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockedReason, setBlockedReason] = useState<string | null>(null);
 
   // Sync Clerk Session with Supabase Client
   useEffect(() => {
@@ -67,6 +68,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             console.log('Supabase Sync: Profile synced successfully');
           }
+
+          // Check if blocked in Supabase
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_blocked, blocked_reason')
+            .eq('id', clerkUser.id)
+            .maybeSingle();
+
+          if (profile?.is_blocked) {
+            setIsBlocked(true);
+            setBlockedReason(profile.blocked_reason || 'Access restricted for security reasons.');
+          }
           
         } catch (err) {
           console.error('Unexpected sync error:', err);
@@ -88,6 +101,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session: clerkSession || null,
     user: clerkUser || null,
     loading: !sessionLoaded || !userLoaded || loading,
+    isBlocked,
+    blockedReason
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

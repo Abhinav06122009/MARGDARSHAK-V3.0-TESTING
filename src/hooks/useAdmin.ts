@@ -98,7 +98,7 @@ export const useAdmin = () => {
         analyticsRes
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
-        supabase.from('security_logs').select('*'),
+        supabase.from('security_threats').select('*'),
         supabase.from('admin_reports').select('*'),
         supabase.from('blocked_users').select('*'),
         supabase.from('contact_messages').select('*'),
