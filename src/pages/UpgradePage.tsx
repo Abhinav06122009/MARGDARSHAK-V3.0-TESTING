@@ -78,11 +78,11 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onBack }) => {
             title="Premium"
             price="₹750"
             features={[
-              '50 GB Storage',
-              'AI Note Summarization (Soon)',
-              'Task Bulk Operations',
-              'Task Timer',
+              'AI Daily Briefing',
+              'AI Note Summarization',
+              'Task Timer & Analytics',
               'Full Progress Tracker Access',
+              '50 GB Cloud Storage',
               'Priority Support'
             ]}
             icon={Star}
@@ -99,14 +99,15 @@ const UpgradePage: React.FC<UpgradePageProps> = ({ onBack }) => {
             }
           />
           <PlanCard
-            title="Extra++"
+            title="Extra++ Elite"
             price="₹1200"
             features={[
               'All Premium Features',
+              'AI Burnout Predictor',
+              'Performance Trends',
+              '24/7 Smart Tutor AI',
               '500 GB Expandable Storage',
-              'Advanced AI Coach Insights (Soon)',
-              'Team Collaboration (Soon)',
-              'Dedicated Onboarding'
+              'Ultimate Security Hardening'
             ]}
             isFeatured
             icon={Zap}

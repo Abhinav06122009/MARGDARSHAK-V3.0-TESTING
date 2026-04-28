@@ -39,9 +39,9 @@ const UpgradeCard = () => {
         {/* Feature List */}
         <div className="space-y-3 mb-8">
           {[
-            "Unlimited AI Image Gen",
-            "Full PCMB Vault Access",
-            "Fast AI Processing"
+            "AI Smart Tutor & Coach",
+            "Burnout Prediction AI",
+            "Full Performance Analytics"
           ].map((feature, i) => (
             <div key={i} className="flex items-center gap-3 text-sm text-gray-300">
               <div className="p-0.5 rounded-full bg-amber-500/20 text-amber-500">
