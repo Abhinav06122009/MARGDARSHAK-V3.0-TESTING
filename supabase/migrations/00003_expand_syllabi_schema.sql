@@ -25,6 +25,8 @@ ADD COLUMN IF NOT EXISTS tags text[] default '{}',
 ADD COLUMN IF NOT EXISTS language text default 'English',
 ADD COLUMN IF NOT EXISTS difficulty_level text default 'Intermediate',
 ADD COLUMN IF NOT EXISTS estimated_workload_hours int,
+ADD COLUMN IF NOT EXISTS is_deleted boolean default false,
+ADD COLUMN IF NOT EXISTS deleted_at timestamptz,
 ADD COLUMN IF NOT EXISTS updated_at timestamptz default now();
 
 -- Add trigger for updated_at
