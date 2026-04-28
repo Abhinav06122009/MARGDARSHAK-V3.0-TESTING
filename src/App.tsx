@@ -19,6 +19,7 @@ import { GlobalWellnessBar } from '@/components/wellness/GlobalWellnessBar';
 import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
+import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
@@ -255,6 +256,7 @@ const App = () => {
                         </AnimatePresence>
                         <AIWidgetWrapper />
                         <GlobalWellnessBar />
+                        <GlobalQuickActions />
                         <MobileNavbar />
                         <ShortcutsOverlay />
                         <Toaster />
