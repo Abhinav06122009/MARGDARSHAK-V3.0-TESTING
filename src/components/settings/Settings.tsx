@@ -35,7 +35,8 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     setDyslexiaMode,
     passkeyCount,
     handleProfileUpdate,
-    handlePasswordUpdate
+    handlePasswordUpdate,
+    refreshUser
   } = useSettings();
 
   if (loading) {
