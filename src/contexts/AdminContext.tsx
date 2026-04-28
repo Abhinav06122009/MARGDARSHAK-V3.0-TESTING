@@ -85,14 +85,24 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     ];
     
     const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
+    const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
     
     const isMaster = MASTER_IDS.includes(clerkUser?.id || '') || 
-                     MASTER_EMAILS.includes(clerkUser?.primaryEmailAddress?.emailAddress || '');
+                     MASTER_EMAILS.includes(userEmail);
     
-    // REMOVED "NUCLEAR" DETECTION TO PREVENT ROLE LEAKAGE
-    // Only allow explicit roles or master status
+    const finalAdminStatus = isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster;
 
-    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster);
+    console.log(`🛡️ [ADMIN ACCESS] Identity: ${userEmail} | Status: ${finalAdminStatus ? 'GRANTED' : 'DENIED'}`);
+    if (finalAdminStatus) {
+      console.log('--- Verification Matrix ---');
+      console.log(`> RPC Verified: ${isRpcAdmin}`);
+      console.log(`> Profile Verified: ${isProfileAdmin} (Role: ${profileData?.user_type})`);
+      console.log(`> Metadata Verified: ${isClerkAdmin} (Role: ${clerkRole})`);
+      console.log(`> Master Override: ${isMaster}`);
+      console.log('---------------------------');
+    }
+
+    setIsAdmin(finalAdminStatus);
     setLoading(false);
   };
 

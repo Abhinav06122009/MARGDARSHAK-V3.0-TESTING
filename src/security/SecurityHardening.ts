@@ -2,99 +2,108 @@ import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
 
 export const initSecurityHardening = () => {
   const isDev = import.meta.env.DEV;
+
+  // Identity & IP Tracking
   let userIP = 'unknown';
+  const resolveIP = async () => {
+    if (userIP !== 'unknown') return userIP;
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      userIP = data.ip;
+      return userIP;
+    } catch { return 'unknown'; }
+  };
+  resolveIP();
 
-  // Get IP address on load
-  fetch('https://api.ipify.org?format=json')
-    .then(res => res.json())
-    .then(data => userIP = data.ip)
-    .catch(() => {});
+  const getFingerprint = () => ({
+    ua: navigator.userAgent,
+    lang: navigator.language,
+    scr: `${window.screen.width}x${window.screen.height}`,
+    plat: navigator.platform,
+    cores: navigator.hardwareConcurrency,
+    mem: (navigator as any).deviceMemory
+  });
 
-  const getFingerprint = () => {
-    return {
-      ua: navigator.userAgent,
-      lang: navigator.language,
-      platform: navigator.platform,
-      cores: navigator.hardwareConcurrency,
-      mem: (navigator as any).deviceMemory,
-      res: `${window.screen.width}x${window.screen.height}`,
-      depth: window.screen.colorDepth,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      touch: navigator.maxTouchPoints,
-    };
+  // --- 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO) ---
+  const isGoogleBot = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    return (
+      ua.includes('googlebot') || 
+      ua.includes('mediapartners-google') || 
+      ua.includes('adsbot-google') ||
+      ua.includes('google-adwords') ||
+      ua.includes('adsense')
+    );
   };
 
   const logViolation = async (type: string, metadata: any = {}) => {
-    // FINAL SAFETY: Exempt Google bots from the strike system
     if (isGoogleBot()) return;
 
     try {
-      // 1. Identification
-      let userId: string | null = null;
-      let userEmail: string | null = null;
-      const user = await supabaseHelpers.getCurrentUser();
-      if (user) { userId = user.id; userEmail = user.email; }
-      if (!userId && (window as any).Clerk?.user) {
-        userId = (window as any).Clerk.user.id;
-        userEmail = (window as any).Clerk.user.primaryEmailAddress?.emailAddress;
-      }
-
-      // 2. Strike Check
-      const { data: existingThreats } = await supabase
-        .from('security_threats')
-        .select('id')
-        .or(`ip_address.eq.${userIP}${userId ? `,user_id.eq.${userId}` : ''}`)
-        .eq('event_type', type);
-
-      const strikes = (existingThreats?.length || 0) + 1;
-      const fingerprint = getFingerprint();
-      const persistentId = localStorage.getItem('mg_sid') || 'new-trace-' + Math.random().toString(36).slice(2);
+      const currentIP = await resolveIP();
+      const persistentId = localStorage.getItem('mg_sid') || 'trace-' + Math.random().toString(36).slice(2);
       if (!localStorage.getItem('mg_sid')) localStorage.setItem('mg_sid', persistentId);
 
-      // 3. Logic: Strike 1 vs Strike 2
+      // 1. Identification
+      let userId: string | null = null;
+      const user = await supabaseHelpers.getCurrentUser();
+      if (user) userId = user.id;
+      if (!userId && (window as any).Clerk?.user) userId = (window as any).Clerk.user.id;
+
+      // 2. Heavy Strike Check (IP + Forensic ID + Local Cache)
+      const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
+      
+      const { data: dbThreats } = await supabase
+        .from('security_threats')
+        .select('id')
+        .or(`ip_address.eq.${currentIP},metadata->>persistent_id.eq.${persistentId}${userId ? `,user_id.eq.${userId}` : ''}`)
+        .eq('event_type', type);
+
+      const dbStrikeCount = dbThreats?.length || 0;
+      const strikes = Math.max(localStrikes, dbStrikeCount) + 1;
+      
+      // Update Local Cache immediately
+      localStorage.setItem('mg_security_strikes', strikes.toString());
+
+      const fingerprint = getFingerprint();
+
       if (strikes === 1) {
         // --- STRIKE 1: YELLOW ALERT ---
         await supabase.from('security_threats').insert({
           event_type: type,
           user_id: userId,
-          ip_address: userIP,
+          ip_address: currentIP,
           threat_level: 'warning',
           threat_score: 50,
-          summary: `STRIKE 1: ${type} detected. Warning issued to ${userIP}`,
+          summary: `STRIKE 1: ${type} detected. Forensic ID: ${persistentId}`,
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 1 }
         });
 
-        // Show Scary Warning (Using custom event to trigger UI)
-        window.dispatchEvent(new CustomEvent('security-warning', { 
-          detail: { type, ip: userIP } 
-        }));
-        
-        console.warn('🛡️ SECURITY STRIKE 1: Your IP has been logged. Further attempts will result in a PERMANENT BAN.');
+        window.dispatchEvent(new CustomEvent('security-warning', { detail: { type, ip: currentIP } }));
+        console.warn('🛡️ SECURITY STRIKE 1: LOGGED.');
       } else {
         // --- STRIKE 2: RED ALERT (BAN) ---
         await supabase.from('security_threats').insert({
           event_type: type,
           user_id: userId,
-          ip_address: userIP,
+          ip_address: currentIP,
           threat_level: 'critical',
           threat_score: 100,
-          summary: `STRIKE 2: Persistent ${type} detected. PERMANENT BAN executed for ${userIP}`,
+          summary: `STRIKE 2: Persistent ${type}. PERMANENT BAN EXECUTED. Forensic ID: ${persistentId}`,
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 2 }
         });
 
         if (userId) {
           await supabase.from('profiles').update({ 
             is_blocked: true,
-            blocked_reason: `STRIKE 2: Persistent security violation (${type}). Automated forensic ban executed.`
+            blocked_reason: `STRIKE 2: Persistent security violation (${type}). Forensic ID: ${persistentId}`
           }).eq('id', userId);
         }
 
-        // Force Lockdown UI
-        window.dispatchEvent(new CustomEvent('security-ban', { 
-          detail: { type, ip: userIP } 
-        }));
-
-        console.error('🛡️ SECURITY STRIKE 2: PERMANENT BAN EXECUTED.');
+        // Trigger Ban Overlay & Force Lockdown
+        window.dispatchEvent(new CustomEvent('security-ban', { detail: { type, ip: currentIP } }));
+        console.error('🛡️ SECURITY STRIKE 2: BAN EXECUTED.');
       }
     } catch (err) {
       if (isDev) console.error('Tracing error:', err);
