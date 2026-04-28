@@ -65,8 +65,29 @@ exports.handler = async (event) => {
     .eq('id', user.id)
     .single();
 
-  let userTier = profile?.subscription_tier || 'free';
+  // --- ROBUST TIER DETECTION (CLERK-FIRST) ---
+  const metadata = user.metadata || {};
+  const unsafeMetadata = user.unsafe_metadata || {};
+  const jwtPayload = user._raw || {};
   
+  // Extract from multiple possible JWT paths
+  const subscription = metadata.subscription || unsafeMetadata.subscription || jwtPayload.subscription || {};
+  let userTier = (
+    subscription.tier || 
+    metadata.subscription_tier || 
+    unsafeMetadata.subscription_tier || 
+    metadata.tier || 
+    profile?.subscription_tier || 
+    'free'
+  ).toLowerCase();
+
+  // Fuzzy Search in JWT (Powerful fallback for all users)
+  const rawTokenData = JSON.stringify(user._raw).toLowerCase();
+  if (userTier === 'free') {
+    if (rawTokenData.includes('elite')) userTier = 'premium_elite';
+    else if (rawTokenData.includes('premium')) userTier = 'premium';
+  }
+
   // MASTER OVERRIDE for Abhinav Jha
   if (user.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
     userTier = 'premium_elite';
@@ -76,7 +97,7 @@ exports.handler = async (event) => {
 
   // Logic: Elite can use inbuilt key. Premium MUST use their own.
   const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'elite'];
-  const isElite = ELITE_TIERS.includes(userTier.toLowerCase());
+  const isElite = ELITE_TIERS.includes(userTier);
 
   let apiKeyToUse = userApiKey;
   

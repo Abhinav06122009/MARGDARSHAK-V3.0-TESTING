@@ -132,7 +132,11 @@ const verifyClerkUser = async (authHeader) => {
       ok: true, 
       user: { 
         id: payload.sub, 
-        email: payload.email || payload.sub + "@clerk.user" 
+        email: payload.email || payload.sub + "@clerk.user",
+        metadata: payload.public_metadata || payload.metadata || {},
+        unsafe_metadata: payload.unsafe_metadata || {},
+        // Include the raw payload for deep extraction
+        _raw: payload
       } 
     };
   } catch (err) {
