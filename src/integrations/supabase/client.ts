@@ -110,23 +110,29 @@ export const supabaseHelpers = {
       const metadata = clerkUser.publicMetadata || {};
       const unsafeMetadata = clerkUser.unsafeMetadata || {};
       
-      console.log('🛡️ [Clerk Metadata Full Scan]:', {
+      console.log('🛡️ [Clerk Metadata Full Scan]:', JSON.stringify({
         public: metadata,
         unsafe: unsafeMetadata,
-        rawUser: clerkUser ? 'Available' : 'Missing',
         clerkId: clerkUser?.id
-      });
+      }, null, 2));
       
       const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
       const role = metadata.role || (unsafeMetadata as any).role || (metadata as any).user_type || (unsafeMetadata as any).user_type || 'student';
       
       // Support multiple metadata formats (flat or nested)
-      const tier = subscription.tier || 
+      let tier = (subscription.tier || 
                    (metadata as any).subscription_tier || 
                    (unsafeMetadata as any).subscription_tier || 
                    (metadata as any).tier || 
                    (unsafeMetadata as any).tier || 
-                   'free';
+                   'free').toLowerCase();
+
+      // FUZZY FALLBACK: If "premium" or "elite" is found anywhere in the raw metadata, force it
+      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+      if (tier === 'free') {
+        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      }
 
       return {
         id: clerkUser.id,

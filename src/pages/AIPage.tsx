@@ -54,10 +54,17 @@ const SmartTutorPage = () => {
       const metadata = clerkUser.publicMetadata || {};
       const unsafeMetadata = clerkUser.unsafeMetadata || {};
       const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-      const tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free');
+      let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free').toLowerCase();
       
+      // FUZZY FALLBACK
+      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+      if (tier === 'free') {
+        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
+        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      }
+
       console.log('[AI Page] Live Clerk Subscription:', tier);
-      setSubscriptionTier(tier.toLowerCase());
+      setSubscriptionTier(tier);
     }
   }, [clerkUser, clerkLoaded]);
 
