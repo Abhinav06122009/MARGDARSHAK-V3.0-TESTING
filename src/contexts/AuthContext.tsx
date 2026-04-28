@@ -43,8 +43,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             avatar_url: clerkUser.imageUrl,
             user_type: metadata.role || (metadata as any).user_type || 'student',
             subscription_tier: subscription.tier || (metadata as any).subscription_tier || 'free',
-            subscription_status: subscription.status || (metadata as any).subscription_status || 'inactive',
-            subscription_period_end: subscription.period_end || (metadata as any).subscription_period_end || null,
+            subscription: {
+              tier: subscription.tier || (metadata as any).subscription_tier || 'free',
+              status: subscription.status || (metadata as any).subscription_status || 'inactive',
+              period_end: subscription.period_end || (metadata as any).subscription_period_end || null,
+            },
             updated_at: new Date().toISOString()
           };
 

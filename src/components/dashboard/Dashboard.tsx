@@ -196,7 +196,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const hasPremiumAccess = useMemo(() => {
     const tierFromHook = currentUser?.profile?.subscription_tier;
-    const effectiveTier = (realSubscriptionTier || tierFromHook || '').toLowerCase();
+    const effectiveTier = (realSubscriptionTier || tierFromHook || 'free').toLowerCase();
+    
+    console.log('[Dashboard] Access Check:', {
+      effectiveTier,
+      realSubscriptionTier,
+      tierFromHook,
+      hasAccess: effectiveTier.includes('premium') || effectiveTier.includes('elite')
+    });
+
     return effectiveTier.includes('premium') || effectiveTier.includes('elite');
   }, [currentUser, realSubscriptionTier]);
 
@@ -267,7 +275,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     }));
   }, [analytics]);
 
-  if (loading || !securityVerified || !dashboardStats) return <DashboardSkeleton />;
+  if (loading || !securityVerified || !dashboardStats || !currentUser) return <DashboardSkeleton />;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30">
@@ -295,7 +303,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <header className="flex flex-col gap-4">
           <DashboardHeader
             currentUser={currentUser}
-            realRole={realRole} // PASSED: The force-fetched role
+            realRole={realRole} 
             isOnline={isOnline}
             refreshing={refreshing}
             onRefresh={handleRefresh}
@@ -303,7 +311,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             onOpenFeatureSpotlight={() => {}}
           />
           <WelcomeHeader 
-            fullName={realFullName || currentUser.profile?.full_name || currentUser.user_metadata?.full_name} 
+            fullName={realFullName || currentUser?.profile?.full_name || currentUser?.user_metadata?.full_name} 
             totalTasks={dashboardStats.totalTasks} 
             totalCourses={dashboardStats.totalCourses} 
             totalStudySessions={dashboardStats.totalStudySessions} 
