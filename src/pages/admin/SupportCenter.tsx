@@ -10,14 +10,15 @@ const SupportCenter = () => {
 
   const activeTickets = tickets.filter(t => t.status !== 'completed');
 
-  const handleComplete = async (id: string) => {
+  const handleComplete = async (id: string, type: 'contact' | 'ticket') => {
     try {
+      const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
       const { error } = await supabase
-        .from('contact_messages')
+        .from(table)
         .update({ 
           status: 'completed',
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -74,23 +75,32 @@ const SupportCenter = () => {
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 text-indigo-400 font-bold uppercase">
-                        {ticket.first_name?.[0] || <AlertCircle className="w-5 h-5" />}
+                        {ticket.type === 'ticket' ? <LifeBuoy className="w-5 h-5" /> : (ticket.first_name?.[0] || <AlertCircle className="w-5 h-5" />)}
                       </div>
                       <div className="max-w-2xl">
-                        <p className="text-sm font-bold text-white tracking-wide">{ticket.first_name} {ticket.last_name} <span className="text-zinc-500 font-normal">({ticket.email})</span></p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-white tracking-wide">
+                            {ticket.type === 'ticket' ? ticket.subject : `${ticket.first_name} ${ticket.last_name}`}
+                          </p>
+                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${ticket.type === 'ticket' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                            {ticket.type}
+                          </span>
+                        </div>
                         <p className="text-[10px] font-mono text-zinc-500 mt-1 mb-2 flex items-center gap-1.5">
-                          <Clock className="w-3 h-3" /> {new Date(ticket.created_at).toLocaleString()}
+                          <Clock className="w-3 h-3" /> {new Date(ticket.created_at).toLocaleString()} {ticket.email && `• ${ticket.email}`}
                         </p>
                         <p className="text-sm text-zinc-300 leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">{ticket.message}</p>
                       </div>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <span className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest text-center whitespace-nowrap">
-                        {ticket.status || 'open'}
+                      <span className={`px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest text-center whitespace-nowrap ${
+                        ticket.status === 'open' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                      }`}>
+                        {ticket.status || 'pending'}
                       </span>
                       <button 
-                        onClick={() => handleComplete(ticket.id)}
+                        onClick={() => handleComplete(ticket.id, ticket.type)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-black uppercase tracking-widest transition-all hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] whitespace-nowrap"
                       >
                         <CheckCircle2 className="w-3 h-3" /> Mark Completed

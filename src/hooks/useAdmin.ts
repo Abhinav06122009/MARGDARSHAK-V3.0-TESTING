@@ -44,8 +44,10 @@ export interface SupportTicket {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
+  subject?: string | null;
   message?: string | null;
   status?: string | null;
+  type: 'contact' | 'ticket';
 }
 
 export interface ModerationQueueItem {
@@ -90,6 +92,7 @@ export const useAdmin = () => {
         reportsRes, 
         blockedRes, 
         ticketsRes,
+        supportTicketsRes,
         settingsRes,
         moderationRes,
         analyticsRes
@@ -99,6 +102,7 @@ export const useAdmin = () => {
         supabase.from('admin_reports').select('*'),
         supabase.from('blocked_users').select('*'),
         supabase.from('contact_messages').select('*'),
+        supabase.from('support_tickets').select('*'),
         supabase.from('security_settings').select('*').eq('id', 'global').single(),
         supabase.from('moderation_queue').select('*'),
         supabase.from('daily_metrics').select('*')
@@ -120,10 +124,13 @@ export const useAdmin = () => {
         );
       }
 
-      if (ticketsRes.data) {
-        setTickets(ticketsRes.data
+      if (ticketsRes.data || supportTicketsRes.data) {
+        const contactMsgs = (ticketsRes.data || []).map((m: any) => ({ ...m, type: 'contact' }));
+        const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ ...m, type: 'ticket', first_name: 'Ticket', last_name: `#${m.id.slice(0,4)}` }));
+        
+        setTickets([...contactMsgs, ...supportTkts]
           .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 20)
+          .slice(0, 50)
         );
       }
 

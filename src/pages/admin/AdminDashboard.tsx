@@ -2,12 +2,12 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
 import ThreatCard from '@/components/admin/ThreatCard';
 import { useAdmin } from '@/hooks/useAdmin';
-import { ShieldCheck, User, AlertTriangle, Ban, Loader2, DatabaseZap } from 'lucide-react';
+import { ShieldCheck, User, AlertTriangle, Ban, Loader2, DatabaseZap, LifeBuoy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SentryTestButton } from '@/integrations/SentryDiagnostics';
 
 const AdminDashboard = () => {
-  const { stats, threats, users, loading } = useAdmin();
+  const { stats, threats, users, tickets, loading } = useAdmin();
 
   return (
     <AdminLayout>
@@ -17,10 +17,11 @@ const AdminDashboard = () => {
           <p className="text-sm font-bold text-zinc-500 tracking-wide mt-1">Live snapshot of system health and policy enforcement.</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard title="Total Users" value={stats?.totalUsers ?? '—'} icon={<User className="h-5 w-5" />} />
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+          <StatCard title="Total Users" value={users.length} icon={<User className="h-5 w-5" />} />
           <StatCard title="Elite Members" value={users.filter(u => u.subscription_tier === 'premium_elite').length} icon={<DatabaseZap className="h-5 w-5 text-purple-400" />} />
           <StatCard title="Premium Users" value={users.filter(u => u.subscription_tier === 'premium').length} icon={<ShieldCheck className="h-5 w-5 text-amber-400" />} />
+          <StatCard title="Pending Support" value={tickets.filter(t => t.status !== 'completed').length} icon={<LifeBuoy className="h-5 w-5 text-indigo-400" />} />
           <StatCard title="Blocked Users" value={stats?.blockedUsers ?? '—'} icon={<Ban className="h-5 w-5" />} />
         </div>
 
