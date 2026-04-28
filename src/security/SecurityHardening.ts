@@ -25,25 +25,33 @@ export const initSecurityHardening = () => {
     mem: (navigator as any).deviceMemory
   });
 
+  // Violation Cooldown (Prevent Double-Striking)
+  const violationCooldowns = new Map<string, number>();
+
   const logViolation = async (type: string, metadata: any = {}) => {
-    // 0. BOT WHITELISTING (CRITICAL FOR ADSENSE/SEO)
+    // 0. BOT WHITELISTING
     const ua = navigator.userAgent.toLowerCase();
-    if (ua.includes('googlebot') || ua.includes('adsense') || ua.includes('google-adwords')) return;
+    if (ua.includes('googlebot') || ua.includes('adsense')) return;
+
+    // 1. Cooldown Check (5 second window)
+    const now = Date.now();
+    const lastTrigger = violationCooldowns.get(type) || 0;
+    if (now - lastTrigger < 5000) return;
+    violationCooldowns.set(type, now);
 
     try {
       const currentIP = await resolveIP();
       const persistentId = localStorage.getItem('mg_sid') || 'trace-' + Math.random().toString(36).slice(2);
       if (!localStorage.getItem('mg_sid')) localStorage.setItem('mg_sid', persistentId);
 
-      // 1. Identification
+      // Identification
       let userId: string | null = null;
       const user = await supabaseHelpers.getCurrentUser();
       if (user) userId = user.id;
       if (!userId && (window as any).Clerk?.user) userId = (window as any).Clerk.user.id;
 
-      // 2. Heavy Strike Check (IP + Forensic ID + Local Cache)
+      // Heavy Strike Check
       const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
-      
       const { data: dbThreats } = await supabase
         .from('security_threats')
         .select('id')
