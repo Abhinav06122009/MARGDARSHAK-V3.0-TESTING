@@ -180,8 +180,11 @@ const callGateway = async (messages: any[], options: RouterOptions): Promise<str
     Authorization: `Bearer ${session.access_token}`,
   };
 
-  if (options.userApiKey?.trim()) {
-    headers['X-User-API-Key'] = options.userApiKey.trim();
+  // Automatically inject BYOK if available in localStorage and not explicitly provided
+  const effectiveApiKey = options.userApiKey?.trim() || localStorage.getItem('openrouter_api_key')?.trim();
+  
+  if (effectiveApiKey) {
+    headers['X-User-API-Key'] = effectiveApiKey;
   }
 
   let res: Response;

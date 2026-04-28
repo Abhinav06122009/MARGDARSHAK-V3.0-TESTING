@@ -17,6 +17,12 @@ export async function authedFetch(
     if (init.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
+    
+    // Automatically inject BYOK if available in localStorage
+    const byokKey = localStorage.getItem('openrouter_api_key');
+    if (byokKey?.trim()) {
+      headers.set("X-User-API-Key", byokKey.trim());
+    }
     return fetch(input, { ...init, headers });
   };
 

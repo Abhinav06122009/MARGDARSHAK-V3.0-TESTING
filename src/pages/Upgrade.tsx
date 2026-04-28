@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@clerk/react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Check,
@@ -20,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 const Upgrade = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [currentTier, setCurrentTier] = useState<string | null>(null);
+  const { user: clerkUser } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -78,6 +80,34 @@ const Upgrade = () => {
         description: `Welcome to ${tier === 'premium_elite' ? 'Premium + Elite' : 'Premium'}.`,
         className: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
       });
+
+      // --- 3. SYNC WITH CLERK (INSTANT) ---
+      if (clerkUser) {
+        console.log("[Upgrade] Syncing with Clerk metadata...", tier);
+        await clerkUser.update({
+          unsafeMetadata: {
+            ...clerkUser.unsafeMetadata,
+            subscription: {
+              tier: tier,
+              status: 'active',
+              updatedAt: new Date().toISOString()
+            }
+          }
+        });
+      }
+
+      // --- 4. BACKEND PROFILE SYNC ---
+      try {
+        const { authedFetch } = await import('@/lib/ai/authedFetch');
+        await authedFetch('/.netlify/functions/profile-sync', {
+          method: 'POST',
+          body: JSON.stringify({
+            subscription: { tier, status: 'active' }
+          })
+        });
+      } catch (syncErr) {
+        console.error("[Upgrade] Backend sync failed, but local update succeeded:", syncErr);
+      }
 
       // Optional: Refresh page or redirect
       setTimeout(() => navigate('/ai-assistant'), 1500);
