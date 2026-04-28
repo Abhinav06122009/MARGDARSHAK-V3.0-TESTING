@@ -262,6 +262,22 @@ export default {
                                 'ping-slow': {
                                         '0%': { transform: 'scale(1)', opacity: '0.8' },
                                         '100%': { transform: 'scale(1.5)', opacity: '0' }
+                                },
+                                'reverse-spin': {
+                                        from: { transform: 'rotate(360deg)' },
+                                        to: { transform: 'rotate(0deg)' }
+                                },
+                                orbit: {
+                                        from: { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+                                        to: { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' }
+                                },
+                                glitch: {
+                                        '0%': { transform: 'translate(0)' },
+                                        '20%': { transform: 'translate(-2px, 2px)' },
+                                        '40%': { transform: 'translate(-2px, -2px)' },
+                                        '60%': { transform: 'translate(2px, 2px)' },
+                                        '80%': { transform: 'translate(2px, -2px)' },
+                                        '100%': { transform: 'translate(0)' }
                                 }
                         },
                         animation: {
@@ -287,7 +303,12 @@ export default {
                                 matrix: 'matrix 3s linear infinite',
                                 'particle-float': 'particle-float 4s ease-in-out infinite',
                                 scanline: 'scanline 4s linear infinite',
-                                'ping-slow': 'ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite'
+                                'ping-slow': 'ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+                                'spin-slow': 'spin 12s linear infinite',
+                                'reverse-spin': 'reverse-spin 15s linear infinite',
+                                orbit: 'orbit 20s linear infinite',
+                                glitch: 'glitch 0.3s ease-in-out infinite',
+                                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                         },
                         backdropBlur: {
                                 xs: '2px',
