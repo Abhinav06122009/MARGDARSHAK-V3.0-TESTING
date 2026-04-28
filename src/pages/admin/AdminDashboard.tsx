@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { SentryTestButton } from '@/integrations/SentryDiagnostics';
 
 const AdminDashboard = () => {
-  const { stats, threats, loading } = useAdmin();
+  const { stats, threats, users, loading } = useAdmin();
 
   return (
     <AdminLayout>
