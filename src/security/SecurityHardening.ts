@@ -119,15 +119,18 @@ export const initSecurityHardening = () => {
     // 3. Key Detection (PrintScreen / Win+Shift+S)
     window.addEventListener('keyup', (e) => {
       if (e.key === 'PrintScreen') {
+        // Just clear clipboard and notify, NO strike/ban
         navigator.clipboard.writeText('Security Policy: Screenshots are prohibited on MARGDARSHAK.');
-        logViolation('screenshot_attempt');
+        console.warn('Screenshot attempt blocked.');
       }
     });
 
     window.addEventListener('keydown', (e) => {
       // Win + Shift + S or Cmd + Shift + 4
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4')) {
-        logViolation('screenshot_shortcut');
+        // Just clear focus to trigger blur, NO strike/ban
+        window.blur();
+        console.warn('Screenshot shortcut detected. Content obscured.');
       }
     });
   };
