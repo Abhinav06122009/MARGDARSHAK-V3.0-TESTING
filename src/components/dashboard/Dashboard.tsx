@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/react';
-import { ArrowUp, Lock, Sparkles, TrendingUp } from 'lucide-react';
+import { 
+  LayoutDashboard, Calendar, FileText, Settings, BookOpen, 
+  Users, Award, Bell, Search, BrainCircuit, Target, 
+  TrendingUp, Clock, CheckCircle2, ChevronRight, Sparkles,
+  Lock, Play, Zap, GraduationCap, BarChart3, 
+  Shield, Activity, Globe, MessageSquare, ArrowUp
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';

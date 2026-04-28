@@ -3,7 +3,7 @@ import {
   Calendar, FileText, Book, Settings, ChevronRight,
   BrainCircuit, GraduationCap, BarChart3, Sparkles, Target,
   Library, MessageSquare, Image as ImageIcon, Trophy,
-  Briefcase, Timer, Headphones, Zap
+  Briefcase, Timer, Headphones, Zap, Lock
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
