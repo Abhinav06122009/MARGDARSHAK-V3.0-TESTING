@@ -89,11 +89,29 @@ const SEO = ({ title, description }: { title: string, description: string }) => 
 
 
 import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, PageLoader } from '@/components/auth/RouteGuards';
+import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
   if (!session) return null;
   return <GlobalAIAssistant />;
+};
+
+const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
+  const { isBlocked, blockedReason, loading } = useContext(AuthContext);
+  
+  if (isBlocked) {
+    return (
+      <>
+        <BlockedUserOverlay reason={blockedReason} />
+        <div className="blur-xl pointer-events-none select-none">
+          {children}
+        </div>
+      </>
+    );
+  }
+  
+  return <>{children}</>;
 };
 
 // Main App Structure
@@ -117,6 +135,7 @@ const App = () => {
                   <SecurityProvider>
                     <AIProvider>
                       <div className="bg-[#050505] min-h-screen text-white">
+                        <GlobalSecurityGuard>
                         <AnimatePresence mode="wait">
                           <Routes>
                             {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
@@ -262,6 +281,7 @@ const App = () => {
                         <Toaster />
                         <Sonner />
                         <CookieConsent />
+                        </GlobalSecurityGuard>
                       </div>
                     </AIProvider>
                   </SecurityProvider>

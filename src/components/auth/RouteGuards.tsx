@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import { AdminContext } from '@/contexts/AdminContext';
 import { courseService } from '@/components/dashboard/courseService';
+import { BlockedUserOverlay } from './BlockedUserOverlay';
 
 /**
  * Standard loading indicator for protected routes.
@@ -13,31 +14,31 @@ export const PageLoader = () => (
   </div>
 );
 
-/**
- * Displayed when a user is blocked for security reasons.
- */
-export const BlockedUserScreen = ({ reason }: { reason: string | null }) => (
-  <div className="fixed inset-0 z-[9999999] bg-black flex items-center justify-center p-6 text-center">
-    <div className="max-w-md w-full bg-zinc-900 border border-red-500/50 rounded-3xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
-      <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-        <span className="text-4xl">🚫</span>
-      </div>
-      <h1 className="text-3xl font-bold text-white mb-4">Account Restricted</h1>
-      <p className="text-zinc-400 mb-6">
-        Your access to MARGDARSHAK has been restricted due to a security violation or administrative action.
-      </p>
-      {reason && (
-        <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-6">
-          <p className="text-xs uppercase tracking-widest text-red-400 font-bold mb-1">Reason</p>
-          <p className="text-red-200 text-sm font-mono">{reason}</p>
-        </div>
-      )}
-      <p className="text-zinc-500 text-sm">
-        If you believe this is an error, please contact support@margdarshan.tech with your User ID.
-      </p>
-    </div>
-  </div>
-);
+- /**
+-  * Displayed when a user is blocked for security reasons.
+-  */
+- export const BlockedUserScreen = ({ reason }: { reason: string | null }) => (
+-   <div className="fixed inset-0 z-[9999999] bg-black flex items-center justify-center p-6 text-center">
+-     <div className="max-w-md w-full bg-zinc-900 border border-red-500/50 rounded-3xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
+-       <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+-         <span className="text-4xl">🚫</span>
+-       </div>
+-       <h1 className="text-3xl font-bold text-white mb-4">Account Restricted</h1>
+-       <p className="text-zinc-400 mb-6">
+-         Your access to MARGDARSHAK has been restricted due to a security violation or administrative action.
+-       </p>
+-       {reason && (
+-         <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-6">
+-           <p className="text-xs uppercase tracking-widest text-red-400 font-bold mb-1">Reason</p>
+-           <p className="text-red-200 text-sm font-mono">{reason}</p>
+-         </div>
+-       )}
+-       <p className="text-zinc-500 text-sm">
+-         If you believe this is an error, please contact support@margdarshan.tech with your User ID.
+-       </p>
+-     </div>
+-   </div>
+- );
 
 /**
  * Ensures user is authenticated before allowing access.
@@ -51,7 +52,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [session, loading, navigate]);
   
   if (loading) return null;
-  if (isBlocked) return <BlockedUserScreen reason={blockedReason} />;
+  if (isBlocked) return <BlockedUserOverlay reason={blockedReason} />;
   return session ? <>{children}</> : null;
 };
 
