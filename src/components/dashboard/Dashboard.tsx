@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useUser } from '@clerk/react';
 import { ArrowUp, Lock, Sparkles, TrendingUp } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -158,9 +159,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
   const [showBackToTop, setShowBackToTop] = useState(false);
   
-  const realSubscriptionTier = (currentUser?.user_metadata?.subscription as any)?.tier || (currentUser?.user_metadata as any)?.subscription_tier || currentUser?.profile?.subscription_tier || null;
-  const realRole = currentUser?.profile?.role || currentUser?.profile?.user_type || null;
-  const realFullName = currentUser?.user_metadata?.full_name || currentUser?.profile?.full_name || 'Scholar';
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  
+  const realSubscriptionTier = useMemo(() => {
+    if (!clerkLoaded || !clerkUser) return currentUser?.profile?.subscription_tier || null;
+    const metadata = clerkUser.publicMetadata || {};
+    const subscription = (metadata.subscription as any) || {};
+    return (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || currentUser?.profile?.subscription_tier || 'free').toLowerCase();
+  }, [clerkUser, clerkLoaded, currentUser]);
+
+  const realRole = useMemo(() => {
+    if (!clerkLoaded || !clerkUser) return currentUser?.profile?.role || currentUser?.profile?.user_type || null;
+    return (clerkUser.publicMetadata?.role || (clerkUser.publicMetadata as any)?.user_type || currentUser?.profile?.role || 'student').toLowerCase();
+  }, [clerkUser, clerkLoaded, currentUser]);
+
+  const realFullName = useMemo(() => {
+    if (!clerkLoaded || !clerkUser) return currentUser?.user_metadata?.full_name || currentUser?.profile?.full_name || 'Scholar';
+    return clerkUser.fullName || 
+           (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || clerkUser.username || currentUser?.user_metadata?.full_name || 'Scholar');
+  }, [clerkUser, clerkLoaded, currentUser]);
   
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 400);
@@ -195,18 +212,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }, [analytics, realIncompleteTasksCount, dashboardStats]);
 
   const hasPremiumAccess = useMemo(() => {
-    const metadataTier = (currentUser?.user_metadata?.subscription as any)?.tier || (currentUser?.user_metadata as any)?.subscription_tier;
-    const effectiveTier = (realSubscriptionTier || metadataTier || 'free').toLowerCase();
+    const effectiveTier = (realSubscriptionTier || 'free').toLowerCase();
     
     console.log('[Dashboard] Access Check:', {
       effectiveTier,
-      realSubscriptionTier,
-      metadataTier,
       hasAccess: effectiveTier.includes('premium') || effectiveTier.includes('elite')
     });
 
     return effectiveTier.includes('premium') || effectiveTier.includes('elite');
-  }, [currentUser, realSubscriptionTier]);
+  }, [realSubscriptionTier]);
 
   const filteredTasks = useMemo(() => {
     if (!activeTasks) return [];

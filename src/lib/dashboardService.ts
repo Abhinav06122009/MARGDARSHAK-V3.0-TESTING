@@ -31,7 +31,7 @@ export const dashboardService = {
 
       const fullName = clerkUser.user_metadata?.full_name || profile?.full_name || 'Scholar';
       const role = clerkUser.role || profile?.user_type || profile?.role || 'student';
-      const tier = clerkUser.subscription?.tier || profile?.subscription_tier || 'free';
+      const tier = clerkUser.subscription?.tier || clerkUser.user_metadata?.subscription_tier || profile?.subscription_tier || 'free';
 
       return {
         id: clerkUser.id,

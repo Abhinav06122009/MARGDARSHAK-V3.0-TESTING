@@ -10,6 +10,7 @@ import {
 import logo from "@/components/logo/logo.png";
 import type { SecureUser } from '@/types/dashboard';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/react';
 
 interface DashboardHeaderProps {
   currentUser: SecureUser;
@@ -56,9 +57,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const displayRole = (realRole || currentUser.profile?.role || 'STUDENT').toUpperCase();
-  const nameToUse = currentUser.user_metadata?.full_name || currentUser.profile?.full_name || currentUser.email || 'User';
-  const initials = nameToUse
-    .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+
+  const nameToUse = useMemo(() => {
+    if (clerkLoaded && clerkUser) {
+      return clerkUser.fullName || 
+             (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || clerkUser.username || currentUser.user_metadata?.full_name || currentUser.profile?.full_name || currentUser.email || 'User');
+    }
+    return currentUser.user_metadata?.full_name || currentUser.profile?.full_name || currentUser.email || 'User';
+  }, [clerkUser, clerkLoaded, currentUser]);
+
+  const initials = useMemo(() => {
+    return nameToUse.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }, [nameToUse]);
 
   const roleColor = displayRole === 'ADMIN' ? 'from-red-500 to-orange-600'
     : displayRole === 'PREMIUM' || displayRole === 'PREMIUM_ELITE' ? 'from-amber-500 to-yellow-600'

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BrainCircuit, Globe, Camera, Sparkles, Lock, Crown, ImageIcon, KeyRound, Loader2, Send, X, ChevronRight } from "lucide-react";
 import { Link } from 'react-router-dom';
@@ -44,29 +45,20 @@ const SmartTutorPage = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { checkSubscription(); }, []);
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, loading]);
 
-  const checkSubscription = async () => {
-    try {
-      const { supabaseHelpers } = await import('@/integrations/supabase/client');
-      const user = await supabaseHelpers.getCurrentUser();
+  useEffect(() => {
+    if (clerkLoaded && clerkUser) {
+      const metadata = clerkUser.publicMetadata || {};
+      const subscription = (metadata.subscription as any) || {};
+      const tier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
       
-      if (user?.profile?.subscription_tier) {
-        console.log('[AI Page] Subscription check from Clerk:', user.profile.subscription_tier);
-        setSubscriptionTier(user.profile.subscription_tier);
-      } else {
-        // Fallback to direct supabase auth user metadata if helper is not yet ready
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        const tier = authUser?.user_metadata?.subscription?.tier || 
-                     authUser?.user_metadata?.subscription_tier || 
-                     'free';
-        setSubscriptionTier(tier);
-      }
-    } catch (err) {
-      console.error('Error checking subscription:', err);
+      console.log('[AI Page] Live Clerk Subscription:', tier);
+      setSubscriptionTier(tier.toLowerCase());
     }
-  };
+  }, [clerkUser, clerkLoaded]);
 
   // Helpers
   const isEliteUser = () => ELITE_TIERS.includes(subscriptionTier);

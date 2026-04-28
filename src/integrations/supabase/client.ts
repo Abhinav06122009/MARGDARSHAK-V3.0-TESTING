@@ -105,12 +105,16 @@ export const supabaseHelpers = {
                     clerkUser.emailAddresses?.[0]?.emailAddress || '';
       
       const fullName = clerkUser.fullName || 
-                       (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || '');
+                       (clerkUser.firstName && clerkUser.lastName ? `${clerkUser.firstName} ${clerkUser.lastName}` : clerkUser.firstName || clerkUser.lastName || clerkUser.username || '');
 
       const metadata = clerkUser.publicMetadata || {};
+      console.log('🛡️ [Clerk Metadata Raw]:', metadata);
+      
       const subscription = (metadata.subscription as any) || {};
       const role = metadata.role || (metadata as any).user_type || 'student';
-      const tier = subscription.tier || (metadata as any).subscription_tier || 'free';
+      
+      // Support multiple metadata formats (flat or nested)
+      const tier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
 
       return {
         id: clerkUser.id,
@@ -123,7 +127,8 @@ export const supabaseHelpers = {
         user_metadata: {
           full_name: fullName,
           avatar_url: clerkUser.imageUrl,
-          ...metadata
+          ...metadata,
+          subscription_tier: tier // Ensure it's flat for easier access
         },
         profile: {
           id: clerkUser.id,
