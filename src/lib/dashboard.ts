@@ -130,10 +130,17 @@ export interface RealTimetableEntry {
 export interface SecureUser {
   id: string;
   email: string;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+    [key: string]: any;
+  };
   profile?: {
     full_name: string;
     user_type: string;
     student_id?: string;
+    role?: string;
+    subscription_tier?: string;
   };
 }
 

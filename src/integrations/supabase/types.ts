@@ -158,37 +158,61 @@ export type Database = {
       }
       courses: {
         Row: {
+          color: string | null
           academic_year: string | null
           code: string
           created_at: string | null
           description: string | null
+          difficulty: string | null
+          credits: number | null
           grade_level: string | null
+          is_active: boolean | null
           id: string
           name: string
+          priority: string | null
           semester: string | null
+          status: string | null
           teacher_id: string | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
+          color?: string | null
           academic_year?: string | null
           code: string
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
+          credits?: number | null
           grade_level?: string | null
+          is_active?: boolean | null
           id?: string
           name: string
+          priority?: string | null
           semester?: string | null
+          status?: string | null
           teacher_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
+          color?: string | null
           academic_year?: string | null
           code?: string
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
+          credits?: number | null
           grade_level?: string | null
+          is_active?: boolean | null
           id?: string
           name?: string
+          priority?: string | null
           semester?: string | null
+          status?: string | null
           teacher_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -454,6 +478,7 @@ export type Database = {
           security_score: number | null
           security_settings: Json | null
           student_id: string | null
+          study_streak: number | null
           updated_at: string | null
           user_type: string
         }
@@ -474,6 +499,7 @@ export type Database = {
           security_score?: number | null
           security_settings?: Json | null
           student_id?: string | null
+          study_streak?: number | null
           updated_at?: string | null
           user_type: string
         }
@@ -494,6 +520,7 @@ export type Database = {
           security_score?: number | null
           security_settings?: Json | null
           student_id?: string | null
+          study_streak?: number | null
           updated_at?: string | null
           user_type?: string
         }

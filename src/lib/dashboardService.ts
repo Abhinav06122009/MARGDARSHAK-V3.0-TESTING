@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type {
   SecureUser,
@@ -15,35 +15,49 @@ import type {
 export const dashboardService = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
+      const fallbackUser = await supabaseHelpers.getCurrentUser();
+      const baseUser = {
+        id: fallbackUser?.id,
+        email: fallbackUser?.email || '',
+        user_metadata: {
+          full_name: fallbackUser?.user_metadata?.full_name || 'User',
+          avatar_url: fallbackUser?.user_metadata?.avatar_url,
+          ...(fallbackUser?.user_metadata || {})
+        }
+      };
 
-      // Fetch profile from Supabase
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
+      if (!baseUser.id) return null;
 
-      if (profileError) throw profileError;
-
-      const fullName = profile?.full_name || user.user_metadata?.full_name || 'User';
-      const role = profile?.user_type || 'student';
+      const fullName = baseUser.user_metadata?.full_name || 'User';
+      const role = fallbackUser?.profile?.user_type || fallbackUser?.role || 'student';
 
       return {
-        id: user.id,
-        email: user.email || '',
+        ...baseUser,
         profile: {
           full_name: fullName,
-          user_type: profile?.user_type || 'student',
-          student_id: profile?.student_id || '',
+          user_type: role,
+          student_id: fallbackUser?.profile?.student_id || '',
           role: role,
-          subscription_tier: profile?.subscription_tier || 'free'
+          subscription_tier: fallbackUser?.profile?.subscription_tier || fallbackUser?.subscription?.tier || 'free'
         }
       };
     } catch (error) {
       console.error('dashboardService: Error getting current user:', error);
-      return null;
+      const fallbackUser = await supabaseHelpers.getCurrentUser();
+      if (!fallbackUser) return null;
+
+      return {
+        id: fallbackUser.id,
+        email: fallbackUser.email,
+        user_metadata: fallbackUser.user_metadata,
+        profile: {
+          full_name: fallbackUser.user_metadata?.full_name || 'User',
+          user_type: fallbackUser.profile?.user_type || fallbackUser.role || 'student',
+          student_id: fallbackUser.profile?.student_id || '',
+          role: fallbackUser.profile?.role || fallbackUser.role || 'student',
+          subscription_tier: fallbackUser.profile?.subscription_tier || fallbackUser.subscription?.tier || 'free'
+        }
+      };
     }
   },
 

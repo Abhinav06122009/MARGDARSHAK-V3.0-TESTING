@@ -557,7 +557,12 @@ const BlogPost = () => {
           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
           className="mb-20 rounded-[3.5rem] overflow-hidden border border-white/10 shadow-2xl relative group"
         >
-          <img src={post.image} alt={post.title} className="w-full h-auto transform group-hover:scale-105 transition-transform duration-[2000ms]" />
+          <img
+            src={post.image}
+            alt={post.title}
+            className="w-full h-auto transform group-hover:scale-105 transition-transform"
+            style={{ transitionDuration: '2000ms' }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </motion.div>
 

@@ -18,17 +18,11 @@ create or replace function public.handle_updated_at()
 returns trigger as $$
 begin
   new.updated_at = now();
+  return new;
 end;
 $$ language plpgsql;
 
--- Function to get the current user's role
-create or replace function public.get_current_user_role()
-returns text
-language sql stable
-security definer
-as $$
-  select user_type from public.profiles where id = public.requesting_user_id();
-$$;
+
 
 -- 3. CLEANUP (Ensures fresh reconstruction)
 drop table if exists public.security_logs cascade;
@@ -74,7 +68,7 @@ drop table if exists public.user_activity_logs cascade;
 
 -- PROFILES: Primary user table linked to Clerk
 create table if not exists public.profiles (
-  id text primary key, -- Clerk User ID (user_...)
+  id text primary key,
   email text unique,
   full_name text,
   avatar_url text,
@@ -82,8 +76,6 @@ create table if not exists public.profiles (
   subscription_tier text default 'free',
   subscription_status text default 'inactive',
   subscription_period_end timestamptz,
-  
-  -- Legacy/Extended fields from frontend types
   student_id text,
   department text,
   grade_level text,
@@ -94,22 +86,38 @@ create table if not exists public.profiles (
   last_login_ip text,
   risk_level text default 'low',
   security_score int default 100,
+  study_streak int default 0,
   security_settings jsonb default '{}'::jsonb,
-  
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Function to get the current user's role
+create or replace function public.get_current_user_role()
+returns text
+language sql stable
+security definer
+as $$
+  select user_type from public.profiles where id = public.requesting_user_id();
+$$;
 
 -- COURSES
 create table if not exists public.courses (
   id uuid primary key default uuid_generate_v4(),
   user_id text references public.profiles(id) on delete cascade,
+  teacher_id text references public.profiles(id) on delete set null,
   name text not null,
   code text unique not null,
   description text,
   grade_level text,
   academic_year text,
   semester text,
+  credits int default 3,
+  color text,
+  priority text default 'medium',
+  status text default 'active',
+  difficulty text default 'intermediate',
+  is_active boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -656,7 +664,8 @@ drop trigger if exists on_security_settings_updated on public.security_settings;
 create trigger on_security_settings_updated before update on public.security_settings for each row execute procedure public.handle_updated_at();
 
 -- 5. ROW LEVEL SECURITY (RLS)
-alter table public.profiles enable row level security;
+-- Note: RLS disabled for Clerk integration. Authorization handled at application level.
+alter table public.profiles disable row level security;
 alter table public.courses enable row level security;
 alter table public.attendance enable row level security;
 alter table public.notes enable row level security;
@@ -698,15 +707,11 @@ alter table if exists public.security_threats enable row level security;
 alter table if exists public.support_tickets enable row level security;
 alter table if exists public.user_activity_logs enable row level security;
 
--- PROFILES POLICIES
-drop policy if exists "Users can view their own profile" on public.profiles;
-create policy "Users can view their own profile" on public.profiles for select using ( id = requesting_user_id() );
-
-drop policy if exists "Users can update their own profile" on public.profiles;
-create policy "Users can update their own profile" on public.profiles for update using ( id = requesting_user_id() );
-
-drop policy if exists "Users can insert their own profile" on public.profiles;
-create policy "Users can insert their own profile" on public.profiles for insert with check ( id = requesting_user_id() );
+-- PROFILES POLICIES (Disabled - handled at application level)
+-- drop policy if exists "Users can view their own profile" on public.profiles;
+-- drop policy if exists "Users can update their own profile" on public.profiles;
+-- drop policy if exists "Users can insert their own profile" on public.profiles;
+-- drop policy if exists "Allow profile creation with valid id" on public.profiles;
 
 -- NOTES POLICIES
 drop policy if exists "Users can manage their own notes" on public.notes;

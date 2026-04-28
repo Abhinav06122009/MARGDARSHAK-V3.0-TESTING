@@ -3,7 +3,6 @@ import { ArrowUp, Lock, Sparkles, TrendingUp } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { supabase } from '@/integrations/supabase/client';
 import { 
   handleTaskStatusUpdate as handleStatusUtil,
   handleCreateQuickTask as handleCreateUtil,
@@ -159,36 +158,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
   const [showBackToTop, setShowBackToTop] = useState(false);
   
-  // ADDED: State for Real DB Values (Role & Subscription)
-  const [realSubscriptionTier, setRealSubscriptionTier] = useState<string | null>(null);
-  const [realRole, setRealRole] = useState<string | null>(null);
-  const [realFullName, setRealFullName] = useState<string | null>(null);
-
-  // FORCE FETCH: Get Role and Subscription Tier directly from DB on mount
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!currentUser?.id) return;
-      
-      try {
-        // Try fetching all columns first, then fall back if it fails
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-          
-        if (!error && data) {
-          const profileData = data as any;
-          setRealSubscriptionTier(profileData.subscription_tier || 'free');
-          setRealRole(profileData.role || profileData.user_type || 'student'); 
-          if (profileData.full_name) setRealFullName(profileData.full_name);
-        }
-      } catch (err) {
-        console.error("Dashboard: Error fetching real profile data:", err);
-      }
-    };
-    fetchProfileData();
-  }, [currentUser?.id]);
+  const realSubscriptionTier = currentUser?.profile?.subscription_tier || null;
+  const realRole = currentUser?.profile?.role || currentUser?.profile?.user_type || null;
+  const realFullName = currentUser?.profile?.full_name || currentUser?.user_metadata?.full_name || null;
   
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 400);

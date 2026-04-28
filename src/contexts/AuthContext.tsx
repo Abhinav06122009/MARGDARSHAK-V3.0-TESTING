@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
-import { supabase, setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
+import { setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface AuthContextValue {
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [clerkSession, sessionLoaded, clerkUser, userLoaded]);
 
-  // Sync Profile with Supabase Database
+  // Sync Profile with Supabase Database through a server-side function.
   useEffect(() => {
     const syncProfile = async () => {
       if (sessionLoaded && userLoaded && clerkUser) {
@@ -48,12 +48,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             updated_at: new Date().toISOString()
           };
 
-          // Upsert profile in Supabase
-          const { error } = await supabase.from('profiles').upsert(profileData);
-          
-          if (error) {
-            console.error('Supabase Sync Error:', error.message);
-            // We don't block the UI for sync errors, but we log them
+          const token = clerkSession ? await clerkSession.getToken({ template: 'supabase' }) : null;
+          const syncResponse = await fetch('/.netlify/functions/profile-sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(profileData),
+          });
+
+          if (!syncResponse.ok) {
+            const payload = await syncResponse.json().catch(() => ({}));
+            console.error('Supabase Sync Error:', payload?.error || syncResponse.statusText);
           } else {
             console.log('Supabase Sync: Profile synced successfully');
           }

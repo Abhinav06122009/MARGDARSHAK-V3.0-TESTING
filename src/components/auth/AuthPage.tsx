@@ -31,7 +31,10 @@ const AuthPage: React.FC<AuthPageProps> = () => {
           <div className="flex flex-col items-center gap-8">
             <div className="relative group">
               {/* Spinning outer ring */}
-              <div className="absolute -inset-4 border-t-2 border-b-2 border-blue-500/30 rounded-full animate-spin duration-[3000ms]" />
+              <div
+                className="absolute -inset-4 border-t-2 border-b-2 border-blue-500/30 rounded-full animate-spin"
+                style={{ animationDuration: '3000ms' }}
+              />
               <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
               
               {/* Glass Logo Container */}
