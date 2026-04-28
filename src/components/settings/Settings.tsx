@@ -10,6 +10,7 @@ import AccessibilitySection from './AccessibilitySection';
 import SettingsFooter from './SettingsFooter';
 import Passkeys from "@/components/settings/Passkeys";
 import SecurityAdvisor from "@/components/settings/SecurityAdvisor";
+import PremiumIDCard from './PremiumIDCard';
 
 interface SettingsProps {
   onBack?: () => void;
@@ -112,6 +113,17 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
              </div>
           </div>
         </motion.div>
+
+        {/* Premium Identity Card Section */}
+        <div className="mb-20">
+          <PremiumIDCard user={user} />
+        </div>
+
+        <div className="flex items-center gap-4 mb-10">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 whitespace-nowrap">Core Configuration</h2>
+          <div className="h-px flex-1 bg-gradient-to-r from-white/10 via-white/10 to-transparent" />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Main Configuration Panels */}

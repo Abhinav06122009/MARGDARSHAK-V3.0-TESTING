@@ -34,33 +34,39 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
         Profile Information
       </h2>
       <form onSubmit={onSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/80">Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-emerald-400/50 transition-all shadow-inner-soft"
-            placeholder="Your full name"
-          />
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Full Name</label>
+          <div className="relative group">
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-emerald-500/30 focus:bg-emerald-500/[0.02] transition-all"
+              placeholder="Your full name"
+            />
+            <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/10 group-focus-within:text-emerald-500/40 transition-colors" />
+          </div>
         </div>
         
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/80">Student ID (Optional)</label>
-          <input
-            type="text"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-emerald-400/50 transition-all shadow-inner-soft"
-            placeholder="e.g. STU12345"
-          />
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Student ID (Optional)</label>
+          <div className="relative group">
+            <input
+              type="text"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-emerald-500/30 focus:bg-emerald-500/[0.02] transition-all font-mono"
+              placeholder="e.g. STU12345"
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white/10 uppercase tracking-widest group-focus-within:text-emerald-500/40 transition-colors">Scholar-ID</div>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/80">Email Address</label>
-          <div className="flex items-center gap-3 px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white/60 select-none">
-            <Mail size={18} />
-            <span>{user.email}</span>
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Email Address</label>
+          <div className="flex items-center gap-4 px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white/40 select-none backdrop-blur-md">
+            <Mail size={16} className="text-white/10" />
+            <span className="text-sm font-mono tracking-tight">{user.email}</span>
           </div>
         </div>
 

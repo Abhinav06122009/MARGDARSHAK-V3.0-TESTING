@@ -92,6 +92,32 @@ const originalAuth = supabase.auth;
   },
   signOut: async () => {
     return { error: null };
+  },
+  updateUser: async (attributes: any) => {
+    if (!clerkUser) return { data: { user: null }, error: new Error('Not authenticated') };
+    try {
+      const updateParams: any = {};
+      
+      if (attributes.data?.full_name) {
+        const parts = attributes.data.full_name.split(' ');
+        updateParams.firstName = parts[0];
+        updateParams.lastName = parts.slice(1).join(' ');
+      }
+      
+      if (attributes.password) {
+        updateParams.password = attributes.password;
+      }
+      
+      if (Object.keys(updateParams).length > 0) {
+        await clerkUser.update(updateParams);
+      }
+      
+      const user = await supabaseHelpers.getCurrentUser();
+      return { data: { user }, error: null };
+    } catch (error: any) {
+      console.error('Error updating user via Clerk:', error);
+      return { data: { user: null }, error };
+    }
   }
 };
 
