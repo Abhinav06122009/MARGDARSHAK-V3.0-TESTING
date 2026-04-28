@@ -61,13 +61,17 @@ export const useSettings = () => {
         console.warn("useSettings: Profile fetch error (non-critical):", profileError);
       }
 
+      // PRIORITIZE CLERK METADATA FOR ROLE
+      const metadata = authUser.user_metadata || {};
+      const clerkRole = (metadata.role as string) || (authUser.app_metadata?.role as string) || (metadata as any).user_type || 'student';
+
       const secureUser: SecureUser = {
         id: authUser.id,
         email: authUser.email || '',
         last_sign_in_at: authUser.last_sign_in_at,
         profile: {
           full_name: profile?.full_name || authUser.user_metadata?.full_name || '',
-          user_type: profile?.user_type || 'student',
+          user_type: clerkRole,
           student_id: profile?.student_id || '',
           avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url || ''
         }

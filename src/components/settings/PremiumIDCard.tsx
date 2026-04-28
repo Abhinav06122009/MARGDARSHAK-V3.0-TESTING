@@ -39,14 +39,12 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-300, 300], [15, -15]), { stiffness: 200, damping: 40 });
-  const rotateY = useSpring(useTransform(x, [-300, 300], [-15, 15]), { stiffness: 200, damping: 40 });
+  const rotateX = useSpring(useTransform(y, [-300, 300], [12, -12]), { stiffness: 150, damping: 30 });
+  const rotateY = useSpring(useTransform(x, [-300, 300], [-12, 12]), { stiffness: 150, damping: 30 });
 
-  // Depth-Offset Constants
-  const DEPTH_BASE = 0;
-  const DEPTH_AVATAR = 60;
-  const DEPTH_CHIP = 100;
-  const DEPTH_TEXT = 40;
+  // Holographic Shift
+  const holoX = useTransform(x, [-300, 300], [0, 100]);
+  const holoY = useTransform(y, [-300, 300], [0, 100]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -63,7 +61,19 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   };
   
   const joinDate = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'EST. 2024';
-  const tier = user.profile?.user_type === 'admin' ? 'SYSTEM OVERSEER' : (user.profile?.subscription_tier?.toUpperCase() || 'ELITE SCHOLAR');
+  
+  // REAL ROLE SYNC LOGIC
+  const getDisplayRole = (role: string) => {
+    switch(role?.toLowerCase()) {
+      case 'admin': return 'SYSTEM OVERSEER';
+      case 'superadmin': return 'PREMIUM OVERSEER';
+      case 'teacher': return 'FACULTY PROCTOR';
+      case 'moderator': return 'SECURITY MONITOR';
+      default: return 'ELITE SCHOLAR';
+    }
+  };
+
+  const tier = getDisplayRole(user.profile?.user_type || 'student');
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,7 +82,8 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${user.id}/${Math.random()}.${fileExt}`;
+      // FIXED: Shortened path to match RLS security policies
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -101,214 +112,175 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-6 w-full max-w-md mx-auto">
+    <div className="flex flex-col items-center justify-center py-4 w-full">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative w-full aspect-[1/1.58] rounded-[3.5rem] overflow-hidden shadow-[0_60px_120px_-20px_rgba(0,0,0,1)] border border-white/15 bg-[#010101] group selection:bg-emerald-500/30"
+        className="relative w-full max-w-[440px] aspect-[1/1.58] rounded-[3.5rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.1)] border border-white/20 bg-[#050505] group"
       >
-        {/* PHYSICAL BASE LAYERS */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-950" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-soft-light" />
+        {/* BASE TITANIUM TEXTURE */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.05),transparent)] opacity-50" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] opacity-20 mix-blend-overlay" />
         
-        {/* DYNAMIC AMBIENCE */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_center,black,transparent_80%)]" />
-        
+        {/* HOLOGRAPHIC SHIMMER LAYER */}
         <motion.div 
-          animate={{ x: [-1000, 1000] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/[0.05] to-transparent skew-x-12 z-10 pointer-events-none"
+          style={{ 
+            background: useTransform(
+              [holoX, holoY], 
+              ([hx, hy]) => `radial-gradient(circle at ${hx}% ${hy}%, rgba(16,185,129,0.15) 0%, transparent 50%)`
+            )
+          }}
+          className="absolute inset-0 pointer-events-none z-10 opacity-60 mix-blend-color-dodge"
         />
 
-        <div className="relative h-full flex flex-col z-20 p-10 lg:p-12" style={{ transform: `translateZ(${DEPTH_BASE}px)` }}>
+        {/* HUD GRID OVERLAY */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.02)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+
+        <div className="relative h-full flex flex-col z-20 p-10 lg:p-12" style={{ transform: "translateZ(50px)" }}>
           
-          {/* HEADER: Perfect Alignment */}
-          <div className="flex items-start justify-between mb-12">
-            <div className="flex items-center gap-5">
+          {/* HEADER SECTION: Perfectly Aligned */}
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-6">
                <div className="relative">
-                  <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl rounded-full animate-pulse" />
-                  <div className="p-3.5 bg-zinc-950 border border-emerald-500/40 rounded-2xl relative shadow-2xl">
-                     <Shield className="w-8 h-8 text-emerald-400" />
+                  <div className="absolute -inset-3 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
+                  <div className="p-3.5 bg-black border border-emerald-500/40 rounded-2xl relative shadow-2xl overflow-hidden group/icon">
+                     <Shield className="w-8 h-8 text-emerald-400 group-hover/icon:scale-110 transition-transform" />
+                     <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent" />
                   </div>
                </div>
-               <div className="flex flex-col gap-1">
+               <div className="flex flex-col">
                   <h2 className="text-2xl font-black text-white tracking-[-0.05em] uppercase italic leading-none">MARGDARSHAK</h2>
-                  <div className="flex items-center gap-2">
-                     <div className="flex gap-1">
-                        <div className="w-1 h-1 bg-emerald-500 rounded-full animate-ping" />
-                        <div className="w-1 h-1 bg-emerald-500/20 rounded-full" />
-                     </div>
-                     <span className="text-[9px] font-black tracking-[0.4em] text-emerald-500/50 uppercase">Identity Verified</span>
+                  <div className="flex items-center gap-2 mt-2">
+                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                     <span className="text-[9px] font-black tracking-[0.4em] text-emerald-500/60 uppercase">ACTIVE_CORE</span>
                   </div>
                </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-               <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+               <div className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full backdrop-blur-md">
                   <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase italic">{tier}</span>
                </div>
-               <div className="flex items-center gap-2 text-[8px] font-mono text-white/20 uppercase tracking-tighter">
-                  <Radio size={10} className="animate-pulse" />
-                  NODE-ALPHA-7
+               <div className="flex items-center gap-2 text-[8px] font-mono text-white/30 uppercase tracking-widest">
+                  <Activity size={10} className="text-emerald-500/50" />
+                  STABLE
                </div>
             </div>
           </div>
 
-          {/* BIO-METRIC CENTERPIECE: Layered Parallax */}
-          <div className="flex flex-col items-center mb-12" style={{ transform: `translateZ(${DEPTH_AVATAR}px)` }}>
-             <div className="relative group/avatar">
-                {/* Orbital Decoration */}
-                <div className="absolute inset-[-15px] border border-white/5 rounded-full animate-spin-slow pointer-events-none" />
-                <div className="absolute inset-[-25px] border border-emerald-500/10 rounded-full animate-reverse-spin pointer-events-none" />
+          {/* AVATAR CENTERPIECE: Holographic HUD */}
+          <div className="flex flex-col items-center mb-12 relative" style={{ transform: "translateZ(80px)" }}>
+             <div className="relative">
+                {/* HUD Elements */}
+                <div className="absolute -inset-6 border border-white/5 rounded-full animate-spin-slow pointer-events-none" />
+                <div className="absolute -inset-10 border border-emerald-500/10 rounded-full animate-reverse-spin pointer-events-none" />
                 
-                <div className="w-52 h-52 rounded-[3.5rem] border border-white/10 overflow-hidden relative z-10 bg-black shadow-2xl transition-all duration-700 group-hover/avatar:scale-[1.02] group-hover/avatar:border-emerald-500/40">
+                <div className="w-52 h-52 rounded-[3.5rem] border-[3px] border-white/10 overflow-hidden relative z-10 bg-black shadow-2xl group-hover:border-emerald-500/40 transition-colors duration-700">
                    <img 
                       src={user.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
                       alt="Profile" 
-                      className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-1000 grayscale-[0.1] group-hover/avatar:grayscale-0"
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                    />
                    
-                   {/* HUD Overlays */}
-                   <div className="absolute inset-0 opacity-20 pointer-events-none">
-                      <Target className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 text-emerald-500/40 animate-pulse-slow" />
-                      <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/20 animate-scanline" />
+                   {/* Scanning HUD */}
+                   <div className="absolute inset-0 pointer-events-none z-20">
+                      <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-emerald-500/20 to-transparent -translate-y-full group-hover:translate-y-[200%] transition-transform duration-[2000ms] ease-linear repeat-infinite" />
                    </div>
 
-                   {/* Upload Interaction */}
+                   {/* Interaction Layer */}
                    <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-500 z-20 backdrop-blur-sm cursor-pointer"
+                      className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-30 backdrop-blur-sm cursor-pointer"
                    >
-                      <Camera className="w-12 h-12 text-white mb-3" />
-                      <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] px-8 text-center">Update Bio-Link</span>
+                      <Camera className="w-10 h-10 text-white mb-3" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Update_Bio</span>
                    </button>
-                   
-                   {isUploading && (
-                      <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-30">
-                         <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mb-3" />
-                         <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Encrypting...</span>
-                      </div>
-                   )}
                 </div>
 
-                {/* ADVANCED QUANTUM CHIP: Parallax Offset */}
-                <div 
-                   className="absolute -bottom-6 -right-6 p-4 bg-zinc-950 rounded-[2rem] border border-emerald-500/30 shadow-2xl z-20 group-hover/avatar:rotate-12 transition-all duration-500"
-                   style={{ transform: `translateZ(${DEPTH_CHIP}px)` }}
-                >
-                   <Cpu className="w-8 h-8 text-emerald-400 animate-pulse-slow" />
+                {/* QUANTUM CHIP */}
+                <div className="absolute -bottom-4 -right-4 p-4 bg-zinc-950 rounded-3xl border border-emerald-500/30 shadow-2xl z-20 group-hover:scale-110 transition-transform">
+                   <Cpu className="w-8 h-8 text-emerald-400" />
                 </div>
              </div>
              <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
           </div>
 
-          {/* DATA FIELDS: Precision Sizing */}
-          <form onSubmit={onSubmit} className="flex-1 flex flex-col gap-7" style={{ transform: `translateZ(${DEPTH_TEXT}px)` }}>
+          {/* INPUT FIELDS: Perfect Alignment */}
+          <form onSubmit={onSubmit} className="space-y-8 flex-1" style={{ transform: "translateZ(40px)" }}>
              <div className="space-y-3">
-                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
-                   <User size={12} className="text-emerald-500/20" /> Identifier
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
+                   <User size={12} className="text-emerald-500/40" /> Scholar_Name
                 </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-7 py-4.5 bg-white/[0.02] border border-white/5 rounded-3xl text-xl font-black text-white placeholder-white/5 focus:outline-none focus:border-emerald-500/30 transition-all tracking-tight uppercase"
-                  placeholder="IDENTITY_NAME"
-                />
+                <div className="relative group/field">
+                   <input
+                     type="text"
+                     value={fullName}
+                     onChange={(e) => setFullName(e.target.value)}
+                     className="w-full px-8 py-5 bg-black/40 border border-white/10 rounded-[1.75rem] text-xl font-black text-white focus:outline-none focus:border-emerald-500/40 transition-all uppercase placeholder-white/5"
+                     placeholder="NAME_REQUIRED"
+                   />
+                   <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent opacity-0 group-focus-within/field:opacity-100 transition-opacity" />
+                </div>
              </div>
 
-             <div className="grid grid-cols-2 gap-5">
+             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
-                   <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
-                      <Hash size={12} className="text-emerald-500/20" /> Registry
-                   </label>
+                   <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] ml-2">Registry_ID</label>
                    <input
                      type="text"
                      value={studentId}
                      onChange={(e) => setStudentId(e.target.value)}
-                     className="w-full px-6 py-4 bg-white/[0.01] border border-white/5 rounded-2xl text-xs font-mono text-white/70 placeholder-white/10 focus:outline-none focus:border-emerald-500/30 transition-all uppercase"
-                     placeholder="ID-CORE"
+                     className="w-full px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-xs font-mono text-white/60 focus:outline-none focus:border-emerald-500/40 transition-all uppercase"
+                     placeholder="ID_NONE"
                    />
                 </div>
                 <div className="space-y-3">
-                   <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] ml-2 flex items-center gap-3">
-                      <Globe size={12} className="text-emerald-500/20" /> Matrix
-                   </label>
-                   <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-[9px] font-black text-emerald-500/30 uppercase tracking-[0.3em] flex items-center justify-center">
+                   <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] ml-2 text-right block pr-2">Matrix_Link</label>
+                   <div className="px-6 py-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-[9px] font-black text-emerald-400/40 uppercase tracking-widest text-center flex items-center justify-center h-[52px]">
                      {joinDate}
                    </div>
                 </div>
              </div>
 
-             <div className="flex-1" />
-
-             {/* SIGNATURE: High Contrast */}
-             <div className="p-6 border border-white/5 rounded-[2.5rem] bg-white/[0.01] relative group/sig overflow-hidden">
-                <div className="flex justify-between items-center mb-3">
-                   <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.5em]">Auth Signature</span>
-                   <Fingerprint size={12} className="text-white/5 group-hover/sig:text-emerald-500/20 transition-colors" />
+             {/* SIGNATURE PANEL */}
+             <div className="mt-8 p-6 rounded-[2.5rem] border border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent relative group/sig">
+                <div className="justify-between items-center mb-4 flex">
+                   <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">Auth_Signature</span>
+                   <Fingerprint size={12} className="text-white/10 group-hover/sig:text-emerald-500/40 transition-colors" />
                 </div>
-                <div className="h-16 flex items-center justify-center italic font-signature text-emerald-500/30 text-4xl group-hover/sig:text-emerald-400 group-hover/sig:scale-110 transition-all duration-700 select-none">
-                   {fullName || 'Nexus_User'}
+                <div className="h-14 flex items-center justify-center italic font-signature text-emerald-500/40 text-4xl group-hover/sig:text-emerald-400/60 transition-all duration-700">
+                   {fullName || 'Nexus_Identity'}
                 </div>
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] h-px bg-white/5" />
              </div>
 
-             {/* BOTTOM BAR: Alignment Perfection */}
-             <div className="flex items-center justify-between pt-6 mt-auto border-t border-white/5">
-                <div className="flex items-center gap-4">
-                   <QrCode className="w-14 h-14 text-white/5 hover:text-white/20 transition-colors" />
-                   <div className="flex flex-col">
-                      <div className="h-6 w-32 bg-[url('https://www.transparenttextures.com/patterns/barcode-1.png')] opacity-10" />
-                      <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest mt-1">UUID_{user.id.substring(0, 12).toUpperCase()}</span>
+             {/* SYNC ACTION: Aligned Bottom */}
+             <div className="flex items-center justify-between pt-8 mt-auto">
+                <div className="flex flex-col gap-2">
+                   <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                         <div key={i} className={`w-3 h-1 rounded-full ${i < 3 ? 'bg-emerald-500/40' : 'bg-white/10'}`} />
+                      ))}
                    </div>
+                   <span className="text-[8px] font-mono text-white/20 uppercase tracking-[0.2em]">ID: {user.id.substring(0, 16).toUpperCase()}</span>
                 </div>
                 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`group relative flex items-center justify-center w-20 h-20 rounded-[2.25rem] transition-all active:scale-95 ${
-                    isSubmitting ? 'bg-zinc-900' : 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_20px_40px_-10px_rgba(16,185,129,0.4)]'
-                  }`}
+                  className="relative group/btn flex items-center gap-4 px-10 py-5 rounded-3xl bg-emerald-500 text-black font-black uppercase tracking-widest text-xs hover:bg-emerald-400 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(16,185,129,0.4)] disabled:opacity-30"
                 >
-                  <AnimatePresence mode="wait">
-                     {isSubmitting ? (
-                        <motion.div
-                          key="loading"
-                          initial={{ rotate: 0 }}
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                        >
-                           <Zap className="w-8 h-8 text-emerald-200" />
-                        </motion.div>
-                     ) : (
-                        <motion.div
-                          key="idle"
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="flex flex-col items-center gap-1"
-                        >
-                           <Save className="w-8 h-8 text-black" />
-                           <span className="text-[9px] font-black text-black uppercase">SYNC</span>
-                        </motion.div>
-                     )}
-                  </AnimatePresence>
+                   {isSubmitting ? <RefreshCw className="animate-spin w-5 h-5" /> : <Save className="w-5 h-5" />}
+                   {isSubmitting ? 'SYNCING' : 'PUSH'}
                 </button>
              </div>
           </form>
         </div>
-
-        {/* REINFORCED BORDER GLOW */}
-        <div className="absolute inset-0 pointer-events-none border-[2px] border-white/10 rounded-[3.5rem] z-50 group-hover:border-emerald-500/20 transition-colors duration-700" />
       </motion.div>
       
-      {/* PERFECTED GROUND SHADOW */}
-      <motion.div 
-         animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.7, 0.5] }}
-         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-         className="w-[90%] h-8 bg-black/80 blur-[40px] rounded-[100%] mt-12" 
-      />
+      {/* GROUND REFLECTION */}
+      <div className="w-1/2 h-4 bg-emerald-500/10 blur-3xl rounded-full mt-10" />
     </div>
   );
 };

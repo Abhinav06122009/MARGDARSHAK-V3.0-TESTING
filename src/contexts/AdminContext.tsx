@@ -54,7 +54,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       console.warn('Admin role RPC unavailable', error);
     }
 
-    // Fetch profile data. This will fail if id is still UUID in the DB.
+    // Fetch profile data.
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id, full_name, email, user_type')
@@ -62,21 +62,13 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       .maybeSingle();
 
     if (profileError) {
-      if (profileError.code === '22P02') {
-        console.error("ADMIN SYNC CRITICAL: Database 'profiles.id' is still UUID. Please run the SQL fix to convert to TEXT.");
-        toast.error('Admin System Blocked', {
-          description: 'Profiles table using UUID instead of Clerk TEXT ID. SQL fix required.',
-          id: 'admin-uuid-error'
-        });
-      } else {
-        console.error("Failed to fetch admin profile:", profileError);
-      }
+      console.error("Failed to fetch admin profile:", profileError);
     }
 
     setProfile(profileData || null);
     
     // Check both the RPC role and the Profile role
-    // Support Clerk-based roles in metadata as a fallback (public AND unsafe)
+    // Support Clerk-based roles in metadata as a fallback
     const metadata = clerkUser?.publicMetadata || {};
     const unsafeMetadata = clerkUser?.unsafeMetadata || {};
     const clerkRole = (metadata.role as string) || (unsafeMetadata.role as string) || (metadata as any).user_type || (unsafeMetadata as any).user_type || '';
@@ -92,13 +84,15 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       'user_3CyueymOUFein248UifL5xSPBOU'
     ];
     
-    const isMaster = MASTER_IDS.includes(clerkUser?.id || '');
+    const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
     
-    // Nuclear role detection: if "admin" is mentioned anywhere in the user object
-    const fullUserStr = JSON.stringify(clerkUser || {}).toLowerCase();
-    const hasAdminKeyword = fullUserStr.includes('admin') || fullUserStr.includes('owner');
+    const isMaster = MASTER_IDS.includes(clerkUser?.id || '') || 
+                     MASTER_EMAILS.includes(clerkUser?.primaryEmailAddress?.emailAddress || '');
+    
+    // REMOVED "NUCLEAR" DETECTION TO PREVENT ROLE LEAKAGE
+    // Only allow explicit roles or master status
 
-    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster || hasAdminKeyword);
+    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster);
     setLoading(false);
   };
 
