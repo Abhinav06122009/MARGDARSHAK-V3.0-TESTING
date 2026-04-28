@@ -50,6 +50,7 @@ const UserList: React.FC<UserListProps> = ({ loading, users, onAction }) => {
             risk={user.risk_level}
             blocked={user.is_blocked}
             tier={user.subscription_tier}
+            lastIp={user.last_login_ip}
             onAction={onAction}
           />
         ))}

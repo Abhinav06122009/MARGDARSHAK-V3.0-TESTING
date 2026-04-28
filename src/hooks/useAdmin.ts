@@ -27,6 +27,7 @@ export interface AdminUser {
   is_blocked?: boolean | null;
   subscription_tier?: string | null;
   subscription_status?: string | null;
+  last_login_ip?: string | null;
 }
 
 export interface AdminReport {

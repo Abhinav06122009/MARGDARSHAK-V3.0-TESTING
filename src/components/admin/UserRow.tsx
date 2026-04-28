@@ -9,10 +9,11 @@ interface UserRowProps {
   risk?: string | null;
   blocked?: boolean | null;
   tier?: string | null;
+  lastIp?: string | null;
   onAction?: (action: 'block' | 'unblock' | 'set_tier', userId: string, extra?: any) => void;
 }
 
-const UserRow = ({ id, name, email, role, risk, blocked, tier, onAction }: UserRowProps) => {
+const UserRow = ({ id, name, email, role, risk, blocked, tier, lastIp, onAction }: UserRowProps) => {
   const isHighRisk = risk?.toLowerCase() === 'high';
   
   const tiers = [
@@ -50,6 +51,12 @@ const UserRow = ({ id, name, email, role, risk, blocked, tier, onAction }: UserR
             )}
           </div>
           <p className="text-xs font-mono text-zinc-500 mt-0.5">{email || 'No email on file'}</p>
+          {lastIp && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
+              <p className="text-[10px] font-black text-emerald-500/60 tracking-widest uppercase">IP: {lastIp}</p>
+            </div>
+          )}
         </div>
       </div>
       

@@ -25,74 +25,78 @@ export const initSecurityHardening = () => {
   };
 
   const logViolation = async (type: string, metadata: any = {}) => {
+    // FINAL SAFETY: Exempt Google bots from the strike system
+    if (isGoogleBot()) return;
+
     try {
-      // Attempt to get user from multiple sources for maximum tracing
+      // 1. Identification
       let userId: string | null = null;
       let userEmail: string | null = null;
-      
       const user = await supabaseHelpers.getCurrentUser();
-      if (user) {
-        userId = user.id;
-        userEmail = user.email;
-      }
-
-      // If user ID is still missing, check Clerk directly from window if available
+      if (user) { userId = user.id; userEmail = user.email; }
       if (!userId && (window as any).Clerk?.user) {
         userId = (window as any).Clerk.user.id;
         userEmail = (window as any).Clerk.user.primaryEmailAddress?.emailAddress;
       }
 
+      // 2. Strike Check
+      const { data: existingThreats } = await supabase
+        .from('security_threats')
+        .select('id')
+        .or(`ip_address.eq.${userIP}${userId ? `,user_id.eq.${userId}` : ''}`)
+        .eq('event_type', type);
+
+      const strikes = (existingThreats?.length || 0) + 1;
       const fingerprint = getFingerprint();
-      const payload = {
-        event_type: type,
-        user_id: userId,
-        ip_address: userIP,
-        risk_level: 'critical',
-        metadata: {
-          ...metadata,
-          ...fingerprint,
-          user_email: userEmail,
-          url: window.location.href,
-          timestamp: new Date().toISOString(),
-          persistent_id: localStorage.getItem('mg_sid') || 'new-trace-' + Math.random().toString(36).slice(2)
-        },
-        summary: `SECURITY ALERT: ${type} from ${userIP} (User: ${userId || 'Anonymous'})`
-      };
+      const persistentId = localStorage.getItem('mg_sid') || 'new-trace-' + Math.random().toString(36).slice(2);
+      if (!localStorage.getItem('mg_sid')) localStorage.setItem('mg_sid', persistentId);
 
-      // Store a persistent tracker on their device for subsequent identification
-      if (!localStorage.getItem('mg_sid')) {
-        localStorage.setItem('mg_sid', payload.metadata.persistent_id);
-      }
+      // 3. Logic: Strike 1 vs Strike 2
+      if (strikes === 1) {
+        // --- STRIKE 1: YELLOW ALERT ---
+        await supabase.from('security_threats').insert({
+          event_type: type,
+          user_id: userId,
+          ip_address: userIP,
+          threat_level: 'warning',
+          threat_score: 50,
+          summary: `STRIKE 1: ${type} detected. Warning issued to ${userIP}`,
+          metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 1 }
+        });
 
-      // Log to security_logs
-      await supabase.from('security_logs').insert(payload);
-      
-      // Log to security_threats for admin panel visibility
-      await supabase.from('security_threats').insert({
-        event_type: type,
-        user_id: userId,
-        ip_address: userIP,
-        threat_level: 'critical',
-        threat_score: 98,
-        summary: `CRITICAL: ${type} by ${userId ? 'Identified User' : 'Anonymous Guest'}. IP: ${userIP}`,
-        metadata: payload.metadata
-      });
-
-      // If user is identified, perform immediate lockdown and ban
-      if (userId) {
-        await supabase.from('profiles').update({ 
-          risk_level: 'critical',
-          security_score: 0,
-          is_blocked: true,
-          blocked_reason: `AUTOMATED BAN: ${type} detected. Security forensic trace: ${payload.metadata.persistent_id}`
-        }).eq('id', userId);
+        // Show Scary Warning (Using custom event to trigger UI)
+        window.dispatchEvent(new CustomEvent('security-warning', { 
+          detail: { type, ip: userIP } 
+        }));
         
-        console.warn('🛡️ Security trace completed. User identity confirmed and restricted.');
+        console.warn('🛡️ SECURITY STRIKE 1: Your IP has been logged. Further attempts will result in a PERMANENT BAN.');
       } else {
-        console.warn('🛡️ Security trace completed. IP logged for administrative review.');
+        // --- STRIKE 2: RED ALERT (BAN) ---
+        await supabase.from('security_threats').insert({
+          event_type: type,
+          user_id: userId,
+          ip_address: userIP,
+          threat_level: 'critical',
+          threat_score: 100,
+          summary: `STRIKE 2: Persistent ${type} detected. PERMANENT BAN executed for ${userIP}`,
+          metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 2 }
+        });
+
+        if (userId) {
+          await supabase.from('profiles').update({ 
+            is_blocked: true,
+            blocked_reason: `STRIKE 2: Persistent security violation (${type}). Automated forensic ban executed.`
+          }).eq('id', userId);
+        }
+
+        // Force Lockdown UI
+        window.dispatchEvent(new CustomEvent('security-ban', { 
+          detail: { type, ip: userIP } 
+        }));
+
+        console.error('🛡️ SECURITY STRIKE 2: PERMANENT BAN EXECUTED.');
       }
     } catch (err) {
-      // Fail silently to the user but log to console in dev if needed
       if (isDev) console.error('Tracing error:', err);
     }
   };

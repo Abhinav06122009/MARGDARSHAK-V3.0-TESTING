@@ -90,6 +90,7 @@ const SEO = ({ title, description }: { title: string, description: string }) => 
 
 import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, PageLoader } from '@/components/auth/RouteGuards';
 import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
+import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -123,10 +124,20 @@ const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  return <>{children}</>;
+   return <>{children}</>;
+ };
+ 
+const NavigationTracker = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    trackActivity('page_view', { path: location.pathname });
+  }, [location]);
+
+  return null;
 };
 
-// Main App Structure
+ // Main App Structure
 const App = () => {
   useEffect(() => {
     if (localStorage.getItem('dyslexiaMode') === 'true') {
@@ -148,6 +159,8 @@ const App = () => {
                     <AIProvider>
                       <div className="bg-[#050505] min-h-screen text-white">
                         <GlobalSecurityGuard>
+                        <NavigationTracker />
+                        <SecurityWarningOverlay />
                         <AnimatePresence mode="wait">
                           <Routes>
                             {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
