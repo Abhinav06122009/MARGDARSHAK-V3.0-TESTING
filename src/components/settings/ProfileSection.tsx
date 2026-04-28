@@ -47,7 +47,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
             <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/10 group-focus-within:text-emerald-500/40 transition-colors" />
           </div>
         </div>
-        
+
         <div className="space-y-3">
           <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Student ID (Optional)</label>
           <div className="relative group">

@@ -83,18 +83,18 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     <div className="min-h-screen bg-[#020202] text-gray-300 selection:bg-emerald-500/30 overflow-x-hidden cursor-none">
       <NexusCursor />
       <NoiseOverlay />
-      
+
       {/* FAST LOADING AMBIENT LIGHT */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <motion.div 
-           className="absolute w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[200px] rounded-full"
-           animate={{ x: mousePos.x - 400, y: mousePos.y - 400 }}
-           transition={{ type: "spring", damping: 100, stiffness: 20 }}
+        <motion.div
+          className="absolute w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[200px] rounded-full"
+          animate={{ x: mousePos.x - 400, y: mousePos.y - 400 }}
+          transition={{ type: "spring", damping: 100, stiffness: 20 }}
         />
       </div>
 
       <div className="relative z-10 max-w-[1700px] mx-auto px-8 lg:px-16 py-16 lg:py-24">
-        
+
         {/* HEADER: Geometric Perfection */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -108,82 +108,82 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             >
               <ArrowLeft size={24} className="text-white/20 group-hover:text-emerald-400 group-hover:-translate-x-1 transition-all" />
             </button>
-            
+
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-6">
-                 <h1 className="text-7xl lg:text-[9rem] font-black text-white tracking-[-0.08em] uppercase italic leading-none">
-                    NEXUS
-                 </h1>
-                 <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl hidden xl:block">
-                    <SettingsIcon size={28} className="text-emerald-400 animate-spin-slow" />
-                 </div>
+                <h1 className="text-7xl lg:text-[9rem] font-black text-white tracking-[-0.08em] uppercase italic leading-none">
+                  SETTING
+                </h1>
+                <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl hidden xl:block">
+                  <SettingsIcon size={28} className="text-emerald-400 animate-spin-slow" />
+                </div>
               </div>
-              <p className="text-white/20 font-black uppercase tracking-[1em] text-[9px] italic ml-1">Configuration_Interface</p>
+              <p className="text-white/20 font-black uppercase tracking-[1em] text-[9px] italic ml-1">Profile_Cum_Settings</p>
             </div>
           </div>
 
           {/* STATUS CONSOLE: Aligned Pill */}
           <div className="flex items-center gap-4 p-3 bg-zinc-950/40 border border-white/5 rounded-full backdrop-blur-3xl shadow-2xl">
-             <div className="flex items-center gap-6 px-10 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
-                <Cpu size={20} className="text-emerald-400" />
-                <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">CORE_ACTIVE</span>
-             </div>
-             <div className="flex items-center gap-6 px-10 py-3 bg-white/[0.01] border border-white/5 rounded-full">
-                <Layers size={20} className="text-white/20" />
-                <span className="text-[11px] font-black text-white/30 tracking-widest uppercase leading-none">NODE_READY</span>
-             </div>
+            <div className="flex items-center gap-6 px-10 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+              <Cpu size={20} className="text-emerald-400" />
+              <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">Settings_Status</span>
+            </div>
+            <div className="flex items-center gap-6 px-10 py-3 bg-white/[0.01] border border-white/5 rounded-full">
+              <Layers size={20} className="text-white/20" />
+              <span className="text-[11px] font-black text-white/30 tracking-widest uppercase leading-none">READY</span>
+            </div>
           </div>
         </motion.header>
 
         {/* CONTENT GRID: Mathematical Balance */}
         <div className="grid grid-cols-1 xl:grid-cols-[440px_1fr] gap-20 lg:gap-32 items-start">
-          
+
           {/* LEFT: ID Component */}
           <div className="flex flex-col gap-16 xl:sticky xl:top-12">
-             <div className="flex items-center gap-6 px-4">
-                <Box size={20} className="text-emerald-500/40" />
-                <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">IDENTIFICATION</h3>
-                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-             </div>
-             
-             <PremiumIDCard 
-               user={user} fullName={fullName} setFullName={setFullName}
-               studentId={studentId} setStudentId={setStudentId}
-               isSubmitting={isSubmittingProfile} onSubmit={handleProfileUpdate} onRefresh={refreshUser}
-             />
+            <div className="flex items-center gap-6 px-4">
+              <Box size={20} className="text-emerald-500/40" />
+              <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">IDENTIFICATION</h3>
+              <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+            </div>
+
+            <PremiumIDCard
+              user={user} fullName={fullName} setFullName={setFullName}
+              studentId={studentId} setStudentId={setStudentId}
+              isSubmitting={isSubmittingProfile} onSubmit={handleProfileUpdate} onRefresh={refreshUser}
+            />
           </div>
 
           {/* RIGHT: Modules */}
           <div className="flex flex-col gap-16">
             <div className="flex items-center gap-6 px-4">
-               <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
-               <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">CONFIG_STACK</h3>
-               <Activity size={20} className="text-emerald-500/40" />
+              <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
+              <h3 className="text-[11px] font-black uppercase tracking-[0.8em] text-white/20">Settings</h3>
+              <Activity size={20} className="text-emerald-500/40" />
             </div>
 
             <div className="grid gap-12">
-               {[
-                 { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
-                 { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
-                 { Component: SecurityAdvisor, props: { userId: user.id, userEmail: user.email, passkeyCount, hasFullName: !!(user.profile?.full_name && user.profile.full_name.trim()) } },
-                 { Component: AccessibilitySection, props: { dyslexiaMode, setDyslexiaMode } }
-               ].map(({ Component, props }, i) => (
-                 <motion.div
-                   key={i}
-                   initial={{ opacity: 0, y: 20 }}
-                   whileInView={{ opacity: 1, y: 0 }}
-                   viewport={{ once: true }}
-                   transition={{ duration: 0.5, delay: i * 0.05 }}
-                 >
-                    <Component {...props} />
-                 </motion.div>
-               ))}
+              {[
+                { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
+                { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
+                { Component: SecurityAdvisor, props: { userId: user.id, userEmail: user.email, passkeyCount, hasFullName: !!(user.profile?.full_name && user.profile.full_name.trim()) } },
+                { Component: AccessibilitySection, props: { dyslexiaMode, setDyslexiaMode } }
+              ].map(({ Component, props }, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
+                >
+                  <Component {...props} />
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="mt-64 pt-24 border-t border-white/5 text-center">
-           <SettingsFooter />
+          <SettingsFooter />
         </div>
       </div>
     </div>

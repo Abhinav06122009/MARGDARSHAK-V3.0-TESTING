@@ -19,17 +19,17 @@ const SettingsFooter: React.FC = () => {
           <div className="text-[10px] font-bold tracking-[0.2em] text-white/40 mt-1 uppercase">Advanced Learning Systems</div>
         </div>
       </div>
-      
+
       <div className="flex flex-col items-center md:items-end gap-3">
-        <button 
-          disabled 
+        <button
+          disabled
           className="text-xs text-white/40 hover:text-white transition-all flex items-center gap-2 group/btn py-1.5 px-3 rounded-lg border border-white/5 hover:border-white/10"
         >
           <Command size={14} className="group-hover/btn:rotate-12 transition-transform" />
           <span className="font-medium">Command Menu</span>
           <span className="ml-2 font-mono text-[9px] bg-white/10 px-1.5 py-0.5 rounded opacity-50">Ctrl+K</span>
         </button>
-        
+
         <div className="flex flex-col items-center md:items-end gap-1.5">
           <div className="text-[10px] flex items-center gap-2 font-bold text-white/40 uppercase tracking-widest">
             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />

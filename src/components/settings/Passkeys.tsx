@@ -139,12 +139,12 @@ const Passkeys: React.FC<PasskeysProps> = ({ userId, userEmail, fullName }) => {
       if (transports.length === 0) transports = ['internal'];
 
       const newKey: StoredPasskey = {
-         id: crypto.randomUUID(),
-         credentialId,
-         deviceName: guessDeviceName(),
-         createdAt: new Date().toISOString(),
-         transports,
-         platform: navigator.platform || 'unknown',
+        id: crypto.randomUUID(),
+        credentialId,
+        deviceName: guessDeviceName(),
+        createdAt: new Date().toISOString(),
+        transports,
+        platform: navigator.platform || 'unknown',
       };
 
       const { data: { user: latest } } = await supabase.auth.getUser();
@@ -190,26 +190,26 @@ const Passkeys: React.FC<PasskeysProps> = ({ userId, userEmail, fullName }) => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-[200%] animate-scanline pointer-events-none opacity-20" />
 
       <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700">
-         <Fingerprint size={140} />
+        <Fingerprint size={140} />
       </div>
 
       <div className="flex flex-col lg:flex-row items-start justify-between gap-10 mb-12 relative z-10">
         <div className="max-w-2xl">
-           <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
-                 <Fingerprint className="text-cyan-400" size={24} />
-              </div>
-              <div>
-                 <h2 className="text-2xl font-black text-white tracking-tight italic uppercase leading-none">Bio-Metrics</h2>
-                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mt-2">Hardware-Layer Protection</p>
-              </div>
-           </div>
-           <p className="text-sm text-white/40 leading-relaxed font-medium">
-             Deploy cryptographic tokens for password-less node access. Your biometric data is 
-             retained within your hardware secure enclave and never broadcasted to our clusters.
-           </p>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
+              <Fingerprint className="text-cyan-400" size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-white tracking-tight italic uppercase leading-none">Bio-Metrics</h2>
+              <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mt-2">Hardware-Layer Protection</p>
+            </div>
+          </div>
+          <p className="text-sm text-white/40 leading-relaxed font-medium">
+            Deploy cryptographic tokens for password-less node access. Your biometric data is
+            retained within your hardware secure enclave and never broadcasted to our clusters.
+          </p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           {inIframe && (
             <button
@@ -269,10 +269,10 @@ const Passkeys: React.FC<PasskeysProps> = ({ userId, userEmail, fullName }) => {
                 <div className="flex-1 min-w-0 relative z-10">
                   <div className="text-white font-black uppercase tracking-tight truncate mb-1">{p.deviceName}</div>
                   <div className="flex items-center gap-2">
-                     <div className="w-1 h-1 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_5px_#06b6d4]" />
-                     <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] truncate">
-                       Last_Sync: {new Date(p.createdAt).toLocaleDateString()}
-                     </span>
+                    <div className="w-1 h-1 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_5px_#06b6d4]" />
+                    <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] truncate">
+                      Last_Sync: {new Date(p.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
                 <button

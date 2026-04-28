@@ -22,7 +22,7 @@ const AccessibilitySection: React.FC<AccessibilitySectionProps> = ({
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent h-[200%] animate-scanline pointer-events-none opacity-20" />
 
       <div className="absolute -bottom-20 -right-20 p-10 opacity-[0.02] group-hover:opacity-[0.04] transition-all duration-1000 rotate-12 group-hover:rotate-0">
-         <Heart size={300} />
+        <Heart size={300} />
       </div>
 
       <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-12 relative z-10">
@@ -32,45 +32,42 @@ const AccessibilitySection: React.FC<AccessibilitySectionProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-3 mb-2">
-               <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Inclusion Core</span>
-               <Activity size={12} className="text-blue-500/30 animate-pulse" />
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Dyslexia Settings</span>
+              <Activity size={12} className="text-blue-500/30 animate-pulse" />
             </div>
-            <h2 className="text-3xl font-black text-white mb-4 tracking-tight italic uppercase leading-none">Universal Interface</h2>
+            <h2 className="text-3xl font-black text-white mb-4 tracking-tight italic uppercase leading-none">Dyslexia Friendly Interface</h2>
             <p className="text-white/30 text-sm leading-relaxed font-medium">
-              We engineer for the neuro-diverse spectrum. The Dyslexia-Friendly override recalibrates 
-              lexical kerning, chromatic contrast, and spatial density to minimize visual load 
+              We engineer for the neuro-diverse spectrum. The Dyslexia-Friendly override recalibrates
+              lexical kerning, chromatic contrast, and spatial density to minimize visual load
               and optimize neural processing speeds.
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-8 bg-black/60 p-8 rounded-[2.5rem] border border-white/5 min-w-[360px] shadow-2xl relative overflow-hidden group/toggle">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover/toggle:opacity-100 transition-opacity" />
           <div className="flex-1 relative z-10">
-             <div className="flex items-center gap-3 mb-2">
-                <Globe size={14} className="text-blue-400/50" />
-                <h3 className="text-[12px] font-black text-white uppercase tracking-widest">Protocol Delta</h3>
-             </div>
-            <span className={`text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-lg border ${
-              dyslexiaMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.2)]' : 'text-white/10 border-white/5'
-            } transition-all duration-500`}>
-              {dyslexiaMode ? 'OVERRIDE_ENABLED' : 'ARCH_STANDARD'}
+            <div className="flex items-center gap-3 mb-2">
+              <Globe size={14} className="text-blue-400/50" />
+              <h3 className="text-[12px] font-black text-white uppercase tracking-widest">Dyslexia Mode</h3>
+            </div>
+            <span className={`text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-lg border ${dyslexiaMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.2)]' : 'text-white/10 border-white/5'
+              } transition-all duration-500`}>
+              {dyslexiaMode ? 'OVERRIDE_ENABLED' : 'DYSLEXIA_FRIENDLY_INTERFACE'}
             </span>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setDyslexiaMode(!dyslexiaMode)}
-            className={`relative inline-flex h-12 w-24 items-center rounded-full transition-all duration-700 p-1.5 ${
-              dyslexiaMode ? 'bg-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.4)]' : 'bg-zinc-900 border border-white/5'
-            }`}
+            className={`relative inline-flex h-12 w-24 items-center rounded-full transition-all duration-700 p-1.5 ${dyslexiaMode ? 'bg-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.4)]' : 'bg-zinc-900 border border-white/5'
+              }`}
           >
-            <motion.span 
+            <motion.span
               layout
-              className={`inline-block h-9 w-9 transform rounded-full bg-white shadow-2xl flex items-center justify-center ${
-                dyslexiaMode ? 'translate-x-12' : 'translate-x-0'
-              }`} 
+              className={`inline-block h-9 w-9 transform rounded-full bg-white shadow-2xl flex items-center justify-center ${dyslexiaMode ? 'translate-x-12' : 'translate-x-0'
+                }`}
             >
-               <Sparkles size={16} className={dyslexiaMode ? 'text-blue-500' : 'text-zinc-400'} />
+              <Sparkles size={16} className={dyslexiaMode ? 'text-blue-500' : 'text-zinc-400'} />
             </motion.span>
           </button>
         </div>
