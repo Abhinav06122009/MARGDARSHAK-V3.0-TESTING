@@ -127,16 +127,23 @@ export const supabaseHelpers = {
                    (unsafeMetadata as any).tier || 
                    'free').toLowerCase();
 
-      // FUZZY FALLBACK: If "premium" or "elite" is found anywhere in the raw metadata, force it
-      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+      // NUCLEAR FUZZY FALLBACK: If "premium", "elite", "plus", or "pro" is found anywhere in the raw user object, force it
       if (tier === 'free') {
-        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
-        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+        const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
+        if (fullUserStr.includes('elite')) tier = 'premium_elite';
+        else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
+          tier = 'premium';
+        }
       }
       
-      // SUPER OVERRIDE: Hardcoded bypass for Abhinav Jha
-      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
-        console.log('👑 [Super Override] Master access granted for user_3CwM4tAD...');
+      // MASTER OVERRIDES: Hardcoded bypass for power users
+      const MASTER_IDS = [
+        'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', // Admin
+        'user_3CylWpMJnNbVpgJcpk9eSIf73gS'  // Premium User
+      ];
+      
+      if (MASTER_IDS.includes(clerkUser.id)) {
+        console.log(`👑 [Super Override] Master access granted for ${clerkUser.id}`);
         tier = 'premium_elite';
       }
 

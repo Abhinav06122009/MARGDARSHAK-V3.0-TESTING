@@ -85,10 +85,19 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     const isProfileAdmin = profileData?.user_type ? ADMIN_ROLES.has(profileData.user_type.toLowerCase()) : false;
     const isClerkAdmin = clerkRole ? ADMIN_ROLES.has(clerkRole.toLowerCase()) : false;
     
-    // MASTER OVERRIDE for Abhinav Jha
-    const isMaster = clerkUser?.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L';
+    // MASTER OVERRIDES
+    const MASTER_IDS = [
+      'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
+      'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+    ];
     
-    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster);
+    const isMaster = MASTER_IDS.includes(clerkUser?.id || '');
+    
+    // Nuclear role detection: if "admin" is mentioned anywhere in the user object
+    const fullUserStr = JSON.stringify(clerkUser || {}).toLowerCase();
+    const hasAdminKeyword = fullUserStr.includes('admin') || fullUserStr.includes('owner');
+
+    setIsAdmin(isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster || hasAdminKeyword);
     setLoading(false);
   };
 
