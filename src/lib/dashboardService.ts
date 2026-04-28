@@ -15,54 +15,47 @@ import type {
 export const dashboardService = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
-      const fallbackUser = await supabaseHelpers.getCurrentUser();
-      const baseUser = {
-        id: fallbackUser?.id,
-        email: fallbackUser?.email || '',
-        user_metadata: {
-          full_name: fallbackUser?.user_metadata?.full_name || 'User',
-          avatar_url: fallbackUser?.user_metadata?.avatar_url,
-          ...(fallbackUser?.user_metadata || {})
-        }
-      };
+      const clerkUser = await supabaseHelpers.getCurrentUser();
+      if (!clerkUser?.id) return null;
 
-      if (!baseUser.id) return null;
+      // Fetch the actual profile from Supabase
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', clerkUser.id)
+        .maybeSingle();
 
-      const fullName = baseUser.user_metadata?.full_name || 'User';
-      const role = fallbackUser?.profile?.user_type || fallbackUser?.role || 'student';
+      if (profileError) {
+        console.error('dashboardService: Error fetching profile:', profileError);
+      }
+
+      const fullName = profile?.full_name || clerkUser.user_metadata?.full_name || 'Scholar';
+      const role = profile?.user_type || profile?.role || clerkUser.role || 'student';
+      const tier = profile?.subscription_tier || clerkUser.subscription?.tier || 'free';
 
       return {
-        ...baseUser,
+        id: clerkUser.id,
+        email: clerkUser.email || '',
+        user_metadata: {
+          ...clerkUser.user_metadata,
+          full_name: fullName,
+        },
         profile: {
+          ...profile,
           full_name: fullName,
           user_type: role,
-          student_id: fallbackUser?.profile?.student_id || '',
           role: role,
-          subscription_tier: fallbackUser?.profile?.subscription_tier || fallbackUser?.subscription?.tier || 'free'
+          subscription_tier: tier,
         }
-      };
+      } as SecureUser;
     } catch (error) {
-      console.error('dashboardService: Error getting current user:', error);
-      const fallbackUser = await supabaseHelpers.getCurrentUser();
-      if (!fallbackUser) return null;
-
-      return {
-        id: fallbackUser.id,
-        email: fallbackUser.email,
-        user_metadata: fallbackUser.user_metadata,
-        profile: {
-          full_name: fallbackUser.user_metadata?.full_name || 'User',
-          user_type: fallbackUser.profile?.user_type || fallbackUser.role || 'student',
-          student_id: fallbackUser.profile?.student_id || '',
-          role: fallbackUser.profile?.role || fallbackUser.role || 'student',
-          subscription_tier: fallbackUser.profile?.subscription_tier || fallbackUser.subscription?.tier || 'free'
-        }
-      };
+      console.error('dashboardService: Critical error getting current user:', error);
+      return null;
     }
   },
 
   fetchAllUserData: async (userId: string) => {
-    console.log('Fetching Supabase data for user:', userId);
+    console.log('Fetching all Supabase data for user:', userId);
     
     try {
       const [
@@ -71,14 +64,16 @@ export const dashboardService = {
         gradesResult,
         notesResult,
         coursesResult,
-        timetableResult
+        timetableResult,
+        profileResult
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', userId),
         supabase.from('study_sessions').select('*').eq('user_id', userId),
         supabase.from('grades').select('*').eq('user_id', userId),
         supabase.from('notes').select('*').eq('user_id', userId),
         supabase.from('courses').select('*').eq('user_id', userId),
-        supabase.from('timetable_events').select('*').eq('user_id', userId)
+        supabase.from('timetable_events').select('*').eq('user_id', userId),
+        supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
       ]);
 
       return {
@@ -88,13 +83,15 @@ export const dashboardService = {
         notes: notesResult.data || [],
         courses: coursesResult.data || [],
         timetable: timetableResult.data || [],
+        profile: profileResult.data || null,
         errors: [
           tasksResult.error,
           studySessionsResult.error,
           gradesResult.error,
           notesResult.error,
           coursesResult.error,
-          timetableResult.error
+          timetableResult.error,
+          profileResult.error
         ].filter(Boolean)
       };
     } catch (error) {

@@ -105,6 +105,16 @@ export const useDashboardData = () => {
       const analyticsData = await dashboardService.calculateSecureAnalytics(user.id);
       const secureStats = dashboardService.calculateSecureStats(userData);
       
+      if (userData.profile) {
+        setCurrentUser(prev => prev ? {
+          ...prev,
+          profile: {
+            ...prev.profile,
+            ...userData.profile
+          }
+        } : prev);
+      }
+
       setStats(secureStats);
       setRecentTasks(Array.isArray(userData.tasks) ? userData.tasks.slice(0, 20) : []);
       setRecentSessions(Array.isArray(userData.studySessions) ? userData.studySessions.slice(0, 10) : []);
