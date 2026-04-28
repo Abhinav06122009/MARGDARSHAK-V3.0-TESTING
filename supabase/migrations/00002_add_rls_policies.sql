@@ -7,6 +7,33 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated, service_role;
 
+-- Helper function to break RLS recursion for enrollments
+CREATE OR REPLACE FUNCTION public.check_course_access(p_course_id uuid, p_user_id text)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.courses 
+    WHERE id = p_course_id AND (user_id = p_user_id OR teacher_id = p_user_id)
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.check_enrollment_access(p_course_id uuid, p_user_id text)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.enrollments 
+    WHERE course_id = p_course_id AND student_id = p_user_id
+  );
+$$;
+
 -- 2. Enable Row Level Security for profiles (previously disabled)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
@@ -98,10 +125,10 @@ ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can manage their own courses" ON public.courses;
-CREATE POLICY "Users can manage their own courses" ON public.courses FOR ALL USING (user_id = requesting_user_id());
+CREATE POLICY "Users can manage their own courses" ON public.courses FOR ALL USING (user_id = requesting_user_id() OR teacher_id = requesting_user_id());
 
 DROP POLICY IF EXISTS "Students can view enrolled courses" ON public.courses;
-CREATE POLICY "Students can view enrolled courses" ON public.courses FOR SELECT USING (EXISTS (SELECT 1 FROM public.enrollments WHERE course_id = public.courses.id AND student_id = requesting_user_id()));
+CREATE POLICY "Students can view enrolled courses" ON public.courses FOR SELECT USING (check_enrollment_access(id, requesting_user_id()));
 
 -- Allow students to view their own enrollments
 DROP POLICY IF EXISTS "Users can view their own enrollments" ON public.enrollments;
@@ -119,7 +146,7 @@ WITH CHECK ( student_id = requesting_user_id() );
 DROP POLICY IF EXISTS "Teachers can manage enrollments" ON public.enrollments;
 CREATE POLICY "Teachers can manage enrollments" 
 ON public.enrollments FOR ALL 
-USING ( exists ( select 1 from public.courses where id = public.enrollments.course_id and user_id = requesting_user_id() ) );
+USING ( check_course_access(course_id, requesting_user_id()) );
 
 -- 7. Exams & Grades Policies
 ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
