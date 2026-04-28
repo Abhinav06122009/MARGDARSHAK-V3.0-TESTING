@@ -9,6 +9,7 @@ export interface SecureUser {
     full_name: string;
     user_type: string;
     student_id?: string;
+    avatar_url?: string;
   };
   last_sign_in_at?: string;
 }
@@ -67,7 +68,8 @@ export const useSettings = () => {
         profile: {
           full_name: profile?.full_name || authUser.user_metadata?.full_name || '',
           user_type: profile?.user_type || 'student',
-          student_id: profile?.student_id || ''
+          student_id: profile?.student_id || '',
+          avatar_url: profile?.avatar_url || authUser.user_metadata?.avatar_url || ''
         }
       };
       

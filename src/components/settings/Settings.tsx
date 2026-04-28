@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 
 // Hooks & Components
 import { useSettings } from '@/hooks/useSettings';
-import ProfileSection from './ProfileSection';
 import SecuritySection from './SecuritySection';
 import AccessibilitySection from './AccessibilitySection';
 import SettingsFooter from './SettingsFooter';
@@ -114,9 +113,18 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           </div>
         </motion.div>
 
-        {/* Premium Identity Card Section */}
+        {/* Premium Identity Card Section - Now the Main Editor */}
         <div className="mb-20">
-          <PremiumIDCard user={user} />
+          <PremiumIDCard 
+            user={user} 
+            fullName={fullName}
+            setFullName={setFullName}
+            studentId={studentId}
+            setStudentId={setStudentId}
+            isSubmitting={isSubmittingProfile}
+            onSubmit={handleProfileUpdate}
+            onRefresh={refreshUser}
+          />
         </div>
 
         <div className="flex items-center gap-4 mb-10">
@@ -127,15 +135,6 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           {/* Main Configuration Panels */}
-          <ProfileSection 
-            user={user}
-            fullName={fullName}
-            setFullName={setFullName}
-            studentId={studentId}
-            setStudentId={setStudentId}
-            isSubmitting={isSubmittingProfile}
-            onSubmit={handleProfileUpdate}
-          />
 
           <SecuritySection 
             newPassword={newPassword}
