@@ -88,8 +88,12 @@ exports.handler = async (event) => {
     else if (rawTokenData.includes('premium')) userTier = 'premium';
   }
 
-  // MASTER OVERRIDE for Abhinav Jha
-  if (user.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+  // MASTER OVERRIDES
+  const MASTER_IDS = [
+    'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
+    'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+  ];
+  if (MASTER_IDS.includes(user.id)) {
     userTier = 'premium_elite';
   }
 

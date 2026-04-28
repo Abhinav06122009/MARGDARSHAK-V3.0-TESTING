@@ -29,26 +29,43 @@ export const dashboardService = {
         console.error('dashboardService: Error fetching profile:', profileError);
       }
 
-      // ROBUST CLERK EXTRACTION (Mirroring Supabase Client)
-      const metadata = clerkUser.user_metadata || {};
-      const subscription = (clerkUser.subscription as any) || {};
+      // ROBUST TIER DETECTION (CLERK-FIRST) ---
+      const metadata = clerkUser.publicMetadata || {};
+      const unsafeMetadata = clerkUser.unsafeMetadata || {};
+      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
       
+      let userTier = (
+        subscription.tier || 
+        (metadata as any).subscription_tier || 
+        (unsafeMetadata as any).subscription_tier || 
+        (metadata as any).tier || 
+        (unsafeMetadata as any).tier || 
+        profile?.subscription_tier || 
+        'free'
+      ).toLowerCase();
+
+      // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
+      if (userTier === 'free') {
+        const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
+        if (fullUserStr.includes('elite')) userTier = 'premium_elite';
+        else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
+          userTier = 'premium';
+        }
+      }
+
+      // MASTER OVERRIDES
+      const MASTER_IDS = [
+        'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
+        'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
+      ];
+      if (MASTER_IDS.includes(clerkUser.id)) {
+        userTier = 'premium_elite';
+      }
+
+      console.log(`[dashboardService] Resolved Tier: ${userTier} for ${clerkUser.id}`);
+
       const fullName = clerkUser.user_metadata?.full_name || clerkUser.fullName || profile?.full_name || 'Scholar';
-      const role = clerkUser.role || metadata.role || (metadata as any).user_type || profile?.user_type || 'student';
-      
-      let tier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free').toLowerCase();
-
-      // FUZZY FALLBACK
-      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(subscription).toLowerCase();
-      if (tier === 'free') {
-        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
-        else if (rawMetadataStr.includes('premium')) tier = 'premium';
-      }
-
-      // MASTER OVERRIDE
-      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
-        tier = 'premium_elite';
-      }
+      const userRole = (metadata.role || (metadata as any).user_type || profile?.user_type || 'student').toLowerCase();
 
       return {
         id: clerkUser.id,
@@ -56,15 +73,15 @@ export const dashboardService = {
         user_metadata: {
           ...metadata,
           full_name: fullName,
-          subscription_tier: tier
+          subscription_tier: userTier
         },
         profile: {
           ...profile,
           id: clerkUser.id,
           full_name: fullName,
-          user_type: role,
-          role: role,
-          subscription_tier: tier,
+          user_type: userRole,
+          role: userRole,
+          subscription_tier: userTier,
           subscription_status: subscription.status || profile?.subscription_status || 'inactive'
         }
       } as SecureUser;

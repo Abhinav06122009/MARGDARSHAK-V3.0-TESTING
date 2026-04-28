@@ -165,18 +165,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     if (!clerkLoaded || !clerkUser) return currentUser?.profile?.subscription_tier || null;
     const metadata = clerkUser.publicMetadata || {};
     const unsafeMetadata = clerkUser.unsafeMetadata || {};
-    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-    let tier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || currentUser?.profile?.subscription_tier || 'free').toLowerCase();
     
-    // FUZZY FALLBACK
-    const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(unsafeMetadata).toLowerCase();
+    // Deep Extraction from all known Clerk paths
+    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+    let tier = (
+      subscription.tier || 
+      (metadata as any).subscription_tier || 
+      (unsafeMetadata as any).subscription_tier || 
+      (metadata as any).tier || 
+      (unsafeMetadata as any).tier || 
+      currentUser?.profile?.subscription_tier || 
+      'free'
+    ).toLowerCase();
+    
+    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object for keywords
+    // This catches cases where metadata is empty but the subscription exists in other fields
     if (tier === 'free') {
-      if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
-      else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
+      if (fullUserStr.includes('elite')) tier = 'premium_elite';
+      else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
+        tier = 'premium';
+      }
     }
 
-    // SUPER OVERRIDE for Abhinav Jha
-    if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+    // MASTER OVERRIDES for specific power users
+    const MASTER_IDS = [
+      'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', // Admin
+      'user_3CylWpMJnNbVpgJcpk9eSIf73gS'  // User from logs
+    ];
+    
+    if (MASTER_IDS.includes(clerkUser.id)) {
       tier = 'premium_elite';
     }
     
