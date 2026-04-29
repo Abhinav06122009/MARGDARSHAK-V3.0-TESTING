@@ -75,11 +75,21 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     // Support Clerk-based roles in metadata as a fallback
     const metadata = clerkUser?.publicMetadata || {};
     const unsafeMetadata = clerkUser?.unsafeMetadata || {};
-    const clerkRole = (metadata.role as string) || (unsafeMetadata.role as string) || (metadata as any).user_type || (unsafeMetadata as any).user_type || '';
+    const rawClerkRole = metadata.role || unsafeMetadata.role || (metadata as any).user_type || (unsafeMetadata as any).user_type || '';
+    
+    // Normalize Clerk roles to an array
+    const clerkRoles = Array.isArray(rawClerkRole) 
+      ? rawClerkRole 
+      : (typeof rawClerkRole === 'string' ? rawClerkRole.split(',').map(r => r.trim()) : []);
     
     const isRpcAdmin = role ? ADMIN_ROLES.has(role.toLowerCase()) : false;
-    const isProfileAdmin = profileData?.user_type ? ADMIN_ROLES.has(profileData.user_type.toLowerCase()) : false;
-    const isClerkAdmin = clerkRole ? ADMIN_ROLES.has(clerkRole.toLowerCase()) : false;
+    
+    // Support multiple roles in Profile as well (comma-separated)
+    const profileRoles = profileData?.user_type?.split(',').map(r => r.trim()) || [];
+    const isProfileAdmin = profileRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
+    const isClerkAdmin = clerkRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
+    
+    const clerkRoleDisplay = Array.isArray(rawClerkRole) ? rawClerkRole.join(', ') : rawClerkRole;
     
     const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
     const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
@@ -90,8 +100,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     console.group(`🛡️ [ADMIN AUDIT] ${userEmail}`);
     console.log(`STATUS: ${finalAdminStatus ? '✅ GRANTED' : '❌ DENIED'}`);
     console.log(`1. RPC Role [${role}]: ${isRpcAdmin}`);
-    console.log(`2. Profile Role [${profileData?.user_type}]: ${isProfileAdmin}`);
-    console.log(`3. Clerk Metadata [${clerkRole}]: ${isClerkAdmin}`);
+    console.log(`2. Profile Role [${profileData?.user_type || 'none'}]: ${isProfileAdmin}`);
+    console.log(`3. Clerk Metadata [${clerkRoleDisplay || 'none'}]: ${isClerkAdmin}`);
     console.log(`4. Master Override: ${isMaster}`);
     if (finalAdminStatus && !isMaster) {
       console.warn('⚠️ WARNING: Admin access granted via non-master role. Verify DB/Metadata integrity.');
