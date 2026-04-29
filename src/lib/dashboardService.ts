@@ -19,11 +19,14 @@ export const dashboardService = {
       const clerkUser = await supabaseHelpers.getCurrentUser();
       if (!clerkUser?.id) return null;
 
-      // Fetch the actual profile from Supabase (as a fallback/enrichment)
+      // Translate ID for Supabase UUID lookup
+      const translatedId = await translateClerkIdToUUID(clerkUser.id);
+
+      // Fetch the actual profile from Supabase using translated ID
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', clerkUser.id)
+        .eq('id', translatedId)
         .maybeSingle();
 
       if (profileError) {

@@ -172,6 +172,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <AnimatePresence>
             {showExportMenu && (
               <motion.div
+                key="export-menu"
                 initial={{ opacity: 0, y: -8, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.95 }}
@@ -248,6 +249,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <AnimatePresence>
             {showUserMenu && (
               <motion.div
+                key="user-menu"
                 initial={{ opacity: 0, y: -8, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.95 }}

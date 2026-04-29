@@ -207,7 +207,7 @@ const TasksPanel: React.FC<TasksPanelProps> = ({
       )}
 
       {/* Tasks List */}
-      <motion.div layout className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
+      <motion.div className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
         <AnimatePresence>
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (

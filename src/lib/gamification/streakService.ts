@@ -67,11 +67,15 @@ export const generateHeatmapData = (tasks: any[] = []): ActivityDay[] => {
 };
 
 import { supabase } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import { toast } from 'sonner';
 
 // Fetch Real Leaderboard Data from Supabase
 export const fetchRealLeaderboard = async (currentUserId: string, currentUserXP: number) => {
   try {
+    // Ensure we are comparing UUIDs
+    const translatedId = await translateClerkIdToUUID(currentUserId);
+    
     // Fetch a few real profiles from Supabase
     const { data: profiles, error } = await supabase
       .from('profiles')
@@ -84,7 +88,7 @@ export const fetchRealLeaderboard = async (currentUserId: string, currentUserXP:
     
     // For each profile, fetch their completed tasks to calculate real XP
     for (const profile of (profiles || [])) {
-      if (profile.id === currentUserId) {
+      if (profile.id === translatedId) {
         leaderboard.push({
           id: profile.id,
           name: profile.full_name || 'You',

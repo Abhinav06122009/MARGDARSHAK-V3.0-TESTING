@@ -30,6 +30,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({ courses, onEdit, onDelete, onFo
           >
             <CourseCard
               course={course}
+              index={index}
               onEdit={() => onEdit(course)}
               onDelete={() => onDelete(course.id, course.name)}
               onFocus={() => onFocus(course)}

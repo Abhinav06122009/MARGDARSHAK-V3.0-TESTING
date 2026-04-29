@@ -48,8 +48,24 @@ const CommandPalette = ({ isOpen, onClose, onAction }: { isOpen: boolean, onClos
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start justify-center z-50 pt-24" onClick={onClose}>
-          <motion.div initial={{ scale: 0.95, y: -20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: -20 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="bg-black/50 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <motion.div
+          key="command-palette-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start justify-center z-50 pt-24"
+          onClick={onClose}
+        >
+          <motion.div
+            key="command-palette-container"
+            initial={{ scale: 0.95, y: -20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.95, y: -20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="bg-black/50 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-4 border-b border-white/10 flex items-center gap-4">
               <Search className="text-white/50" />
               <input type="text" placeholder="Type a command or search..." value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={handleKeyDown} className="w-full bg-transparent text-white placeholder:text-white/50 focus:outline-none text-lg" autoFocus />

@@ -210,7 +210,16 @@ export const supabaseHelpers = {
 
   getUserProfile: async (userId?: string) => {
     try {
-      const id = userId || (await supabaseHelpers.getCurrentUser())?.id;
+      let id: string | null = null;
+      
+      if (userId) {
+        // If a raw userId is provided, translate it
+        id = await translateClerkIdToUUID(userId);
+      } else {
+        // Fallback to current user (which is already translated)
+        id = (await supabaseHelpers.getCurrentUser())?.id || null;
+      }
+      
       if (!id) return null;
 
       const { data, error } = await supabase

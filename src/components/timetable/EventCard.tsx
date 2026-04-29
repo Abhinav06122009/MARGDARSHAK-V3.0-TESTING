@@ -109,11 +109,10 @@ const EventCard = ({ event, onEdit, onDelete, dayIndex, onDragStart, onSelect, i
 
   return (
     <motion.div
-      layoutId={event.id}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
       whileHover={{ 
-        y: -2,
         scale: 1.02,
         boxShadow: `0 20px 40px rgba(0,0,0,0.4), 0 0 20px ${baseColor}40`
       }}

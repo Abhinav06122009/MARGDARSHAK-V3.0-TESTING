@@ -372,16 +372,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     }));
   }, [analytics]);
 
-  if (loading || !securityVerified || !dashboardStats || !currentUser) return <DashboardSkeleton />;
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30">
-      <AmbientBackground />
-      
-      <AnimatePresence>
-        {showBackToTop && (
-          <motion.button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    <AnimatePresence mode="wait">
+      {loading || !securityVerified || !dashboardStats || !currentUser ? (
+        <motion.div
+          key="skeleton"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <DashboardSkeleton />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="dashboard-content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30"
+        >
+          <AmbientBackground />
+          
+          <AnimatePresence>
+            {showBackToTop && (
+              <motion.button
+                key="back-to-top"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="fixed bottom-24 right-6 z-50 p-3.5 bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-2xl shadow-xl shadow-indigo-500/30 border border-white/10 group"
             initial={{ opacity: 0, scale: 0.7, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -125,15 +125,21 @@ export const useDashboardData = () => {
       setAnalytics(analyticsData);
 
       if (unsubscribeRef.current) unsubscribeRef.current();
-      unsubscribeRef.current = dashboardService.setupSecureRealTimeSubscription(
-        user.id,
-        {
-          onTaskUpdate: handleSecureTaskUpdate,
-          onSessionUpdate: handleSecureSessionUpdate,
-          onGradeUpdate: handleSecureGradeUpdate,
-          onNoteUpdate: handleSecureNoteUpdate
-        }
-      );
+      
+      const setupSub = async () => {
+        const unsubscribeFn = await dashboardService.setupSecureRealTimeSubscription(
+          user.id,
+          {
+            onTaskUpdate: handleSecureTaskUpdate,
+            onSessionUpdate: handleSecureSessionUpdate,
+            onGradeUpdate: handleSecureGradeUpdate,
+            onNoteUpdate: handleSecureNoteUpdate
+          }
+        );
+        unsubscribeRef.current = unsubscribeFn;
+      };
+      
+      setupSub();
     } catch (error) {
       console.error('Error initializing dashboard:', error);
     } finally {

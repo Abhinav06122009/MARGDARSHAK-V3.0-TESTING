@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import { toast } from 'sonner';
 
 export interface AdminProfile {
@@ -49,6 +50,9 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
     setLoading(true);
     let role: string | null = null;
+    
+    // Translate ID for Supabase UUID lookup
+    const translatedId = await translateClerkIdToUUID(userId);
 
     try {
       // First attempt to get role via RPC
@@ -58,11 +62,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       console.warn('Admin role RPC unavailable', error);
     }
 
-    // Fetch profile data.
+    // Fetch profile data using translated ID.
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id, full_name, email, user_type')
-      .eq('id', userId)
+      .eq('id', translatedId)
       .maybeSingle();
 
     if (profileError) {
