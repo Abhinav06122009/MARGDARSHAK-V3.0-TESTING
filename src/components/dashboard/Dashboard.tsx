@@ -562,7 +562,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         <Footer />
       </div>
-    </div>
+    </motion.div>
+    )}
+    </AnimatePresence>
   );
 };
 
