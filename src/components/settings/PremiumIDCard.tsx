@@ -64,44 +64,67 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
   const joinDate = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'EST. 2024';
 
-  const getDisplayRole = (role: string) => {
-    const rawRole = role || 'student';
-    const normalizedRole = Array.isArray(rawRole) ? String(rawRole[0]).toLowerCase() : String(rawRole).toLowerCase();
-    const cleanRole = normalizedRole.replace(/_/g, '');
-
-    switch (cleanRole) {
-      case 'admin':
-      case 'superadmin':
-      case 'owner':
-        return 'SYSTEM_OVERSEER';
-      case 'ceo':
-        return 'CHIEF_EXECUTIVE';
-      case 'cto':
-        return 'CHIEF_TECHNOLOGY';
-      case 'cfo':
-        return 'CHIEF_FINANCIAL';
-      case 'coo':
-        return 'CHIEF_OPERATIONS';
-      case 'cmo':
-        return 'CHIEF_MARKETING';
-      case 'cio':
-        return 'CHIEF_INFORMATION';
-      case 'moderator':
-        return 'SYSTEM_MODERATOR';
-      case 'manager':
-        return 'DEPT_MANAGER';
-      case 'executive':
-        return 'EXEC_PROCTOR';
-      case 'staff':
-        return 'OPERATIONAL_STAFF';
-      case 'teacher':
-        return 'FACULTY_PROCTOR';
-      default:
-        return 'ELITE_SCHOLAR';
+  const getDisplayRole = (role: string | string[]) => {
+    const roles = Array.isArray(role) ? role : [role || 'student'];
+    const normalizedRoles = roles.map(r => String(r).toLowerCase().replace(/_/g, ''));
+    
+    // Multi-role A+ Class: The Hyper-Chromatic Protocol
+    if (normalizedRoles.length >= 2) {
+      return {
+        class: 'A+ CLASS',
+        title: 'MULTICORE_ELITE',
+        color: 'bg-gradient-to-r from-[#ff0080] via-[#7928ca] to-[#00dfd8]',
+        text: 'text-white',
+        glow: 'shadow-[0_0_40px_rgba(121,40,202,0.5)]',
+        accent: 'text-cyan-400'
+      };
     }
+
+    const cleanRole = normalizedRoles[0];
+
+    // A-Class: C-Suite Chromatics
+    const cSuite: Record<string, any> = {
+      ceo: { title: 'CHIEF_EXECUTIVE', color: 'bg-[#8B5CF6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(139,92,246,0.5)]', accent: 'text-purple-400' },
+      cto: { title: 'CHIEF_TECHNOLOGY', color: 'bg-[#1E40AF]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(30,64,175,0.5)]', accent: 'text-blue-400' },
+      cfo: { title: 'CHIEF_FINANCIAL', color: 'bg-[#FBBF24]', text: 'text-black', glow: 'shadow-[0_0_25px_rgba(251,191,36,0.5)]', accent: 'text-amber-400' },
+      coo: { title: 'CHIEF_OPERATIONS', color: 'bg-[#F97316]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(249,115,22,0.5)]', accent: 'text-orange-400' },
+      cmo: { title: 'CHIEF_MARKETING', color: 'bg-[#EC4899]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(236,72,153,0.5)]', accent: 'text-pink-400' },
+      cio: { title: 'CHIEF_INFORMATION', color: 'bg-[#06B6D4]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(6,182,212,0.5)]', accent: 'text-cyan-400' }
+    };
+
+    if (cSuite[cleanRole]) return { ...cSuite[cleanRole], class: 'A-CLASS' };
+
+    // B-Class: Sovereignty Chromatics
+    const bClass: Record<string, any> = {
+      owner: { title: 'SYSTEM_OWNER', color: 'bg-[#EF4444]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(239,68,68,0.5)]', accent: 'text-red-400' },
+      superadmin: { title: 'SUPER_ADMIN', color: 'bg-[#6366F1]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(99,102,241,0.5)]', accent: 'text-indigo-400' },
+      admin: { title: 'SYSTEM_ADMIN', color: 'bg-[#3B82F6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(59,130,246,0.5)]', accent: 'text-blue-400' }
+    };
+
+    if (bClass[cleanRole]) return { ...bClass[cleanRole], class: 'B-CLASS' };
+
+    // C-Class: Oversight Chromatics
+    const cClass: Record<string, any> = {
+      moderator: { title: 'SYSTEM_MODERATOR', color: 'bg-[#10B981]', text: 'text-black', glow: 'shadow-[0_0_25px_rgba(16,185,129,0.5)]', accent: 'text-emerald-400' },
+      manager: { title: 'DEPT_MANAGER', color: 'bg-[#14B8A6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(20,184,166,0.5)]', accent: 'text-teal-400' },
+      executive: { title: 'EXEC_PROCTOR', color: 'bg-[#475569]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(71,85,105,0.5)]', accent: 'text-slate-400' },
+      staff: { title: 'OPERATIONAL_STAFF', color: 'bg-[#64748B]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(100,116,139,0.5)]', accent: 'text-slate-500' }
+    };
+
+    if (cClass[cleanRole]) return { ...cClass[cleanRole], class: 'C-CLASS' };
+
+    // CORE: Standard Student Theme
+    return {
+      class: 'CORE',
+      title: 'ELITE_SCHOLAR',
+      color: 'bg-[#1a1a1a]',
+      text: 'text-zinc-600',
+      glow: 'shadow-none',
+      accent: 'text-zinc-800'
+    };
   };
 
-  const tier = getDisplayRole(user.profile?.user_type || 'student');
+  const roleData = getDisplayRole(user.profile?.user_type || 'student');
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,7 +135,8 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
       const filePath = `${user.id}/${Math.random()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
       if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = publicUrlData.publicUrl;
       const { error: updateError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
       if (updateError) throw updateError;
       toast({ title: "IDENTITY_SYNC", description: "Biometric node updated." });
@@ -139,7 +163,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
           {isClicked && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 border-4 border-emerald-500 rounded-[3rem] shadow-[0_0_60px_rgba(16,185,129,0.5)] pointer-events-none"
+              className={`absolute inset-0 z-50 border-4 ${roleData.class === 'CORE' ? 'border-zinc-800' : 'border-white/20'} rounded-[3rem] ${roleData.glow} pointer-events-none`}
             />
           )}
         </AnimatePresence>
@@ -150,9 +174,12 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
         {/* ROLE RIBBON: Perfectly Anchored */}
         <div className="absolute top-10 left-0 z-40">
-          <div className="bg-emerald-500 px-6 py-2 rounded-r-full shadow-[5px_0_20px_rgba(16,185,129,0.3)] flex items-center gap-2 border-y border-r border-white/10">
-            <Sparkles size={12} className="text-black" />
-            <span className="text-[10px] font-black text-black uppercase tracking-widest italic">{tier}</span>
+          <div className={`${roleData.color} ${roleData.glow} px-6 py-2.5 rounded-r-full flex flex-col border-y border-r border-white/10`}>
+            <div className="flex items-center gap-2">
+              <Sparkles size={10} className={roleData.text} />
+              <span className={`text-[8px] font-black ${roleData.text} uppercase tracking-[0.3em]`}>{roleData.class}</span>
+            </div>
+            <span className={`text-[11px] font-black ${roleData.text} uppercase tracking-widest italic leading-tight`}>{roleData.title}</span>
           </div>
         </div>
 
@@ -162,8 +189,8 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
           <div className="flex items-center justify-between mb-12">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                  <Shield size={16} className="text-emerald-400" />
+                <div className={`p-2 ${roleData.class === 'CORE' ? 'bg-zinc-500/10 border-zinc-500/20' : roleData.color + ' bg-opacity-10 border-white/20'} border rounded-lg`}>
+                  <Shield size={16} className={roleData.class === 'CORE' ? 'text-zinc-400' : 'text-white'} />
                 </div>
                 <h2 className="text-lg font-black text-white tracking-tight uppercase italic leading-none">Margdarshak</h2>
               </div>
@@ -171,7 +198,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
             </div>
             <div className="text-right">
               <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">REG_CODE</div>
-              <div className="text-[11px] font-mono text-fuchsia-400 font-bold tracking-widest">{studentId || 'ID_0000'}</div>
+              <div className={`text-[11px] font-mono ${roleData.class === 'A+ CLASS' ? 'text-rose-400' : roleData.class === 'A-CLASS' ? 'text-amber-400' : roleData.class === 'B-CLASS' ? 'text-cyan-400' : 'text-fuchsia-400'} font-bold tracking-widest`}>{studentId || 'ID_0000'}</div>
             </div>
           </div>
 
