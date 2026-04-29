@@ -7,7 +7,9 @@ const {
   MAX_BODY_BYTES,
 } = require("./_shared/security");
 
-const MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+const ELITE_UPGRADE_MODEL = "anthropic/claude-3.5-sonnet";
+const PREMIUM_UPGRADE_MODEL = "google/gemini-2.0-flash-001";
 
 const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Under no circumstances should you output math delimiters like \\(, \\), \\[, \\], or $$, nor should you use backslash commands like \\frac, \\theta, \\sqrt, \\times, or \\cdot.
 
@@ -168,6 +170,17 @@ exports.handler = async (event) => {
     messages = [{ role: "system", content: FORMATTING_SYSTEM_PROMPT }, ...messages];
   }
 
+  const isPremium = userTier === 'premium' || isElite;
+  
+  // Decide model: Upgrade if elite/premium and current model is free or default
+  let modelToUse = payload.model || DEFAULT_FREE_MODEL;
+  if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
+    if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
+    else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
+  }
+
+  console.log(`[AI-CHAT] User: ${user.id} | Tier: ${userTier} | Model: ${modelToUse}`);
+
   try {
     const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -178,7 +191,7 @@ exports.handler = async (event) => {
         "X-Title": "MARGDARSHAK AI Tutor",
       },
       body: JSON.stringify({ 
-        model: payload.model || "nvidia/nemotron-3-super-120b-a12b:free", 
+        model: modelToUse, 
         messages 
       }),
     });
@@ -200,7 +213,7 @@ exports.handler = async (event) => {
       headers,
       body: JSON.stringify({
         response: choice?.content ?? "",
-        model: payload.model || "nvidia/nemotron-3-super-120b-a12b:free",
+        model: modelToUse,
       }),
     };
   } catch (err) {
