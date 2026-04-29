@@ -46,6 +46,19 @@ export const taskService = {
 
   async createTask(taskData: TaskFormData, userId: string): Promise<Task> {
     const translatedId = await translateClerkIdToUUID(userId);
+    
+    // Ensure profile exists before creating task (fixes 23503 foreign key violation)
+    const { data: authData } = await supabase.auth.getUser();
+    if (authData?.user) {
+      await supabase.from('profiles').upsert({
+        id: translatedId,
+        clerk_id: (authData.user as any).clerk_id || (authData.user as any).id,
+        email: authData.user.email || '',
+        full_name: (authData.user as any).user_metadata?.full_name || 'Scholar',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+    }
+
     const newTask = {
       ...taskData,
       id: crypto.randomUUID(),

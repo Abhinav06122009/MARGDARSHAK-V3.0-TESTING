@@ -205,6 +205,19 @@ export interface TimetableEvent {
   
     createEvent: async (eventData: any, userId: string) => {
       try {
+        // Ensure profile exists before creating event (fixes 23503 foreign key violation)
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData?.user) {
+          // Sync profile immediately to satisfy FK constraint
+          await supabase.from('profiles').upsert({
+            id: userId,
+            clerk_id: (authData.user as any).clerk_id || (authData.user as any).id,
+            email: authData.user.email || '',
+            full_name: (authData.user as any).user_metadata?.full_name || 'Scholar',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+        }
+
         const cleanData = {
           user_id: userId,
           title: eventData.title,
