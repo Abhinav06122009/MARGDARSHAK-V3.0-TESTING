@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     session: clerkSession || null,
     user: clerkUser || null,
-    loading: !sessionLoaded || !userLoaded || loading,
+    loading: loading, // Use the internal state which only flips to false when sync is done
     isBlocked,
     blockedReason
   };

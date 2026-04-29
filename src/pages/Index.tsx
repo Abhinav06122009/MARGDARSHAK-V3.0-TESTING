@@ -68,8 +68,8 @@ const Index = () => {
     setCurrentPage('dashboard');
   };
 
-  // Loading state with timeout protection
-  if (loading || !authChecked) return <PageLoader />;
+  // Initial loading state
+  if (loading) return <PageLoader />;
 
   // Auth page
   if (!isAuthenticated) {
