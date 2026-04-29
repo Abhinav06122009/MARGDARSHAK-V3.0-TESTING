@@ -319,7 +319,6 @@ const AchievementsPage = () => {
 
           </div>
         </div>
-        </div>
       </ScrollArea>
     </div>
   );

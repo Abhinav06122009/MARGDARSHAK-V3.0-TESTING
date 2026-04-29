@@ -180,6 +180,7 @@ const TermsAndConditions: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             </button>
           </div>
         )}
+      </div>
     </div>
   );
 };
