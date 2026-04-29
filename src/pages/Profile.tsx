@@ -7,6 +7,8 @@ import {
   Edit3, Save, X, Github, Twitter, Linkedin
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import { useUser } from '@clerk/react';
+import { useToast } from '@/hooks/use-toast';
 import PremiumIDCard from '@/components/settings/PremiumIDCard';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import { jsPDF } from 'jspdf';
@@ -17,15 +19,39 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     user, loading, fullName, setFullName, studentId, setStudentId,
     handleProfileUpdate, refreshUser 
   } = useSettings();
+  const { user: clerkUser } = useUser();
+  const { toast } = useToast();
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState('identity');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  const registerPasskey = async () => {
+    if (!clerkUser) return;
+    setIsRegistering(true);
+    try {
+      await clerkUser.createPasskey();
+      toast({ 
+        title: 'BIO-METRIC ENROLLED', 
+        description: 'New passkey registered successfully in Identity Hub.',
+        className: "bg-zinc-900 border-emerald-500/50 text-emerald-400"
+      });
+    } catch (err: any) {
+      toast({ 
+        title: 'ENROLMENT FAILED', 
+        description: err.message || 'Verification failed.', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   const generateCertificate = () => {
     const doc = new jsPDF({
@@ -230,7 +256,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
           {/* LEFT COLUMN: THE ID CARD (PHYSICAL IDENTITY) */}
           <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-12 lg:sticky lg:top-12">
             <div className="space-y-4">
-              <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase">Identity <span className="text-emerald-500">Node</span></h2>
+              <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase">Identity <span className="text-emerald-500">Hub</span></h2>
               <p className="text-zinc-500 text-sm font-medium leading-relaxed">Your Margdarshak Universal ID. This holographic asset represents your verified status across the ecosystem.</p>
             </div>
 
@@ -247,9 +273,15 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
 
              {/* QUICK ACTIONS */}
             <div className="grid grid-cols-2 gap-4">
-               <button className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group">
-                 <Fingerprint className="w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400" />
-                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Security_Key</span>
+               <button 
+                 onClick={registerPasskey}
+                 disabled={isRegistering}
+                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group disabled:opacity-50"
+               >
+                 <Fingerprint className={`w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400 ${isRegistering ? 'animate-pulse' : ''}`} />
+                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">
+                   {isRegistering ? 'SYNCING...' : 'Security_Key'}
+                 </span>
                </button>
                <button 
                  onClick={generateCertificate}
@@ -348,24 +380,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
                 </div>
               </div>
 
-              {/* SOCIAL GRAPH MODULE */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { label: 'GitHub', icon: <Github size={20} />, status: 'LINKED', color: 'text-white' },
-                  { label: 'Twitter', icon: <Twitter size={20} />, status: 'PENDING', color: 'text-blue-400' },
-                  { label: 'LinkedIn', icon: <Linkedin size={20} />, status: 'LINKED', color: 'text-blue-600' }
-                ].map((social, i) => (
-                  <div key={i} className="p-8 bg-zinc-950/40 border border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 hover:border-white/20 transition-all group cursor-pointer">
-                    <div className={`${social.color} opacity-40 group-hover:opacity-100 transition-opacity`}>
-                      {social.icon}
-                    </div>
-                    <span className="text-[10px] font-black text-white/20 group-hover:text-white uppercase tracking-widest transition-colors">{social.label}</span>
-                    <div className={`px-4 py-1 rounded-full text-[7px] font-black tracking-[0.2em] ${social.status === 'LINKED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-800 text-zinc-600'}`}>
-                      {social.status}
-                    </div>
-                  </div>
-                ))}
-              </div>
+
 
             </div>
 

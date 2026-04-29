@@ -61,7 +61,6 @@ import CourseManagement from "@/components/courses/CourseManagement";
 import Syllabus from "@/components/syllabus/Syllabus";
 import Settings from "@/components/settings/Settings";
 import ProgressTracker from "@/components/progress/ProgressTracker";
-import ProgressTracer from "@/components/progress/ProgressTracer";
 import Wellness from "@/components/wellness/Wellness";
 import Profile from "@/pages/Profile";
 import Status from "@/pages/Status";
@@ -153,7 +152,6 @@ const DashboardRouteWrapper = () => {
       <SEO title="Dashboard | MARGDARSHAK" description="Your AI-powered command center." />
       <Dashboard onNavigate={(page) => {
         if (page === 'dashboard') navigate('/dashboard');
-        else if (page === 'tracer') navigate('/tracer');
         else if (page === 'progress') navigate('/progress');
         else if (page === 'settings') navigate('/settings');
         else if (page === 'profile') navigate('/profile');
@@ -224,8 +222,7 @@ const AppContent = () => {
 
 
                         <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/tracer" element={<PremiumRoute><SEO title="Progress Tracer | MARGDARSHAK" description="Advanced academic telemetry." /><ProgressTracer /></PremiumRoute>} />
-                        <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Node | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/status" element={<><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></>} />
                         <Route path="/sitemap" element={<><SEO title="Sitemap Index | MARGDARSHAK" description="Architectural matrix of the ecosystem." /><Sitemap onBack={() => window.history.back()} /></>} />
                         <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />

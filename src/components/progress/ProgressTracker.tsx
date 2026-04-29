@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Plus, Edit, Trash2, Save, X, Download, Upload, Filter, Search, Star, TrendingUp, Trophy, Target, AlertCircle, Eye, Shield, BookOpen, Calculator, Calendar, Clock, Award, BarChart3, PieChart, LineChart, Activity, PlayCircle, PauseCircle, CheckCircle, Circle, Flag, Zap, Sparkles, Timer, RefreshCw, BrainCircuit, Lightbulb, Repeat, LayoutGrid, List, Flame, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -576,6 +577,7 @@ const progressHelpers = {
 };
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ onBack }) => {
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
@@ -644,16 +646,18 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ onBack }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    addCustomStyles();
-    initializeProgressTracker();
-  }, []);
+    if (clerkLoaded) {
+      addCustomStyles();
+      initializeProgressTracker();
+    }
+  }, [clerkLoaded, clerkUser]);
 
   const initializeProgressTracker = async () => {
     try {
       setLoading(true);
 
       const user = await progressHelpers.getCurrentUser();
-
+      
       if (!user) {
         toast({
           title: "Authentication Required",
@@ -665,10 +669,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ onBack }) => {
         return;
       }
 
-      const allowedRoles = ['premium', 'bdo', 'admin', 'superadmin'];
-      const userRole = user.profile?.role || 'student';
-
-      if (!allowedRoles.includes(userRole)) {
+      // Sync subscription from Clerk metadata
+      const subscriptionTier = clerkUser?.publicMetadata?.subscription?.tier || 'student';
+      const allowedRoles = ['premium', 'premium_elite', 'bdo', 'admin', 'superadmin'];
+      
+      if (!allowedRoles.includes(subscriptionTier as string) && user.profile?.role !== 'admin' && user.profile?.role !== 'superadmin') {
         toast({
           title: "Access Denied",
           description: "You do not have permission to access the Progress Tracker. Please upgrade your plan.",

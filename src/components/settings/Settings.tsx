@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@clerk/react';
 import { ArrowLeft, Settings as SettingsIcon, ShieldCheck, Zap, Globe, Cpu, Radio, Target, Activity, Layout, Layers, Terminal, Box, Sparkles, Command } from 'lucide-react';
 
 // Hooks & Components
@@ -61,6 +62,8 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     dyslexiaMode, setDyslexiaMode, passkeyCount, handleProfileUpdate,
     handlePasswordUpdate, refreshUser
   } = useSettings();
+  const { user: clerkUser } = useUser();
+  const clerkPasskeyCount = clerkUser?.passkeys?.length || 0;
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -185,7 +188,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               {[
                 { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
                 { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
-                { Component: SecurityAdvisor, props: { userId: user.id, userEmail: user.email, passkeyCount, hasFullName: !!(user.profile?.full_name && user.profile.full_name.trim()) } },
+                { Component: SecurityAdvisor, props: { userId: user.id, userEmail: user.email, passkeyCount: clerkPasskeyCount, hasFullName: !!(user.profile?.full_name && user.profile.full_name.trim()) } },
                 { Component: AccessibilitySection, props: { dyslexiaMode, setDyslexiaMode } }
               ].map(({ Component, props }, i) => (
                 <motion.div

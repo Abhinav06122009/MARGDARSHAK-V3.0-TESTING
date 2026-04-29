@@ -120,7 +120,7 @@ const GlobalQuickActions: React.FC = () => {
               {/* FOOTER STATS */}
               <div className="p-6 bg-zinc-950 border-t border-white/5 flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Active_Node</span>
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Identity_Hub</span>
                   <span className="text-[11px] font-mono text-emerald-400">SYNC_OK</span>
                 </div>
                 <div className="flex -space-x-2">

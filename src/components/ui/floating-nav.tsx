@@ -85,13 +85,10 @@ const navigationItems = [
   { id: 'timetable', icon: Calendar, label: 'Temporal Grid' },
   { id: 'tasks', icon: CheckSquare, label: 'Tactical Units' },
   { id: 'progress', icon: Target, label: 'Neural Matrix' },
-  { id: 'tracer', icon: Zap, label: 'Quantum Tracer' },
-  { id: 'notes', icon: BookOpen, label: 'Signal Logs' },
-  { id: 'grades', icon: Trophy, label: 'Performance Metrics' },
   { id: 'syllabus', icon: GraduationCap, label: 'Protocol Index' },
   { id: 'privacy', icon: Shield, label: 'Data Sovereignty' },
   { id: 'terms', icon: FileText, label: 'Legal Accord' },
-  { id: 'profile', icon: UserCheck, label: 'Identity Node' },
+  { id: 'profile', icon: UserCheck, label: 'Identity Hub' },
 ];
 
 export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPage }) => {

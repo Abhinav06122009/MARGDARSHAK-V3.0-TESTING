@@ -19,7 +19,6 @@ const Syllabus = lazy(() => import('@/components/syllabus/Syllabus'));
 const Attendance = lazy(() => import('@/components/attendance/Attendance'));
 const CourseManagement = lazy(() => import('@/components/courses/CourseManagement'));
 const ProgressTracker = lazy(() => import('@/components/progress/ProgressTracker'));
-const ProgressTracer = lazy(() => import('@/components/progress/ProgressTracer'));
 const PrivacyPolicy = lazy(() => import('@/components/legal/PrivacyPolicy'));
 const TermsAndConditions = lazy(() => import('@/components/legal/TermsAndConditions'));
 const Upgrade = lazy(() => import('./Upgrade'));
@@ -120,8 +119,6 @@ const Index = () => {
           return <Attendance onBack={handleBackToDashboard} />;
         case 'progress': // ✅ Add Progress Tracker case
           return <ProgressTracker onBack={handleBackToDashboard} />;
-        case 'tracer': // ✅ New Progress Tracer for Premium users
-          return <ProgressTracer />;
         case 'syllabus':
           return <Syllabus onBack={handleBackToDashboard} />;
         case 'privacy':
