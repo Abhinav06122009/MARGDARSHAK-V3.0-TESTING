@@ -173,6 +173,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       // (Repeat content without image or just save anyway)
       doc.save(`${fullName || 'Student'}_Margdarshak_Certificate.pdf`);
     };
+  };
 
 
   if (loading) return (
