@@ -6,7 +6,6 @@ import {
   Layout, List, Database, Terminal,
   ArrowUpRight, ChevronRight, Hash, Code
 } from 'lucide-react';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 
 const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
@@ -164,10 +163,7 @@ const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
            </div>
         </div>
 
-        <div className="mt-24">
-          <GlobalFooter />
         </div>
-      </div>
     </div>
   );
 };

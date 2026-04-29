@@ -14,7 +14,6 @@ import { Link } from 'react-router-dom';
 import { dashboardService } from '@/lib/dashboardService';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -691,7 +690,7 @@ const Wellness: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             </div>
           </motion.div>
 
-      <GlobalFooter />
+      </div>
 
         </div>
       </ScrollArea>

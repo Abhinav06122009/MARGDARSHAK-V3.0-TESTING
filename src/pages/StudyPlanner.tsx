@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar, Sparkles, Clock, Target, ArrowLeft, Loader2, CheckCircle,
@@ -569,7 +568,7 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
               )}
             </div>
           </div>
-          <GlobalFooter />
+          </div>
         </div>
       </ScrollArea>
     </div>

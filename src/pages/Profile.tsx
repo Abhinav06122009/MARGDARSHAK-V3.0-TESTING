@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import PremiumIDCard from '@/components/settings/PremiumIDCard';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import { jsPDF } from 'jspdf';
 import logo from "@/components/logo/logo.png";
@@ -373,9 +372,6 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        {/* FOOTER PUSH */}
-        <div className="mt-48">
-          <GlobalFooter />
         </div>
       </div>
     </div>

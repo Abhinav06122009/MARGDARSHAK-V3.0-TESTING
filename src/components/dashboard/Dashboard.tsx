@@ -35,9 +35,7 @@ import { LeaderboardWidget } from './LeaderboardWidget';
 import { BurnoutPredictorWidget } from './BurnoutPredictorWidget';
 // UPDATED: Using the better chart component for Productivity Flow
 import { TrendChart } from '@/components/ai/QuantumGraph'; 
-// Unified Footer is handled by GlobalFooter if using PageLayout, but Dashboard uses its own.
-// We will replace the old Footer with GlobalFooter here.
-import GlobalFooter from '@/components/layout/GlobalFooter'; 
+// Unified Footer is handled by GlobalFooter in App.tsx
 
 const GlassContainer = ({ children, className = "", glow = false }: { children: React.ReactNode, className?: string, glow?: boolean }) => (
   <motion.div
@@ -590,7 +588,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </aside>
         </div>
 
-        <GlobalFooter />
+        
       </div>
     </motion.div>
     )}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import { ArrowLeft, Users, Calendar, CheckCircle, XCircle, Clock, Search, Filter, Download, UserCheck, Plus, Edit, Trash2, Shield, AlertCircle, Eye, EyeOff, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -1567,7 +1566,6 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
             <p>✓ Advanced conflict resolution ensures all records are saved</p>
           </div>
         </div>
-        <GlobalFooter />
       </motion.div>
     </div>
   );

@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import { useToast } from '@/hooks/use-toast';
 
@@ -240,8 +239,6 @@ const StatusPage = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        <div className="mt-48">
-          <GlobalFooter />
         </div>
       </div>
     </div>

@@ -21,7 +21,6 @@ import {
   AlertCircle, History, Share, MessageCircle, BarChart3, Copy, Archive, LayoutGrid, List, TrendingUp, Palette, CheckCircle
 } from 'lucide-react';
 import { X } from 'lucide-react';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 import logo from "@/components/logo/logo.png";
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import { TiltCard } from '@/components/ui/TiltCard';
@@ -1532,7 +1531,6 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
           )}
         </AnimatePresence>
       </div>
-      <GlobalFooter />
     </div>
   );
 };

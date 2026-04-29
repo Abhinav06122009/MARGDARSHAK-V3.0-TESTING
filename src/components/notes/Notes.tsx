@@ -8,7 +8,6 @@ import { NotesDashboard } from './NotesDashboard';
 import { NotesFolderView } from './NotesFolderView';
 import { NoteSheet } from './NoteSheet';
 import { ShareModal } from './ShareModal';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 
 const Notes: React.FC<NotesProps> = ({ onBack }) => {
   const hookProps = useSecureNotes();
@@ -78,7 +77,6 @@ const Notes: React.FC<NotesProps> = ({ onBack }) => {
         hasPremiumAccess={hasPremiumAccess}
       />
       {showShareModal && <ShareModal note={noteToShare} onClose={closeShareModal} />}
-      <GlobalFooter />
     </div>
   );
 };

@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { taskService } from './taskService';
 import { courseService } from '@/components/dashboard/courseService';
@@ -30,7 +31,6 @@ import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import TaskCard from './TaskCard';
 import KanbanBoard from './KanbanBoard';
 import TaskGrid from './TaskGrid';
-import GlobalFooter from '@/components/layout/GlobalFooter';
 
 // Social Icons
 const LinkedinLogo = () => (
@@ -1565,7 +1565,6 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       </div>
 
 
-      <GlobalFooter />
     </div>
   );
 };
