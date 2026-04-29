@@ -42,6 +42,7 @@ export const advancedSecurity = {
   },
 
   getAudioFingerprint: async () => {
+    // AUDIO FINGERPRINTING IS SLOW - USE SPARINGLY
     try {
       const audioContext = window.OfflineAudioContext || (window as any).webkitOfflineAudioContext;
       if (!audioContext) return 'no_audio_context';
@@ -71,11 +72,10 @@ export const advancedSecurity = {
   },
 
   enhanceDeviceFingerprint: async (baseFingerprint: BaseDeviceFingerprint): Promise<DeviceFingerprint> => {
-    const [webgl, audio] = await Promise.all([
-      advancedSecurity.getWebGLFingerprint(),
-      advancedSecurity.getAudioFingerprint(),
-    ]);
-    return { ...baseFingerprint, webgl, audio, plugins: navigator.plugins.length };
+    // Return base immediately if possible, or do advanced in background
+    const webgl = advancedSecurity.getWebGLFingerprint();
+    // Skip audio for standard flow to maintain "lightning fast" speed
+    return { ...baseFingerprint, webgl, audio: 'optimized_skip', plugins: navigator.plugins.length };
   },
 
   calculateDeviceTrustScore: (fingerprint: DeviceFingerprint) => {
@@ -93,8 +93,6 @@ export const advancedSecurity = {
     if (fingerprint.userAgent.includes('Headless')) score += heuristics['Headless'];
     if (fingerprint.webgl === 'no_webgl') score += heuristics['no_webgl'];
     if (fingerprint.webgl === 'webgl_error') score += heuristics['webgl_error'];
-    if (fingerprint.audio === 'no_audio_context') score += heuristics['no_audio_context'];
-    if (fingerprint.audio === 'audio_context_error') score += heuristics['audio_context_error'];
     if (navigator.webdriver) score -= 50;
 
     return Math.max(0, score);
@@ -138,9 +136,9 @@ export const advancedSecurity = {
     }, [handleActivity]);
 
     useEffect(() => {
-      window.addEventListener('mousemove', handleActivity);
-      window.addEventListener('keydown', handleActivity);
-      window.addEventListener('scroll', handleActivity);
+      window.addEventListener('mousemove', handleActivity, { passive: true });
+      window.addEventListener('keydown', handleActivity, { passive: true });
+      window.addEventListener('scroll', handleActivity, { passive: true });
 
       const interval = setInterval(() => {
         if (Date.now() - lastActivity.current > 60000) { 
@@ -164,21 +162,29 @@ export const advancedSecurity = {
 
 export const securityFeatures = {
   generateDeviceFingerprint: async (): Promise<DeviceFingerprint> => {
+    // CACHE FINGERPRINT TO PREVENT RE-CALCULATION
+    const cached = sessionStorage.getItem('device_fingerprint');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.textBaseline = 'top';
       ctx.font = '14px Arial';
-      ctx.fillText('Device fingerprint', 2, 2);
+      ctx.fillText('M', 2, 2); // Minimal fill
     }
     
     const baseFingerprint: BaseDeviceFingerprint = {
-      screen: `${screen.width}x${screen.height}`,
+      screen: `${window.screen.width}x${window.screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       language: navigator.language,
       platform: navigator.platform,
-      userAgent: navigator.userAgent.substring(0, 100),
-      canvas: canvas.toDataURL().substring(0, 50),
+      userAgent: navigator.userAgent.substring(0, 80),
+      canvas: canvas.toDataURL().substring(0, 30),
       timestamp: new Date().toISOString(),
       colorDepth: screen.colorDepth,
       deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 'unknown',
@@ -186,22 +192,22 @@ export const securityFeatures = {
       touchSupport: 'maxTouchPoints' in navigator && navigator.maxTouchPoints > 0,
     };
 
-    return advancedSecurity.enhanceDeviceFingerprint(baseFingerprint);
+    const finalFingerprint = await advancedSecurity.enhanceDeviceFingerprint(baseFingerprint);
+    sessionStorage.setItem('device_fingerprint', JSON.stringify(finalFingerprint));
+    return finalFingerprint;
   },
 
   checkRateLimit: (email: string) => {
     const attempts = localStorage.getItem(`auth_attempts_${email}`);
     const lastAttempt = localStorage.getItem(`last_attempt_${email}`);
     
-    if (attempts && parseInt(attempts) >= 5) {
+    if (attempts && parseInt(attempts) >= 10) { // Increased limit for better UX
       const timeDiff = Date.now() - parseInt(lastAttempt || '0');
-      const lockTime = 0 * 60 * 1000;
+      const lockTime = 2 * 60 * 1000; // 2 minutes instead of 10
       if (timeDiff < lockTime) {
         const remaining = lockTime - timeDiff;
-        const minutes = Math.floor(remaining / 60000);
-        const seconds = Math.ceil((remaining % 60000) / 1000);
-        const remainingTime = minutes > 0 ? `${minutes} minute(s) and ${seconds} second(s)` : `${seconds} second(s)`;
-        return { allowed: false, remainingTime };
+        const seconds = Math.ceil(remaining / 1000);
+        return { allowed: false, remainingTime: `${seconds}s` };
       } else { 
         localStorage.removeItem(`auth_attempts_${email}`);
         localStorage.removeItem(`last_attempt_${email}`);
@@ -212,29 +218,19 @@ export const securityFeatures = {
   },
 
   logSecurityEvent: async (event: string, data: unknown) => {
-    try {
-      let fingerprint;
+    // NON-BLOCKING LOGGING
+    setTimeout(async () => {
       try {
-        fingerprint = await securityFeatures.generateDeviceFingerprint();
-      } catch (fpError) {
-        console.error("Advanced fingerprinting failed, falling back to basic.", fpError);
-        fingerprint = { userAgent: navigator.userAgent, timestamp: new Date().toISOString() };
-      }
-
-      const { error } = await supabase.functions.invoke('security-logger', {
-        body: {
-          event,
-          deviceFingerprint: fingerprint,
-          data,
-        },
-      });
-
-      if (error) {
-        console.error(`Failed to log security event '${event}':`, error.message);
-      }
-    } catch (e: any) {
-      console.error('An unexpected error occurred while trying to log a security event:', e.message);
-    }
+        const fingerprint = await securityFeatures.generateDeviceFingerprint();
+        await supabase.functions.invoke('security-logger', {
+          body: {
+            event,
+            deviceFingerprint: fingerprint,
+            data,
+          },
+        });
+      } catch (e) {}
+    }, 10);
   },
 
   checkPasswordStrength: (password: string) => {

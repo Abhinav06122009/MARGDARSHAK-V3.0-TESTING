@@ -1,28 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthPageWrapper from '@/components/auth/AuthPage';
-import Dashboard from '@/components/dashboard/Dashboard';
-import Settings from '@/components/settings/Settings';
-import Timetable from '@/components/timetable/Timetable';
-import Tasks from '@/components/tasks/Tasks';
-import StudyTimer from '@/components/timer/StudyTimer';
-import Calculator from '@/components/calculator/Calculator';
-import Notes from '@/components/notes/Notes';
-import Grades from '@/components/grades/Grades';
-import Syllabus from '@/components/syllabus/Syllabus';
-import Attendance from '@/components/attendance/Attendance';
-import CourseManagement from '@/components/courses/CourseManagement';
-import ProgressTracker from '@/components/progress/ProgressTracker'; // ✅ Add Progress Tracker import
 import { FloatingNav } from '@/components/ui/floating-nav';
 import { NotificationSystem, useNotifications } from '@/components/ui/notification-system';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Import Legal Pages
-import PrivacyPolicy from '@/components/legal/PrivacyPolicy';
-import TermsAndConditions from '@/components/legal/TermsAndConditions';
-import UpgradePage from './UpgradePage';
-
 import { PageLoader } from '@/components/auth/RouteGuards';
+
+// Lazy load feature components to keep initial bundle small
+const Dashboard = lazy(() => import('@/components/dashboard/Dashboard'));
+const Settings = lazy(() => import('@/components/settings/Settings'));
+const Timetable = lazy(() => import('@/components/timetable/Timetable'));
+const Tasks = lazy(() => import('@/components/tasks/Tasks'));
+const StudyTimer = lazy(() => import('@/components/timer/StudyTimer'));
+const Calculator = lazy(() => import('@/components/calculator/Calculator'));
+const Notes = lazy(() => import('@/components/notes/Notes'));
+const Grades = lazy(() => import('@/components/grades/Grades'));
+const Syllabus = lazy(() => import('@/components/syllabus/Syllabus'));
+const Attendance = lazy(() => import('@/components/attendance/Attendance'));
+const CourseManagement = lazy(() => import('@/components/courses/CourseManagement'));
+const ProgressTracker = lazy(() => import('@/components/progress/ProgressTracker'));
+const PrivacyPolicy = lazy(() => import('@/components/legal/PrivacyPolicy'));
+const TermsAndConditions = lazy(() => import('@/components/legal/TermsAndConditions'));
+const UpgradePage = lazy(() => import('./UpgradePage'));
 
 const Index = () => {
   const { session, loading } = useAuth();
@@ -167,7 +166,9 @@ const Index = () => {
           transition={pageTransitions}
           className="relative z-10"
         >
-          {renderPage()}
+          <Suspense fallback={<PageLoader />}>
+            {renderPage()}
+          </Suspense>
         </motion.div>
       </AnimatePresence>
 

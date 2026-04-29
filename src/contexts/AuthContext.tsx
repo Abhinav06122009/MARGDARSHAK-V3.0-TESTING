@@ -30,12 +30,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [clerkSession, sessionLoaded, clerkUser, userLoaded]);
 
-  // Sync Profile with Supabase Database through a server-side function.
+  // Initial loading state resolution - FAST BOOT
+  useEffect(() => {
+    if (sessionLoaded && userLoaded) {
+      // If no user, we are definitely not loading anymore
+      if (!clerkUser) {
+        setLoading(false);
+      } else {
+        // If we have a user, check cache for block status to show immediately
+        const cachedBlock = localStorage.getItem(`blocked_${clerkUser.id}`);
+        if (cachedBlock) {
+          const { blocked, reason } = JSON.parse(cachedBlock);
+          setIsBlocked(blocked);
+          setBlockedReason(reason);
+        }
+        // Set loading to false early - we use Clerk data while Supabase syncs in background
+        setLoading(false);
+      }
+    }
+  }, [sessionLoaded, userLoaded, clerkUser]);
+
+  // Background Sync Profile
   useEffect(() => {
     const syncProfile = async () => {
       if (sessionLoaded && userLoaded && clerkUser) {
         try {
-          console.log('Supabase Sync: Syncing profile for', clerkUser.id);
+          console.log('⚡ Background Sync: Syncing profile for', clerkUser.id);
           
           const metadata = clerkUser.publicMetadata || {};
           const subscription = (metadata.subscription as any) || {};
@@ -56,23 +76,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           };
 
           const token = clerkSession ? await clerkSession.getToken({ template: 'supabase' }) : null;
-          const syncResponse = await fetch('/.netlify/functions/profile-sync', {
+          
+          // Fire and forget sync (mostly)
+          fetch('/.netlify/functions/profile-sync', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify(profileData),
-          });
+          }).catch(err => console.error('Sync Fetch Error:', err));
 
-          if (!syncResponse.ok) {
-            const payload = await syncResponse.json().catch(() => ({}));
-            console.error('Supabase Sync Error:', payload?.error || syncResponse.statusText);
-          } else {
-            console.log('Supabase Sync: Profile synced successfully');
-          }
-
-          // Check if blocked in Supabase
+          // Check if blocked in Supabase - Keep this fast
           const { data: profile } = await supabase
             .from('profiles')
             .select('is_blocked, blocked_reason')
@@ -81,29 +96,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           if (profile?.is_blocked) {
             setIsBlocked(true);
-            setBlockedReason(profile.blocked_reason || 'Access restricted for security reasons.');
+            const reason = profile.blocked_reason || 'Access restricted for security reasons.';
+            setBlockedReason(reason);
+            localStorage.setItem(`blocked_${clerkUser.id}`, JSON.stringify({ blocked: true, reason }));
+          } else if (clerkUser) {
+            setIsBlocked(false);
+            localStorage.removeItem(`blocked_${clerkUser.id}`);
           }
           
         } catch (err) {
           console.error('Unexpected sync error:', err);
-        } finally {
-          setLoading(false);
         }
-      } else if (sessionLoaded && userLoaded && !clerkUser) {
-        setLoading(false);
       }
     };
 
-    if (sessionLoaded && userLoaded) {
+    if (sessionLoaded && userLoaded && clerkUser) {
       syncProfile();
     }
-  }, [sessionLoaded, userLoaded, clerkUser]);
+  }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
 
-  // Provide the session and user globally
   const value = {
     session: clerkSession || null,
     user: clerkUser || null,
-    loading: loading, // Use the internal state which only flips to false when sync is done
+    loading,
     isBlocked,
     blockedReason
   };
