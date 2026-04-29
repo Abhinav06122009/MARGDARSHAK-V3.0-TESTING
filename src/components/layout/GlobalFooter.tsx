@@ -17,27 +17,27 @@ import {
 
 const GlobalFooter = () => {
   const socialLinks = [
-    { icon: <Instagram size={18} />, label: 'Instagram', color: 'hover:text-pink-500', glow: 'group-hover:shadow-[0_0_20px_rgba(236,72,153,0.3)]' },
-    { icon: <Twitter size={18} />, label: 'Twitter', color: 'hover:text-blue-400', glow: 'group-hover:shadow-[0_0_20px_rgba(56,189,248,0.3)]' },
-    { icon: <MessageSquare size={18} />, label: 'Discord', color: 'hover:text-indigo-400', glow: 'group-hover:shadow-[0_0_20px_rgba(129,140,248,0.3)]' },
-    { icon: <Github size={18} />, label: 'GitHub', color: 'hover:text-white', glow: 'group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]' },
+    { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/vsavgyantapa/', color: 'hover:text-pink-500', glow: 'group-hover:shadow-[0_0_20px_rgba(236,72,153,0.3)]' },
+    { icon: <Twitter size={18} />, label: 'Twitter', href: 'https://x.com/gyantappas', color: 'hover:text-blue-400', glow: 'group-hover:shadow-[0_0_20px_rgba(56,189,248,0.3)]' },
+    { icon: <Globe size={18} />, label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61584618795158', color: 'hover:text-blue-600', glow: 'group-hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]' },
+    { icon: <Github size={18} />, label: 'GitHub', href: 'https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING', color: 'hover:text-white', glow: 'group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]' },
   ];
 
   const footerLinks = {
     protocols: [
       { name: 'Privacy Policy', path: '/privacy' },
       { name: 'Terms of Service', path: '/terms' },
-      { name: 'Security Audit', path: '/security' },
+      { name: 'Cookie Policy', path: '/cookies' },
     ],
     infrastructure: [
       { name: 'Identity Hub', path: '/auth' },
       { name: 'Premium Upgrade', path: '/upgrade' },
-      { name: 'System Status', path: '/status' },
+      { name: 'Community Hub', path: '/community' },
     ],
     support: [
       { name: 'Documentation', path: '/docs' },
-      { name: 'Help Center', path: '/support' },
-      { name: 'AI Feedback', path: '/feedback' },
+      { name: 'Help Center', path: '/help' },
+      { name: 'Contact Support', path: '/contact' },
     ]
   };
 
@@ -74,7 +74,9 @@ const GlobalFooter = () => {
               {socialLinks.map((social, idx) => (
                 <motion.a
                   key={idx}
-                  href="#"
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   whileHover={{ y: -5, scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   className={`group relative p-3 bg-white/[0.02] border border-white/5 rounded-xl transition-all duration-300 ${social.color} ${social.glow}`}
@@ -131,9 +133,9 @@ const GlobalFooter = () => {
               </div>
             </div>
             
-            <button className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:bg-blue-600/20 transition-all group">
+            <Link to="/contact" className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:bg-blue-600/20 transition-all group">
               Global Support <ArrowUpRight size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </button>
+            </Link>
           </div>
 
         </div>
