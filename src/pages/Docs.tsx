@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, BookOpen, Terminal, Code, Cpu, Database, Zap, ChevronRight, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Footer from '@/components/Footer';
+
 
 // Navigation Categories
 
@@ -198,7 +198,7 @@ const Docs = () => {
             </motion.div>
           </div>
 
-          <Footer />
+
 
         </div>
       </ScrollArea>

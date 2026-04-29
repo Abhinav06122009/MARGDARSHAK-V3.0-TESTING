@@ -180,23 +180,6 @@ const TermsAndConditions: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             </button>
           </div>
         )}
- <footer className="mt-12 py-6 border-t border-black text-sm select-none flex items-center justify-center gap-4 text-white/70">
-  <img
-    src={logo}
-    alt="VSAV GyanVedu Logo"
-    className="w-15 h-14 object-contain mr-4 bg-white"
-    draggable={false}
-    style={{ minWidth: 48 }}
-  />
-  <div className="text-center text-black">
-    Maintained by <span className="font-semibold text-emerald-400">VSAV Managements</span>
-    <br />
-    Developed &amp; Maintained by <span className="font-semibold text-emerald-400">Abhinav Jha</span>
-    <br />
-    © 2025 Vsav Managements. All Rights Reserved
-  </div>
-</footer>
-      </div>
     </div>
   );
 };

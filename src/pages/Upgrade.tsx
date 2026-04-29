@@ -395,12 +395,6 @@ const Upgrade = () => {
           </div>
         </div>
 
-        <footer className="mt-20 pt-10 border-t border-white/5 text-center">
-          <p className="text-xs text-gray-600 font-medium">
-            Secure Payments via Uropay • © 2026 VSAV GYANTAPA . ALL RIGHTS RESERVED.
-          </p>
-        </footer>
-
       </div>
     </div>
   );

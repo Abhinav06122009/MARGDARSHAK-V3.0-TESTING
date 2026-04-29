@@ -542,33 +542,6 @@ const PrivacyPolicy: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       </main>
 
       {/* App Footer */}
-      <footer className="border-t border-slate-200 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <img
-              src={logo}
-              alt="MARGDARSHAK Logo"
-              className="w-14 h-14 object-contain bg-white rounded"
-              draggable={false}
-              style={{ minWidth: 48 }}
-            />
-            <div className="text-slate-800 text-sm">
-              Developed &amp; Maintained by{" "}
-              <span className="font-semibold text-emerald-600">VSAV GYANTAPA</span>
-              <br />
-              © 2026 VSAV GYANTAPA. All Rights Reserved
-            </div>
-          </div>
-          <a
-            href="#top"
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow hover:bg-emerald-50 transition"
-            aria-label="Back to top"
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Back to top
-          </a>
-        </div>
-      </footer>
     </div>
   );
 };
