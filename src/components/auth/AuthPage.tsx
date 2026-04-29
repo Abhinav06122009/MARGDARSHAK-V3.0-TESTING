@@ -73,7 +73,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         <div className="flex flex-col items-center mb-10">
           <Link to="/" className="group relative mb-8">
             <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full group-hover:bg-blue-500/40 transition-all duration-700 scale-110" />
-            <div className="p-5 rounded-[2.8rem] bg-black/40 backdrop-blur-3xl border border-white/10 relative z-10 shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-1">
+            <div className="p-5 rounded-[2.8rem] bg-white border border-white/20 relative z-10 shadow-[0_0_50px_rgba(255,255,255,0.1)] transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-1">
               <img src={logo} alt="Margdarshak" className="w-16 h-16 object-contain" loading="eager" />
             </div>
           </Link>
