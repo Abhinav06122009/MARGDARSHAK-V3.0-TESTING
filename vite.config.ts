@@ -389,20 +389,33 @@ export default defineConfig(async ({ mode }) => {
     }
   }
   return {
-  server: {
-    host: "0.0.0.0",
-    port: 5000,
-    allowedHosts: true,
-    headers: {
-      // Allow passkeys (WebAuthn) inside the Replit preview iframe and on production.
-      "Permissions-Policy": "publickey-credentials-create=(self), publickey-credentials-get=(self)",
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "strict-origin-when-cross-origin",
+    base: "/",
+    server: {
+      host: "0.0.0.0",
+      port: 5000,
+      allowedHosts: true,
+      headers: {
+        "Permissions-Policy": "publickey-credentials-create=(self), publickey-credentials-get=(self)",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+      },
     },
-  },
-  plugins: [react(), aiPlugin()],
-  resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
-  },
+    plugins: [react(), aiPlugin()],
+    resolve: {
+      alias: { "@": path.resolve(__dirname, "./src") },
+    },
+    build: {
+      manifest: true,
+      emptyOutDir: true,
+      assetsDir: "assets",
+      sourcemap: false,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ["react", "react-dom", "react-router-dom"],
+          },
+        },
+      },
+    },
   };
 });
