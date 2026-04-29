@@ -44,48 +44,82 @@ const SmartNotes = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Load user and notes from Supabase
-  useEffect(() => {
-    const init = async () => {
-      const user = await dashboardService.getCurrentUser();
-      if (user) {
-        setUserId(user.id);
-        const { data, error } = await supabase
-          .from('smart_notes')
-          .select('*')
-          .eq('user_id', user.id);
-        if (!error && data) {
-          const formattedNotes = data.map((n: any) => ({
-            id: n.id,
-            title: n.title,
-            content: n.content,
-            lastEdited: new Date(n.updated_at || n.created_at).getTime()
-          }));
-          setNotes(formattedNotes);
-          if (formattedNotes.length > 0) {
-            loadNote(formattedNotes[0]);
-          }
-        }
-      } else {
-        toast({ title: "Authentication Required", description: "Please log in to save your notes.", variant: "destructive" });
-      }
-    };
-    init();
-  }, [loadNote, toast]);
+  // --- UTILITIES & CALLBACKS (Must be defined before useEffect) ---
+  const stopSpeaking = React.useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setIsPaused(false);
+    }
+  }, []);
+
+  const pauseSpeaking = React.useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.pause();
+      setIsPaused(true);
+      setIsSpeaking(false);
+    }
+  }, []);
 
   const loadNote = React.useCallback((note: Note) => {
     stopSpeaking();
     setActiveNoteId(note.id);
     setTitle(note.title);
     setContent(note.content);
-  }, []);
+  }, [stopSpeaking]);
 
-  const createNewNote = () => {
+  const createNewNote = React.useCallback(() => {
     stopSpeaking();
     setActiveNoteId(null);
     setTitle('');
     setContent('');
-  };
+  }, [stopSpeaking]);
+
+  const speakText = React.useCallback(() => {
+    if (!content) return;
+
+    if ('speechSynthesis' in window) {
+      try {
+        if (isPaused) {
+          window.speechSynthesis.resume();
+          setIsPaused(false);
+          setIsSpeaking(true);
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(content);
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
+          if (preferredVoice) utterance.voice = preferredVoice;
+        }
+
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => {
+          setIsSpeaking(false);
+          setIsPaused(false);
+        };
+
+        utterance.onerror = () => {
+          setIsSpeaking(false);
+          setIsPaused(false);
+        };
+
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+        setIsPaused(false);
+      } catch (err) {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      }
+    } else {
+      toast({ title: "TTS Unavailable", description: "Your browser does not support Text-to-Speech.", variant: "destructive" });
+    }
+  }, [content, isPaused, toast]);
 
   const handleSave = async () => {
     if (!userId) {
@@ -121,96 +155,51 @@ const SmartNotes = () => {
         : [{ id: noteId, title: newNoteData.title, content, lastEdited: Date.now() }, ...notes];
       
       setNotes(updatedNotes);
-      toast({ title: "Note Saved", description: "Your note has been saved to Supabase." });
+      toast({ title: "Note Saved", description: "Your note has been saved." });
     } catch (err) {
-      toast({ title: "Save Failed", description: "Could not save to database.", variant: "destructive" });
+      toast({ title: "Save Failed", description: "Could not save note.", variant: "destructive" });
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!userId) return;
     try {
-      await supabase
-        .from('smart_notes')
-        .delete()
-        .match({ id: id, user_id: userId });
+      await supabase.from('smart_notes').delete().match({ id: id, user_id: userId });
       const updatedNotes = notes.filter(n => n.id !== id);
       setNotes(updatedNotes);
-      if (activeNoteId === id) {
-        createNewNote();
-      }
-      toast({ title: "Note Deleted", description: "Note removed from Supabase." });
+      if (activeNoteId === id) createNewNote();
+      toast({ title: "Note Deleted", description: "Note removed successfully." });
     } catch (err) {
-      toast({ title: "Delete Failed", description: "Could not delete from database.", variant: "destructive" });
+      toast({ title: "Delete Failed", description: "Could not delete note.", variant: "destructive" });
     }
   };
 
-  // --- TTS LOGIC ---
-  const speakText = () => {
-    if (!content) return;
-
-    if ('speechSynthesis' in window) {
-      try {
-        if (isPaused) {
-          window.speechSynthesis.resume();
-          setIsPaused(false);
-          setIsSpeaking(true);
-          return;
+  // Load user and notes from Supabase
+  useEffect(() => {
+    const init = async () => {
+      const user = await dashboardService.getCurrentUser();
+      if (user) {
+        setUserId(user.id);
+        const { data, error } = await supabase
+          .from('smart_notes')
+          .select('*')
+          .eq('user_id', user.id);
+        if (!error && data) {
+          const formattedNotes = data.map((n: any) => ({
+            id: n.id,
+            title: n.title,
+            content: n.content,
+            lastEdited: new Date(n.updated_at || n.created_at).getTime()
+          }));
+          setNotes(formattedNotes);
+          if (formattedNotes.length > 0) {
+            loadNote(formattedNotes[0]);
+          }
         }
-
-        window.speechSynthesis.cancel(); // Clear queue
-        const utterance = new SpeechSynthesisUtterance(content);
-
-        // Optimize voice for accessibility
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
-          if (preferredVoice) utterance.voice = preferredVoice;
-        }
-
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-
-        utterance.onend = () => {
-          setIsSpeaking(false);
-          setIsPaused(false);
-        };
-
-        utterance.onerror = (event) => {
-          console.error('TTS Utterance Error:', event);
-          setIsSpeaking(false);
-          setIsPaused(false);
-        };
-
-        window.speechSynthesis.speak(utterance);
-        setIsSpeaking(true);
-        setIsPaused(false);
-      } catch (err) {
-        console.error('TTS Engine Failure:', err);
-        toast({ title: "Audio Error", description: "The TTS engine encountered a problem.", variant: "destructive" });
-        setIsSpeaking(false);
-        setIsPaused(false);
       }
-    } else {
-      toast({ title: "TTS Unavailable", description: "Your browser does not support Text-to-Speech.", variant: "destructive" });
-    }
-  };
-
-  const pauseSpeaking = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.pause();
-      setIsPaused(true);
-      setIsSpeaking(false);
-    }
-  };
-
-  const stopSpeaking = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      setIsPaused(false);
-    }
-  };
+    };
+    init();
+  }, [loadNote]);
 
   // Cleanup TTS on unmount
   useEffect(() => {
