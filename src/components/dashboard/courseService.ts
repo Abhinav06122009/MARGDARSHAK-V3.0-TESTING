@@ -20,7 +20,8 @@ export const courseService = {
       const fullName = clerkUser.fullName || clerkUser.user_metadata?.full_name || profile?.full_name || 'User';
       const role = clerkUser.role || metadata.role || (metadata as any).user_type || profile?.user_type || 'student';
       
-      let tier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free').toLowerCase();
+      const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free');
+      let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
 
       // Fuzzy Fallback
       const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(subscription).toLowerCase();

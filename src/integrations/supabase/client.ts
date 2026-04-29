@@ -146,12 +146,13 @@ export const supabaseHelpers = {
       const role = metadata.role || (unsafeMetadata as any).role || (metadata as any).user_type || (unsafeMetadata as any).user_type || 'student';
       
       // Support multiple metadata formats (flat or nested)
-      let tier = (subscription.tier || 
+      const rawTier = (subscription.tier || 
                    (metadata as any).subscription_tier || 
                    (unsafeMetadata as any).subscription_tier || 
                    (metadata as any).tier || 
                    (unsafeMetadata as any).tier || 
-                   'free').toLowerCase();
+                   'free');
+      let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
 
       // NUCLEAR FUZZY FALLBACK: If "premium", "elite", "plus", or "pro" is found anywhere in the raw user object, force it
       if (tier === 'free') {

@@ -211,7 +211,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     
     // Deep Extraction from all known Clerk paths
     const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-    let tier = (
+    const rawTier = (
       subscription.tier || 
       (metadata as any).subscription_tier || 
       (unsafeMetadata as any).subscription_tier || 
@@ -219,7 +219,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       (unsafeMetadata as any).tier || 
       currentUser?.profile?.subscription_tier || 
       'free'
-    ).toLowerCase();
+    );
+    
+    let tier = Array.isArray(rawTier) ? String(rawTier[0]).toLowerCase() : String(rawTier).toLowerCase();
     
     // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object for keywords
     // This catches cases where metadata is empty but the subscription exists in other fields
@@ -246,7 +248,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const realRole = useMemo(() => {
     if (!clerkLoaded || !clerkUser) return currentUser?.profile?.role || currentUser?.profile?.user_type || null;
-    return (clerkUser.publicMetadata?.role || (clerkUser.publicMetadata as any)?.user_type || currentUser?.profile?.role || 'student').toLowerCase();
+    const rawRole = clerkUser.publicMetadata?.role || (clerkUser.publicMetadata as any)?.user_type || currentUser?.profile?.role || 'student';
+    
+    if (Array.isArray(rawRole)) {
+      return rawRole.map(r => String(r).toLowerCase()).join(', ');
+    }
+    return String(rawRole).toLowerCase();
   }, [clerkUser, clerkLoaded, currentUser]);
 
   const realFullName = useMemo(() => {
@@ -342,7 +349,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     const counts = { high: 0, medium: 0, low: 0, other: 0 };
     activeTasks.forEach(t => {
       if (t.status !== 'completed') {
-        const p = (t.priority?.toLowerCase() || 'other') as keyof typeof counts;
+        const p = (String(t.priority || 'other').toLowerCase()) as keyof typeof counts;
         if (counts[p] !== undefined) counts[p]++;
         else counts.other++;
       }

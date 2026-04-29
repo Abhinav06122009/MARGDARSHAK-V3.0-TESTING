@@ -65,7 +65,9 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   const joinDate = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'EST. 2024';
 
   const getDisplayRole = (role: string) => {
-    switch (role?.toLowerCase()) {
+    const rawRole = role || 'student';
+    const normalizedRole = Array.isArray(rawRole) ? String(rawRole[0]).toLowerCase() : String(rawRole).toLowerCase();
+    switch (normalizedRole) {
       case 'admin': return 'SYSTEM_OVERSEER';
       case 'teacher': return 'FACULTY_PROCTOR';
       default: return 'ELITE_SCHOLAR';
