@@ -7,8 +7,9 @@ import {
   Edit3, Save, X, Github, Twitter, Linkedin
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
-import { useUser } from '@clerk/react';
+import { useUser, useClerk } from '@clerk/react';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from "@/components/ui/toast";
 import PremiumIDCard from '@/components/settings/PremiumIDCard';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import { jsPDF } from 'jspdf';
@@ -20,6 +21,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     handleProfileUpdate, refreshUser 
   } = useSettings();
   const { user: clerkUser } = useUser();
+  const { openUserProfile } = useClerk();
   const { toast } = useToast();
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -47,9 +49,18 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       toast({ 
         title: isVerificationError ? 'SECURITY CHECK REQUIRED' : 'ENROLMENT FAILED', 
         description: isVerificationError 
-          ? 'For your security, please sign in again before registering a new passkey.' 
+          ? 'For your security, please verify your identity before registering a new passkey.' 
           : err.message || 'Verification failed.', 
-        variant: 'destructive' 
+        variant: 'destructive',
+        action: isVerificationError ? (
+          <ToastAction 
+            altText="Verify Now" 
+            onClick={() => openUserProfile({ label: 'security' })}
+            className="bg-emerald-500 hover:bg-emerald-600 text-black border-none font-black text-[10px] uppercase tracking-widest"
+          >
+            Verify Now
+          </ToastAction>
+        ) : undefined
       });
     } finally {
       setIsRegistering(false);
