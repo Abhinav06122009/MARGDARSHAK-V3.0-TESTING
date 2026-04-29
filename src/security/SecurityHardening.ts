@@ -289,9 +289,14 @@ export const initSecurityHardening = () => {
 
   // --- 5. DEVTOOLS DETECTION ---
   let devtoolsOpen = false;
-  const threshold = 160;
+  const threshold = 250; // Increased threshold for high-density displays
 
   const checkDevTools = () => {
+    // Skip devtools check on mobile/touch devices as it's prone to false positives
+    // due to mobile browser address bars and system UI scaling.
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
+
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
 
@@ -306,7 +311,7 @@ export const initSecurityHardening = () => {
   };
 
   window.addEventListener('resize', checkDevTools);
-  setInterval(checkDevTools, 1000);
+  setInterval(checkDevTools, 2000); // Reduced frequency
 
 
   // --- 6. VISUAL LOCKDOWN ---
