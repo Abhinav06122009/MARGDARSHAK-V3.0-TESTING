@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Fingerprint, KeyRound, Plus, Trash2, ShieldCheck, Loader2, Smartphone, ExternalLink, AlertTriangle, Bluetooth } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUser } from '@clerk/react';
+import { useUser, useClerk } from '@clerk/react';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from "@/components/ui/toast";
 
 const Passkeys: React.FC<{ userId: string; userEmail: string; fullName: string }> = () => {
   const { user, isLoaded } = useUser();
+  const { openUserProfile } = useClerk();
   const { toast } = useToast();
   const [registering, setRegistering] = useState(false);
   const [supported, setSupported] = useState(true);
@@ -45,10 +47,23 @@ const Passkeys: React.FC<{ userId: string; userEmail: string; fullName: string }
       });
     } catch (err: any) {
       console.error('Passkey error:', err);
+      const isVerificationError = err.message?.toLowerCase().includes('verification') || err.errors?.[0]?.code === 'session_step_up_required';
+      
       toast({ 
-        title: 'ENROLMENT FAILED', 
-        description: err.message || 'Verification failed.', 
-        variant: 'destructive' 
+        title: isVerificationError ? 'SECURITY CHECK REQUIRED' : 'ENROLMENT FAILED', 
+        description: isVerificationError 
+          ? 'For your security, please verify your identity before registering a new passkey.' 
+          : err.message || 'Verification failed.', 
+        variant: 'destructive',
+        action: isVerificationError ? (
+          <ToastAction 
+            altText="Verify Now" 
+            onClick={() => openUserProfile({ label: 'security' })}
+            className="bg-cyan-500 hover:bg-cyan-600 text-black border-none font-black text-[10px] uppercase tracking-widest"
+          >
+            Verify Now
+          </ToastAction>
+        ) : undefined
       });
     } finally {
       setRegistering(false);
