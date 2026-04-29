@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { SignIn, SignUp } from '@clerk/react';
 import { motion } from 'framer-motion';
-import { Shield, Cpu } from 'lucide-react';
-import logo from "@/components/logo/logo.png";
 import { Link, useSearchParams } from 'react-router-dom';
+import logo from "@/components/logo/logo.png";
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 
 interface AuthPageProps {
   onLogin?: () => void;
@@ -15,6 +15,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   const [isLogin, setIsLogin] = useState(mode !== 'signup');
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const { signInWithSSO, signUpWithSSO } = useSecureAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -24,6 +25,11 @@ const AuthPage: React.FC<AuthPageProps> = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const handleSSO = (provider: 'oauth_google' | 'oauth_microsoft') => {
+    if (isLogin) signInWithSSO(provider);
+    else signUpWithSSO(provider);
+  };
+
   useEffect(() => {
     setIsLogin(mode !== 'signup');
   }, [mode]);
@@ -32,7 +38,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 md:p-8 relative overflow-y-auto overflow-x-hidden">
-      {/* Optimized Background - Reduced layers for speed */}
+      {/* Optimized Background */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div 
           className="absolute inset-0 opacity-[0.1]"
@@ -42,21 +48,6 @@ const AuthPage: React.FC<AuthPageProps> = () => {
             maskImage: 'radial-gradient(circle at center, black, transparent 80%)'
           }}
         />
-        
-        {!isMobile && (
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div 
-              animate={{ opacity: [0.1, 0.2, 0.1] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15)_0%,transparent_50%)]"
-            />
-            <motion.div 
-              animate={{ opacity: [0.1, 0.2, 0.1] }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear", delay: 1 }}
-              className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_80%_80%,rgba(147,51,234,0.15)_0%,transparent_50%)]"
-            />
-          </div>
-        )}
       </div>
 
       <motion.div 
@@ -65,16 +56,11 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-[460px] relative z-10 my-4 md:my-8"
       >
-        <div className="text-center mb-6 md:mb-10">
+        <div className="text-center mb-6 md:mb-8">
           <Link to="/" className="inline-block mb-6 relative group transition-transform hover:scale-105 duration-300">
             <div className="absolute -inset-8 bg-blue-600/10 blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 rounded-full" />
             <div className="p-4 md:p-5 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 relative z-10 shadow-2xl border-b-blue-500/50">
-              <img 
-                src={logo} 
-                alt="Logo" 
-                className="w-16 h-16 md:w-20 md:h-20 object-contain brightness-110" 
-                loading="eager"
-              />
+              <img src={logo} alt="Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain brightness-110" loading="eager" />
             </div>
           </Link>
           
@@ -90,9 +76,33 @@ const AuthPage: React.FC<AuthPageProps> = () => {
           </div>
         </div>
 
-        <div className="clerk-container rounded-[2.5rem] overflow-hidden border border-white/10 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] relative group">
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-blue-500/5 to-purple-500/5 opacity-50" />
+        {/* FAST SSO CONNECTIONS - Direct Handshake */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <button 
+            onClick={() => handleSSO('oauth_google')}
+            className="group relative flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/50 transition-all duration-300 py-4 rounded-2xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5 relative z-10" />
+            <span className="text-white text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10">Google SSO</span>
+          </button>
           
+          <button 
+            onClick={() => handleSSO('oauth_microsoft')}
+            className="group relative flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500/50 transition-all duration-300 py-4 rounded-2xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" className="w-5 h-5 relative z-10" />
+            <span className="text-white text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10">Microsoft</span>
+          </button>
+        </div>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+          <div className="relative flex justify-center text-[8px] uppercase tracking-[0.5em] text-zinc-600"><span className="bg-[#050505] px-4">Secure Terminal Access</span></div>
+        </div>
+
+        <div className="clerk-container rounded-[2.5rem] overflow-hidden border border-white/10 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] relative">
           <div className="relative z-10">
             {isLogin ? (
               <SignIn 
@@ -100,20 +110,14 @@ const AuthPage: React.FC<AuthPageProps> = () => {
                   elements: {
                     rootBox: "w-full",
                     card: "bg-transparent border-none shadow-none w-full p-6 md:p-8",
-                    headerTitle: "hidden",
-                    headerSubtitle: "hidden",
-                    socialButtonsBlockButton: "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 transition-all h-12 md:h-14 rounded-2xl",
-                    socialButtonsBlockButtonText: "text-white font-bold text-[10px] md:text-xs uppercase tracking-widest",
+                    header: "hidden",
+                    socialButtonsBlockButton: "hidden",
+                    dividerRow: "hidden",
                     formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] h-12 md:h-14 rounded-2xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]",
                     footerActionLink: "text-blue-400 hover:text-blue-300 font-bold",
                     formFieldLabel: "text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-2",
                     formFieldInput: "bg-white/5 border-white/10 text-white rounded-xl md:rounded-2xl h-11 md:h-12 text-sm focus:border-blue-500/50 focus:ring-0 transition-all",
-                    dividerText: "text-zinc-500 text-[9px] font-bold uppercase tracking-widest",
                     footer: "bg-transparent mt-4",
-                    identityPreviewText: "text-white text-xs font-bold",
-                    identityPreviewEditButton: "text-blue-400 font-bold",
-                    formFieldAction: "text-blue-400 hover:text-blue-300 font-bold text-[10px] uppercase",
-                    providerIcon: "brightness-125 scale-110"
                   }
                 }}
                 signUpUrl="/auth?mode=signup"
@@ -125,17 +129,14 @@ const AuthPage: React.FC<AuthPageProps> = () => {
                   elements: {
                     rootBox: "w-full",
                     card: "bg-transparent border-none shadow-none w-full p-6 md:p-8",
-                    headerTitle: "hidden",
-                    headerSubtitle: "hidden",
-                    socialButtonsBlockButton: "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 transition-all h-12 md:h-14 rounded-2xl",
-                    socialButtonsBlockButtonText: "text-white font-bold text-[10px] md:text-xs uppercase tracking-widest",
+                    header: "hidden",
+                    socialButtonsBlockButton: "hidden",
+                    dividerRow: "hidden",
                     formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] h-12 md:h-14 rounded-2xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]",
                     footerActionLink: "text-blue-400 hover:text-blue-300 font-bold",
                     formFieldLabel: "text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-2",
                     formFieldInput: "bg-white/5 border-white/10 text-white rounded-xl md:rounded-2xl h-11 md:h-12 text-sm focus:border-blue-500/50 focus:ring-0 transition-all",
-                    dividerText: "text-zinc-500 text-[9px] font-bold uppercase tracking-widest",
                     footer: "bg-transparent mt-4",
-                    providerIcon: "brightness-125 scale-110"
                   }
                 }}
                 signInUrl="/auth?mode=signin"

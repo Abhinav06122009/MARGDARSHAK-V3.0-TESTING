@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { securityFeatures, advancedSecurity } from '@/components/auth/AuthSecurity';
-import { countries } from '@/components/auth/AuthData';
 import { useToast } from '@/hooks/use-toast';
-import { User } from '@supabase/supabase-js';
+import { useSignIn, useSignUp as useClerkSignUp } from '@clerk/react';
 
 export interface UserData {
   full_name?: string;
@@ -14,34 +13,31 @@ export interface UserData {
 
 export const useSecureAuth = () => {
   const { toast } = useToast();
+  const { signIn: clerkSignIn, isLoaded: signInLoaded } = useSignIn();
+  const { signUp: clerkSignUp, isLoaded: signUpLoaded } = useClerkSignUp();
 
-  const updateSecureUserProfile = async (user: User) => {
+  const updateSecureUserProfile = async (userId: string) => {
     try {
-      const { data: existingProfile, error: checkError } = await supabase
+      const fingerprint = await securityFeatures.generateDeviceFingerprint();
+      
+      const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id, security_settings')
-        .eq('id', user.id)
-        .single();
-      
-      const fingerprint = await securityFeatures.generateDeviceFingerprint();
-
-      if (checkError && checkError.code === 'PGRST116') {
-        return { success: true };
-      }
+        .eq('id', userId)
+        .maybeSingle();
 
       if (existingProfile) { 
         const anomalies = advancedSecurity.checkForAnomalies(fingerprint, existingProfile.security_settings?.device_fingerprints?.[0]);
         if (anomalies.length > 0) {
-          securityFeatures.logSecurityEvent('login_anomaly_detected', { userId: user.id, anomalies });
+          securityFeatures.logSecurityEvent('login_anomaly_detected', { userId, anomalies });
         }
         
         const updatedFingerprints = [fingerprint, ...(existingProfile.security_settings?.device_fingerprints || [])].slice(0, 5);
         
-        const { error: updateError } = await supabase
+        await supabase
           .from('profiles')
           .update({ security_settings: { ...existingProfile.security_settings, device_fingerprints: updatedFingerprints } })
-          .eq('id', user.id);
-        if (updateError) throw updateError;
+          .eq('id', userId);
       }
       return { success: true };
     } catch (error) {
@@ -49,155 +45,50 @@ export const useSecureAuth = () => {
     }
   };
 
-  const signUp = async (email: string, password: string, userData?: UserData) => {
-    const rateLimitCheck = securityFeatures.checkRateLimit(email);
-    if (!rateLimitCheck.allowed) {
-      throw new Error(`Too many attempts. Please try again in ${rateLimitCheck.remainingTime} minutes.`);
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: userData?.full_name,
-          phone_number: userData?.phone_number,
-          country_code: userData?.country_code,
-          security_metadata: await securityFeatures.generateDeviceFingerprint()
-        },
-        emailRedirectTo: `${window.location.origin}/`
-      }
-    });
+  const signInWithSSO = async (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
+    if (!signInLoaded) return;
     
-    if (error) {
-      const attempts = parseInt(localStorage.getItem(`auth_attempts_${email}`) || '0') + 1;
-      localStorage.setItem(`auth_attempts_${email}`, attempts.toString());
-      localStorage.setItem(`last_attempt_${email}`, Date.now().toString());
-      securityFeatures.logSecurityEvent('signup_failed', { email, error: error.message });
-      throw error;
+    try {
+      securityFeatures.logSecurityEvent(`${provider}_signin_attempt`, {});
+      await clerkSignIn.authenticateWithRedirect({
+        strategy: provider,
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/dashboard",
+      });
+    } catch (error: any) {
+      securityFeatures.logSecurityEvent(`${provider}_signin_failed`, { error: error.message });
+      toast({
+        title: "Connection Failed",
+        description: "Could not establish SSO connection. Please try again.",
+        variant: "destructive"
+      });
     }
+  };
+
+  const signUpWithSSO = async (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
+    if (!signUpLoaded) return;
     
-    if (data.user) {
-      securityFeatures.logSecurityEvent('signup_success', { email, userId: data.user.id });
-      localStorage.removeItem(`auth_attempts_${email}`);
-      localStorage.removeItem(`last_attempt_${email}`);
+    try {
+      securityFeatures.logSecurityEvent(`${provider}_signup_attempt`, {});
+      await clerkSignUp.authenticateWithRedirect({
+        strategy: provider,
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/dashboard",
+      });
+    } catch (error: any) {
+      securityFeatures.logSecurityEvent(`${provider}_signup_failed`, { error: error.message });
+      toast({
+        title: "Registration Failed",
+        description: "Could not complete SSO registration.",
+        variant: "destructive"
+      });
     }
-    
-    return { data, error };
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const rateLimitCheck = securityFeatures.checkRateLimit(email);
-    if (!rateLimitCheck.allowed) {
-      throw new Error(`Too many attempts. Please try again in ${rateLimitCheck.remainingTime} minutes.`);
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-      const attempts = parseInt(localStorage.getItem(`auth_attempts_${email}`) || '0') + 1;
-      localStorage.setItem(`auth_attempts_${email}`, attempts.toString());
-      localStorage.setItem(`last_attempt_${email}`, Date.now().toString());
-      securityFeatures.logSecurityEvent('signin_failed', { email, error: error.message });
-      throw error;
-    }
-    
-    if (data.user) {
-      await updateSecureUserProfile(data.user);
-      securityFeatures.logSecurityEvent('signin_success', { email, userId: data.user.id });
-      localStorage.removeItem(`auth_attempts_${email}`);
-      localStorage.removeItem(`last_attempt_${email}`);
-    }
-    
-    return { data, error };
-  };
-
-  const signInWithGoogle = async () => {
-    securityFeatures.logSecurityEvent('google_signin_attempt', {});
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` }
-    });
-    if (error) securityFeatures.logSecurityEvent('google_signin_failed', { error: error.message });
-    return { data, error };
-  };
-
-  const resetPassword = async (email: string) => {
-    securityFeatures.logSecurityEvent('password_reset_requested', { email });
-    return await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
-    });
-  };
-
-  const signInWithGitHub = async () => {
-    securityFeatures.logSecurityEvent('github_signin_attempt', {});
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: `${window.location.origin}/` },
-    });
-    if (error) securityFeatures.logSecurityEvent('github_signin_failed', { error: error.message });
-    return { data, error };
-  };
-
-  const sendPhoneOtp = async (phone: string) => {
-    securityFeatures.logSecurityEvent('mfa_otp_sent_attempt', { phone });
-    return await supabase.auth.signInWithOtp({ phone });
-  };
-
-  const verifyPhoneOtp = async (phone: string, token: string) => {
-    securityFeatures.logSecurityEvent('mfa_otp_verify_attempt', { phone });
-    const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
-    if (error) {
-      securityFeatures.logSecurityEvent('mfa_otp_verify_failed', { phone, error: error.message });
-      throw error;
-    }
-    securityFeatures.logSecurityEvent('mfa_otp_verify_success', { phone });
-    return { data, error };
-  };
-
-  const updatePassword = async (newPassword: string) => {
-    const strength = securityFeatures.checkPasswordStrength(newPassword);
-    if (strength.score < 4) throw new Error('Password is too weak.');
-    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) throw error;
-    securityFeatures.logSecurityEvent('password_updated', {});
-    return { data, error };
-  };
-
-  const signInWithMagicLink = async (email: string) => {
-    securityFeatures.logSecurityEvent('magic_link_requested', { email });
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/` },
-    });
-    if (error) securityFeatures.logSecurityEvent('magic_link_failed', { email, error: error.message });
-    return { data, error };
-  };
-
-  const getCurrentUser = async () => {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (!user || error) return null;
-    
-    // Use Clerk metadata for profile instead of querying profiles table
-    // This avoids RLS permission issues while maintaining full user data
-    return { 
-      user, 
-      profile: null // Profile data is available through Clerk context, not Supabase table
-    };
   };
 
   return {
-    signUp,
-    signIn,
-    signInWithGoogle,
-    signInWithGitHub,
-    signInWithMagicLink,
-    resetPassword,
-    updatePassword,
-    sendPhoneOtp,
-    verifyPhoneOtp,
-    updateSecureUserProfile,
-    getCurrentUser
+    signInWithSSO,
+    signUpWithSSO,
+    updateSecureUserProfile
   };
 };
 
