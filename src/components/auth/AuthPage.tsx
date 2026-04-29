@@ -14,54 +14,17 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   const mode = searchParams.get('mode');
   const [isLogin, setIsLogin] = useState(mode !== 'signup');
   const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024); // Increased threshold to include tablets
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
-    const timer = setTimeout(() => setMounted(true), 400); // Snappier feel
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', checkMobile);
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
     setIsLogin(mode !== 'signup');
   }, [mode]);
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-        <div className="bg-white/5 backdrop-blur-lg rounded-[2rem] p-8 md:p-12 border border-white/10 text-center w-full max-w-sm">
-          <div className="flex flex-col items-center gap-6">
-            <div className="relative group">
-              <div
-                className="absolute -inset-4 border-t-2 border-b-2 border-blue-500/30 rounded-full animate-spin"
-                style={{ animationDuration: '2000ms' }}
-              />
-              <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full animate-pulse" />
-              <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 relative z-10">
-                <img src={logo} alt="Logo" className="w-12 h-12 md:w-16 md:h-16 object-contain brightness-110" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-white text-sm md:text-lg font-black tracking-tighter uppercase italic">Secure Initializing</p>
-              <div className="flex items-center justify-center gap-2 text-blue-400">
-                <div className="flex gap-1">
-                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" />
-                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.1s]" />
-                </div>
-                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Protection Active</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 md:p-8 relative overflow-y-auto overflow-x-hidden">

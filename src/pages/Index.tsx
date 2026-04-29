@@ -22,6 +22,8 @@ import PrivacyPolicy from '@/components/legal/PrivacyPolicy';
 import TermsAndConditions from '@/components/legal/TermsAndConditions';
 import UpgradePage from './UpgradePage';
 
+import { PageLoader } from '@/components/auth/RouteGuards';
+
 const Index = () => {
   const { session, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -45,16 +47,13 @@ const Index = () => {
   }, [session, addNotification]);
 
   const handleLogin = () => {
-    // Auth state is managed by AuthProvider (useAuth). The sign-in welcome
-    // notification is handled by the session-tracking useEffect above.
+    // Auth state is managed by AuthProvider (useAuth).
   };
 
   const handleNavigation = (page: string) => {
     if (page === currentPage) return;
-    console.log('Navigating to:', page);
     setCurrentPage(page);
     
-    // ✅ Add notification for Progress Tracker navigation
     if (page === 'progress') {
       addNotification({
         type: 'info',
@@ -70,7 +69,7 @@ const Index = () => {
   };
 
   // Loading state with timeout protection
-  if (loading || !authChecked) return null;
+  if (loading || !authChecked) return <PageLoader />;
 
   // Auth page
   if (!isAuthenticated) {

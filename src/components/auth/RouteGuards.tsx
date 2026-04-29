@@ -6,11 +6,23 @@ import { courseService } from '@/components/dashboard/courseService';
 import { BlockedUserOverlay } from './BlockedUserOverlay';
 
 /**
- * Standard loading indicator for protected routes.
+ * High-fidelity full-screen loading indicator.
  */
 export const PageLoader = () => (
-  <div className="fixed top-4 right-4 z-[100]">
-    <div className="w-6 h-6 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
+  <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 fixed inset-0 z-[999]">
+    <div className="relative group">
+      <div
+        className="absolute -inset-4 border-t-2 border-b-2 border-blue-500/30 rounded-full animate-spin"
+        style={{ animationDuration: '1500ms' }}
+      />
+      <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full animate-pulse" />
+      <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 relative z-10">
+        <div className="w-12 h-12 border-2 border-blue-500/50 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    </div>
+    <p className="mt-8 text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+      Establishing Secure Connection
+    </p>
   </div>
 );
 
@@ -26,7 +38,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (!loading && !session) navigate('/auth', { replace: true });
   }, [session, loading, navigate]);
   
-  if (loading) return null;
+  if (loading) return <PageLoader />;
   if (isBlocked) return <BlockedUserOverlay reason={blockedReason} />;
   return session ? <>{children}</> : null;
 };
