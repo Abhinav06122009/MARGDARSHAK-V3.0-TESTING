@@ -1,21 +1,24 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSession, useUser } from '@clerk/react';
 import { supabase, setClerkTokenProvider, setClerkUser } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import { toast } from 'sonner';
 
 interface AuthContextValue {
   session: any | null;
   loading: boolean;
   user: any | null;
+  clerkUser: any | null;
   isBlocked: boolean;
   blockedReason: string | null;
 }
 
-export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true, user: null, isBlocked: false, blockedReason: null });
+export const AuthContext = createContext<AuthContextValue>({ session: null, loading: true, user: null, clerkUser: null, isBlocked: false, blockedReason: null });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { session: clerkSession, isLoaded: sessionLoaded } = useSession();
   const { user: clerkUser, isLoaded: userLoaded } = useUser();
+  const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockedReason, setBlockedReason] = useState<string | null>(null);
@@ -57,18 +60,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           console.log('⚡ Background Sync: Syncing profile for', clerkUser.id);
           
+          const translatedId = await translateClerkIdToUUID(clerkUser.id);
           const metadata = clerkUser.publicMetadata || {};
           const subscription = (metadata.subscription as any) || {};
+          
+          const tier = (subscription.tier || (metadata as any).subscription_tier || 'free').toLowerCase();
+          const role = metadata.role || (metadata as any).user_type || 'student';
+
+          // Set the augmented user state immediately for the app to use
+          setUser({
+            ...clerkUser,
+            id: translatedId,
+            clerk_id: clerkUser.id,
+            profile: {
+              id: translatedId,
+              clerk_id: clerkUser.id,
+              subscription_tier: tier,
+              role: role
+            }
+          });
 
           const profileData: any = {
-            id: clerkUser.id,
+            id: translatedId, // Use translated ID as primary key
+            clerk_id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
-            user_type: metadata.role || (metadata as any).user_type || 'student',
-            subscription_tier: subscription.tier || (metadata as any).subscription_tier || 'free',
+            user_type: role,
+            subscription_tier: tier,
             subscription: {
-              tier: subscription.tier || (metadata as any).subscription_tier || 'free',
+              tier: tier,
               status: subscription.status || (metadata as any).subscription_status || 'inactive',
               period_end: subscription.period_end || (metadata as any).subscription_period_end || null,
             },
@@ -91,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('is_blocked, blocked_reason')
-            .eq('id', clerkUser.id)
+            .eq('id', translatedId)
             .maybeSingle();
 
           if (profile?.is_blocked) {
@@ -99,7 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const reason = profile.blocked_reason || 'Access restricted for security reasons.';
             setBlockedReason(reason);
             localStorage.setItem(`blocked_${clerkUser.id}`, JSON.stringify({ blocked: true, reason }));
-          } else if (clerkUser) {
+          } else {
             setIsBlocked(false);
             localStorage.removeItem(`blocked_${clerkUser.id}`);
           }
@@ -117,11 +138,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = useMemo(() => ({
     session: clerkSession || null,
-    user: clerkUser || null,
+    user,
+    clerkUser: clerkUser || null,
     loading,
     isBlocked,
     blockedReason
-  }), [clerkSession, clerkUser, loading, isBlocked, blockedReason]);
+  }), [clerkSession, user, clerkUser, loading, isBlocked, blockedReason]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,5 +1,6 @@
 import { Briefcase, Heart, GraduationCap, PiggyBank, Home, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import type { Task, TaskFormData, SecureUser, TaskStats, TaskTemplate, TaskTemplateFormData } from './types';
 
 export const taskService = {
@@ -21,10 +22,11 @@ export const taskService = {
   },
 
   async fetchUserTasks(userId: string): Promise<Task[]> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', translatedId)
       .eq('is_deleted', false);
 
     if (error) throw new Error(error.message);
@@ -43,10 +45,11 @@ export const taskService = {
   },
 
   async createTask(taskData: TaskFormData, userId: string): Promise<Task> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const newTask = {
       ...taskData,
       id: crypto.randomUUID(),
-      user_id: userId,
+      user_id: translatedId,
       is_deleted: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -63,10 +66,11 @@ export const taskService = {
   },
 
   async updateTask(taskId: string, taskData: Partial<TaskFormData>, userId: string): Promise<Task> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { data, error } = await supabase
       .from('tasks')
       .update({ ...taskData, updated_at: new Date().toISOString() })
-      .match({ id: taskId, user_id: userId })
+      .match({ id: taskId, user_id: translatedId })
       .select()
       .single();
 
@@ -75,19 +79,21 @@ export const taskService = {
   },
 
   async deleteTask(taskId: string, userId: string): Promise<void> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { error } = await supabase
       .from('tasks')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .match({ id: taskId, user_id: userId });
+      .match({ id: taskId, user_id: translatedId });
 
     if (error) throw new Error(error.message);
   },
   
   async toggleFavoriteStatus(taskId: string, currentStatus: boolean, userId: string): Promise<Task> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { data, error } = await supabase
       .from('tasks')
       .update({ is_favorited: !currentStatus })
-      .match({ id: taskId, user_id: userId })
+      .match({ id: taskId, user_id: translatedId })
       .select()
       .single();
 
@@ -96,11 +102,12 @@ export const taskService = {
   },
 
   async bulkUpdateTasks(taskIds: string[], updates: Partial<TaskFormData>, userId: string): Promise<Task[]> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { data, error } = await supabase
       .from('tasks')
       .update(updates)
       .in('id', taskIds)
-      .eq('user_id', userId)
+      .eq('user_id', translatedId)
       .select();
 
     if (error) throw new Error(error.message);
@@ -108,11 +115,12 @@ export const taskService = {
   },
 
   async bulkDeleteTasks(taskIds: string[], userId: string): Promise<void> {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { error } = await supabase
       .from('tasks')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .in('id', taskIds)
-      .eq('user_id', userId);
+      .eq('user_id', translatedId);
 
     if (error) throw new Error(error.message);
   },

@@ -1,6 +1,7 @@
 // This file is used to interact with Supabase and Clerk
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -174,8 +175,11 @@ export const supabaseHelpers = {
         tier = 'premium_elite';
       }
 
+      const translatedId = await translateClerkIdToUUID(clerkUser.id);
+
       return {
-        id: clerkUser.id,
+        id: translatedId,
+        clerk_id: clerkUser.id,
         email: email,
         role: role,
         subscription: {
@@ -189,7 +193,8 @@ export const supabaseHelpers = {
           subscription_tier: tier // Ensure it's flat for easier access
         },
         profile: {
-          id: clerkUser.id,
+          id: translatedId,
+          clerk_id: clerkUser.id,
           full_name: fullName,
           user_type: role,
           role: role,

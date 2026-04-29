@@ -18,6 +18,7 @@ import { jsPDF } from 'jspdf';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { dashboardService } from '@/lib/dashboardService';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 // Social Icons (Unified)
 
@@ -68,11 +69,12 @@ const StudyPlanner: React.FC = () => {
     const loadPlan = async () => {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
+      const translatedId = await translateClerkIdToUUID(user.id);
 
       const { data } = await supabase
         .from('study_plans')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', translatedId)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -159,8 +161,9 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
         // Save to Supabase
         const user = await dashboardService.getCurrentUser();
         if (user) {
+          const translatedId = await translateClerkIdToUUID(user.id);
           await supabase.from('study_plans').insert({
-            user_id: user.id,
+            user_id: translatedId,
             plan: result as any,
             config: config as any,
             completed_sessions: [],
@@ -188,10 +191,11 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
     // Persist completed sessions to Supabase (Update the latest plan)
     const user = await dashboardService.getCurrentUser();
     if (user) {
+      const translatedId = await translateClerkIdToUUID(user.id);
       const { data: plans } = await supabase
         .from('study_plans')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', translatedId)
         .order('created_at', { ascending: false })
         .limit(1);
 

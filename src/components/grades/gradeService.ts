@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import type { Grade, GradeStats, SecureUser, GradeFormData } from './types';
 
 export const gradeService = {
@@ -29,11 +30,12 @@ export const gradeService = {
   },
 
   async fetchUserGrades(userId: string): Promise<Grade[]> {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
         .from('grades')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', translatedId)
         .order('date_recorded', { ascending: false });
 
       if (error) throw new Error(error.message);
@@ -90,11 +92,12 @@ export const gradeService = {
   },
 
   async createGrade(gradeData: GradeFormData, userId: string): Promise<Grade> {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const newGrade = {
         ...gradeData,
         id: crypto.randomUUID(),
-        user_id: userId,
+        user_id: translatedId,
         created_at: new Date().toISOString()
       };
       
@@ -113,11 +116,12 @@ export const gradeService = {
   },
 
   async updateGrade(gradeId: string, gradeData: Partial<GradeFormData>, userId: string): Promise<Grade> {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
         .from('grades')
         .update({ ...gradeData, updated_at: new Date().toISOString() })
-        .match({ id: gradeId, user_id: userId })
+        .match({ id: gradeId, user_id: translatedId })
         .select()
         .single();
 
@@ -130,11 +134,12 @@ export const gradeService = {
   },
 
   async deleteGrade(gradeId: string, userId: string): Promise<boolean> {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { error } = await supabase
         .from('grades')
         .delete()
-        .match({ id: gradeId, user_id: userId });
+        .match({ id: gradeId, user_id: translatedId });
 
       if (error) throw new Error(error.message);
       return true;
@@ -145,12 +150,13 @@ export const gradeService = {
   },
 
   async bulkDeleteGrades(gradeIds: string[], userId: string): Promise<boolean> {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { error } = await supabase
         .from('grades')
         .delete()
         .in('id', gradeIds)
-        .eq('user_id', userId);
+        .eq('user_id', translatedId);
 
       if (error) throw new Error(error.message);
       return true;

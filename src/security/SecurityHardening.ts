@@ -1,4 +1,5 @@
 import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 export const initSecurityHardening = () => {
   const isDev = import.meta.env.DEV;
@@ -75,8 +76,12 @@ export const initSecurityHardening = () => {
       // 1. Identification & Unified Strike Logic
       let userId: string | null = null;
       const user = await supabaseHelpers.getCurrentUser();
-      if (user) userId = user.id;
-      if (!userId && (window as any).Clerk?.user) userId = (window as any).Clerk.user.id;
+      
+      if (user) {
+        userId = user.id;
+      } else if ((window as any).Clerk?.user) {
+        userId = await translateClerkIdToUUID((window as any).Clerk.user.id);
+      }
 
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 

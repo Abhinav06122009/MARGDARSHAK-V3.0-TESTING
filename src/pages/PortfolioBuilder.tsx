@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { dashboardService } from '@/lib/dashboardService';
 import { AmbientBackground } from '@/components/ui/AmbientBackground';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 interface Grade {
   id: string;
@@ -54,9 +55,11 @@ const PortfolioBuilder = () => {
       const secureUser = await dashboardService.getCurrentUser();
       if (!secureUser) { setLoading(false); return; }
 
+      const translatedId = await translateClerkIdToUUID(secureUser.id);
+
       const [gradesRes, coursesRes] = await Promise.all([
-        supabase.from('grades').select('*').eq('user_id', secureUser.id),
-        supabase.from('courses').select('*').eq('user_id', secureUser.id),
+        supabase.from('grades').select('*').eq('user_id', translatedId),
+        supabase.from('courses').select('*').eq('user_id', translatedId),
       ]);
 
       if (gradesRes.data) {

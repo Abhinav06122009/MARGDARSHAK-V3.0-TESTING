@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { dashboardService } from '@/lib/dashboardService';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -146,10 +147,12 @@ const DeadlineTracker = () => {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
 
+      const translatedId = await translateClerkIdToUUID(user.id);
+
       const { data, error } = await supabase
         .from('deadlines')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', translatedId);
 
       if (error) throw error;
 
@@ -183,8 +186,10 @@ const DeadlineTracker = () => {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
 
+      const translatedId = await translateClerkIdToUUID(user.id);
+
       const { data, error } = await supabase.from('deadlines').insert({
-        user_id: user.id,
+        user_id: translatedId,
         name: form.name,
         category: form.category,
         date: form.date,
@@ -219,11 +224,13 @@ const DeadlineTracker = () => {
     try {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
+      
+      const translatedId = await translateClerkIdToUUID(user.id);
 
       const originalExams = [...exams];
       setExams(exams.filter(e => e.id !== id)); // Optimistic update
       
-      const { error } = await supabase.from('deadlines').delete().eq('id', id).eq('user_id', user.id);
+      const { error } = await supabase.from('deadlines').delete().eq('id', id).eq('user_id', translatedId);
       if (error) {
         setExams(originalExams);
         throw error;
@@ -239,6 +246,8 @@ const DeadlineTracker = () => {
     try {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
+      
+      const translatedId = await translateClerkIdToUUID(user.id);
 
       const exam = exams.find(e => e.id === id);
       if (!exam) return;
@@ -249,7 +258,7 @@ const DeadlineTracker = () => {
       const { error } = await supabase.from('deadlines').update({ 
         is_completed: newStatus, 
         updated_at: new Date().toISOString() 
-      }).eq('id', id).eq('user_id', user.id);
+      }).eq('id', id).eq('user_id', translatedId);
 
       if (error) throw error;
     } catch (err) {

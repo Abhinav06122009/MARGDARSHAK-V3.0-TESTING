@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { dashboardService } from '@/lib/dashboardService';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -128,10 +129,11 @@ const SmartNotes = () => {
     }
     if (!title.trim() && !content.trim()) return;
 
+    const translatedId = await translateClerkIdToUUID(userId);
     const noteId = activeNoteId || crypto.randomUUID();
     const newNoteData = {
       id: noteId,
-      user_id: userId,
+      user_id: translatedId,
       title: title || 'Untitled Note',
       content,
       updated_at: new Date().toISOString()
@@ -163,8 +165,9 @@ const SmartNotes = () => {
 
   const handleDelete = async (id: string) => {
     if (!userId) return;
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
-      await supabase.from('smart_notes').delete().match({ id: id, user_id: userId });
+      await supabase.from('smart_notes').delete().match({ id: id, user_id: translatedId });
       const updatedNotes = notes.filter(n => n.id !== id);
       setNotes(updatedNotes);
       if (activeNoteId === id) createNewNote();
@@ -180,10 +183,11 @@ const SmartNotes = () => {
       const user = await dashboardService.getCurrentUser();
       if (user) {
         setUserId(user.id);
+        const translatedId = await translateClerkIdToUUID(user.id);
         const { data, error } = await supabase
           .from('smart_notes')
           .select('*')
-          .eq('user_id', user.id);
+          .eq('user_id', translatedId);
         if (!error && data) {
           const formattedNotes = data.map((n: any) => ({
             id: n.id,

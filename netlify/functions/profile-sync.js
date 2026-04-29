@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 const {
   corsHeaders,
   rateLimit,
@@ -6,6 +7,25 @@ const {
   verifyClerkUser,
   MAX_BODY_BYTES,
 } = require('./_shared/security');
+
+/**
+ * ID Translation Protocol (Node.js Version)
+ * Deterministically maps Clerk User IDs (strings) to valid Postgres UUIDs.
+ */
+const translateClerkIdToUUID = (clerkId) => {
+  if (!clerkId) return '';
+  if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
+
+  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
+  
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    '8' + hash.slice(17, 20),
+    hash.slice(20, 32)
+  ].join('-');
+};
 
 exports.handler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin || null;
@@ -68,11 +88,13 @@ exports.handler = async (event) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   // --- PREVENT ADMIN DOWNGRADE ---
+  const translatedId = translateClerkIdToUUID(auth.user.id);
+
   // Fetch existing profile to check current role
   const { data: existingProfile } = await supabase
     .from('profiles')
     .select('user_type')
-    .eq('id', auth.user.id)
+    .eq('id', translatedId)
     .maybeSingle();
 
   const newUserType = clerkMetadata.role || metadata.role || 'student';
@@ -83,7 +105,8 @@ exports.handler = async (event) => {
     : newUserType;
 
   const profileRow = {
-    id: auth.user.id,
+    id: translatedId,
+    clerk_id: auth.user.id,
     email: auth.user.email || metadata.email || '',
     full_name: fullName,
     avatar_url: metadata.avatar_url || null,
@@ -94,11 +117,11 @@ exports.handler = async (event) => {
     updated_at: new Date().toISOString(),
   };
 
-  console.log('[profile-sync] Attempting upsert for user:', auth.user.id, 'with role:', finalUserType);
+  console.log('[profile-sync] Attempting upsert for user:', translatedId, '(Clerk:', auth.user.id, ') with role:', finalUserType);
 
   const { data, error } = await supabase.from('profiles').upsert(profileRow).select();
   if (error) {
-    console.error('[profile-sync] Upsert failed:', {
+    console.error('[profile-sync] Upsert failed for ID:', translatedId, {
       message: error.message,
       code: error.code,
       details: error.details,
@@ -111,7 +134,7 @@ exports.handler = async (event) => {
     }) };
   }
 
-  console.log('[profile-sync] Upsert successful for user:', auth.user.id);
+  console.log('[profile-sync] Upsert successful for user:', translatedId);
 
   return {
     statusCode: 200,

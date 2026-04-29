@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const {
   corsHeaders,
@@ -7,6 +8,25 @@ const {
   verifyClerkUser,
   MAX_BODY_BYTES,
 } = require('./_shared/security');
+
+/**
+ * ID Translation Protocol (Node.js Version)
+ * Deterministically maps Clerk User IDs (strings) to valid Postgres UUIDs.
+ */
+const translateClerkIdToUUID = (clerkId) => {
+  if (!clerkId) return '';
+  if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
+
+  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
+  
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    '8' + hash.slice(17, 20),
+    hash.slice(20, 32)
+  ].join('-');
+};
 
 exports.handler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin || null;
@@ -43,10 +63,12 @@ exports.handler = async (event) => {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    const adminUUID = translateClerkIdToUUID(auth.user.id);
+
     const { data: adminProfile, error: adminError } = await supabase
       .from('profiles')
       .select('user_type')
-      .eq('id', auth.user.id)
+      .eq('id', adminUUID)
       .single();
 
     if (adminError || adminProfile?.user_type !== 'admin') {
@@ -71,7 +93,8 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'targetUserId and action are required' }) };
     }
 
-    console.log(`[admin-manage] Admin ${auth.user.id} performing ${action} on user ${targetUserId}`);
+    const targetUUID = translateClerkIdToUUID(targetUserId);
+    console.log(`[admin-manage] Admin ${auth.user.id} (UUID: ${adminUUID}) performing ${action} on user ${targetUserId} (UUID: ${targetUUID})`);
 
     // 5. Perform Action
     if (action === 'update_subscription') {
@@ -86,7 +109,7 @@ exports.handler = async (event) => {
           subscription_status: status || 'active',
           updated_at: new Date().toISOString()
         })
-        .eq('id', targetUserId);
+        .eq('id', targetUUID);
 
       if (upError) throw upError;
 

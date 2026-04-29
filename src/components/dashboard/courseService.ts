@@ -31,7 +31,7 @@ export const courseService = {
       }
 
       // MASTER OVERRIDE
-      if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+      if (clerkUser.clerk_id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
 
       return {
         id: clerkUser.id,

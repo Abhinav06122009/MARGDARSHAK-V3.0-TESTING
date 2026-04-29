@@ -11,6 +11,7 @@ import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
 import cacheService from '@/lib/ai/cacheService';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { dashboardService } from '@/lib/dashboardService';
 import logo from "@/components/logo/logo.png";
 
 interface InsightCard {
@@ -52,7 +53,7 @@ const AIAnalytics: React.FC = () => {
 
   const fetchAnalytics = async (): Promise<Analytics> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await dashboardService.getCurrentUser();
       if (!user) return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
 
       const [tasksRes, gradesRes, coursesRes] = await Promise.all([

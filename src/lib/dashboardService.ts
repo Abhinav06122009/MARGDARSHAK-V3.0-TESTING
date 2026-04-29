@@ -1,4 +1,5 @@
 import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import { toast } from 'sonner';
 import type {
   SecureUser,
@@ -64,7 +65,8 @@ export const dashboardService = {
   },
 
   fetchAllUserData: async (userId: string) => {
-    console.log('Fetching all Supabase data for user:', userId);
+    const translatedId = await translateClerkIdToUUID(userId);
+    console.log('Fetching all Supabase data for user:', translatedId, '(Clerk:', userId, ')');
     
     try {
       const [
@@ -76,13 +78,13 @@ export const dashboardService = {
         timetableResult,
         profileResult
       ] = await Promise.all([
-        supabase.from('tasks').select('*').eq('user_id', userId),
-        supabase.from('study_sessions').select('*').eq('user_id', userId),
-        supabase.from('grades').select('*').eq('user_id', userId),
-        supabase.from('notes').select('*').eq('user_id', userId),
-        supabase.from('courses').select('*').eq('user_id', userId),
-        supabase.from('timetable_events').select('*').eq('user_id', userId),
-        supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+        supabase.from('tasks').select('*').eq('user_id', translatedId),
+        supabase.from('study_sessions').select('*').eq('user_id', translatedId),
+        supabase.from('grades').select('*').eq('user_id', translatedId),
+        supabase.from('notes').select('*').eq('user_id', translatedId),
+        supabase.from('courses').select('*').eq('user_id', translatedId),
+        supabase.from('timetable_events').select('*').eq('user_id', translatedId),
+        supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
 
       return {
@@ -118,11 +120,12 @@ export const dashboardService = {
   },
 
   updateTaskStatus: async (taskId: string, status: string, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
         .from('tasks')
         .update({ status, updated_at: new Date().toISOString() })
-        .match({ id: taskId, user_id: userId })
+        .match({ id: taskId, user_id: translatedId })
         .select()
         .single();
 
@@ -135,11 +138,12 @@ export const dashboardService = {
   },
 
   deleteTask: async (taskId: string, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .match({ id: taskId, user_id: userId });
+        .match({ id: taskId, user_id: translatedId });
         
       if (error) throw error;
       return true;
@@ -150,6 +154,7 @@ export const dashboardService = {
   },
 
   createQuickTask: async (userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const newTask = {
         id: crypto.randomUUID(),
@@ -157,7 +162,7 @@ export const dashboardService = {
         description: 'Add description here',
         status: 'pending',
         priority: 'medium',
-        user_id: userId,
+        user_id: translatedId,
         created_at: new Date().toISOString()
       };
       const { data, error } = await supabase
@@ -259,8 +264,9 @@ export const dashboardService = {
   },
 
   calculateSecureAnalytics: async (userId: string): Promise<RealAnalytics> => {
-    const { data: sessions } = await supabase.from('study_sessions').select('*').eq('user_id', userId);
-    const { data: grades } = await supabase.from('grades').select('*').eq('user_id', userId);
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { data: sessions } = await supabase.from('study_sessions').select('*').eq('user_id', translatedId);
+    const { data: grades } = await supabase.from('grades').select('*').eq('user_id', translatedId);
 
     return {
       dailyStudyTime: [],
@@ -275,10 +281,11 @@ export const dashboardService = {
     };
   },
 
-  setupSecureRealTimeSubscription: (userId: string, callback: (payload: any) => void) => {
+  setupSecureRealTimeSubscription: async (userId: string, callback: (payload: any) => void) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const subscription = supabase
-      .channel(`public:tasks:user_id=eq.${userId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${userId}` }, callback)
+      .channel(`public:tasks:user_id=eq.${translatedId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${translatedId}` }, callback)
       .subscribe();
       
     return () => {
