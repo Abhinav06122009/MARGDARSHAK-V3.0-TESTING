@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 import AuthPageWrapper from '@/components/auth/AuthPage';
 import { FloatingNav } from '@/components/ui/floating-nav';
 import { NotificationSystem, useNotifications } from '@/components/ui/notification-system';

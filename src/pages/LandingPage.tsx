@@ -1,10 +1,11 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { SoundProvider } from '@/components/landing/SoundContext';
 import { CustomCursor, ScrollProgressBar } from '@/components/landing/UIEffects';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { BackgroundScene } from '@/components/landing/BackgroundScene';
-
 
 // Lazy load heavy sections for performance
 const Features = lazy(() => import('@/components/landing/LandingSections').then(m => ({ default: m.Features })));
@@ -14,9 +15,6 @@ const GeminiFeatureDemo = lazy(() => import('@/components/landing/GeminiFeatureD
 const Pricing = lazy(() => import('@/components/landing/Pricing').then(m => ({ default: m.Pricing })));
 const CTA = lazy(() => import('@/components/landing/Pricing').then(m => ({ default: m.CTA })));
 const TechStack = lazy(() => import('@/components/landing/TechStack').then(m => ({ default: m.TechStack })));
-
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * The main Landing Page component.
