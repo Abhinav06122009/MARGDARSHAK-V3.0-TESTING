@@ -42,21 +42,21 @@ const AuthPage: React.FC<AuthPageProps> = () => {
       header: "hidden",
       headerTitle: "hidden",
       headerSubtitle: "hidden",
-      socialButtonsBlockButton: "bg-white/[0.03] border-white/10 hover:bg-white/10 text-white rounded-2xl h-14 w-full transition-all duration-500 border hover:border-blue-500/50 flex justify-center items-center mb-2",
+      socialButtonsBlockButton: "bg-white/[0.03] border-white/10 hover:bg-white/10 text-white rounded-2xl h-14 w-full transition-all duration-500 border hover:border-emerald-500/50 flex justify-center items-center mb-2",
       socialButtonsBlockButtonText: "text-white text-[10px] font-black uppercase tracking-[0.2em] w-full text-center",
       dividerRow: "my-10 w-full",
       dividerLine: "bg-white/5",
       dividerText: "text-zinc-700 text-[8px] font-black uppercase tracking-[0.5em]",
-      formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-[10px] font-black uppercase tracking-[0.3em] h-14 w-full rounded-2xl transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/20 mt-4",
+      formButtonPrimary: "bg-emerald-600 hover:bg-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] h-14 w-full rounded-2xl transition-all active:scale-[0.98] shadow-2xl shadow-emerald-500/20 mt-4",
       formFieldLabel: "text-zinc-500 text-[8px] font-black uppercase tracking-[0.3em] mb-3 ml-1",
-      formFieldInput: "bg-white/[0.03] border-white/10 text-white rounded-2xl h-14 text-sm focus:border-blue-500/50 focus:bg-white/5 transition-all w-full px-5",
+      formFieldInput: "bg-white/[0.03] border-white/10 text-white rounded-2xl h-14 text-sm focus:border-emerald-500/50 focus:bg-white/5 transition-all w-full px-5",
       footerActionText: "text-zinc-600 text-[9px] font-bold uppercase tracking-widest",
-      footerActionLink: "text-blue-400 hover:text-blue-300 font-black uppercase tracking-widest transition-colors ml-2",
+      footerActionLink: "text-emerald-400 hover:text-emerald-300 font-black uppercase tracking-widest transition-colors ml-2",
       identityPreviewText: "text-white font-medium",
-      identityPreviewEditButtonIcon: "text-blue-400",
-      formResendCodeLink: "text-blue-400 font-bold uppercase text-[10px]",
-      otpCodeFieldInput: "bg-white/5 border-white/10 text-white rounded-2xl h-14 focus:border-blue-500/50",
-      formFieldAction: "text-blue-400 hover:text-blue-300 text-[10px] font-bold uppercase tracking-tighter",
+      identityPreviewEditButtonIcon: "text-emerald-400",
+      formResendCodeLink: "text-emerald-400 font-bold uppercase text-[10px]",
+      otpCodeFieldInput: "bg-white/5 border-white/10 text-white rounded-2xl h-14 focus:border-emerald-500/50",
+      formFieldAction: "text-emerald-400 hover:text-emerald-300 text-[10px] font-bold uppercase tracking-tighter",
       internal: "hidden"
     },
     layout: {
@@ -66,12 +66,15 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] grid place-items-center p-6 relative overflow-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#050505] grid place-items-center p-6 relative overflow-hidden selection:bg-emerald-500/30">
       {/* Precision Background Layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] opacity-50" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.08),transparent_50%)]" />
-        <div className="absolute inset-0 opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[120px] opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.08),transparent_50%)]" />
+        
+        {/* Neural Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <motion.div
@@ -83,7 +86,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         {/* Centered Identity Block */}
         <div className="flex flex-col items-center mb-10">
           <Link to="/" className="group relative mb-8">
-            <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full group-hover:bg-blue-500/40 transition-all duration-700 scale-110" />
+            <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full group-hover:bg-emerald-500/40 transition-all duration-700 scale-110" />
             <div className="p-5 rounded-[2.8rem] bg-white border border-white/20 relative z-10 shadow-[0_0_50px_rgba(255,255,255,0.1)] transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-1">
               <img src={logo} alt="Margdarshak" className="w-16 h-16 object-contain" loading="eager" />
             </div>
@@ -132,4 +135,3 @@ const AuthPage: React.FC<AuthPageProps> = () => {
 };
 
 export default AuthPage;
-

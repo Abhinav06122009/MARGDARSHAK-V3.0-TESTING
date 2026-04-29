@@ -14,7 +14,9 @@ import {
   FolderOpen,
   Shield,
   FileText,
-  Target, // ✅ Added for Progress Tracker
+  Target,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,30 +25,30 @@ interface FloatingNavProps {
   currentPage: string;
 }
 
-// Enhanced Custom Styles with World-Class Color Matching
+// Enhanced Custom Styles with Zenith Architecture Standards
 const navStyles = `
   .floating-nav-container {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    background: rgba(5, 5, 5, 0.4);
+    backdrop-filter: blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 
   .nav-item-active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #B24BF3 100%);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
   }
 
   .nav-item-hover:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
   }
 
   .nav-tooltip {
-    background: linear-gradient(135deg, #0A0A0A 0%, #1A1A2E 100%);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(5, 5, 5, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .scrollbar-hide {
@@ -58,17 +60,16 @@ const navStyles = `
     display: none;
   }
 
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
-    50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6); }
+  @keyframes pulseGlowEmerald {
+    0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
   }
 `;
 
 // Add styles to document head
 const addNavStyles = () => {
-  if (document.getElementById('floating-nav-styles')) {
-    return;
-  }
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('floating-nav-styles')) return;
 
   const styleSheet = document.createElement("style");
   styleSheet.id = 'floating-nav-styles';
@@ -77,19 +78,18 @@ const addNavStyles = () => {
   document.head.appendChild(styleSheet);
 };
 
-// Enhanced navigation items with Progress Tracker + world-class color matching
+// Enhanced navigation items with Zenith high-stakes nomenclature
 const navigationItems = [
-  { id: 'dashboard', icon: Home, label: 'Dashboard' },
-  { id: 'courses', icon: Book, label: 'Courses' },
-  { id: 'timetable', icon: Calendar, label: 'Timetable' },
-  { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
-  { id: 'progress', icon: Target, label: 'Progress Tracker' }, // ✅ Added Progress Tracker
-  { id: 'notes', icon: BookOpen, label: 'Notes' },
-  { id: 'grades', icon: Trophy, label: 'Grades' },
-  { id: 'syllabus', icon: GraduationCap, label: 'Syllabus' },
-  // Legal pages
-  { id: 'privacy', icon: Shield, label: 'Privacy Policy' },
-  { id: 'terms', icon: FileText, label: 'Terms & Conditions' },
+  { id: 'dashboard', icon: Home, label: 'Operational Core' },
+  { id: 'courses', icon: Book, label: 'Sector Registry' },
+  { id: 'timetable', icon: Calendar, label: 'Temporal Grid' },
+  { id: 'tasks', icon: CheckSquare, label: 'Tactical Units' },
+  { id: 'progress', icon: Target, label: 'Neural Matrix' },
+  { id: 'notes', icon: BookOpen, label: 'Signal Logs' },
+  { id: 'grades', icon: Trophy, label: 'Performance Metrics' },
+  { id: 'syllabus', icon: GraduationCap, label: 'Protocol Index' },
+  { id: 'privacy', icon: Shield, label: 'Data Sovereignty' },
+  { id: 'terms', icon: FileText, label: 'Legal Accord' },
 ];
 
 export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPage }) => {
@@ -97,7 +97,7 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPag
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    addNavStyles(); // ✅ Add enhanced styles
+    addNavStyles();
   }, []);
 
   useEffect(() => {
@@ -119,10 +119,13 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPag
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 px-4"
         >
-          <div className="floating-nav-container rounded-2xl p-2 shadow-2xl">
-            <div className="flex items-center space-x-1 overflow-x-auto max-w-screen-lg scrollbar-hide">
+          <div className="floating-nav-container rounded-[2rem] p-2.5 shadow-2xl overflow-hidden relative">
+            {/* Background Grain/Noise */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            
+            <div className="flex items-center space-x-1.5 overflow-x-auto max-w-screen-lg scrollbar-hide relative z-10">
               {navigationItems.map((item, index) => {
                 const isActive = currentPage === item.id;
                 return (
@@ -130,99 +133,62 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPag
                     key={item.id}
                     onClick={() => onNavigate(item.id)}
                     className={cn(
-                      'relative p-3 rounded-xl transition-all duration-300 flex-shrink-0 group nav-item-hover',
+                      'relative p-3.5 rounded-[1.2rem] transition-all duration-500 flex-shrink-0 group nav-item-hover',
                       isActive
-                        ? 'nav-item-active text-black shadow-lg'
-                        : 'text-black/70 hover:text-black'
+                        ? 'nav-item-active text-emerald-400'
+                        : 'text-zinc-500 hover:text-white'
                     )}
-                    whileHover={{ 
-                      scale: 1.05,
-                      transition: { type: "spring", stiffness: 400, damping: 10 }
-                    }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ 
                       opacity: 1, 
                       y: 0,
-                      transition: { 
-                        delay: index * 0.05,
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 20
-                      }
+                      transition: { delay: index * 0.03 }
                     }}
                   >
-                    <motion.div
-                      animate={isActive ? {
-                        rotate: [0, 360],
-                        transition: { duration: 2, repeat: Infinity, ease: "linear" }
-                      } : {}}
-                    >
-                      <item.icon className="w-5 h-5" />
-                    </motion.div>
+                    <div className="relative z-10">
+                      <item.icon className={cn("w-5 h-5", isActive ? "text-emerald-400" : "text-zinc-600 group-hover:text-white transition-colors")} />
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeGlow"
+                          className="absolute inset-0 bg-emerald-500/20 blur-xl -z-10"
+                        />
+                      )}
+                    </div>
 
                     {isActive && (
                       <motion.div
                         layoutId="activeNav"
-                        className="absolute inset-0 rounded-xl"
+                        className="absolute inset-0 rounded-[1.2rem] border border-emerald-500/30"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 50%, rgba(178, 75, 243, 0.3) 100%)',
-                          animation: 'pulseGlow 2s ease-in-out infinite'
+                          animation: 'pulseGlowEmerald 3s ease-in-out infinite'
                         }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                       />
                     )}
 
-                    {/* Enhanced Tooltip */}
+                    {/* Tooltip Engineering */}
                     <motion.div 
-                      className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 nav-tooltip text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none"
-                      initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                      whileHover={{ opacity: 1, y: 0, scale: 1 }}
+                      className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 px-4 py-2.5 nav-tooltip text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap pointer-events-none shadow-2xl border border-white/5 italic"
                     >
-                      {item.label}
-                      {/* Tooltip arrow */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={10} className="text-emerald-500" />
+                        {item.label}
+                      </div>
+                      {/* Architectural arrow */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-px h-2 bg-emerald-500/30" />
                     </motion.div>
-
-                    {/* Special indicator for Progress Tracker */}
-                    {item.id === 'progress' && (
-                      <motion.div
-                        transition={{ 
-                          duration: 2, 
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    )}
                   </motion.button>
                 );
               })}
             </div>
           </div>
 
-          {/* Navigation Indicator */}
-          <motion.div
-            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            {navigationItems.slice(0, 3).map((_, index) => (
-              <motion.div
-                key={index}
-                className="w-1 h-1 bg-white/30 rounded-full"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.3, 0.8, 0.3]
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: index * 0.2
-                }}
-              />
-            ))}
-          </motion.div>
+          {/* Subsystem Connection Indicators */}
+          <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 px-4 py-1 bg-[#050505] rounded-full border border-white/5">
+             <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+             <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-600">Neural Sync Active</span>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

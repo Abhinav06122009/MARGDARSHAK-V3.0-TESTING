@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BrainCircuit, Globe, Camera, Sparkles, Lock, Crown, ImageIcon, KeyRound, Loader2, Send, X, ChevronRight } from "lucide-react";
+import { BrainCircuit, Globe, Camera, Sparkles, Lock, Crown, ImageIcon, KeyRound, Loader2, Send, X, ChevronRight, Database, Zap } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AI_GATEWAY_NOT_CONFIGURED_MESSAGE, getConfiguredAIGatewayUrl } from '@/lib/ai/constants';
 import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from "@/components/logo/logo.png";
 
 // Modular Components
 import { UpgradeModal, ByokModal } from '@/components/ai/AIModals';
@@ -24,10 +25,6 @@ const VISION_MODEL_LABEL = "MARGDARSHAK SAARTHI";
 const IMAGE_GEN_LABEL = "MARGDARSHAK SAARTHI VISION";
 const BYOK_STORAGE_KEY = 'margdarshak_openrouter_key';
 
-/**
- * AI Assistant Page - "Margdarshak Saarthi"
- * A multimodal AI interface for academic assistance, document analysis, and creative generation.
- */
 const SmartTutorPage = () => {
   // State
   const [messages, setMessages] = useState<Message[]>([]);
@@ -57,7 +54,6 @@ const SmartTutorPage = () => {
       const rawTier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free');
       let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
       
-      // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
       if (tier === 'free') {
         const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
         if (fullUserStr.includes('elite')) tier = 'premium_elite';
@@ -66,26 +62,14 @@ const SmartTutorPage = () => {
         }
       }
 
-      // MASTER OVERRIDES
-      const MASTER_IDS = [
-        'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
-        'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
-      ];
-      if (MASTER_IDS.includes(clerkUser.id)) {
-        tier = 'premium_elite';
-      }
-
-      console.log('[AI Page] Live Clerk Subscription:', tier);
+      const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
+      if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
       setSubscriptionTier(tier);
     }
   }, [clerkUser, clerkLoaded]);
 
-  // Helpers
   const isEliteUser = () => ELITE_TIERS.includes(subscriptionTier);
-  const isPremiumPlusUser = () => subscriptionTier === 'premium_plus' || subscriptionTier === 'extra_plus';
-  const isPremiumUser = () => subscriptionTier === 'premium';
-  const isFreeUser = () => !isEliteUser() && !isPremiumUser() && !isPremiumPlusUser();
-  const getUserApiKey = () => (isPremiumUser() || isPremiumPlusUser()) ? byokKey || null : null;
+  const getUserApiKey = () => (subscriptionTier === 'premium' || subscriptionTier === 'premium_plus' || subscriptionTier === 'extra_plus') ? byokKey || null : null;
 
   const saveByokKey = () => {
     const trimmed = byokInput.trim();
@@ -101,29 +85,11 @@ const SmartTutorPage = () => {
     setByokKey('');
   };
 
-  // AI Interaction Logic
-  const handleGatewayResponseCode = (code: unknown): boolean => {
-    if (code === GATEWAY_RESPONSE.AUTH_REQUIRED) {
-      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Please sign in to use AI features.' }]);
-      return true;
-    }
-    if (code === GATEWAY_RESPONSE.UPGRADE_TO_EXTRA) {
-      setShowUpgradeModal(true);
-      return true;
-    }
-    if (code === GATEWAY_RESPONSE.KEY_REQUIRED) {
-      setShowByokModal(true);
-      return true;
-    }
-    return false;
-  };
-
   async function executeSend(textToSend: string, modeToUse: Mode, imageToSend: File | null = null) {
-    if (isFreeUser()) return;
+    if (subscriptionTier === 'free') return;
     const isVision = !!imageToSend;
     const userApiKey = getUserApiKey();
 
-    // Enforce BYOK for Premium members (Elite can use inbuilt)
     if (!isEliteUser() && !userApiKey) {
       setMessages(prev => [...prev, { role: 'assistant', content: '🔑 **API Key Required**: Premium members must provide an OpenRouter API key to use Saarthi. Elite members have inbuilt access.' }]);
       setShowByokModal(true);
@@ -135,33 +101,12 @@ const SmartTutorPage = () => {
        content: textToSend,
        userImage: imageToSend ? URL.createObjectURL(imageToSend) : undefined
      }]);
- 
-    // Trace AI Action
-    import('@/lib/security/activityTracker').then(({ trackActivity }) => {
-      trackActivity('ai_request', { 
-        mode: modeToUse, 
-        hasImage: !!imageToSend,
-        promptLength: textToSend.length 
-      });
-    });
-     // Identity intercept
-    const identityTriggers = ["who are you", "what is your name", "who made you", "your name", "tell me about yourself"];
-    if (identityTriggers.some(t => textToSend.toLowerCase().includes(t)) && !imageToSend) {
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: "I am **Margdarshak Saarthi**, your elite AI study companion and cognitive orchestrator. I have been meticulously engineered to assist students within the **Margdarshak Ecosystem** with advanced academic synthesis, multimodal document analysis, and creative problem-solving.\n\nMy mission is to empower your learning journey with state-of-the-art intelligence, ensuring you achieve academic excellence with precision and clarity.",
-          agent: "Margdarshak Saarthi",
-        }]);
-        setLoading(false);
-      }, 800);
-      return;
-    }
+  
+    setLoading(true);
 
     try {
       const chatHistory = messages.map(m => ({ role: m.role, content: m.content }));
       
-      // Local API Path (supports Vision if no Gateway)
       if (!AI_GATEWAY_URL) {
         const { authedFetch, readErrorMessage } = await import('@/lib/ai/authedFetch');
         
@@ -179,17 +124,13 @@ const SmartTutorPage = () => {
           ];
         }
 
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
         if (userApiKey) headers['X-User-API-Key'] = userApiKey;
 
         const res = await authedFetch('/api/ai-chat', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ 
-            messages: [...chatHistory, { role: 'user', content }] 
-          }),
+          body: JSON.stringify({ messages: [...chatHistory, { role: 'user', content }] }),
         });
 
         if (!res.ok) throw new Error(await readErrorMessage(res));
@@ -202,7 +143,6 @@ const SmartTutorPage = () => {
         return;
       }
 
-      // Gateway path (Legacy/External)
       const { data: { session } } = await supabase.auth.getSession();
       const headers: any = { Authorization: `Bearer ${session?.access_token}` };
       if (userApiKey) headers['X-User-API-Key'] = userApiKey;
@@ -223,7 +163,6 @@ const SmartTutorPage = () => {
       }
 
       const data = await res.json();
-      if (handleGatewayResponseCode(data.response)) return;
       setMessages(prev => [...prev, { role: 'assistant', content: data.response, diagram: data.image, agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL }]);
     } catch (e: any) {
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${e.message}` }]);
@@ -251,28 +190,34 @@ const SmartTutorPage = () => {
 
   const speak = (text: string) => {
     if (!('speechSynthesis' in window)) return;
-    
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      window.speechSynthesis.speak(utterance);
-    } catch (err) {
-      console.error('AI TTS Error:', err);
-      setIsSpeaking(false);
-    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans relative overflow-x-hidden">
-      {/* Visual Background */}
+    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans relative overflow-x-hidden selection:bg-emerald-500/30">
+      {/* Zenith Background Aesthetics */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,20,20,1)_0%,rgba(5,5,5,1)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+        
+        {/* Animated Neural Orbs */}
+        <motion.div 
+          animate={{ opacity: [0.1, 0.15, 0.1], scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, 30, 0] }}
+          transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
+          className="absolute top-0 -left-40 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[150px]"
+        />
+        <motion.div 
+          animate={{ opacity: [0.05, 0.1, 0.05], scale: [1, 1.3, 1], x: [0, -40, 0], y: [0, -20, 0] }}
+          transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut', delay: 2 }}
+          className="absolute bottom-0 -right-40 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px]"
+        />
+        
+        {/* Neural Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <UpgradeModal isOpen={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
@@ -282,34 +227,41 @@ const SmartTutorPage = () => {
         onSave={saveByokKey} byokKey={byokKey} onClear={clearByokKey} 
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col p-2 sm:p-4 gap-4">
+      <div className="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col p-4 md:p-8 gap-6">
         {/* Header */}
-        <header className="flex flex-col md:flex-row items-center justify-between p-3 md:p-4 rounded-2xl md:rounded-[2rem] border border-white/10 bg-white/[0.02] backdrop-blur-xl">
-          <div className="flex items-center gap-4">
-            <div className="bg-[#0a0a0a] p-3 rounded-xl border border-white/10">
-              <BrainCircuit className="text-amber-500 w-6 h-6" />
+        <header className="flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.05] to-transparent pointer-events-none" />
+          <div className="flex items-center gap-6">
+            <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-all duration-700">
+              <img src={logo} alt="Margdarshak" className="h-8 w-8 object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-black italic text-white">MARGDARSHAK <span className="text-amber-500">SAARTHI</span></h1>
+              <h1 className="text-2xl font-black italic text-white tracking-tighter uppercase leading-none">
+                Margdarshak <span className="text-emerald-500 not-italic font-light">Saarthi</span>
+              </h1>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-60">Neural Orchestrator v3.0.5</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-3 md:mt-0">
-            {(isPremiumUser() || isPremiumPlusUser()) && (
-              <button onClick={() => setShowByokModal(true)} className={`h-9 px-3 border rounded-lg text-xs font-semibold flex items-center gap-2 ${byokKey ? 'border-green-500/30 text-green-400' : 'border-red-500/30 text-red-400 animate-pulse'}`}>
-                <KeyRound size={12} /> {byokKey ? 'Key Active' : 'Add Key'}
+          <div className="flex items-center gap-4 mt-6 md:mt-0">
+            {getUserApiKey() !== null && (
+              <button 
+                onClick={() => setShowByokModal(true)} 
+                className={`h-10 px-5 border rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${byokKey ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' : 'border-red-500/30 text-red-400 animate-pulse bg-red-500/5'}`}
+              >
+                <KeyRound size={12} /> {byokKey ? 'Handshake Active' : 'Initialize Key'}
               </button>
             )}
-            <div className="h-9 px-4 flex items-center border border-white/10 rounded-lg text-xs font-bold text-amber-400 bg-black/40">
-              <Sparkles size={12} className="mr-2" /> {mode === 'imagine' ? IMAGE_GEN_LABEL : selectedImage ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL}
+            <div className="h-10 px-5 flex items-center border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-white/[0.02] shadow-xl italic">
+              <Sparkles size={12} className="mr-3 text-emerald-500 animate-pulse" /> {mode === 'imagine' ? IMAGE_GEN_LABEL : selectedImage ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL}
             </div>
           </div>
         </header>
 
         {/* Chat Area */}
-        <ScrollArea className="flex-1 rounded-[2.5rem] bg-white/[0.02] border border-white/5 relative" ref={scrollRef}>
-          <div className="p-4 md:p-8 space-y-8 pb-32">
-            {isFreeUser() ? (
+        <ScrollArea className="flex-1 rounded-[3.5rem] bg-white/[0.01] border border-white/5 relative shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] backdrop-blur-3xl" ref={scrollRef}>
+          <div className="p-6 md:p-12 space-y-10 pb-40">
+            {subscriptionTier === 'free' ? (
               <LockState />
             ) : (
               <>
@@ -324,17 +276,21 @@ const SmartTutorPage = () => {
         </ScrollArea>
 
         {/* Input Bar */}
-        {!isFreeUser() && (
-          <div className="sticky bottom-4 w-full max-w-4xl mx-auto px-4">
-            <div className="relative bg-zinc-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-[3rem] p-1.5 md:p-2 flex items-center gap-1 md:gap-2 shadow-2xl">
+        {subscriptionTier !== 'free' && (
+          <div className="sticky bottom-8 w-full max-w-4xl mx-auto px-4 z-50">
+            <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-3 flex items-center gap-3 shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)] group">
+              <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
               {preview && (
-                <div className="absolute -top-24 left-4 p-2 bg-zinc-900 border border-white/10 rounded-xl flex items-center gap-2">
-                  <img src={preview} className="h-16 w-16 object-cover rounded-lg" alt="Preview" />
-                  <button onClick={() => { setSelectedImage(null); setPreview(null); }} className="p-1 bg-red-500/20 text-red-400 rounded-full"><X size={14} /></button>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  className="absolute -top-32 left-8 p-3 bg-[#0a0a0a] border border-white/10 rounded-[2rem] flex items-center gap-4 shadow-2xl"
+                >
+                  <img src={preview} className="h-20 w-20 object-cover rounded-2xl" alt="Preview" />
+                  <button onClick={() => { setSelectedImage(null); setPreview(null); }} className="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all"><X size={14} /></button>
+                </motion.div>
               )}
-              <label className="p-2 md:p-3 text-gray-400 hover:text-white cursor-pointer transition-colors">
-                <Camera size={18} />
+              <label className="p-4 text-zinc-500 hover:text-emerald-400 cursor-pointer transition-all hover:scale-110">
+                <Camera size={20} />
                 <input type="file" className="hidden" accept="image/*" onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) { setSelectedImage(file); setPreview(URL.createObjectURL(file)); }
@@ -345,10 +301,14 @@ const SmartTutorPage = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Ask Saarthi anything..."
-                className="flex-1 bg-transparent border-none focus:ring-0 text-sm md:text-base text-white placeholder:text-gray-600"
+                className="flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide"
               />
-              <Button onClick={handleSend} disabled={loading || (!input.trim() && !selectedImage)} className="rounded-full h-10 w-10 md:h-12 md:w-12 p-0 bg-amber-500 hover:bg-amber-600 text-black">
-                {loading ? <Loader2 className="animate-spin" /> : <Send size={18} />}
+              <Button 
+                onClick={handleSend} 
+                disabled={loading || (!input.trim() && !selectedImage)} 
+                className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
               </Button>
             </div>
           </div>
@@ -358,32 +318,41 @@ const SmartTutorPage = () => {
   );
 };
 
-// Sub-components for cleaner structure
+// Sub-components
 const EmptyState = ({ label }: { label: string }) => (
-  <div className="h-[50vh] flex flex-col items-center justify-center opacity-30">
-    <Sparkles size={64} className="mb-4 animate-pulse text-amber-500" />
-    <p className="font-bold tracking-widest text-xs uppercase">Saarthi Active</p>
-    <p className="text-[10px] text-amber-400 mt-2">{label}</p>
+  <div className="h-[50vh] flex flex-col items-center justify-center">
+    <div className="relative mb-8">
+      <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-20 animate-pulse" />
+      <div className="p-10 bg-white/[0.02] rounded-[3rem] border border-white/5 shadow-inner relative z-10">
+        <Sparkles size={64} className="text-emerald-500" />
+      </div>
+    </div>
+    <p className="font-black tracking-[0.5em] text-[10px] uppercase text-zinc-500 italic">Saarthi Protocol Active</p>
+    <p className="text-[10px] text-emerald-500 mt-4 font-black uppercase tracking-widest">{label}</p>
   </div>
 );
 
 const LockState = () => (
   <div className="h-[55vh] flex flex-col items-center justify-center text-center px-6">
-    <div className="w-20 h-20 rounded-full bg-gray-900 border border-white/10 flex items-center justify-center mb-6">
-      <Lock className="w-10 h-10 text-gray-500" />
+    <div className="w-24 h-24 rounded-[2.5rem] bg-white/[0.02] border border-white/10 flex items-center justify-center mb-10 shadow-2xl relative overflow-hidden">
+      <div className="absolute inset-0 bg-emerald-500/5 blur-xl" />
+      <Lock className="w-10 h-10 text-zinc-700 relative z-10" />
     </div>
-    <h2 className="text-2xl font-black text-white mb-2">Saarthi is Locked</h2>
-    <p className="text-gray-400 text-sm max-w-xs mb-8">Upgrade to Premium or Elite to activate your AI study companion.</p>
+    <h2 className="text-4xl font-black text-white mb-4 uppercase italic tracking-tighter">Protocol Locked</h2>
+    <p className="text-zinc-600 text-[10px] max-w-xs mb-10 font-black uppercase tracking-widest leading-relaxed">Upgrade to the Elite or Premium suite to activate your neural study companion and cognitive orchestrator.</p>
     <Link to="/upgrade">
-      <Button className="bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold px-8 py-6 rounded-full text-lg">View Plans</Button>
+      <Button className="h-16 px-12 bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] rounded-2xl hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/5 active:scale-95">Initialize Upgrade</Button>
     </Link>
   </div>
 );
 
 const LoadingIndicator = ({ mode, isVision }: { mode: string, isVision: boolean }) => (
-  <div className="flex items-center gap-3 ml-6 font-bold text-[10px] uppercase tracking-widest text-amber-500 animate-pulse">
-    <Loader2 className="animate-spin" size={14} />
-    {mode === 'imagine' ? 'Generating Image...' : isVision ? 'Analyzing Image...' : 'Thinking...'}
+  <div className="flex items-center gap-4 ml-8 font-black text-[10px] uppercase tracking-[0.4em] text-emerald-500 italic transition-all">
+    <div className="relative">
+      <Loader2 className="animate-spin" size={16} />
+      <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-40 animate-pulse" />
+    </div>
+    {mode === 'imagine' ? 'Synthesizing Visuals...' : isVision ? 'Orchestrating Vision...' : 'Processing Neural Signal...'}
   </div>
 );
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart3, BrainCircuit, TrendingUp, Target, Lightbulb, ArrowLeft,
-  Loader2, RefreshCw, Sparkles, X, Facebook, Twitter, Linkedin
+  Loader2, RefreshCw, Sparkles, Database, Lock, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -11,25 +11,7 @@ import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
 import cacheService from '@/lib/ai/cacheService';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-// Social Icons (Unified)
-const linkedinLogo = () => (
-  <svg viewBox="0 0 16 16" className="w-5 h-5 fill-current">
-    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-  </svg>
-);
-
-const TwitterLogo = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
-
-const FacebookLogo = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
-    <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.323-1.325z" />
-  </svg>
-);
+import logo from "@/components/logo/logo.png";
 
 interface InsightCard {
   title: string;
@@ -50,15 +32,15 @@ interface Analytics {
 }
 
 const priorityColors = {
-  high: 'border-red-500/30 bg-red-500/5',
-  medium: 'border-amber-500/30 bg-amber-500/5',
-  low: 'border-emerald-500/30 bg-emerald-500/5',
+  high: 'border-red-500/20 bg-red-500/[0.02]',
+  medium: 'border-emerald-500/20 bg-emerald-500/[0.02]',
+  low: 'border-blue-500/20 bg-blue-500/[0.02]',
 };
 
 const priorityBadge = {
-  high: 'bg-red-500/20 text-red-400 border-red-500/30',
-  medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  low: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  high: 'bg-red-500/10 text-red-500 border-red-500/20',
+  medium: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+  low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
 };
 
 const AIAnalytics: React.FC = () => {
@@ -73,8 +55,6 @@ const AIAnalytics: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { taskCompletionRate: 0, totalTasks: 0, completedTasks: 0, avgGrade: 0, totalGrades: 0, studyStreak: 0, coursesEnrolled: 0 };
 
-      // Removed profile query to avoid RLS permission issues
-      // Using Clerk data for user metadata instead
       const [tasksRes, gradesRes, coursesRes] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('grades').select('*').eq('user_id', user.id),
@@ -96,7 +76,7 @@ const AIAnalytics: React.FC = () => {
         completedTasks: completed,
         avgGrade: Math.round(avgGrade),
         totalGrades: grades.length,
-        studyStreak: 0, // Default to 0 since profile table has permission issues
+        studyStreak: 0,
         coursesEnrolled: courses.length,
       };
     } catch (err) {
@@ -153,11 +133,11 @@ Make insights specific, encouraging, and actionable. Use emojis for icons.`;
       }
     } catch {
       setInsights([{
-        title: 'Keep Building Momentum',
-        insight: 'Your academic data shows you are actively tracking your progress.',
-        recommendation: 'Continue logging your grades and completing tasks consistently to see AI-powered trends.',
+        title: 'Initialize Neural Stream',
+        insight: 'Your academic data stream is currently being aggregated.',
+        recommendation: 'Log more grades and complete tasks to unlock high-fidelity predictive modeling.',
         priority: 'medium',
-        icon: '📈',
+        icon: '📡',
       }]);
     } finally {
       setGeneratingInsights(false);
@@ -179,40 +159,40 @@ Make insights specific, encouraging, and actionable. Use emojis for icons.`;
   }, []);
 
   const statCards = analytics ? [
-    { label: 'Task Completion', value: `${analytics.taskCompletionRate}%`, sub: `${analytics.completedTasks}/${analytics.totalTasks} tasks`, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Average Grade', value: `${analytics.avgGrade}%`, sub: `${analytics.totalGrades} grades recorded`, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Study Streak', value: `${analytics.studyStreak}d`, sub: 'consecutive days', color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    { label: 'Courses', value: analytics.coursesEnrolled, sub: 'enrolled', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { label: 'Completion Rate', value: `${analytics.taskCompletionRate}%`, sub: `${analytics.completedTasks}/${analytics.totalTasks} UNITS`, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Performance Metric', value: `${analytics.avgGrade}%`, sub: `${analytics.totalGrades} DATA POINTS`, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Neural Streak', value: `${analytics.studyStreak}d`, sub: 'CONSECUTIVE DAYS', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { label: 'Active Courses', value: analytics.coursesEnrolled, sub: 'REGISTERED', color: 'text-blue-400', bg: 'bg-blue-500/10' },
   ] : [];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-purple-500/30 overflow-x-hidden relative">
-      {/* Background Aesthetics */}
+    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden relative">
+      {/* Zenith Background Aesthetics */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(15,10,25,1)_0%,rgba(5,5,5,1)_100%)]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
 
         {/* Animated Neural Orbs */}
         <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, 30, 0] }}
           transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]"
+          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.3, 1], x: [0, -40, 0], y: [0, -20, 0] }}
           transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut', delay: 2 }}
-          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px]"
+          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"
         />
 
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        {/* Neural Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <ScrollArea className="h-screen w-full relative z-10">
-        <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col gap-8">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-8">
           {/* HEADER */}
-          <header className="flex flex-col md:flex-row items-center justify-between p-6 glass-card rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-2xl relative z-20 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/[0.05] to-transparent pointer-events-none" />
+          <header className="flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-2xl relative z-20 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.05] to-transparent pointer-events-none" />
 
             <div className="flex items-center gap-6">
               <Link to="/dashboard">
@@ -223,13 +203,12 @@ Make insights specific, encouraging, and actionable. Use emojis for icons.`;
                 </motion.div>
               </Link>
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-purple-500/20 rounded-2xl border border-purple-500/30 shadow-lg shadow-purple-500/10 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-purple-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                  <BarChart3 className="w-8 h-8 text-purple-400 relative z-10" />
+                <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                  <img src={logo} alt="Margdarshak" className="h-6 w-6 object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">AI<span className="text-purple-400">Analyst</span></h1>
-                  <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest mt-0.5">AI POWERED Performance Tracker</p>
+                  <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">AI<span className="text-emerald-500 not-italic font-light">Analytics</span></h1>
+                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-60">High-Fidelity Neural Diagnostics</p>
                 </div>
               </div>
             </div>
@@ -239,111 +218,113 @@ Make insights specific, encouraging, and actionable. Use emojis for icons.`;
                 <Button
                   onClick={() => generateInsights(analytics, true)}
                   disabled={generatingInsights}
-                  className="h-12 px-6 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all group"
+                  className="h-12 px-8 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[9px] transition-all group shadow-xl"
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${generatingInsights ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                  <RefreshCw className={`w-4 h-4 mr-3 text-emerald-500 ${generatingInsights ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} />
                   Recalibrate
                 </Button>
               )}
-
             </div>
           </header>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
-              <p className="text-zinc-400 text-sm">Analyzing your academic data...</p>
+            <div className="flex flex-col items-center justify-center py-32 gap-6">
+              <div className="relative">
+                <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
+                <div className="absolute inset-0 bg-emerald-500 blur-xl opacity-20 animate-pulse" />
+              </div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Establishing Neural Connection...</p>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-10">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 {statCards.map((card, i) => (
                   <motion.div
                     key={card.label}
-                    whileHover={{ y: -8, scale: 1.02 }}
+                    whileHover={{ y: -10, scale: 1.02 }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1, duration: 0.5, ease: "circOut" }}
-                    className="bg-white/[0.02] border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden group"
+                    transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="bg-white/[0.01] border border-white/5 backdrop-blur-3xl rounded-[2.8rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-                    <div className={`inline-flex p-4 rounded-2xl ${card.bg} mb-6 border border-white/5 relative z-10`}>
+                    <div className={`inline-flex p-4 rounded-2xl ${card.bg} mb-8 border border-white/5 relative z-10 shadow-lg`}>
                       <TrendingUp className={`w-5 h-5 ${card.color}`} />
                     </div>
-                    <p className={`text-4xl font-black ${card.color} tracking-tighter mb-1 relative z-10 italic`}>{card.value}</p>
+                    <p className={`text-5xl font-black ${card.color} tracking-tighter mb-2 relative z-10 italic leading-none`}>{card.value}</p>
                     <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-1 relative z-10">{card.label}</p>
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest relative z-10">{card.sub}</p>
+                    <p className="text-[8px] text-zinc-600 font-black uppercase tracking-[0.3em] relative z-10 opacity-60">{card.sub}</p>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="space-y-8">
-                <div className="flex items-center justify-between px-2">
+              <div className="space-y-10">
+                <div className="flex items-center justify-between px-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-1.5 h-6 bg-purple-500 rounded-full" />
+                    <div className="w-1.5 h-6 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                     <div className="flex items-center gap-3">
-                      <BrainCircuit className="w-6 h-6 text-purple-400" />
-                      <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">AI-Generated Diagnostics</h2>
+                      <BrainCircuit className="w-6 h-6 text-emerald-400" />
+                      <h2 className="text-[11px] font-black text-white uppercase tracking-[0.4em] italic">Predictive Diagnostics</h2>
                     </div>
                   </div>
                   {generatingInsights && (
-                    <div className="flex items-center gap-3 px-4 py-2 bg-purple-500/10 rounded-full border border-purple-500/20">
-                      <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
-                      <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest">Processing Data...</span>
+                    <div className="flex items-center gap-3 px-5 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-lg">
+                      <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Synthesizing Signals...</span>
                     </div>
                   )}
                 </div>
 
                 {insights.length === 0 && !generatingInsights && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-24 bg-white/[0.02] border border-white/5 rounded-[3rem] text-center"
+                    className="flex flex-col items-center justify-center py-32 bg-white/[0.01] border border-white/5 rounded-[3.5rem] text-center shadow-2xl"
                   >
-                    <div className="p-8 bg-white/5 rounded-full mb-6">
-                      <Sparkles className="w-12 h-12 text-zinc-700" />
+                    <div className="p-10 bg-white/[0.02] rounded-[2.5rem] border border-white/5 mb-8 shadow-inner">
+                      <Database className="w-12 h-12 text-zinc-800" />
                     </div>
-                    <h3 className="text-lg font-black text-white uppercase tracking-widest mb-2">Insufficient Data Stream</h3>
-                    <p className="text-zinc-500 text-xs max-w-xs leading-relaxed font-medium uppercase tracking-widest">Aggregate more academic markers to unlock high-fidelity AI diagnostics.</p>
+                    <h3 className="text-xl font-black text-white uppercase italic tracking-widest mb-3">Signal Interruption</h3>
+                    <p className="text-zinc-600 text-[10px] max-w-sm leading-relaxed font-black uppercase tracking-widest opacity-60">Aggregate more academic markers to unlock high-fidelity AI diagnostics and predictive study modeling.</p>
                   </motion.div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   {insights.map((insight, i) => (
                     <motion.div
                       key={i}
-                      whileHover={{ scale: 1.02 }}
-                      initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.15, duration: 0.6, ease: "circOut" }}
-                      className={`rounded-[2.5rem] p-8 border backdrop-blur-3xl shadow-2xl relative overflow-hidden group ${priorityColors[insight.priority]}`}
+                      whileHover={{ y: -5, scale: 1.01 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className={`rounded-[3rem] p-10 border backdrop-blur-3xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group transition-all duration-700 ${priorityColors[insight.priority]}`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none" />
-                      <div className="flex items-start justify-between mb-8 relative z-10">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner">
+                      <div className="flex items-start justify-between mb-10 relative z-10">
+                        <div className="flex items-center gap-5">
+                          <div className="w-16 h-16 rounded-[1.5rem] bg-white/[0.02] border border-white/5 flex items-center justify-center text-4xl shadow-inner group-hover:scale-110 transition-transform duration-700">
                             {insight.icon}
                           </div>
                           <div>
-                            <h3 className="text-base font-black text-white tracking-tight leading-tight">{insight.title}</h3>
-                            <div className={`mt-2 inline-flex text-[8px] font-black px-3 py-1 rounded-full border uppercase tracking-[0.2em] ${priorityBadge[insight.priority]}`}>
-                              {insight.priority} Priority
+                            <h3 className="text-lg font-black text-white tracking-tighter leading-tight uppercase italic">{insight.title}</h3>
+                            <div className={`mt-3 inline-flex text-[8px] font-black px-4 py-1.5 rounded-full border uppercase tracking-[0.3em] ${priorityBadge[insight.priority]}`}>
+                              {insight.priority} Priority Signal
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <p className="text-sm text-zinc-300 leading-relaxed mb-8 font-medium italic relative z-10">
+                      <p className="text-base text-zinc-500 leading-relaxed mb-10 font-medium italic relative z-10">
                         "{insight.insight}"
                       </p>
 
-                      <div className="flex items-start gap-4 p-5 rounded-[1.5rem] bg-black/40 border border-white/5 relative z-10 group-hover:border-purple-500/30 transition-colors">
-                        <div className="p-2.5 bg-amber-500/20 rounded-xl border border-amber-500/30">
-                          <Lightbulb className="w-4 h-4 text-amber-400" />
+                      <div className="flex items-start gap-5 p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 relative z-10 group-hover:border-emerald-500/20 transition-all duration-500 shadow-xl">
+                        <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                          <Sparkles className="w-4 h-4 text-emerald-400" />
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">Recommendation</p>
-                          <p className="text-xs text-zinc-400 leading-relaxed font-bold">{insight.recommendation}</p>
+                        <div className="space-y-2">
+                          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.4em] italic">Tactical Directive</p>
+                          <p className="text-[11px] text-zinc-400 leading-relaxed font-black uppercase tracking-widest opacity-80">{insight.recommendation}</p>
                         </div>
                       </div>
                     </motion.div>
@@ -355,22 +336,23 @@ Make insights specific, encouraging, and actionable. Use emojis for icons.`;
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="bg-gradient-to-br from-purple-500/[0.08] via-indigo-500/[0.05] to-transparent border border-purple-500/20 rounded-[3rem] p-12 text-center relative overflow-hidden group"
+                  transition={{ delay: 0.6, duration: 1 }}
+                  className="bg-white/[0.01] border border-white/5 rounded-[4rem] p-16 text-center relative overflow-hidden group shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)]"
                 >
-                  <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
-                  <div className="relative z-10 space-y-8">
-                    <div className="w-20 h-20 bg-purple-500/20 rounded-[2rem] border border-purple-500/30 flex items-center justify-center mx-auto shadow-2xl">
-                      <Sparkles className="w-10 h-10 text-purple-400" />
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:30px_30px] opacity-20" />
+                  <div className="relative z-10 space-y-10">
+                    <div className="w-24 h-24 bg-emerald-500/10 rounded-[2.5rem] border border-emerald-500/20 flex items-center justify-center mx-auto shadow-2xl relative">
+                      <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20" />
+                      <Sparkles className="w-12 h-12 text-emerald-400 relative z-10" />
                     </div>
-                    <div className="space-y-3">
-                      <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Unlock Deep <span className="text-purple-400">Cognitive Metrics</span></h3>
-                      <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed font-bold uppercase tracking-widest">Upgrade to Premium for predictive performance modeling and high-fidelity study pattern analytics.</p>
+                    <div className="space-y-4">
+                      <h3 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Ascend to <span className="text-emerald-500">Elite Protocol</span></h3>
+                      <p className="text-zinc-600 text-[10px] max-w-lg mx-auto leading-relaxed font-black uppercase tracking-[0.4em] opacity-60">Unlock predictive performance modeling, high-fidelity neural analytics, and autonomous study optimization.</p>
                     </div>
                     <Link to="/upgrade">
-                      <Button className="bg-purple-500 hover:bg-purple-400 text-black font-black h-16 px-10 rounded-[2rem] shadow-xl shadow-purple-500/20 uppercase tracking-[0.3em] text-[10px] transition-all hover:translate-y-[-4px] group/btn overflow-hidden relative">
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
-                        <span className="relative z-10">Ascend to Premium</span>
+                      <Button className="bg-white text-black font-black h-16 px-12 rounded-2xl shadow-2xl shadow-emerald-500/10 uppercase tracking-[0.3em] text-[10px] transition-all hover:translate-y-[-4px] active:scale-95 group/btn overflow-hidden relative">
+                        <div className="absolute inset-0 bg-emerald-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-700" />
+                        <span className="relative z-10 group-hover/btn:text-black transition-colors">Initialize Upgrade</span>
                       </Button>
                     </Link>
                   </div>

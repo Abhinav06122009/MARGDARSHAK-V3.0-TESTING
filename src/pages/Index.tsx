@@ -132,16 +132,19 @@ const Index = () => {
     } catch (error) {
       console.error('Page render error:', error);
       return (
-        <div className="min-h-screen bg-gradient-cosmic flex items-center justify-center p-6">
-          <div className="glass-morphism rounded-lg p-8 shadow-lg max-w-md w-full text-center">
-            <div className="text-red-400 text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-white mb-4">Page Error</h1>
-            <p className="text-white/80 mb-6">Something went wrong loading this page</p>
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(239,68,68,0.05)_0%,transparent_100%)] pointer-events-none" />
+          <div className="bg-white/[0.02] border border-white/5 backdrop-blur-3xl rounded-[2.5rem] p-12 shadow-2xl max-w-md w-full text-center relative z-10">
+            <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-red-500/20">
+              <span className="text-red-500 text-3xl font-black italic">!</span>
+            </div>
+            <h1 className="text-2xl font-black text-white mb-4 uppercase italic tracking-tighter">System Malfunction</h1>
+            <p className="text-[10px] font-black text-zinc-500 mb-10 uppercase tracking-[0.3em]">Protocol execution failure detected during page synthesis.</p>
             <button
               onClick={() => setCurrentPage('dashboard')}
-              className="bg-gradient-button-primary text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
+              className="w-full h-14 bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] rounded-2xl hover:bg-emerald-500 transition-all shadow-2xl"
             >
-              Back to Dashboard
+              Return to Core Dashboard →
             </button>
           </div>
         </div>
@@ -154,7 +157,7 @@ const Index = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen bg-gradient-cosmic"
+      className="min-h-screen bg-[#050505]"
     >
       <AnimatePresence mode="wait">
         <motion.div
