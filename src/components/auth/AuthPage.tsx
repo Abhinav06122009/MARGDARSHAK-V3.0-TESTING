@@ -14,13 +14,14 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   const mode = searchParams.get('mode');
   const [isLogin, setIsLogin] = useState(mode !== 'signup');
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024); // Increased threshold to include tablets
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
-    const timer = setTimeout(() => setMounted(true), 600); // Reduced delay for snappier feel
+    const timer = setTimeout(() => setMounted(true), 400); // Snappier feel
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', checkMobile);
@@ -63,58 +64,52 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden">
-      {/* Premium Background Elements - Optimized */}
-      <div className="absolute inset-0 z-0">
+    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 md:p-8 relative overflow-y-auto overflow-x-hidden">
+      {/* Premium Background Elements - Optimized for visibility */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <div 
-          className="absolute inset-0 opacity-[0.1]"
+          className="absolute inset-0 opacity-[0.15]"
           style={{
             backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.2) 1px, transparent 1px)`,
-            backgroundSize: isMobile ? '30px 30px' : '40px 40px',
-            maskImage: 'radial-gradient(ellipse at center, black, transparent 80%)'
+            backgroundSize: isMobile ? '40px 40px' : '50px 50px',
+            maskImage: 'radial-gradient(ellipse at center, black, transparent 90%)'
           }}
         />
         
-        {/* Simplified Orbs for Mobile */}
         {!isMobile && (
           <>
             <motion.div 
               animate={{
                 scale: [1, 1.1, 1],
-                x: [0, 30, 0],
-                y: [0, 20, 0],
+                opacity: [0.3, 0.5, 0.3]
               }}
               transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[10%] left-[15%] w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[80px]" 
+              className="absolute top-[10%] left-[10%] w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px]" 
             />
             <motion.div 
               animate={{
                 scale: [1, 1.2, 1],
-                x: [0, -30, 0],
-                y: [0, -20, 0],
+                opacity: [0.2, 0.4, 0.2]
               }}
-              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute bottom-[10%] right-[15%] w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[80px]" 
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute bottom-[10%] right-[10%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]" 
             />
           </>
         )}
-        {isMobile && (
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[100px] rounded-full" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/30 to-[#050505]" />
       </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-[440px] relative z-10"
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-[480px] relative z-10 my-8"
       >
-        <div className="text-center mb-6 md:mb-10">
-          <Link to="/" className="inline-block mb-6 md:mb-8 relative group">
-            <div className="absolute -inset-4 bg-blue-600/20 blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 rounded-full scale-75 group-hover:scale-100" />
-            <div className="p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 relative z-10 shadow-xl group-hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] transition-all duration-500 group-hover:scale-105">
-              <img src={logo} alt="Logo" className="w-12 h-12 md:w-16 md:h-16 object-contain brightness-125" />
+        <div className="text-center mb-8 md:mb-12">
+          <Link to="/" className="inline-block mb-8 relative group">
+            <div className="absolute -inset-6 bg-blue-600/20 blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 rounded-full" />
+            <div className="p-4 md:p-6 rounded-[2rem] bg-white/5 backdrop-blur-md border border-white/10 relative z-10 shadow-2xl group-hover:shadow-[0_0_50px_rgba(59,130,246,0.3)] transition-all duration-500">
+              <img src={logo} alt="Logo" className="w-20 h-20 md:w-24 md:h-24 object-contain brightness-125" />
             </div>
           </Link>
           <motion.div
@@ -122,38 +117,38 @@ const AuthPage: React.FC<AuthPageProps> = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase italic mb-2">
-              <span className="text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.4)]">Margdarshak</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter uppercase italic mb-3 leading-none">
+              <span className="text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]">Margdarshak</span>
             </h1>
-            <p className="text-zinc-400 text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] opacity-80">
-              {isLogin ? 'Command Center Access' : 'Join Elite Ecosystem'}
+            <p className="text-zinc-300 text-[10px] md:text-sm font-bold uppercase tracking-[0.3em] opacity-90">
+              {isLogin ? 'Access your academic command center' : 'Join the elite student ecosystem'}
             </p>
           </motion.div>
         </div>
 
-        <div className="clerk-container rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden border border-white/10 bg-white/[0.02] backdrop-blur-xl shadow-2xl relative">
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-blue-500/5 to-purple-500/5" />
+        <div className="clerk-container rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/20 bg-white/[0.03] backdrop-blur-md shadow-[0_0_80px_rgba(0,0,0,0.5)] relative">
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-blue-500/10 to-purple-500/10" />
           
           {isLogin ? (
             <SignIn 
               appearance={{
                 elements: {
                   rootBox: "w-full",
-                  card: "bg-transparent border-none shadow-none w-full p-4 md:p-8",
-                  headerTitle: "text-white font-black uppercase tracking-widest text-base md:text-lg",
-                  headerSubtitle: "text-zinc-400 text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-4 md:mb-6",
-                  socialButtonsBlockButton: "bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all",
-                  socialButtonsBlockButtonText: "text-white font-bold text-[10px] md:text-xs uppercase tracking-widest",
-                  formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-[10px] md:text-xs font-bold uppercase tracking-widest py-3 md:py-4 rounded-xl md:rounded-2xl transition-all shadow-lg",
-                  footerActionLink: "text-blue-400 hover:text-blue-300 font-bold",
-                  formFieldLabel: "text-zinc-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2",
-                  formFieldInput: "bg-white/5 border-white/10 text-white rounded-lg md:rounded-xl py-2 md:py-3 text-sm focus:border-blue-500/50 transition-all",
-                  dividerText: "text-zinc-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest",
+                  card: "bg-transparent border-none shadow-none w-full p-6 md:p-10",
+                  headerTitle: "text-white font-black uppercase tracking-widest text-xl md:text-2xl",
+                  headerSubtitle: "text-zinc-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 md:mb-8 opacity-80",
+                  socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-blue-500 transition-all py-3 md:py-4",
+                  socialButtonsBlockButtonText: "text-white font-black text-xs md:text-sm uppercase tracking-widest",
+                  formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-xs md:text-sm font-black uppercase tracking-widest py-4 md:py-5 rounded-2xl transition-all shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)]",
+                  footerActionLink: "text-blue-400 hover:text-blue-300 font-black",
+                  formFieldLabel: "text-zinc-200 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2 opacity-90",
+                  formFieldInput: "bg-white/10 border-white/20 text-white rounded-xl md:rounded-2xl py-3 md:py-4 text-base focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all",
+                  dividerText: "text-zinc-400 text-[10px] md:text-xs font-black uppercase tracking-widest",
                   footer: "bg-transparent",
-                  identityPreviewText: "text-white",
-                  identityPreviewEditButton: "text-blue-400",
-                  formFieldAction: "text-blue-400 hover:text-blue-300 font-bold text-[8px] md:text-[10px] uppercase tracking-widest",
-                  providerIcon: "brightness-150"
+                  identityPreviewText: "text-white text-sm font-bold",
+                  identityPreviewEditButton: "text-blue-400 font-black",
+                  formFieldAction: "text-blue-400 hover:text-blue-300 font-black text-[10px] md:text-xs uppercase tracking-widest",
+                  providerIcon: "brightness-200 scale-125"
                 }
               }}
               signUpUrl="/auth?mode=signup"
@@ -165,18 +160,18 @@ const AuthPage: React.FC<AuthPageProps> = () => {
               appearance={{
                 elements: {
                   rootBox: "w-full",
-                  card: "bg-transparent border-none shadow-none w-full p-4 md:p-8",
-                  headerTitle: "text-white font-black uppercase tracking-widest text-base md:text-lg",
-                  headerSubtitle: "text-zinc-400 text-[8px] md:text-[10px] font-bold uppercase tracking-widest mb-4 md:mb-6",
-                  socialButtonsBlockButton: "bg-white/5 border-white/10 text-white hover:bg-white/10 transition-all",
-                  socialButtonsBlockButtonText: "text-white font-bold text-[10px] md:text-xs uppercase tracking-widest",
-                  formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-[10px] md:text-xs font-bold uppercase tracking-widest py-3 md:py-4 rounded-xl md:rounded-2xl transition-all shadow-lg",
-                  footerActionLink: "text-blue-400 hover:text-blue-300 font-bold",
-                  formFieldLabel: "text-zinc-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2",
-                  formFieldInput: "bg-white/5 border-white/10 text-white rounded-lg md:rounded-xl py-2 md:py-3 text-sm focus:border-blue-500/50 transition-all",
-                  dividerText: "text-zinc-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest",
+                  card: "bg-transparent border-none shadow-none w-full p-6 md:p-10",
+                  headerTitle: "text-white font-black uppercase tracking-widest text-xl md:text-2xl",
+                  headerSubtitle: "text-zinc-300 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 md:mb-8 opacity-80",
+                  socialButtonsBlockButton: "bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-blue-500 transition-all py-3 md:py-4",
+                  socialButtonsBlockButtonText: "text-white font-black text-xs md:text-sm uppercase tracking-widest",
+                  formButtonPrimary: "bg-blue-600 hover:bg-blue-500 text-xs md:text-sm font-black uppercase tracking-widest py-4 md:py-5 rounded-2xl transition-all shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)]",
+                  footerActionLink: "text-blue-400 hover:text-blue-300 font-black",
+                  formFieldLabel: "text-zinc-200 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2 opacity-90",
+                  formFieldInput: "bg-white/10 border-white/20 text-white rounded-xl md:rounded-2xl py-3 md:py-4 text-base focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all",
+                  dividerText: "text-zinc-400 text-[10px] md:text-xs font-black uppercase tracking-widest",
                   footer: "bg-transparent",
-                  providerIcon: "brightness-150"
+                  providerIcon: "brightness-200 scale-125"
                 }
               }}
               signInUrl="/auth?mode=signin"
@@ -186,12 +181,12 @@ const AuthPage: React.FC<AuthPageProps> = () => {
           )}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <button 
             onClick={() => setIsLogin(!isLogin)}
-            className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-all"
+            className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-white transition-all hover:tracking-[0.4em]"
           >
-            {isLogin ? "New user? Join now" : "Member? Sign In"}
+            {isLogin ? "Need an account? Join the elite" : "Already a member? Sign in here"}
           </button>
         </div>
       </motion.div>
@@ -200,13 +195,14 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mt-12 flex items-center gap-2 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600"
+        className="mt-12 flex items-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-zinc-500"
       >
-        <Shield className="w-3 h-3 md:w-4 md:h-4 text-emerald-500" />
-        <span className="opacity-60">Secure Encrypted Platform</span>
+        <Shield className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+        <span className="opacity-80">Security Protocol Alpha Active</span>
       </motion.div>
     </div>
   );
 };
 
 export default AuthPage;
+

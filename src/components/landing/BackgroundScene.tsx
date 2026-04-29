@@ -31,21 +31,20 @@ export const BackgroundScene: React.FC = () => {
 
     const initParticles = () => {
       particles = [];
-      // Significantly fewer particles on mobile
-      const count = isMobile ? 40 : Math.min(Math.floor(width / 10), 120);
+      // Significantly fewer particles on mobile/tablet
+      const count = isMobile ? 30 : Math.min(Math.floor(width / 15), 100);
       
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          size: Math.random() * 1.5 + 0.5,
-          color: `hsl(${210 + Math.random() * 20}, 70%, 50%)`
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: Math.random() * 1.2 + 0.5,
+          color: `hsl(${215 + Math.random() * 15}, 60%, 50%)`
         });
       }
     };
-
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
     };
@@ -60,14 +59,14 @@ export const BackgroundScene: React.FC = () => {
     window.addEventListener('touchmove', handleTouchMove);
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-
     const animate = () => {
-      // Background fill instead of clearing for trail effect
       ctx.fillStyle = '#0A0A0A';
       ctx.fillRect(0, 0, width, height);
 
-      const maxDist = isMobile ? 80 : 120;
-      const mouseMaxDist = isMobile ? 100 : 150;
+      const maxDist = isMobile ? 60 : 100;
+      const mouseMaxDist = isMobile ? 80 : 130;
+      const maxDistSq = maxDist * maxDist;
+      const mouseMaxDistSq = mouseMaxDist * mouseMaxDist;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
@@ -83,11 +82,11 @@ export const BackgroundScene: React.FC = () => {
         const dyMouse = mousePos.current.y - p.y;
         const distSqMouse = dxMouse * dxMouse + dyMouse * dyMouse;
 
-        if (distSqMouse < mouseMaxDist * mouseMaxDist) {
+        if (distSqMouse < mouseMaxDistSq) {
           const distMouse = Math.sqrt(distSqMouse);
           const force = (mouseMaxDist - distMouse) / mouseMaxDist;
-          p.vx -= (dxMouse / distMouse) * force * 0.02;
-          p.vy -= (dyMouse / distMouse) * force * 0.02;
+          p.vx -= (dxMouse / distMouse) * force * 0.015;
+          p.vy -= (dyMouse / distMouse) * force * 0.015;
         }
 
         // Draw lines
@@ -97,13 +96,13 @@ export const BackgroundScene: React.FC = () => {
           const dy = p.y - p2.y;
           const distSq = dx * dx + dy * dy;
 
-          if (distSq < maxDist * maxDist) {
+          if (distSq < maxDistSq) {
             const dist = Math.sqrt(distSq);
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.1 * (1 - dist / maxDist)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(59, 130, 246, ${0.08 * (1 - dist / maxDist)})`;
+            ctx.lineWidth = 0.4;
             ctx.stroke();
           }
         }
