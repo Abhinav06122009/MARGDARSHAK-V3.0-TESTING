@@ -1,75 +1,111 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 /**
- * An interactive particle background that simulates a 3D space.
+ * An optimized interactive particle background.
  * Particles react to mouse position and form dynamic networks.
+ * Designed for high performance across all devices.
  */
 export const BackgroundScene: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const mousePos = useRef({ x: -1000, y: -1000 });
+  const requestRef = useRef<number>();
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false }); // Optimization: disable alpha if possible or keep for trail
     if (!ctx) return;
 
+    let width = 0;
+    let height = 0;
+    let particles: any[] = [];
+    const isMobile = window.innerWidth < 768;
+
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      initParticles();
     };
 
-    resizeCanvas();
+    const initParticles = () => {
+      particles = [];
+      // Significantly fewer particles on mobile
+      const count = isMobile ? 40 : Math.min(Math.floor(width / 10), 120);
+      
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          size: Math.random() * 1.5 + 0.5,
+          color: `hsl(${210 + Math.random() * 20}, 70%, 50%)`
+        });
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) {
+        mousePos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove);
     window.addEventListener('resize', resizeCanvas);
-
-    // Initialize particles
-    const particles: any[] = [];
-    const particleCount = Math.min(Math.floor(window.innerWidth / 10), 200);
-    
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * (Math.random() * 0.5 + 0.1),
-        vy: (Math.random() - 0.5) * (Math.random() * 0.5 + 0.1),
-        size: Math.random() * 1.5 + 0.5,
-        color: `hsl(${200 + Math.random() * 40}, 80%, 60%)`
-      });
-    }
-
-    let animationFrameId: number;
+    resizeCanvas();
 
     const animate = () => {
-      // Clear with slight trail effect
-      ctx.fillStyle = 'rgba(10, 10, 10, 0.5)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Background fill instead of clearing for trail effect
+      ctx.fillStyle = '#0A0A0A';
+      ctx.fillRect(0, 0, width, height);
 
-      particles.forEach((p, i) => {
-        // Apply friction
-        p.vx *= 0.995;
-        p.vy *= 0.995;
+      const maxDist = isMobile ? 80 : 120;
+      const mouseMaxDist = isMobile ? 100 : 150;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
         p.x += p.vx;
         p.y += p.vy;
 
-        // Bounce off walls
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Mouse interaction (repulsion/attraction)
-        const dxMouse = mousePos.x - p.x;
-        const dyMouse = mousePos.y - p.y;
-        const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-        const maxDist = 150;
+        // Mouse interaction
+        const dxMouse = mousePos.current.x - p.x;
+        const dyMouse = mousePos.current.y - p.y;
+        const distSqMouse = dxMouse * dxMouse + dyMouse * dyMouse;
 
-        if (distMouse < maxDist) {
-          const force = (maxDist - distMouse) / maxDist;
-          p.vx -= (dxMouse / distMouse) * force * 0.05;
-          p.vy -= (dyMouse / distMouse) * force * 0.05;
+        if (distSqMouse < mouseMaxDist * mouseMaxDist) {
+          const distMouse = Math.sqrt(distSqMouse);
+          const force = (mouseMaxDist - distMouse) / mouseMaxDist;
+          p.vx -= (dxMouse / distMouse) * force * 0.02;
+          p.vy -= (dyMouse / distMouse) * force * 0.02;
+        }
+
+        // Draw lines
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq < maxDist * maxDist) {
+            const dist = Math.sqrt(distSq);
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(59, 130, 246, ${0.1 * (1 - dist / maxDist)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
         }
 
         // Draw particle
@@ -77,41 +113,25 @@ export const BackgroundScene: React.FC = () => {
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
+      }
 
-        // Draw lines between nearby particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.15 * (1 - distance / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      });
-
-      animationFrameId = requestAnimationFrame(animate);
+      requestRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    requestRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrameId);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [mousePos]);
+  }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 opacity-70 transition-opacity duration-500"
+      className="fixed inset-0 opacity-50"
       style={{ zIndex: 0, pointerEvents: 'none' }}
     />
   );

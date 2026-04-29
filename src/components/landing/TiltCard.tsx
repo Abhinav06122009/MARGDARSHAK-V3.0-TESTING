@@ -9,30 +9,35 @@ interface TiltCardProps {
 }
 
 /**
- * A card component that tilts based on mouse position.
- * Features hover sound effects and smooth spring animations.
+ * A card component that tilts on desktop and simplifies on mobile.
  */
 export const TiltCard: React.FC<TiltCardProps> = ({ children, className = '', ...props }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { playSound } = useSound();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Smooth springs for rotation
-  const springX = useSpring(mouseX, { stiffness: 150, damping: 12 });
-  const springY = useSpring(mouseY, { stiffness: 150, damping: 12 });
+  const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
 
   const rotateX = useTransform(springY, [-100, 100], ['8deg', '-8deg']);
   const rotateY = useTransform(springX, [-100, 100], ['-8deg', '8deg']);
 
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    if (isMobile) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (ref.current && isHovering) {
         const card = ref.current.getBoundingClientRect();
-        
-        // Calculate relative mouse position (-100 to 100)
         const deltaX = (e.clientX - (card.left + card.width / 2)) / (card.width / 2) * 100;
         const deltaY = (e.clientY - (card.top + card.height / 2)) / (card.height / 2) * 100;
 
@@ -41,19 +46,23 @@ export const TiltCard: React.FC<TiltCardProps> = ({ children, className = '', ..
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [isHovering, mouseX, mouseY]);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, [isHovering, isMobile, mouseX, mouseY]);
 
   return (
     <motion.div
       ref={ref}
       style={{
-        rotateX: rotateX,
-        rotateY: rotateY,
+        rotateX: isMobile ? 0 : rotateX,
+        rotateY: isMobile ? 0 : rotateY,
         transformStyle: 'preserve-3d',
         perspective: '1000px'
       }}
+      whileHover={{ scale: isMobile ? 1 : 1.02 }}
       onMouseEnter={() => {
         setIsHovering(true);
         playSound('hover');

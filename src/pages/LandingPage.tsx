@@ -1,26 +1,36 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { SoundProvider } from '@/components/landing/SoundContext';
 import { CustomCursor, ScrollProgressBar } from '@/components/landing/UIEffects';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { BackgroundScene } from '@/components/landing/BackgroundScene';
-import { Features, Testimonials, About } from '@/components/landing/LandingSections';
-import { GeminiFeatureDemo } from '@/components/landing/GeminiFeatureDemo';
-import { Pricing, CTA } from '@/components/landing/Pricing';
-import { TechStack } from '@/components/landing/TechStack';
 import Footer from '@/components/Footer';
+
+// Lazy load heavy sections for performance
+const Features = lazy(() => import('@/components/landing/LandingSections').then(m => ({ default: m.Features })));
+const Testimonials = lazy(() => import('@/components/landing/LandingSections').then(m => ({ default: m.Testimonials })));
+const About = lazy(() => import('@/components/landing/LandingSections').then(m => ({ default: m.About })));
+const GeminiFeatureDemo = lazy(() => import('@/components/landing/GeminiFeatureDemo').then(m => ({ default: m.GeminiFeatureDemo })));
+const Pricing = lazy(() => import('@/components/landing/Pricing').then(m => ({ default: m.Pricing })));
+const CTA = lazy(() => import('@/components/landing/Pricing').then(m => ({ default: m.CTA })));
+const TechStack = lazy(() => import('@/components/landing/TechStack').then(m => ({ default: m.TechStack })));
 
 /**
  * The main Landing Page component.
- * Orchestrates all landing page sections and global effects.
- * Modularized for better maintainability and professional standards.
+ * Optimized for universal display and high performance on all devices.
  */
 const LandingPage: React.FC = () => {
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
   return (
     <SoundProvider>
-      <div className="bg-[#0A0A0A] min-h-screen font-sans text-white antialiased relative cursor-none">
-        {/* Global UI Overlays */}
-        <CustomCursor />
+      <div className={`bg-[#0A0A0A] min-h-screen font-sans text-white antialiased relative ${!isTouch ? 'cursor-none' : ''}`}>
+        {/* Global UI Overlays - Only show custom cursor on non-touch devices */}
+        {!isTouch && <CustomCursor />}
         <ScrollProgressBar />
         <BackgroundScene />
 
@@ -28,31 +38,38 @@ const LandingPage: React.FC = () => {
         <style dangerouslySetInnerHTML={{ __html: `
           /* Custom Scrollbar */
           ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
           }
           ::-webkit-scrollbar-track {
             background: #0A0A0A;
           }
           ::-webkit-scrollbar-thumb {
             background: #3b82f6;
-            border-radius: 4px;
-          }
-          ::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
+            border-radius: 10px;
           }
           
-          /* Interactive elements fallback for cursor */
+          /* Smooth Scrolling */
+          html {
+            scroll-behavior: smooth;
+          }
+
+          /* Universal sizing fixes */
+          body {
+            overflow-x: hidden;
+            width: 100vw;
+          }
+          
           .button-interactive {
-            cursor: none !important;
+            cursor: ${isTouch ? 'pointer' : 'none'} !important;
           }
         `}} />
 
         <LandingHeader />
 
-        <main className="relative z-10">
+        <main className="relative z-10 w-full">
           <LandingHero />
           
-          {/* Lazy-loaded sections for performance */}
+          {/* Lazy-loaded sections with placeholders */}
           <Suspense fallback={<SectionPlaceholder />}>
             <Features />
             <GeminiFeatureDemo />
@@ -70,6 +87,10 @@ const LandingPage: React.FC = () => {
   );
 };
 
-const SectionPlaceholder = () => <div className="h-96 w-full animate-pulse bg-gray-900/20" />;
+const SectionPlaceholder = () => (
+  <div className="h-[50vh] w-full flex items-center justify-center bg-gray-900/10">
+    <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+  </div>
+);
 
 export default LandingPage;
