@@ -115,13 +115,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
 
-  const value = {
+  const value = useMemo(() => ({
     session: clerkSession || null,
     user: clerkUser || null,
     loading,
     isBlocked,
     blockedReason
-  };
+  }), [clerkSession, clerkUser, loading, isBlocked, blockedReason]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

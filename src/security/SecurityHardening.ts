@@ -220,7 +220,7 @@ export const initSecurityHardening = () => {
       }
     }
   };
-  setInterval(fixLinks, 3000);
+  setInterval(fixLinks, 10000); // Increased interval
 
   if (location.protocol === 'http:' && !isDev) {
     location.replace(`https://${location.host}${location.pathname}${location.search}`);
@@ -246,26 +246,33 @@ export const initSecurityHardening = () => {
     }
   }
 
-  // Debugger Protection (Infinite loop)
+  // Debugger Protection (Optimized)
   if (!isDev) {
     setInterval(() => {
-      (function () {
-        (function a() {
+      if (window.location.pathname.includes('/sso-callback')) return;
+      
+      const startTime = Date.now();
+      (function() {
+        // Light check that doesn't use recursion
+        const check = function() {
+          if (typeof window === 'undefined') return;
           try {
-            (function b(i) {
-              if (('' + i / i).length !== 1 || i % 20 === 0) {
-                (function () { }).constructor('debugger')();
-              } else {
-                debugger;
-              }
-              b(++i);
-            }(0));
-          } catch (e) {
-            setTimeout(a, 5000);
-          }
-        }());
-      }());
-    }, 1000);
+            // Only trigger if console is likely open
+            if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+              (function() {}).constructor("debugger")();
+            }
+          } catch (e) {}
+        };
+        check();
+      })();
+      
+      // If check takes too long, it might be a sign of debugger interference
+      const duration = Date.now() - startTime;
+      if (duration > 100) {
+        // Slow down even more if we detect lag
+        console.warn('⚡ Performance Guard: Throttling security cycles');
+      }
+    }, 15000); // Increased from 1s to 15s to prevent CPU spikes
   }
 
   // --- 2. PREVENTION OF COPYING AND INSPECTION ---
@@ -311,7 +318,7 @@ export const initSecurityHardening = () => {
   };
 
   window.addEventListener('resize', checkDevTools);
-  setInterval(checkDevTools, 2000); // Reduced frequency
+  setInterval(checkDevTools, 5000); // Increased interval
 
 
   // --- 6. VISUAL LOCKDOWN ---
@@ -358,7 +365,7 @@ export const initSecurityHardening = () => {
       // Tamper logic here if needed
     }
   };
-  setInterval(tamperCheck, 5000);
+  setInterval(tamperCheck, 15000); // Increased interval
 
   console.log('%c🛡️ MAX SECURITY ACTIVE', 'color: green; font-weight: bold; font-size: 20px;');
 };

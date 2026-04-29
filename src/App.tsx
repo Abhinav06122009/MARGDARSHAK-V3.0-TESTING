@@ -93,6 +93,8 @@ import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
 import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay';
 import { trackActivity } from '@/lib/security/activityTracker';
 
+import SSOCallback from '@/components/auth/SSOCallback';
+
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
   if (!session) return null;
@@ -167,6 +169,7 @@ const App = () => {
                             {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
                             <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform. Use our smart tutoring, quiz generator, study planner, and grade tracker for academic excellence." /><LandingPage /></>} />
                             <Route path="/auth" element={<Index />} />
+                            <Route path="/sso-callback" element={<SSOCallback />} />
 
                             {/* Free Tools (Public Access for AdSense) */}
                             <Route path="/calculator" element={<><SEO title="Scientific Calculator Online | MARGDARSHAK" description="Free online scientific calculator for students. Solve complex math and physics problems easily." /><Calculator onBack={() => window.history.back()} /></>} />

@@ -217,20 +217,31 @@ export const securityFeatures = {
     return { allowed: true };
   },
 
-  logSecurityEvent: async (event: string, data: unknown) => {
-    // NON-BLOCKING LOGGING
-    setTimeout(async () => {
+  logSecurityEvent: (event: string, data: unknown) => {
+    // NON-BLOCKING LOGGING - Using native fetch for Netlify compatibility
+    const logData = async () => {
       try {
         const fingerprint = await securityFeatures.generateDeviceFingerprint();
-        await supabase.functions.invoke('security-logger', {
-          body: {
+        await fetch('/.netlify/functions/log-security-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             event,
             deviceFingerprint: fingerprint,
             data,
-          },
+            timestamp: new Date().toISOString()
+          }),
         });
-      } catch (e) {}
-    }, 10);
+      } catch (e) {
+        // Silently fail to not interrupt user flow
+      }
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(logData);
+    } else {
+      setTimeout(logData, 100);
+    }
   },
 
   checkPasswordStrength: (password: string) => {

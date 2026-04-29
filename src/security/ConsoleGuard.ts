@@ -45,11 +45,8 @@ export const initConsoleGuard = () => {
   
   methods.forEach(method => {
     (console as any)[method] = () => {
-      // Re-show warning if they try to log something
-      showWarning();
+      // Just keep it quiet, don't re-show the massive warning on every log
+      // which triggers console.clear() and causes UI lag
     };
   });
-
-  // Re-show warning periodically to handle cases where it might be cleared or scrolled
-  setInterval(showWarning, 5000);
 };

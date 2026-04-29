@@ -17,10 +17,10 @@ export const initSentry = () => {
     ],
 
     // Performance Monitoring
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.1,
     
     // Session Replay
-    replaysSessionSampleRate: 0.1, // Sample 10% of sessions
+    replaysSessionSampleRate: 0.05, // Sample 5% of sessions
     replaysOnErrorSampleRate: 1.0, // Sample 100% of sessions with errors
     
     // Distributed Tracing 
@@ -31,7 +31,7 @@ export const initSentry = () => {
     sendDefaultPii: true,
     
     environment: import.meta.env.MODE || 'development',
-    debug: true, // Enable debug mode to see Sentry internal logs
+    debug: false, // Disable debug mode for production performance
   });
   
   Sentry.captureMessage("Sentry initialized in Margdarshak", "info");

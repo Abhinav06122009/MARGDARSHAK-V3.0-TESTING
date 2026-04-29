@@ -45,10 +45,14 @@ export const useSecureAuth = () => {
     }
   };
 
-  const signInWithSSO = async (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
-    if (!signInLoaded) return;
+  const signInWithSSO = async (provider: 'oauth_google' | 'oauth_github') => {
+    if (!signInLoaded || !clerkSignIn) {
+      console.error('[SSO] Clerk not loaded');
+      return;
+    }
     
     try {
+      console.log(`[SSO] Starting ${provider} sign-in...`);
       securityFeatures.logSecurityEvent(`${provider}_signin_attempt`, {});
       await clerkSignIn.authenticateWithRedirect({
         strategy: provider,
@@ -56,19 +60,24 @@ export const useSecureAuth = () => {
         redirectUrlComplete: "/dashboard",
       });
     } catch (error: any) {
+      console.error(`[SSO] ${provider} sign-in error:`, error);
       securityFeatures.logSecurityEvent(`${provider}_signin_failed`, { error: error.message });
       toast({
         title: "Connection Failed",
-        description: "Could not establish SSO connection. Please try again.",
+        description: error.message || "Could not establish SSO connection.",
         variant: "destructive"
       });
     }
   };
 
-  const signUpWithSSO = async (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
-    if (!signUpLoaded) return;
+  const signUpWithSSO = async (provider: 'oauth_google' | 'oauth_github') => {
+    if (!signUpLoaded || !clerkSignUp) {
+      console.error('[SSO] Clerk not loaded');
+      return;
+    }
     
     try {
+      console.log(`[SSO] Starting ${provider} sign-up...`);
       securityFeatures.logSecurityEvent(`${provider}_signup_attempt`, {});
       await clerkSignUp.authenticateWithRedirect({
         strategy: provider,
@@ -76,10 +85,11 @@ export const useSecureAuth = () => {
         redirectUrlComplete: "/dashboard",
       });
     } catch (error: any) {
+      console.error(`[SSO] ${provider} sign-up error:`, error);
       securityFeatures.logSecurityEvent(`${provider}_signup_failed`, { error: error.message });
       toast({
         title: "Registration Failed",
-        description: "Could not complete SSO registration.",
+        description: error.message || "Could not complete SSO registration.",
         variant: "destructive"
       });
     }
