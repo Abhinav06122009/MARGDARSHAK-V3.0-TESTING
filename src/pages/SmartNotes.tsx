@@ -150,37 +150,47 @@ const SmartNotes = () => {
     if (!content) return;
 
     if ('speechSynthesis' in window) {
-      if (isPaused) {
-        window.speechSynthesis.resume();
-        setIsPaused(false);
+      try {
+        if (isPaused) {
+          window.speechSynthesis.resume();
+          setIsPaused(false);
+          setIsSpeaking(true);
+          return;
+        }
+
+        window.speechSynthesis.cancel(); // Clear queue
+        const utterance = new SpeechSynthesisUtterance(content);
+
+        // Optimize voice for accessibility
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
+          if (preferredVoice) utterance.voice = preferredVoice;
+        }
+
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => {
+          setIsSpeaking(false);
+          setIsPaused(false);
+        };
+
+        utterance.onerror = (event) => {
+          console.error('TTS Utterance Error:', event);
+          setIsSpeaking(false);
+          setIsPaused(false);
+        };
+
+        window.speechSynthesis.speak(utterance);
         setIsSpeaking(true);
-        return;
+        setIsPaused(false);
+      } catch (err) {
+        console.error('TTS Engine Failure:', err);
+        toast({ title: "Audio Error", description: "The TTS engine encountered a problem.", variant: "destructive" });
+        setIsSpeaking(false);
+        setIsPaused(false);
       }
-
-      window.speechSynthesis.cancel(); // Clear queue
-      const utterance = new SpeechSynthesisUtterance(content);
-
-      // Optimize voice for accessibility if possible
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
-      if (preferredVoice) utterance.voice = preferredVoice;
-
-      utterance.rate = 0.9; // Slightly slower for better comprehension
-      utterance.pitch = 1.0;
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-      };
-
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        setIsPaused(false);
-      };
-
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
-      setIsPaused(false);
     } else {
       toast({ title: "TTS Unavailable", description: "Your browser does not support Text-to-Speech.", variant: "destructive" });
     }

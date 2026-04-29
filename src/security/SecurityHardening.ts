@@ -28,10 +28,38 @@ export const initSecurityHardening = () => {
   // Violation Cooldown (Prevent Double-Striking)
   const violationCooldowns = new Map<string, number>();
 
+  // --- ELITE BYPASS LOGIC ---
+  const isEliteOfficer = async () => {
+    try {
+      const clerk = (window as any).Clerk;
+      if (!clerk?.user) return false;
+      
+      const metadata = clerk.user.publicMetadata || {};
+      const unsafeMetadata = clerk.user.unsafeMetadata || {};
+      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+      const rawRoles = subscription.role || (metadata as any).role || (unsafeMetadata as any).role || [];
+      const roles = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
+      const normalizedRoles = roles.map((r: any) => String(r).toLowerCase().replace(/_/g, ''));
+
+      // A++ Class (Multi-role), A-Class (C-Suite), or B-Class (Admins/Owners)
+      const isAplusPlus = normalizedRoles.length >= 2;
+      const isAClass = normalizedRoles.some((r: string) => ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'].includes(r));
+      const isBClass = normalizedRoles.some((r: string) => ['admin', 'superadmin', 'owner'].includes(r));
+
+      return isAplusPlus || isAClass || isBClass;
+    } catch { return false; }
+  };
+
   const logViolation = async (type: string, metadata: any = {}) => {
-    // 0. BOT WHITELISTING
+    // 0. ELITE & BOT WHITELISTING
     const ua = navigator.userAgent.toLowerCase();
     if (ua.includes('googlebot') || ua.includes('adsense')) return;
+    
+    const isOfficer = await isEliteOfficer();
+    if (isOfficer) {
+      console.log('🛡️ Officer detected: Security protocols bypassed.');
+      return;
+    }
 
     // 1. Cooldown Check (5 second window)
     const now = Date.now();
@@ -50,14 +78,13 @@ export const initSecurityHardening = () => {
       if (user) userId = user.id;
       if (!userId && (window as any).Clerk?.user) userId = (window as any).Clerk.user.id;
 
-      // Only count threats from the last 24 hours to prevent "Old Strike" bans
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
       const { data: dbThreats } = await supabase
         .from('security_threats')
         .select('id')
         .or(`ip_address.eq.${currentIP},metadata->>persistent_id.eq.${persistentId}${userId ? `,user_id.eq.${userId}` : ''}`)
-        .gt('created_at', oneDayAgo); // Unified across ALL event types
+        .gt('created_at', oneDayAgo);
 
       const localStrikes = parseInt(localStorage.getItem('mg_security_strikes') || '0');
       const dbStrikeCount = dbThreats?.length || 0;
@@ -95,215 +122,65 @@ export const initSecurityHardening = () => {
     } catch (err) { if (isDev) console.error('Tracing error:', err); }
   };
 
-  // If it's a Google bot, we bypass
-  const isGoogleBot = () => {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes('googlebot') || ua.includes('adsense') || ua.includes('google-adwords');
-  };
-  if (isGoogleBot()) return;
-
-  // --- SCREENSHOT PROTECTION (ANTI-STEAL) ---
+  // --- SCREENSHOT PROTECTION ---
   const addScreenshotDefense = () => {
-    // 1. Blackout on Print
     const style = document.createElement('style');
-    style.innerHTML = `
-      @media print {
-        body { display: none !important; }
-      }
-    `;
+    style.innerHTML = `@media print { body { display: none !important; } }`;
     document.head.appendChild(style);
 
-    // 2. Key Detection (PrintScreen / Win+Shift+S)
     window.addEventListener('keyup', (e) => {
       if (e.key === 'PrintScreen') {
-        // Just clear clipboard and notify, NO strike/ban
-        navigator.clipboard.writeText('Security Policy: Screenshots are prohibited on MARGDARSHAK.');
-        console.warn('Screenshot attempt blocked.');
+        navigator.clipboard.writeText('Security Policy: Screenshots are prohibited.');
       }
     });
 
     window.addEventListener('keydown', (e) => {
-      // Win + Shift + S or Cmd + Shift + 4
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4')) {
-        // Just clear focus to trigger blur, NO strike/ban
         window.blur();
-        console.warn('Screenshot shortcut detected. Content obscured.');
       }
     });
   };
-
   addScreenshotDefense();
 
-  // --- 1. GLOBAL OVERLAYS & DETECTION ---
+  // --- KEYBOARD LOCKDOWN & BYPASS ---
+  document.addEventListener('keydown', async (e) => {
+    const forbiddenKeys = ['u', 's', 'p', 'a']; // Silent block keys
+    const inspectKeys = ['F12', 'i', 'j', 'c']; // DevTools trigger keys
+    
+    const isForbidden = (e.ctrlKey || e.metaKey) && forbiddenKeys.includes(e.key.toLowerCase());
+    const isInspection = e.key === 'F12' || 
+                         ((e.ctrlKey || e.metaKey) && (e.shiftKey || e.key.toLowerCase() === 'u') && inspectKeys.includes(e.key.toLowerCase())) ||
+                         ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'i');
 
-  // If it's a Google bot, we bypass the aggressive anti-bot/anti-debugger measures
-  // to ensure AdSense eligibility and SEO ranking.
-  if (isGoogleBot()) {
-    console.log('🤖 Google Bot detected: Bypassing security shields for crawling.');
-    return;
-  }
+    if (isForbidden || isInspection) {
+      const isOfficer = await isEliteOfficer();
+      if (isOfficer) return; // Full bypass for officers
 
-  // --- 1. GLOBAL OVERLAYS & DETECTION ---
-
-  const createOverlay = (message: string) => {
-    const div = document.createElement('div');
-    div.id = 'security-overlay';
-    div.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999999;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    `;
-    div.innerHTML = `
-      <h1 style="color: #ff0000; font-size: 3rem; margin-bottom: 20px;">🛡️ SECURITY ALERT</h1>
-      <p style="font-size: 1.5rem;">${message}</p>
-      <p style="margin-top: 20px; color: #888;">This action is prohibited for security reasons.</p>
-    `;
-    document.body.appendChild(div);
-  };
-
-  // --- 2. PREVENTION OF COPYING AND INSPECTION ---
-
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-  }, false);
-
-  document.addEventListener('keydown', (e) => {
-    const forbiddenKeys = ['F12', 'u', 'i', 'j', 'c', 's', 'p', 'a'];
-    if (
-      e.key === 'F12' ||
-      (e.ctrlKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
-      (e.ctrlKey && e.shiftKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
-      (e.metaKey && forbiddenKeys.includes(e.key.toLowerCase()))
-    ) {
       e.preventDefault();
+      
+      // ONLY F12 or Inspect combos trigger strikes
+      if (isInspection) {
+        logViolation('Tamper Attempt', { key: e.key, combo: 'DEVT_OPEN' });
+      } else {
+        // Silent block for others
+        console.warn('Action blocked by security policy.');
+      }
       return false;
     }
   }, false);
 
-  document.addEventListener('copy', (e) => e.preventDefault());
-  document.addEventListener('cut', (e) => e.preventDefault());
-  document.addEventListener('paste', (e) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-    }
-  });
-
-  document.addEventListener('dragstart', (e) => e.preventDefault());
-
-
-  // --- 3. TRACKING AND PRIVACY PROTECTION ---
-
-  const metaReferrer = document.createElement('meta');
-  metaReferrer.name = 'referrer';
-  metaReferrer.content = 'no-referrer';
-  document.head.appendChild(metaReferrer);
-
-  const fixLinks = () => {
-    const links = document.getElementsByTagName('a');
-    for (let i = 0; i < links.length; i++) {
-      if (links[i].target === '_blank') {
-        if (!links[i].rel.includes('noopener')) links[i].rel += ' noopener';
-        if (!links[i].rel.includes('noreferrer')) links[i].rel += ' noreferrer';
-      }
-    }
-  };
-  setInterval(fixLinks, 10000); // Increased interval
-
-  if (location.protocol === 'http:' && !isDev) {
-    location.replace(`https://${location.host}${location.pathname}${location.search}`);
-  }
-
-
-  // --- 4. HARDENING AND ANTI-HACKING ---
-
-  // --- 4. HARDENING AND ANTI-HACKING (RELAXED FOR COMPATIBILITY) ---
-  
-  // Disabled eval override as it crashes Clerk/Sentry
-  // (window as any).eval = () => {
-  //   throw new Error('Security Violation: eval() is prohibited.');
-  // };
-
-  // Disabled frame buster as it interferes with auth redirects
-  // if (window.self !== window.top) {
-  //   window.top!.location.href = window.self.location.href;
-  // }
-
-  // Headless Browser Detection (Softened)
-  if (!isDev) {
-    const isHeadless = navigator.webdriver || /HeadlessChrome/.test(navigator.userAgent);
-    if (isHeadless) {
-      console.warn('🤖 Bot-like behavior detected.');
-    }
-  }
-
-  // Debugger Protection (Optimized)
-  if (!isDev) {
-    setInterval(() => {
-      if (window.location.pathname.includes('/sso-callback')) return;
-      
-      const startTime = Date.now();
-      (function() {
-        // Light check that doesn't use recursion
-        const check = function() {
-          if (typeof window === 'undefined') return;
-          try {
-            // Only trigger if console is likely open
-            if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
-              (function() {}).constructor("debugger")();
-            }
-          } catch (e) {}
-        };
-        check();
-      })();
-      
-      // If check takes too long, it might be a sign of debugger interference
-      const duration = Date.now() - startTime;
-      if (duration > 100) {
-        // Slow down even more if we detect lag
-        console.warn('⚡ Performance Guard: Throttling security cycles');
-      }
-    }, 15000); // Increased from 1s to 15s to prevent CPU spikes
-  }
-
-  // --- 2. PREVENTION OF COPYING AND INSPECTION ---
-  document.addEventListener('keydown', (e) => {
-    const forbiddenKeys = ['F12', 'u', 'i', 'j', 'c', 's', 'p', 'a'];
-    const isInspection = e.key === 'F12' ||
-      (e.ctrlKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
-      (e.ctrlKey && e.shiftKey && forbiddenKeys.includes(e.key.toLowerCase())) ||
-      (e.metaKey && forbiddenKeys.includes(e.key.toLowerCase()));
-
-    if (isInspection) {
-      e.preventDefault();
-      logViolation('Tamper Attempt', { key: e.key, combo: e.ctrlKey ? 'CTRL' : 'META' });
-      return false;
-    }
+  document.addEventListener('contextmenu', async (e) => {
+    const isOfficer = await isEliteOfficer();
+    if (!isOfficer) e.preventDefault();
   }, false);
 
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-  }, false);
-
-  // --- 5. DEVTOOLS DETECTION ---
+  // --- DEVTOOLS DETECTION ---
   let devtoolsOpen = false;
-  const threshold = 250; // Increased threshold for high-density displays
+  const checkDevTools = async () => {
+    const isOfficer = await isEliteOfficer();
+    if (isOfficer) return;
 
-  const checkDevTools = () => {
-    // Skip devtools check on mobile/touch devices as it's prone to false positives
-    // due to mobile browser address bars and system UI scaling.
+    const threshold = 250;
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) return;
 
@@ -321,7 +198,7 @@ export const initSecurityHardening = () => {
   };
 
   window.addEventListener('resize', checkDevTools);
-  setInterval(checkDevTools, 5000); // Increased interval
+  setInterval(checkDevTools, 5000);
 
 
   // --- 6. VISUAL LOCKDOWN ---
