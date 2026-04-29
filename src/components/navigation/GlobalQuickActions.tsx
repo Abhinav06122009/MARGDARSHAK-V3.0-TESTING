@@ -1,5 +1,5 @@
-import React, { useState, useContext, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useContext, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Zap, X, Command, Search, Star, Clock, 
   ChevronRight, BrainCircuit, Library, ImageIcon,
@@ -16,6 +16,21 @@ const GlobalQuickActions: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useContext(AuthContext);
   const { stats } = useDashboardData();
+  
+  // POSITION STATE
+  const [position, setPosition] = useState({ x: 32, y: window.innerHeight - 200 });
+  
+  // WIN+K (CTRL+K) SHORTCUT
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (!session) return null;
 
@@ -47,14 +62,19 @@ const GlobalQuickActions: React.FC = () => {
       {/* FLOATING TRIGGER */}
       <motion.button
         drag
-        dragConstraints={{ left: 0, right: window.innerWidth - 80, top: 0, bottom: window.innerHeight - 80 }}
         dragMomentum={false}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        onDragEnd={(_, info) => {
+          setPosition({ 
+            x: position.x + info.offset.x, 
+            y: position.y + info.offset.y 
+          });
+        }}
+        initial={false}
+        animate={{ x: position.x, y: position.y }}
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9, cursor: "grabbing" }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-32 left-8 z-[100] w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-[0_20px_40px_rgba(99,102,241,0.4)] flex items-center justify-center border border-white/20 group cursor-grab active:cursor-grabbing"
+        className="fixed top-0 left-0 z-[100] w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-[0_20px_40px_rgba(99,102,241,0.4)] flex items-center justify-center border border-white/20 group cursor-grab active:cursor-grabbing"
       >
         <Zap className="w-6 h-6 text-white group-hover:animate-pulse" />
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#050505]" />
@@ -73,11 +93,19 @@ const GlobalQuickActions: React.FC = () => {
             />
             
             <motion.div
-              initial={{ x: -400, opacity: 0, scale: 0.95 }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
-              exit={{ x: -400, opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-1/2 -translate-y-1/2 left-8 z-[1001] w-[320px] bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-h-[85vh]"
+              drag
+              dragMomentum={false}
+              initial={{ opacity: 0, scale: 0.9, x: position.x, y: position.y }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1,
+                x: Math.min(Math.max(10, position.x - 130), window.innerWidth - 330), 
+                y: position.y > window.innerHeight / 2 
+                   ? position.y - 520 // Open above if in bottom half
+                   : position.y + 70   // Open below if in top half
+              }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed top-0 left-0 z-[1001] w-[320px] bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-h-[85vh] cursor-move"
             >
               {/* HEADER */}
               <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
