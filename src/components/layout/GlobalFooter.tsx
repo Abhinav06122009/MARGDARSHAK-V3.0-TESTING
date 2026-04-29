@@ -38,7 +38,7 @@ const GlobalFooter = () => {
       { name: 'GDPR Compliance', path: '/gdpr' },
     ],
     infrastructure: [
-      { name: 'Identity Hub', path: '/auth' },
+      { name: 'Identity Hub', path: '/profile' },
       { name: 'Premium Upgrade', path: '/upgrade' },
       { name: 'System Status', path: '/status' },
     ],

@@ -5,7 +5,7 @@ import {
   ChevronRight, BrainCircuit, Library, ImageIcon,
   GraduationCap, FileText, Sparkles, BarChart3,
   Trophy, Calendar, Book, Headphones, Settings,
-  Briefcase, Timer, MousePointer2
+  Briefcase, Timer, MousePointer2, User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -25,22 +25,36 @@ const GlobalQuickActions: React.FC = () => {
     { icon: GraduationCap, title: 'Quiz Gen', color: 'from-purple-500 to-violet-600', path: '/quiz' },
     { icon: FileText, title: 'Essay Help', color: 'from-sky-400 to-blue-500', path: '/essay-helper' },
     { icon: Sparkles, title: 'Planner', color: 'from-emerald-400 to-teal-500', path: '/study-planner' },
-    { icon: BarChart3, title: 'Analytics', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics' },
-    { icon: Trophy, title: 'Badges', color: 'from-yellow-400 to-amber-500', path: '/achievements' },
-    { icon: Calendar, title: 'Schedule', color: 'from-cyan-400 to-sky-500', path: '/timetable' },
-    { icon: Settings, title: 'Settings', color: 'from-zinc-400 to-zinc-600', path: '/settings' },
+    { icon: BarChart3, title: 'AI Analytics', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics' },
+    { icon: Timer, title: 'Study Timer', color: 'from-rose-400 to-red-500', path: '/timer' },
+    { icon: MousePointer2, title: 'Calculator', color: 'from-slate-400 to-slate-600', path: '/calculator' },
+    { icon: Briefcase, title: 'Tasks', color: 'from-blue-400 to-indigo-600', path: '/tasks' },
+    { icon: GraduationCap, title: 'Grades', color: 'from-yellow-500 to-amber-600', path: '/grades' },
+    { icon: Clock, title: 'Attendance', color: 'from-green-400 to-emerald-600', path: '/attendance' },
+    { icon: Book, title: 'Notes', color: 'from-orange-400 to-amber-600', path: '/notes' },
+    { icon: Calendar, title: 'Calendar', color: 'from-pink-400 to-rose-600', path: '/calendar' },
+    { icon: Command, title: 'Timetable', color: 'from-cyan-400 to-blue-600', path: '/timetable' },
+    { icon: Library, title: 'Courses', color: 'from-violet-400 to-purple-600', path: '/courses' },
+    { icon: FileText, title: 'Syllabus', color: 'from-emerald-400 to-green-600', path: '/syllabus' },
+    { icon: BarChart3, title: 'Progress', color: 'from-indigo-400 to-blue-600', path: '/progress' },
+    { icon: Headphones, title: 'Wellness', color: 'from-teal-400 to-cyan-600', path: '/wellness' },
+    { icon: User, title: 'Identity Hub', color: 'from-zinc-400 to-zinc-600', path: '/profile' },
+    { icon: Settings, title: 'Settings', color: 'from-zinc-500 to-zinc-700', path: '/settings' },
   ];
 
   return (
     <>
       {/* FLOATING TRIGGER */}
       <motion.button
+        drag
+        dragConstraints={{ left: 0, right: window.innerWidth - 80, top: 0, bottom: window.innerHeight - 80 }}
+        dragMomentum={false}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
+        whileTap={{ scale: 0.9, cursor: "grabbing" }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-32 left-8 z-[100] w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-[0_20px_40px_rgba(99,102,241,0.4)] flex items-center justify-center border border-white/20 group"
+        className="fixed bottom-32 left-8 z-[100] w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl shadow-[0_20px_40px_rgba(99,102,241,0.4)] flex items-center justify-center border border-white/20 group cursor-grab active:cursor-grabbing"
       >
         <Zap className="w-6 h-6 text-white group-hover:animate-pulse" />
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#050505]" />
