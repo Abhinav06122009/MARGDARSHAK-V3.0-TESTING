@@ -101,6 +101,8 @@ const AIWidgetWrapper = () => {
   return <GlobalAIAssistant />;
 };
 
+import GlobalFooter from '@/components/layout/GlobalFooter';
+
 const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
   const { isBlocked, blockedReason } = useContext(AuthContext);
   
@@ -316,6 +318,7 @@ const App = () => {
                         <GlobalQuickActions />
                         <MobileNavbar />
                         <ShortcutsOverlay />
+                        <GlobalFooter />
                         <Toaster />
                         <Sonner />
                         <CookieConsent />

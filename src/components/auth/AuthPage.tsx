@@ -126,13 +126,10 @@ const AuthPage: React.FC<AuthPageProps> = () => {
           </div>
         </div>
 
-        <GlobalFooter />
       </motion.div>
     </div>
   );
 };
-
-import GlobalFooter from '@/components/layout/GlobalFooter';
 
 export default AuthPage;
 

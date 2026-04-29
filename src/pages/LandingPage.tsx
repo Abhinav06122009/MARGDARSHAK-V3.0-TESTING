@@ -81,7 +81,6 @@ const LandingPage: React.FC = () => {
           </Suspense>
         </main>
 
-        <Footer />
       </div>
     </SoundProvider>
   );
