@@ -372,7 +372,6 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        </div>
       </div>
     </div>
   );

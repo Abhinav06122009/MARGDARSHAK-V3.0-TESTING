@@ -568,7 +568,6 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
               )}
             </div>
           </div>
-          </div>
         </div>
       </ScrollArea>
     </div>

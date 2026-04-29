@@ -239,7 +239,6 @@ const StatusPage = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        </div>
       </div>
     </div>
   );
