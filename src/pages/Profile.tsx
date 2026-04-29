@@ -34,37 +34,14 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const registerPasskey = async () => {
+  const openSecuritySettings = () => {
     if (!clerkUser) return;
-    setIsRegistering(true);
-    try {
-      await clerkUser.createPasskey();
-      toast({ 
-        title: 'BIO-METRIC ENROLLED', 
-        description: 'New passkey registered successfully in Identity Hub.',
-        className: "bg-zinc-900 border-emerald-500/50 text-emerald-400"
-      });
-    } catch (err: any) {
-      const isVerificationError = err.message?.toLowerCase().includes('verification') || err.errors?.[0]?.code === 'session_step_up_required';
-      toast({ 
-        title: isVerificationError ? 'SECURITY CHECK REQUIRED' : 'ENROLMENT FAILED', 
-        description: isVerificationError 
-          ? 'For your security, please verify your identity before registering a new passkey.' 
-          : err.message || 'Verification failed.', 
-        variant: 'destructive',
-        action: isVerificationError ? (
-          <ToastAction 
-            altText="Verify Now" 
-            onClick={() => openUserProfile({ label: 'security' })}
-            className="bg-emerald-500 hover:bg-emerald-600 text-black border-none font-black text-[10px] uppercase tracking-widest"
-          >
-            Verify Now
-          </ToastAction>
-        ) : undefined
-      });
-    } finally {
-      setIsRegistering(false);
-    }
+    openUserProfile({ label: 'security' });
+    toast({ 
+      title: 'OPENING SECURITY HUB', 
+      description: 'Please manage your Passkeys in the official Clerk security panel.',
+      className: "bg-zinc-900 border-blue-500/50 text-blue-400"
+    });
   };
 
   const generateCertificate = () => {
@@ -288,13 +265,12 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
              {/* QUICK ACTIONS */}
             <div className="grid grid-cols-2 gap-4">
                <button 
-                 onClick={registerPasskey}
-                 disabled={isRegistering}
-                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group disabled:opacity-50"
+                 onClick={openSecuritySettings}
+                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group"
                >
-                 <Fingerprint className={`w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400 ${isRegistering ? 'animate-pulse' : ''}`} />
+                 <Fingerprint className="w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400" />
                  <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">
-                   {isRegistering ? 'SYNCING...' : 'Security_Key'}
+                   Security_Key
                  </span>
                </button>
                <button 
