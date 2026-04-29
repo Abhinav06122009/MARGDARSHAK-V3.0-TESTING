@@ -82,85 +82,98 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     drawCorner(12, pageHeight - 12, 3);
 
     // 3. LOGO & BRANDING
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(28);
-    doc.text('MARGDARSHAK', pageWidth / 2, 35, { align: 'center', charSpace: 2 });
+    const img = new Image();
+    img.src = logo;
+    img.onload = () => {
+      // Add Logo (Centered top)
+      doc.addImage(img, 'PNG', pageWidth / 2 - 10, 15, 20, 20);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(28);
+      doc.text('MARGDARSHAK', pageWidth / 2, 45, { align: 'center', charSpace: 2 });
+      
+      // Aesthetic Line
+      doc.setDrawColor(16, 185, 129, 0.5);
+      doc.setLineWidth(0.5);
+      doc.line(pageWidth/2 - 40, 52, pageWidth/2 + 40, 52);
+
+      // 4. MAIN CONTENT
+      doc.setTextColor(200, 200, 200);
+      doc.setFont('times', 'italic');
+      doc.setFontSize(16);
+      doc.text('This is to officially recognize', pageWidth / 2, 75, { align: 'center' });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(52);
+      doc.setTextColor(255, 255, 255);
+      doc.text(fullName || user.profile?.full_name || 'SCHOLAR', pageWidth / 2, 105, { align: 'center' });
+
+      // Underline name with gradient-like double line
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(1.2);
+      doc.line(pageWidth / 2 - 90, 110, pageWidth / 2 + 90, 110);
+      doc.setDrawColor(99, 102, 241);
+      doc.setLineWidth(0.5);
+      doc.line(pageWidth / 2 - 80, 112, pageWidth / 2 + 80, 112);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(14);
+      doc.setTextColor(180, 180, 180);
+      doc.text('for their exceptional integration and performance within', pageWidth / 2, 130, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(16, 185, 129);
+      doc.setFontSize(18);
+      doc.text('VSAV GYANTAPA MARGDARSHAK', pageWidth / 2, 142, { align: 'center', charSpace: 1 });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Authenticated as a verified ${user.profile?.user_type || 'PREMIUM_ELITE'} member.`, pageWidth / 2, 155, { align: 'center' });
+
+      // 5. THE "SEAL" (Geometric)
+      doc.setDrawColor(16, 185, 129, 0.3);
+      doc.setLineWidth(0.5);
+      doc.circle(pageWidth / 2, 175, 12, 'D');
+      doc.circle(pageWidth / 2, 175, 10, 'D');
+      doc.setFontSize(5);
+      doc.setTextColor(16, 185, 129);
+      doc.text('VERIFIED IDENTITY', pageWidth / 2, 175, { align: 'center' });
+
+      // 6. METADATA (Surgical Placement)
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text(`ID_REF: ${studentId || 'GEN-PX-99'}`, 30, 180);
+      doc.text(`TIMESTAMP: ${new Date().toISOString()}`, 30, 185);
+
+      // 7. SIGNATURES
+      doc.setDrawColor(255, 255, 255, 0.2);
+      doc.setLineWidth(0.5);
+      doc.line(40, 195, 110, 195);
+      doc.line(pageWidth - 110, 195, pageWidth - 40, 195);
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CEO, MARGDARSHAK', 75, 203, { align: 'center' });
+      doc.text('CTO, CFO MARGDARSHAK', pageWidth - 75, 203, { align: 'center' });
+
+      // 8. SECURITY TOKEN
+      doc.setTextColor(16, 185, 129, 0.6);
+      doc.setFontSize(6);
+      const hash = Math.random().toString(36).substring(2, 15).toUpperCase();
+      doc.text('BLOCKCHAIN_VERIFICATION_HASH: ' + hash, pageWidth / 2, 206, { align: 'center' });
+
+      doc.save(`${fullName || 'Student'}_Margdarshak_Certificate.pdf`);
+    };
     
-    // Aesthetic Line
-    doc.setDrawColor(16, 185, 129, 0.5);
-    doc.setLineWidth(0.5);
-    doc.line(pageWidth/2 - 40, 42, pageWidth/2 + 40, 42);
+    // Fallback if image fails to load
+    img.onerror = () => {
+      // (Repeat content without image or just save anyway)
+      doc.save(`${fullName || 'Student'}_Margdarshak_Certificate.pdf`);
+    };
 
-    // 4. MAIN CONTENT
-    doc.setTextColor(200, 200, 200);
-    doc.setFont('times', 'italic');
-    doc.setFontSize(16);
-    doc.text('This is to officially recognize', pageWidth / 2, 65, { align: 'center' });
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(52);
-    doc.setTextColor(255, 255, 255);
-    doc.text(fullName || user.profile?.full_name || 'SCHOLAR', pageWidth / 2, 95, { align: 'center' });
-
-    // Underline name with gradient-like double line
-    doc.setDrawColor(16, 185, 129);
-    doc.setLineWidth(1.2);
-    doc.line(pageWidth / 2 - 90, 100, pageWidth / 2 + 90, 100);
-    doc.setDrawColor(99, 102, 241);
-    doc.setLineWidth(0.5);
-    doc.line(pageWidth / 2 - 80, 102, pageWidth / 2 + 80, 102);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(14);
-    doc.setTextColor(180, 180, 180);
-    doc.text('for their exceptional integration and performance within', pageWidth / 2, 120, { align: 'center' });
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(16, 185, 129);
-    doc.setFontSize(18);
-    doc.text('VSAV GYANTAPA MARGDARSHAK', pageWidth / 2, 132, { align: 'center', charSpace: 1 });
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Authenticated as a verified ${user.profile?.user_type || 'PREMIUM_ELITE'} member.`, pageWidth / 2, 145, { align: 'center' });
-
-    // 5. THE "SEAL" (Geometric)
-    doc.setDrawColor(16, 185, 129, 0.3);
-    doc.setLineWidth(0.5);
-    doc.circle(pageWidth / 2, 168, 15, 'D');
-    doc.circle(pageWidth / 2, 168, 13, 'D');
-    doc.setFontSize(6);
-    doc.setTextColor(16, 185, 129);
-    doc.text('OFFICIAL VERIFIED SEAL', pageWidth / 2, 168, { align: 'center', angle: 0 });
-
-    // 6. METADATA (Surgical Placement)
-    doc.setFontSize(8);
-    doc.setTextColor(80, 80, 80);
-    doc.text(`ID_REF: ${studentId || 'GEN-PX-99'}`, 30, 175);
-    doc.text(`TIMESTAMP: ${new Date().toISOString()}`, 30, 180);
-
-    // 7. SIGNATURES
-    doc.setDrawColor(255, 255, 255, 0.2);
-    doc.setLineWidth(0.5);
-    doc.line(40, 190, 110, 190);
-    doc.line(pageWidth - 110, 190, pageWidth - 40, 190);
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CEO, MARGDARSHAK', 75, 198, { align: 'center' });
-    doc.text('CTO, CFO MARGDARSHAK', pageWidth - 75, 198, { align: 'center' });
-
-    // 8. SECURITY TOKEN
-    doc.setTextColor(16, 185, 129, 0.6);
-    doc.setFontSize(6);
-    const hash = Math.random().toString(36).substring(2, 15).toUpperCase();
-    doc.text('BLOCKCHAIN_VERIFICATION_HASH: ' + hash, pageWidth / 2, 202, { align: 'center' });
-
-    doc.save(`${fullName || 'Student'}_Margdarshak_Certificate.pdf`);
-  };
 
   if (loading) return (
     <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center gap-8">
