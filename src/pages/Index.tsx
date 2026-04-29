@@ -23,6 +23,9 @@ const ProgressTracer = lazy(() => import('@/components/progress/ProgressTracer')
 const PrivacyPolicy = lazy(() => import('@/components/legal/PrivacyPolicy'));
 const TermsAndConditions = lazy(() => import('@/components/legal/TermsAndConditions'));
 const Upgrade = lazy(() => import('./Upgrade'));
+const Profile = lazy(() => import('./Profile'));
+const Status = lazy(() => import('./Status'));
+const Sitemap = lazy(() => import('./Sitemap'));
 
 const Index = () => {
   const { session, loading } = useAuth();
@@ -129,6 +132,12 @@ const Index = () => {
           return <Settings onBack={handleBackToDashboard} />;
         case 'upgrade':
           return <Upgrade />;
+        case 'profile':
+          return <Profile onBack={handleBackToDashboard} />;
+        case 'status':
+          return <Status onBack={handleBackToDashboard} />;
+        case 'sitemap':
+          return <Sitemap onBack={handleBackToDashboard} />;
         default:
           return <Dashboard onNavigate={handleNavigation} />;
       }

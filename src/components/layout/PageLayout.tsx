@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import Footer from '@/components/Footer'; // Uses our new Master Footer
+import GlobalFooter from './GlobalFooter'; // Uses our new High-Fidelity Global Footer
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, title, description, s
       </motion.main>
 
       {/* Unified Footer */}
-      <Footer />
+      <GlobalFooter />
     </div>
   );
 };

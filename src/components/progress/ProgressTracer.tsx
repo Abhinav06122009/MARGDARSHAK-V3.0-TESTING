@@ -33,14 +33,24 @@ interface Milestone {
   color: string;
 }
 
-export const ProgressTracer: React.FC = () => {
+const ProgressTracer: React.FC = () => {
   const { user, loading } = useAuth();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [activeTab, setActiveTab] = useState<'academic' | 'skills' | 'career'>('academic');
 
   // Check subscription access
-  const tier = user?.profile?.subscription_tier || 'free';
-  const hasAccess = tier === 'premium' || tier === 'premium_elite' || user?.profile?.role === 'admin';
+  // Check subscription access using robust metadata check
+  const realSubscriptionTier = (user?.publicMetadata?.subscription as any)?.tier || 
+                             (user?.unsafeMetadata?.subscription as any)?.tier || 
+                             (user as any)?.profile?.subscription_tier || 
+                             'free';
+                             
+  const hasAccess = realSubscriptionTier === 'premium' || 
+                    realSubscriptionTier === 'premium_elite' || 
+                    realSubscriptionTier === 'premium_wlite' ||
+                    (user as any)?.profile?.role === 'admin' ||
+                    (user as any)?.profile?.role === 'ceo' ||
+                    (user as any)?.profile?.role === 'superadmin';
 
   useEffect(() => {
     if (hasAccess) {
@@ -287,3 +297,5 @@ export const ProgressTracer: React.FC = () => {
     </div>
   );
 };
+
+export default ProgressTracer;

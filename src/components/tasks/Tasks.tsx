@@ -30,7 +30,7 @@ import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import TaskCard from './TaskCard';
 import KanbanBoard from './KanbanBoard';
 import TaskGrid from './TaskGrid';
-import Footer from '@/components/Footer';
+import GlobalFooter from '@/components/layout/GlobalFooter';
 
 // Social Icons
 const LinkedinLogo = () => (
@@ -1565,7 +1565,7 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       </div>
 
 
-      <Footer />
+      <GlobalFooter />
     </div>
   );
 };

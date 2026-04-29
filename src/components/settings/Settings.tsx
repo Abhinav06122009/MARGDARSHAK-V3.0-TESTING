@@ -118,7 +118,31 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                   <SettingsIcon size={28} className="text-emerald-400 animate-spin-slow" />
                 </div>
               </div>
-              <p className="text-white/20 font-black uppercase tracking-[1em] text-[9px] italic ml-1">Profile_Cum_Settings</p>
+              
+              {/* Calligraphy Username & Role */}
+              <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 mt-4 ml-2">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-1">Identity_Persona</span>
+                  <span className="text-5xl lg:text-7xl font-signature text-white italic drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    {fullName || user.profile?.full_name || 'Anonymous'}
+                  </span>
+                </div>
+                
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-1">System_Privilege</span>
+                  <div className="flex items-center gap-3">
+                    <div className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                      <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">
+                        {String(user.profile?.user_type || 'student').replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    {/* A+ Class Badge */}
+                    <div className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-blue-500 border border-white/10 rounded-full shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                      <span className="text-xs font-black text-white uppercase tracking-widest italic">A+ CLASS PROTOCOL</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -126,11 +150,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           <div className="flex items-center gap-4 p-3 bg-zinc-950/40 border border-white/5 rounded-full backdrop-blur-3xl shadow-2xl">
             <div className="flex items-center gap-6 px-10 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
               <Cpu size={20} className="text-emerald-400" />
-              <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">Settings_Status</span>
-            </div>
-            <div className="flex items-center gap-6 px-10 py-3 bg-white/[0.01] border border-white/5 rounded-full">
-              <Layers size={20} className="text-white/20" />
-              <span className="text-[11px] font-black text-white/30 tracking-widest uppercase leading-none">READY</span>
+              <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">Nexus_Active</span>
             </div>
           </div>
         </motion.header>

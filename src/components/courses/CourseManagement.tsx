@@ -29,7 +29,7 @@ import CourseForm from './CourseForm'; // I'll create this next
 // UI Components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import Footer from '@/components/Footer';
+import GlobalFooter from '@/components/layout/GlobalFooter';
 
 interface CourseManagementProps {
   onBack?: () => void;
@@ -402,7 +402,7 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
         path={learningPath} 
       />
 
-      <Footer />
+      <GlobalFooter />
     </div>
   );
 };

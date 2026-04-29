@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import GlobalFooter from '@/components/layout/GlobalFooter';
 import { ArrowLeft, Users, Calendar, CheckCircle, XCircle, Clock, Search, Filter, Download, UserCheck, Plus, Edit, Trash2, Shield, AlertCircle, Eye, EyeOff, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -1565,11 +1566,8 @@ const handleCourseSubmit = async (e: React.FormEvent) => {
             <p>✓ Individual and bulk delete options available</p>
             <p>✓ Advanced conflict resolution ensures all records are saved</p>
           </div>
-                 <footer className="mt-12 py-6 border-t border-white/20 text-center text-white/70 text-sm select-none">
-  Maintained by <span className="font-semibold text-emerald-400">VSAV Managements</span><br />
-  Developed &amp; Maintained by <span className="font-semibold text-emerald-400">Abhinav Jha</span>
-</footer>
         </div>
+        <GlobalFooter />
       </motion.div>
     </div>
   );

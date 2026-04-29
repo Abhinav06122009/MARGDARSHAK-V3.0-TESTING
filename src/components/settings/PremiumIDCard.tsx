@@ -189,12 +189,12 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
           <div className="flex items-center justify-between mb-12">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
-                <div className={`p-2 ${roleData.class === 'CORE' ? 'bg-zinc-500/10 border-zinc-500/20' : roleData.color + ' bg-opacity-10 border-white/20'} border rounded-lg`}>
-                  <Shield size={16} className={roleData.class === 'CORE' ? 'text-zinc-400' : 'text-white'} />
+                <div className="p-2 bg-white rounded-lg border border-white/20 shadow-xl">
+                  <img src="/logo.png" alt="M" className="w-6 h-6 object-contain" />
                 </div>
-                <h2 className="text-lg font-black text-white tracking-tight uppercase italic leading-none">Margdarshak</h2>
+                <h2 className="text-xl font-black text-white tracking-tight uppercase italic leading-none">Margdarshak</h2>
               </div>
-              <span className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] ml-1">ENCRYPTED_STATUS</span>
+              <span className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] ml-12">ENCRYPTED_STATUS</span>
             </div>
             <div className="text-right">
               <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">REG_CODE</div>
@@ -243,13 +243,9 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[8px] font-black text-white/20 uppercase tracking-[0.8em] ml-2">S_ID</label>
-                <input
-                  type="text"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className="w-full px-6 py-4 bg-zinc-950/40 border border-white/5 rounded-2xl text-[10px] font-mono text-white/40 focus:outline-none focus:border-emerald-500/30 transition-all uppercase"
-                  placeholder="000_000"
-                />
+                <div className="w-full px-6 py-4 bg-zinc-900/20 border border-white/5 rounded-2xl text-[10px] font-mono text-white/20 uppercase cursor-not-allowed">
+                  {studentId || 'ID_PENDING'}
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[8px] font-black text-white/20 uppercase tracking-[0.8em] text-right block pr-2">SYNCED</label>

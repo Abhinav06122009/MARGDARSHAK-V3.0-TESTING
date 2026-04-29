@@ -40,7 +40,6 @@ const GlobalFooter = () => {
     infrastructure: [
       { name: 'Identity Hub', path: '/auth' },
       { name: 'Premium Upgrade', path: '/upgrade' },
-      { name: 'Community Network', path: '/community' },
       { name: 'System Status', path: '/status' },
     ],
     intelligence: [
@@ -50,7 +49,6 @@ const GlobalFooter = () => {
       { name: 'Doubt Solver', path: '/doubt-solver' },
     ],
     support: [
-      { name: 'Documentation', path: '/docs' },
       { name: 'Help Center', path: '/help' },
       { name: 'Contact Command', path: '/contact' },
       { name: 'Sitemap Index', path: '/sitemap' },

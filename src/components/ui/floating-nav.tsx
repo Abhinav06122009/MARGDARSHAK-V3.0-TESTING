@@ -91,6 +91,7 @@ const navigationItems = [
   { id: 'syllabus', icon: GraduationCap, label: 'Protocol Index' },
   { id: 'privacy', icon: Shield, label: 'Data Sovereignty' },
   { id: 'terms', icon: FileText, label: 'Legal Accord' },
+  { id: 'profile', icon: UserCheck, label: 'Identity Node' },
 ];
 
 export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPage }) => {
