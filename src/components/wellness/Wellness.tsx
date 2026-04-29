@@ -105,7 +105,7 @@ const TiltCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 // ─── Main Wellness Component ────────────────────────────────────────────────
-const Wellness: React.FC = () => {
+const Wellness: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { toast } = useToast();
 
   // State Persistence Fallback to LocalStorage
@@ -268,9 +268,12 @@ const Wellness: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className="flex items-center gap-4 mb-4">
-                <Link to="/dashboard" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group">
+                <button 
+                  onClick={() => onBack ? onBack() : window.history.back()} 
+                  className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all group"
+                >
                   <ArrowLeft className="w-5 h-5 text-zinc-400 group-hover:text-white" />
-                </Link>
+                </button>
                 <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
                   <Sparkles className="w-3 h-3 text-emerald-400" />
                   <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Wellness Matrix</span>

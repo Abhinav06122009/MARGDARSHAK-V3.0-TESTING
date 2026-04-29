@@ -10,6 +10,8 @@ import { useSettings } from '@/hooks/useSettings';
 import PremiumIDCard from '@/components/settings/PremiumIDCard';
 import GlobalFooter from '@/components/layout/GlobalFooter';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
+import { jsPDF } from 'jspdf';
+import logo from "@/components/logo/logo.png";
 
 const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
   const { 
@@ -25,6 +27,87 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  const generateCertificate = () => {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // 1. BACKGROUND (Zenith Dark Theme)
+    doc.setFillColor(5, 5, 5); // Near black
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    // 2. DECORATIVE BORDERS (Emerald/Indigo Gradient Feel)
+    doc.setDrawColor(16, 185, 129); // Emerald-500
+    doc.setLineWidth(1.5);
+    doc.rect(10, 10, pageWidth - 20, pageHeight - 20, 'D');
+    
+    doc.setDrawColor(99, 102, 241); // Indigo-500
+    doc.setLineWidth(0.5);
+    doc.rect(12, 12, pageWidth - 24, pageHeight - 24, 'D');
+
+    // 3. LOGO & BRANDING
+    // Since I can't easily embed the actual image without base64, I'll use text-based branding
+    // but I'll try to add a placeholder or simple geometric shape
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(24);
+    doc.text('MARGDARSHAK', pageWidth / 2, 40, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(16, 185, 129);
+    doc.text('UNIVERSAL IDENTITY PROTOCOL v3.0', pageWidth / 2, 48, { align: 'center' });
+
+    // 4. MAIN CONTENT
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('times', 'italic');
+    doc.setFontSize(18);
+    doc.text('This is to certify that', pageWidth / 2, 75, { align: 'center' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(48);
+    doc.setTextColor(255, 255, 255);
+    doc.text(fullName || user.profile?.full_name || 'STUDENT', pageWidth / 2, 105, { align: 'center' });
+
+    // Underline name
+    doc.setDrawColor(16, 185, 129);
+    doc.setLineWidth(1);
+    doc.line(pageWidth / 2 - 80, 110, pageWidth / 2 + 80, 110);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(14);
+    doc.setTextColor(200, 200, 200);
+    doc.text('has successfully integrated into the Zenith Academic Matrix', pageWidth / 2, 130, { align: 'center' });
+    doc.text(`as a verified ${user.profile?.user_type || 'PREMIUM_ELITE'} member.`, pageWidth / 2, 140, { align: 'center' });
+
+    // 5. METADATA
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`STUDENT_ID: ${studentId || 'GEN-XXXX-XXXX'}`, pageWidth / 2, 160, { align: 'center' });
+    doc.text(`ISSUE_DATE: ${new Date().toLocaleDateString()}`, pageWidth / 2, 168, { align: 'center' });
+
+    // 6. SIGNATURES (Abstract/Geometric)
+    doc.setDrawColor(255, 255, 255, 0.1);
+    doc.line(40, 185, 100, 185);
+    doc.line(pageWidth - 100, 185, pageWidth - 40, 185);
+    
+    doc.setFontSize(8);
+    doc.text('AI SYSTEMS DIRECTOR', 70, 192, { align: 'center' });
+    doc.text('ACADEMIC PROVOST', pageWidth - 70, 192, { align: 'center' });
+
+    // 7. FOOTER TOKEN
+    doc.setTextColor(16, 185, 129);
+    doc.setFontSize(7);
+    doc.text('VERIFICATION HASH: ' + Math.random().toString(36).substring(2, 15).toUpperCase(), pageWidth / 2, 200, { align: 'center' });
+
+    doc.save(`${fullName || 'Student'}_Zenith_Certificate.pdf`);
+  };
 
   if (loading) return (
     <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center gap-8">
@@ -96,17 +179,21 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
               onRefresh={refreshUser}
             />
 
-            {/* QUICK ACTIONS */}
+             {/* QUICK ACTIONS */}
             <div className="grid grid-cols-2 gap-4">
                <button className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group">
                  <Fingerprint className="w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400" />
                  <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Security_Key</span>
                </button>
-               <button className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-blue-500/20 hover:bg-blue-500/[0.02] transition-all group">
+               <button 
+                 onClick={generateCertificate}
+                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-blue-500/20 hover:bg-blue-500/[0.02] transition-all group"
+               >
                  <Award className="w-6 h-6 text-blue-500/40 mb-3 group-hover:text-blue-400" />
-                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Certifications</span>
+                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Get Certificate</span>
                </button>
             </div>
+
           </div>
 
           {/* RIGHT COLUMN: METADATA & MANAGEMENT */}

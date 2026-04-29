@@ -50,7 +50,7 @@ interface PlanConfig {
   studyStyle: string;
 }
 
-const StudyPlanner: React.FC = () => {
+const StudyPlanner: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [config, setConfig] = useState<PlanConfig>({
     subjects: '',
     examDate: '',
@@ -275,13 +275,15 @@ Make the schedule realistic, with breaks built in. Focus more time on weak areas
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.05] to-transparent pointer-events-none" />
 
             <div className="flex items-center gap-6">
-              <Link to="/dashboard">
+              <button 
+                onClick={() => onBack ? onBack() : window.history.back()}
+              >
                 <motion.div whileHover={{ scale: 1.1, x: -4 }} whileTap={{ scale: 0.9 }}>
                   <Button variant="ghost" size="icon" className="h-12 w-12 text-zinc-400 hover:text-white hover:bg-white/10 rounded-2xl border border-white/5 transition-all">
                     <ArrowLeft className="w-6 h-6" />
                   </Button>
                 </motion.div>
-              </Link>
+              </button>
               <div className="flex items-center gap-4">
                 <div className="p-4 bg-emerald-500/20 rounded-2xl border border-emerald-500/30 shadow-lg shadow-emerald-500/10 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-emerald-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />

@@ -61,7 +61,11 @@ import CourseManagement from "@/components/courses/CourseManagement";
 import Syllabus from "@/components/syllabus/Syllabus";
 import Settings from "@/components/settings/Settings";
 import ProgressTracker from "@/components/progress/ProgressTracker";
+import ProgressTracer from "@/components/progress/ProgressTracer";
 import Wellness from "@/components/wellness/Wellness";
+import Profile from "@/pages/Profile";
+import Status from "@/pages/Status";
+import Sitemap from "@/pages/Sitemap";
 
 // New AI Features - lazy loaded
 const QuizGenerator = lazy(() => import('@/pages/QuizGenerator'));
@@ -142,9 +146,25 @@ const NavigationTracker = () => {
   return null;
 };
 
+const DashboardRouteWrapper = () => {
+  const navigate = useNavigate();
+  return (
+    <>
+      <SEO title="Dashboard | MARGDARSHAK" description="Your AI-powered command center." />
+      <Dashboard onNavigate={(page) => {
+        if (page === 'dashboard') navigate('/dashboard');
+        else if (page === 'tracer') navigate('/tracer');
+        else if (page === 'progress') navigate('/progress');
+        else if (page === 'settings') navigate('/settings');
+        else if (page === 'profile') navigate('/profile');
+        else navigate(`/${page}`);
+      }} />
+    </>
+  );
+};
+
 /**
  * AppContent handles the core UI logic and AnimatePresence synchronization.
- * It must be a child of BrowserRouter to use useLocation().
  */
 const AppContent = () => {
   const location = useLocation();
@@ -183,24 +203,33 @@ const AppContent = () => {
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                         {/* --- PROTECTED ROUTES (Dashboard) --- */}
-                        <Route path="/dashboard" element={<ProtectedRoute><SEO title="Dashboard | MARGDARSHAK" description="Your AI-powered command center." /><Dashboard onNavigate={() => { }} /></ProtectedRoute>} />
+                        <Route path="/dashboard" element={
+                          <ProtectedRoute>
+                            <DashboardRouteWrapper />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/achievements" element={<ProtectedRoute><SEO title="Achievements | MARGDARSHAK" description="Your progress and badges." /><AchievementsPage /></ProtectedRoute>} />
                         <Route path="/ai-assistant" element={<ProtectedRoute><SEO title="SAARTHI | MARGDARSHAK" description="24/7 AI-powered academic assistance." /><AIPage /></ProtectedRoute>} />
                         <Route path="/upgrade" element={<ProtectedRoute><SEO title="Upgrade to Premium | MARGDARSHAK" description="Unlock advanced AI features and study tools with MARGDARSHAK Premium." /><Upgrade /></ProtectedRoute>} />
 
                         {/* Core Features */}
-                        <Route path="/tasks" element={<ProtectedRoute><SEO title="Task Manager | MARGDARSHAK" description="Organize your academic tasks and deadlines efficiently." /><Tasks /></ProtectedRoute>} />
-                        <Route path="/grades" element={<ProtectedRoute><SEO title="Grade Tracker | MARGDARSHAK" description="Track your academic performance and calculate your GPA automatically." /><Grades /></ProtectedRoute>} />
-                        <Route path="/attendance" element={<ProtectedRoute><SEO title="Attendance Tracker | MARGDARSHAK" description="Stay on top of your class attendance and requirements." /><Attendance /></ProtectedRoute>} />
-                        <Route path="/notes" element={<ProtectedRoute><SEO title="Digital Notes | MARGDARSHAK" description="Create and organize your study notes in one secure place." /><Notes /></ProtectedRoute>} />
-                        <Route path="/calendar" element={<ProtectedRoute><SEO title="Academic Calendar | MARGDARSHAK" description="Sync your schedule and never miss an important event." /><Calendar /></ProtectedRoute>} />
-                        <Route path="/timetable" element={<ProtectedRoute><SEO title="Timetable Maker | MARGDARSHAK" description="Create a perfect study schedule with our automated timetable generator." /><Timetable /></ProtectedRoute>} />
-                        <Route path="/courses" element={<ProtectedRoute><SEO title="Course Management | MARGDARSHAK" description="Manage your subjects and courses with ease." /><CourseManagement /></ProtectedRoute>} />
-                        <Route path="/syllabus" element={<ProtectedRoute><SEO title="Syllabus Tracker | MARGDARSHAK" description="Track your progress through your course syllabus." /><Syllabus /></ProtectedRoute>} />
+                        <Route path="/tasks" element={<ProtectedRoute><SEO title="Task Manager | MARGDARSHAK" description="Organize your academic tasks and deadlines efficiently." /><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/grades" element={<ProtectedRoute><SEO title="Grade Tracker | MARGDARSHAK" description="Track your academic performance and calculate your GPA automatically." /><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/attendance" element={<ProtectedRoute><SEO title="Attendance Tracker | MARGDARSHAK" description="Stay on top of your class attendance and requirements." /><Attendance onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/notes" element={<ProtectedRoute><SEO title="Digital Notes | MARGDARSHAK" description="Create and organize your study notes in one secure place." /><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/calendar" element={<ProtectedRoute><SEO title="Academic Calendar | MARGDARSHAK" description="Sync your schedule and never miss an important event." /><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/timetable" element={<ProtectedRoute><SEO title="Timetable Maker | MARGDARSHAK" description="Create a perfect study schedule with our automated timetable generator." /><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/courses" element={<ProtectedRoute><SEO title="Course Management | MARGDARSHAK" description="Manage your subjects and courses with ease." /><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/syllabus" element={<ProtectedRoute><SEO title="Syllabus Tracker | MARGDARSHAK" description="Track your progress through your course syllabus." /><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
 
-                        <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker /></ProtectedRoute>} />
-                        <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness /></PremiumRoute>} />
-                        <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings /></ProtectedRoute>} />
+
+                        <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/tracer" element={<PremiumRoute><SEO title="Progress Tracer | MARGDARSHAK" description="Advanced academic telemetry." /><ProgressTracer /></PremiumRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Node | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
+                        <Route path="/status" element={<><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></>} />
+                        <Route path="/sitemap" element={<><SEO title="Sitemap Index | MARGDARSHAK" description="Architectural matrix of the ecosystem." /><Sitemap onBack={() => window.history.back()} /></>} />
+                        <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/admin/login" element={<AdminAuthPage />} />
                         <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
                         <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
