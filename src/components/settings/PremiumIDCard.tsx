@@ -67,10 +67,37 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   const getDisplayRole = (role: string) => {
     const rawRole = role || 'student';
     const normalizedRole = Array.isArray(rawRole) ? String(rawRole[0]).toLowerCase() : String(rawRole).toLowerCase();
-    switch (normalizedRole) {
-      case 'admin': return 'SYSTEM_OVERSEER';
-      case 'teacher': return 'FACULTY_PROCTOR';
-      default: return 'ELITE_SCHOLAR';
+    const cleanRole = normalizedRole.replace(/_/g, '');
+
+    switch (cleanRole) {
+      case 'admin':
+      case 'superadmin':
+      case 'owner':
+        return 'SYSTEM_OVERSEER';
+      case 'ceo':
+        return 'CHIEF_EXECUTIVE';
+      case 'cto':
+        return 'CHIEF_TECHNOLOGY';
+      case 'cfo':
+        return 'CHIEF_FINANCIAL';
+      case 'coo':
+        return 'CHIEF_OPERATIONS';
+      case 'cmo':
+        return 'CHIEF_MARKETING';
+      case 'cio':
+        return 'CHIEF_INFORMATION';
+      case 'moderator':
+        return 'SYSTEM_MODERATOR';
+      case 'manager':
+        return 'DEPT_MANAGER';
+      case 'executive':
+        return 'EXEC_PROCTOR';
+      case 'staff':
+        return 'OPERATIONAL_STAFF';
+      case 'teacher':
+        return 'FACULTY_PROCTOR';
+      default:
+        return 'ELITE_SCHOLAR';
     }
   };
 
