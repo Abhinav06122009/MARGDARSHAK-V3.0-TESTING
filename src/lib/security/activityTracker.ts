@@ -22,6 +22,9 @@ export const trackActivity = async (
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user?.id || null;
 
+    // 2.5 Skip logging if no user is authenticated (prevents 401 errors on RLS protected tables)
+    if (!userId) return;
+
     // 3. Log to user_activity_logs
     const { error } = await supabase.from('user_activity_logs').insert({
       activity_type: activityType,

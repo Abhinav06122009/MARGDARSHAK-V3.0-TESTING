@@ -229,20 +229,23 @@ export const initSecurityHardening = () => {
 
   // --- 4. HARDENING AND ANTI-HACKING ---
 
-  (window as any).eval = () => {
-    throw new Error('Security Violation: eval() is prohibited.');
-  };
+  // --- 4. HARDENING AND ANTI-HACKING (RELAXED FOR COMPATIBILITY) ---
+  
+  // Disabled eval override as it crashes Clerk/Sentry
+  // (window as any).eval = () => {
+  //   throw new Error('Security Violation: eval() is prohibited.');
+  // };
 
-  if (window.self !== window.top) {
-    window.top!.location.href = window.self.location.href;
-  }
+  // Disabled frame buster as it interferes with auth redirects
+  // if (window.self !== window.top) {
+  //   window.top!.location.href = window.self.location.href;
+  // }
 
-  // Headless Browser Detection (Bypassed by Google whitelist above)
+  // Headless Browser Detection (Softened)
   if (!isDev) {
     const isHeadless = navigator.webdriver || /HeadlessChrome/.test(navigator.userAgent);
     if (isHeadless) {
-      document.body.innerHTML = '<h1>Access Denied: Bot detected</h1>';
-      throw new Error('Bot detected');
+      console.warn('🤖 Bot-like behavior detected.');
     }
   }
 
@@ -325,19 +328,16 @@ export const initSecurityHardening = () => {
 
   const style = document.createElement('style');
   style.innerHTML = `
-    * {
+    /* Visual Lockdown - Softened */
+    /* * {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
       -ms-user-select: none !important;
       user-select: none !important;
       -webkit-user-drag: none !important;
       -webkit-tap-highlight-color: transparent !important;
-    }
+    } */
     input, textarea, [contenteditable="true"] {
-      -webkit-user-select: text !important;
-      -moz-user-select: text !important;
-      -ms-user-select: text !important;
-      user-select: text !important;
       cursor: text !important;
     }
     img {

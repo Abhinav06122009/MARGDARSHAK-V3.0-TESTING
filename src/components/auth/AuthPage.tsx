@@ -54,16 +54,16 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(59,130,246,0.1),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_100%,rgba(99,102,241,0.05),transparent_50%)]" />
         <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-        
+
         {/* Animated Orbs */}
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.15, 0.1] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]"
         />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
@@ -77,7 +77,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
               <img src={logo} alt="Logo" className="w-14 h-14 object-contain" loading="eager" />
             </div>
           </Link>
-          
+
           <div className="space-y-3">
             <h1 className="text-4xl font-black text-white tracking-tight uppercase italic flex items-center justify-center gap-2">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">
@@ -97,16 +97,16 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         {/* Unified Clerk Interface Card */}
         <div className="w-full bg-white/[0.01] backdrop-blur-3xl rounded-[3.5rem] border border-white/5 p-8 md:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-          
+
           <div className="relative z-10 w-full flex flex-col items-center">
             {isLogin ? (
-              <SignIn 
+              <SignIn
                 appearance={clerkAppearance}
                 signUpUrl="/auth?mode=signup"
                 fallbackRedirectUrl="/dashboard"
               />
             ) : (
-              <SignUp 
+              <SignUp
                 appearance={clerkAppearance}
                 signInUrl="/auth?mode=signin"
                 fallbackRedirectUrl="/dashboard"
@@ -116,7 +116,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         </div>
 
         {/* Footer Security Badge */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -126,7 +126,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] animate-pulse" />
             <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">End-to-End Encrypted Tunnel</span>
           </div>
-          
+
           <p className="text-[7px] text-zinc-600 font-bold uppercase tracking-widest text-center max-w-[280px] leading-relaxed">
             By proceeding, you authorize a secure handshake with the Margdarshak Neural Core.
           </p>
