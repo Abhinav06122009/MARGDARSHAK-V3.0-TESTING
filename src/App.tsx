@@ -146,6 +146,15 @@ const App = () => {
     if (localStorage.getItem('dyslexiaMode') === 'true') {
       document.body.classList.add('dyslexia-mode');
     }
+
+    // --- SSO HASH REDIRECT FIX ---
+    // If Clerk sends a callback with a hash (e.g. /auth#/sso-callback), 
+    // we redirect to the actual path to prevent routing crashes.
+    if (window.location.hash.includes('sso-callback')) {
+      const cleanPath = window.location.hash.replace('#', '');
+      console.log('🔄 SSO Hash Detected. Redirecting to:', cleanPath);
+      window.location.href = window.location.origin + cleanPath;
+    }
   }, []);
 
   return (
