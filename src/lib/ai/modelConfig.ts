@@ -62,7 +62,10 @@ export const isPremiumTier = (tier: string): boolean =>
 
 export const selectModel = (task: TaskType, tier: string, hasUserKey: boolean): ModelConfig => {
   if (isEliteTier(tier) || hasUserKey) {
-    return MODELS['puter-gpt4o'];
+    return MODELS['gemini-pro'];
+  }
+  if (isPremiumTier(tier)) {
+    return MODELS['gemini-flash'];
   }
   return MODELS['puter-gpt4o'];
 };

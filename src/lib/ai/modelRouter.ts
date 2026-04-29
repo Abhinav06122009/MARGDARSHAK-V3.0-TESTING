@@ -19,7 +19,8 @@ export interface RouterOptions {
 
 const AI_GATEWAY_URL = getConfiguredAIGatewayUrl();
 const DEFAULT_TEXT_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const PREMIUM_TEXT_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
+const PREMIUM_TEXT_MODEL = 'google/gemini-2.0-flash-001'; // High-performance premium model
+const ELITE_TEXT_MODEL = 'anthropic/claude-3.5-sonnet'; // Top-tier elite model
 
 /**
  * Maps backend gateway response codes to user-facing errors.
@@ -50,7 +51,10 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
     const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
     if (apiKey) {
       try {
-        const modelToUse = options.model || (options.tier === 'premium' ? PREMIUM_TEXT_MODEL : DEFAULT_TEXT_MODEL);
+        const isElite = options.tier === 'premium_elite' || options.tier === 'extra_plus' || options.tier === 'premium_plus';
+        const isPremium = options.tier === 'premium' || isElite;
+        
+        const modelToUse = options.model || (isElite ? ELITE_TEXT_MODEL : isPremium ? PREMIUM_TEXT_MODEL : DEFAULT_TEXT_MODEL);
         
         const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -81,9 +85,17 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
   }
 
   const { authedFetch, readErrorMessage } = await import('@/lib/ai/authedFetch');
+  
+  const isElite = options.tier === 'premium_elite' || options.tier === 'extra_plus' || options.tier === 'premium_plus';
+  const isPremium = options.tier === 'premium' || isElite;
+  const modelToUse = options.model || (isElite ? ELITE_TEXT_MODEL : isPremium ? PREMIUM_TEXT_MODEL : DEFAULT_TEXT_MODEL);
+
   const res = await authedFetch('/api/ai-chat', {
     method: 'POST',
-    body: JSON.stringify({ messages: payload }),
+    body: JSON.stringify({ 
+      messages: payload,
+      model: modelToUse
+    }),
   });
   if (!res.ok) {
     throw new Error(await readErrorMessage(res));

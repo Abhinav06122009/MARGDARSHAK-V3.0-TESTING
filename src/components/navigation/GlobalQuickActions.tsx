@@ -17,9 +17,17 @@ const GlobalQuickActions: React.FC = () => {
   const { session } = useContext(AuthContext);
   const { stats } = useDashboardData();
   
-  // POSITION STATE
+  // POSITION STATE (Synced with drag)
   const [position, setPosition] = useState({ x: 32, y: window.innerHeight - 200 });
   
+  // DRAG HANDLER
+  const handleDrag = (_: any, info: any) => {
+    setPosition(prev => ({
+      x: prev.x + info.delta.x,
+      y: prev.y + info.delta.y
+    }));
+  };
+
   // WIN+K (CTRL+K) SHORTCUT
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,12 +71,7 @@ const GlobalQuickActions: React.FC = () => {
       <motion.button
         drag
         dragMomentum={false}
-        onDragEnd={(_, info) => {
-          setPosition({ 
-            x: position.x + info.offset.x, 
-            y: position.y + info.offset.y 
-          });
-        }}
+        onDrag={handleDrag}
         initial={false}
         animate={{ x: position.x, y: position.y }}
         whileHover={{ scale: 1.1, rotate: 5 }}
@@ -101,8 +104,8 @@ const GlobalQuickActions: React.FC = () => {
                 scale: 1,
                 x: Math.min(Math.max(10, position.x - 130), window.innerWidth - 330), 
                 y: position.y > window.innerHeight / 2 
-                   ? position.y - 520 // Open above if in bottom half
-                   : position.y + 70   // Open below if in top half
+                   ? Math.max(10, position.y - 520) // Open above if in bottom half
+                   : Math.min(window.innerHeight - 400, position.y + 70)   // Open below if in top half
               }}
               exit={{ opacity: 0, scale: 0.9 }}
               className="fixed top-0 left-0 z-[1001] w-[320px] bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,1)] overflow-hidden flex flex-col max-h-[85vh] cursor-move"

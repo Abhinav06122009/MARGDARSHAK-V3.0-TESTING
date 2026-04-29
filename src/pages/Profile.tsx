@@ -43,9 +43,12 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
         className: "bg-zinc-900 border-emerald-500/50 text-emerald-400"
       });
     } catch (err: any) {
+      const isVerificationError = err.message?.toLowerCase().includes('verification') || err.errors?.[0]?.code === 'session_step_up_required';
       toast({ 
-        title: 'ENROLMENT FAILED', 
-        description: err.message || 'Verification failed.', 
+        title: isVerificationError ? 'SECURITY CHECK REQUIRED' : 'ENROLMENT FAILED', 
+        description: isVerificationError 
+          ? 'For your security, please sign in again before registering a new passkey.' 
+          : err.message || 'Verification failed.', 
         variant: 'destructive' 
       });
     } finally {
