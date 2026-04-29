@@ -206,12 +206,13 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
           <div className="flex flex-col items-center mb-12 relative" style={{ transform: "translateZ(60px)" }}>
             <div className="relative group/avatar">
               <div className="absolute -inset-4 border border-emerald-500/10 rounded-full animate-spin-slow pointer-events-none" />
-              <div className="w-52 h-52 rounded-full border-4 border-white/5 overflow-hidden relative z-10 bg-black shadow-2xl">
+              <div className="w-52 h-52 rounded-full border-4 border-white/5 overflow-hidden relative z-10 bg-white shadow-2xl flex items-center justify-center">
                 <img
                   src={user.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 shadow-[inset_0px_2px_10px_rgba(0,0,0,0.1)] pointer-events-none" />
                 <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
               </div>
 
