@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { 
   handleTaskStatusUpdate as handleStatusUtil,
@@ -482,6 +483,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                ) : (
                  <LockedBurnoutWidget />
                )}
+            </motion.div>
+
+            <motion.div 
+              className="w-full p-8 rounded-[2rem] bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 backdrop-blur-3xl relative overflow-hidden group cursor-pointer"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              onClick={() => onNavigate('tracer')}
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
+                <Map className="w-32 h-32 text-indigo-400" />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-2xl bg-indigo-500/20 border border-indigo-500/30">
+                    <Rocket className="w-6 h-6 text-indigo-400" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">Academic Journey Tracer</h3>
+                  <Badge className="bg-indigo-500/20 text-indigo-400 border-indigo-500/30">Premium Exclusive</Badge>
+                </div>
+                <p className="text-zinc-400 max-w-xl text-lg mb-6">
+                  Experience a high-fidelity visualization of your academic milestones, skill progression, and career readiness.
+                </p>
+                <div className="flex items-center gap-2 text-indigo-400 font-bold group-hover:gap-4 transition-all">
+                  Launch Tracer <ChevronRight className="w-5 h-5" />
+                </div>
+              </div>
             </motion.div>
 
 
