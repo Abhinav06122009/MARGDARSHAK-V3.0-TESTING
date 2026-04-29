@@ -691,9 +691,7 @@ const Wellness: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           </motion.div>
 
       </div>
-
-        </div>
-      </ScrollArea>
+    </ScrollArea>
 
       <style>{`
         @keyframes spin-slow {
