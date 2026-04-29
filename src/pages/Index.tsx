@@ -181,8 +181,11 @@ const Index = () => {
         notifications={notifications}
         onRemove={removeNotification}
       />
+      <GlobalFooter />
     </motion.div>
   );
 };
+
+import GlobalFooter from '@/components/layout/GlobalFooter';
 
 export default Index;

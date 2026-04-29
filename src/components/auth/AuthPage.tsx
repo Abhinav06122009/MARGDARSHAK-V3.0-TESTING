@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SignIn, SignUp } from '@clerk/react';
+import { SignIn, SignUp, useUser } from '@clerk/react';
 import { motion } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import logo from "@/components/logo/logo.png";
@@ -12,6 +12,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
   const [isLogin, setIsLogin] = useState(mode !== 'signup');
+  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,16 @@ const AuthPage: React.FC<AuthPageProps> = () => {
   useEffect(() => {
     setIsLogin(mode !== 'signup');
   }, [mode]);
+
+  // BREAK RELOAD LOOP: Escape if authenticated
+  useEffect(() => {
+    if (userLoaded && isSignedIn && user && isMounted) {
+      if (window.location.pathname.includes('/auth')) {
+        console.log('🛡️ Identity confirmed. Escaping auth loop...');
+        window.location.href = '/dashboard';
+      }
+    }
+  }, [userLoaded, isSignedIn, user, isMounted]);
 
   if (!isMounted) return <div className="min-h-screen bg-[#050505]" />;
 
@@ -115,27 +126,13 @@ const AuthPage: React.FC<AuthPageProps> = () => {
           </div>
         </div>
 
-        {/* Global Security Footnote */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-12 flex flex-col items-center gap-6"
-        >
-          <div className="flex items-center gap-4 px-6 py-2.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-xl">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)] animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500">Neural Link Secured</span>
-          </div>
-
-          <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-[0.2em] text-center max-w-[320px] leading-relaxed">
-            By initializing, you authorize a high-fidelity sync with the <span className="text-zinc-500">Margdarshak Core Intelligence</span>.
-          </p>
-        </motion.div>
+        <GlobalFooter />
       </motion.div>
     </div>
   );
 };
 
+import GlobalFooter from '@/components/layout/GlobalFooter';
 
 export default AuthPage;
 
