@@ -15,16 +15,27 @@ const Pricing = lazy(() => import('@/components/landing/Pricing').then(m => ({ d
 const CTA = lazy(() => import('@/components/landing/Pricing').then(m => ({ default: m.CTA })));
 const TechStack = lazy(() => import('@/components/landing/TechStack').then(m => ({ default: m.TechStack })));
 
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 /**
  * The main Landing Page component.
  * Optimized for universal display and high performance on all devices.
  */
 const LandingPage: React.FC = () => {
   const [isTouch, setIsTouch] = useState(false);
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
+
+  useEffect(() => {
+    if (!loading && session) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [session, loading, navigate]);
 
   return (
     <SoundProvider>
