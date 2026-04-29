@@ -12,96 +12,136 @@ import {
   Zap, 
   Lock,
   ChevronRight,
-  ArrowUpRight
+  ArrowUpRight,
+  Sparkles,
+  Command,
+  Database,
+  Search,
+  Mail,
+  Facebook
 } from 'lucide-react';
+import logo from "@/components/logo/logo.png";
 
 const GlobalFooter = () => {
   const socialLinks = [
-    { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/vsavgyantapa/', color: 'hover:text-pink-500', glow: 'group-hover:shadow-[0_0_20px_rgba(236,72,153,0.3)]' },
-    { icon: <Twitter size={18} />, label: 'Twitter', href: 'https://x.com/gyantappas', color: 'hover:text-blue-400', glow: 'group-hover:shadow-[0_0_20px_rgba(56,189,248,0.3)]' },
-    { icon: <Globe size={18} />, label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61584618795158', color: 'hover:text-blue-600', glow: 'group-hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]' },
-    { icon: <Github size={18} />, label: 'GitHub', href: 'https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING', color: 'hover:text-white', glow: 'group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]' },
+    { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/vsavgyantapa/', color: 'hover:text-pink-500', glow: 'group-hover:shadow-[0_0_30px_rgba(236,72,153,0.4)]' },
+    { icon: <Twitter size={18} />, label: 'Twitter', href: 'https://x.com/gyantappas', color: 'hover:text-blue-400', glow: 'group-hover:shadow-[0_0_30px_rgba(56,189,248,0.4)]' },
+    { icon: <Facebook size={18} />, label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61584618795158', color: 'hover:text-blue-600', glow: 'group-hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]' },
+    { icon: <Github size={18} />, label: 'GitHub', href: 'https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING', color: 'hover:text-white', glow: 'group-hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]' },
   ];
 
   const footerLinks = {
     protocols: [
-      { name: 'Privacy Policy', path: '/privacy' },
-      { name: 'Terms of Service', path: '/terms' },
+      { name: 'Privacy Protocol', path: '/privacy' },
+      { name: 'Terms of Accord', path: '/terms' },
       { name: 'Cookie Policy', path: '/cookies' },
+      { name: 'GDPR Compliance', path: '/gdpr' },
     ],
     infrastructure: [
       { name: 'Identity Hub', path: '/auth' },
       { name: 'Premium Upgrade', path: '/upgrade' },
-      { name: 'Community Hub', path: '/community' },
+      { name: 'Community Network', path: '/community' },
+      { name: 'System Status', path: '/status' },
+    ],
+    intelligence: [
+      { name: 'AI Tutor Hub', path: '/ai-assistant' },
+      { name: 'Smart Analytics', path: '/ai-analytics' },
+      { name: 'Study Planner', path: '/study-planner' },
+      { name: 'Doubt Solver', path: '/doubt-solver' },
     ],
     support: [
       { name: 'Documentation', path: '/docs' },
       { name: 'Help Center', path: '/help' },
-      { name: 'Contact Support', path: '/contact' },
+      { name: 'Contact Command', path: '/contact' },
+      { name: 'Sitemap Index', path: '/sitemap' },
     ]
   };
 
   return (
-    <footer className="w-full relative mt-24 pb-12 px-6 overflow-hidden border-t border-white/5 bg-[#050505]">
-      {/* Background Aesthetics */}
+    <footer className="w-full relative mt-32 pb-12 px-6 overflow-hidden border-t border-white/5 bg-[#050505]">
+      {/* Precision Aesthetic Underlay */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent blur-sm" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.03),transparent_70%)]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')] opacity-[0.03]" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent blur-sm" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.03),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
+        
+        {/* Distant Orbs */}
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 pt-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
+      <div className="max-w-7xl mx-auto relative z-10 pt-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
           
-          {/* Brand & Social Section */}
-          <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center lg:justify-start gap-3 group cursor-default">
-                <div className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl group-hover:border-blue-500/30 transition-all duration-500 shadow-2xl">
-                  <Cpu className="text-blue-500 w-6 h-6 animate-pulse" />
+          {/* Brand Engine Section */}
+          <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-10">
+            <div className="space-y-6">
+              <Link to="/" className="flex items-center justify-center lg:justify-start gap-4 group">
+                <motion.div 
+                  whileHover={{ rotate: 15, scale: 1.1 }}
+                  className="p-4 bg-white rounded-[1.8rem] border border-white/20 group-hover:border-emerald-500/30 transition-all duration-700 shadow-2xl shadow-emerald-500/10"
+                >
+                  <img src={logo} alt="Margdarshak" className="w-8 h-8 object-contain" />
+                </motion.div>
+                <div>
+                  <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
+                    Margdarshak <span className="text-emerald-500 block text-xs tracking-[0.5em] mt-1 not-italic font-black opacity-80 uppercase">Architectural Suite</span>
+                  </h2>
                 </div>
-                <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase">
-                  Margdarshak <span className="text-blue-500">Systems</span>
-                </h2>
-              </div>
-              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.4em] leading-relaxed max-w-xs">
-                The definitive cognitive infrastructure for elite academic engineering.
+              </Link>
+              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-[0.3em] leading-relaxed max-w-sm">
+                Engineering high-fidelity cognitive ecosystems for the <span className="text-white italic">Elite Student Persona</span>. Powered by the Margdarshak Neural Core.
               </p>
             </div>
 
-            {/* Social Pulse Hub */}
-            <div className="flex items-center gap-3">
+            {/* Social Signal Hub */}
+            <div className="flex items-center gap-4">
               {socialLinks.map((social, idx) => (
                 <motion.a
                   key={idx}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ y: -5, scale: 1.1 }}
+                  whileHover={{ y: -8, scale: 1.15 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`group relative p-3 bg-white/[0.02] border border-white/5 rounded-xl transition-all duration-300 ${social.color} ${social.glow}`}
+                  className={`group relative p-4 bg-white/[0.02] border border-white/5 rounded-2xl transition-all duration-500 ${social.color} ${social.glow}`}
                 >
                   <div className="relative z-10">{social.icon}</div>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.a>
               ))}
             </div>
+            
+            {/* Newsletter Micro-Interaction */}
+            <div className="w-full max-w-xs relative group">
+              <input 
+                type="email" 
+                placeholder="JOIN THE INTELLIGENCE" 
+                className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white placeholder-zinc-700 focus:outline-none focus:border-emerald-500/30 transition-all"
+              />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500 hover:text-black transition-all">
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
 
-          {/* Navigation Matrix */}
-          <div className="lg:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-12">
+          {/* Navigational Matrix */}
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
             {Object.entries(footerLinks).map(([title, links]) => (
-              <div key={title} className="space-y-6">
-                <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.6em] mb-4">{title}</h4>
+              <div key={title} className="space-y-8">
+                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.5em] mb-6 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                  {title}
+                </h4>
                 <ul className="space-y-4">
                   {links.map((link) => (
                     <li key={link.name}>
                       <Link 
                         to={link.path} 
-                        className="group flex items-center gap-2 text-[11px] font-bold text-zinc-400 hover:text-white transition-all duration-300"
+                        className="group flex items-center gap-3 text-[11px] font-bold text-zinc-500 hover:text-emerald-400 transition-all duration-500"
                       >
-                        <ChevronRight size={10} className="text-blue-500/0 group-hover:text-blue-500 transition-all -ml-2 group-hover:ml-0" />
-                        <span className="tracking-widest uppercase">{link.name}</span>
+                        <span className="w-0 group-hover:w-3 h-[1px] bg-emerald-500 transition-all duration-500" />
+                        <span className="tracking-widest uppercase italic group-hover:not-italic">{link.name}</span>
                       </Link>
                     </li>
                   ))}
@@ -110,59 +150,48 @@ const GlobalFooter = () => {
             ))}
           </div>
 
-          {/* Elite Status Section */}
-          <div className="lg:col-span-2 flex flex-col items-center lg:items-end justify-start space-y-8">
-            <div className="w-full p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl space-y-4 group hover:border-blue-500/20 transition-all duration-500">
-              <div className="flex items-center justify-between">
-                <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Health</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
-                  <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-tighter">Operational</span>
-                </div>
-              </div>
-              <div className="h-[1px] bg-white/5" />
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-white uppercase tracking-tighter">AI Core</span>
-                  <span className="text-[10px] font-mono text-zinc-400 italic">Active</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-white uppercase tracking-tighter">Latency</span>
-                  <span className="text-[10px] font-mono text-blue-400">12ms</span>
-                </div>
-              </div>
-            </div>
-            
-            <Link to="/contact" className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 border border-blue-500/30 rounded-xl text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:bg-blue-600/20 transition-all group">
-              Global Support <ArrowUpRight size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </Link>
-          </div>
-
         </div>
 
-        {/* Global Security Strip */}
-        <div className="flex flex-col md:flex-row items-center justify-between py-10 border-t border-white/5 gap-8">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
-              <Zap size={14} className="text-amber-400" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Powered by Gemini Pro</span>
+        {/* Operational Status Strip */}
+        <div className="flex flex-col md:flex-row items-center justify-between py-12 border-y border-white/5 gap-10">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
+            <div className="flex items-center gap-3 px-5 py-2 bg-white/[0.02] border border-white/5 rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">System Nominal</span>
             </div>
-            <div className="w-1 h-1 bg-zinc-800 rounded-full hidden md:block" />
-            <div className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all cursor-default">
-              <Lock size={12} className="text-zinc-500" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Military Grade RSA</span>
+            <div className="flex items-center gap-3 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
+              <Zap size={14} className="text-amber-400 group-hover:animate-bounce" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Powered by Gemini 1.5 Pro</span>
+            </div>
+            <div className="flex items-center gap-3 opacity-30 hover:opacity-100 transition-all cursor-default">
+              <Shield size={12} className="text-blue-500" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">RSA_2048 Verified</span>
             </div>
           </div>
 
-          <div className="flex flex-col items-center md:items-end gap-2">
-            <div className="flex items-center gap-2">
-              <Shield size={12} className="text-zinc-500 opacity-30" />
-              <p className="text-[8px] font-mono text-zinc-500 uppercase tracking-[0.5em]">
-                © 2026 MARGDARSHAK_SYSTEMS. ALL_RIGHTS_RESERVED.
-              </p>
+          <div className="flex items-center gap-6">
+            <div className="text-right hidden md:block">
+              <p className="text-[8px] font-mono text-zinc-700 uppercase tracking-[0.5em] mb-1">Architectural Build</p>
+              <p className="text-[10px] font-black text-white italic tracking-tighter">ZENITH_STABLE_V3.0.5</p>
             </div>
-            <p className="text-[7px] font-mono text-zinc-800 uppercase tracking-[0.4em]">
-              V3.0.4_BUILD_STABLE // SHA_256_VERIFIED
+            <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center group hover:border-emerald-500/20 transition-all">
+              <Command size={18} className="text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+            </div>
+          </div>
+        </div>
+
+        {/* Global Footer Terminal */}
+        <div className="flex flex-col md:flex-row items-center justify-between py-8 gap-4">
+          <div className="flex items-center gap-2">
+            <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.4em]">
+              © 2026 MARGDARSHAK_ECOSYSTEM. PROGULGATED BY <span className="text-white font-black italic">VSAV GYANTAPA</span>.
+            </p>
+          </div>
+          <div className="flex items-center gap-6">
+             <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+              DESIGNED BY <span className="text-emerald-500 font-black">ABHINAV JHA</span>
+              <span className="w-1 h-1 rounded-full bg-zinc-800" />
+              CTO <span className="text-blue-500 font-black">VAIBHAVI JHA</span>
             </p>
           </div>
         </div>

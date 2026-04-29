@@ -1,4 +1,8 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { Shield, Lock, Eye, Globe, Zap, Cpu, Command, ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import logo from "@/components/logo/logo.png";
 
 type Section = { id: number; slug: string; title: string; content: React.ReactNode };
@@ -7,18 +11,17 @@ const sections: Section[] = [
   {
     id: 1,
     slug: "introduction",
-    title: "Introduction and Scope",
+    title: "Protocol Scope",
     content: (
       <>
-        <p className="mb-5">
+        <p className="mb-6">
           This Cookie Policy (“Policy”) elucidates the modalities and purposes pursuant to which <strong>VSAV GYANTAPA</strong>,
           operating <strong>MARGDARSHAK</strong> (“we,” “us,” “our”), deploys cookies and analogous tracking technologies
           (collectively, “Cookies”) on our website, applications, and related interfaces (the “Services”).
         </p>
-        <p className="mb-5">
+        <p className="mb-6 italic text-zinc-500">
           By continuing to engage our Services, you acknowledge notice of this Policy and our utilization of Cookies in
-          accordance with the dispositions herein articulated. This instrument shall be read <em>in pari materia</em>
-          with our Privacy Policy and Terms of Service.
+          accordance with the dispositions herein articulated.
         </p>
       </>
     ),
@@ -26,18 +29,14 @@ const sections: Section[] = [
   {
     id: 2,
     slug: "what-are-cookies",
-    title: "What are Cookies?",
+    title: "Cookie Architecture",
     content: (
       <>
-        <p className="mb-5">
+        <p className="mb-6 text-zinc-400">
           Cookies comprise infinitesimal data packets—alphanumeric identifiers—that are sequestered on your local
           terminal (computer, smartphone, or tablet) when you access digital resources. They facilitate the
           preservation of state, recognize return visitations, and sustain persistent authentication or preference
           signals.
-        </p>
-        <p className="mb-5">
-          These primitives may be “Session Cookies” (temporary artifacts deleted upon browser cessation) or
-          “Persistent Cookies” (enduring nodes that persist for a predefined duration or until manual erasure).
         </p>
       </>
     ),
@@ -45,18 +44,24 @@ const sections: Section[] = [
   {
     id: 3,
     slug: "how-we-use-cookies",
-    title: "Juridical Rationale: How We Use Cookies",
+    title: "Juridical Rationale",
     content: (
       <>
-        <p className="mb-5">
-          The deployment of Cookies is strictly circumscribed by operational necessity, performance optimization,
-          and the fulfillment of user-initiated desiderata. Specifically, Cookies enable:
+        <p className="mb-6">
+          The deployment of Cookies is strictly circumscribed by operational necessity and performance optimization:
         </p>
-        <ul className="list-disc list-inside space-y-2 mb-6">
-          <li><strong>Authentication:</strong> Verification of identity and sustainment of secure session integrity.</li>
-          <li><strong>Security:</strong> Anomaly detection, fraud interdiction, and mitigation of cross-site request forgery.</li>
-          <li><strong>Preferences:</strong> Preservation of linguistic nodes, UI/UX configurations, and user-defined toggles.</li>
-          <li><strong>Performance:</strong> Aggregated telemetry to instrument service velocity and resolve bottlenecks.</li>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {[
+            { label: "Authentication", desc: "Identity verification and session integrity." },
+            { label: "Security", desc: "Fraud interdiction and mitigation of CSRF." },
+            { label: "Preferences", desc: "Linguistic nodes and UI/UX configurations." },
+            { label: "Performance", desc: "Aggregated telemetry and velocity instrumentation." }
+          ].map((item, i) => (
+            <li key={i} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-emerald-500/20 transition-all">
+              <strong className="block text-emerald-400 text-[10px] uppercase tracking-widest mb-1 italic">{item.label}</strong>
+              <span className="text-sm text-zinc-500">{item.desc}</span>
+            </li>
+          ))}
         </ul>
       </>
     ),
@@ -64,202 +69,180 @@ const sections: Section[] = [
   {
     id: 4,
     slug: "categories",
-    title: "Taxonomy of Cookies",
+    title: "Node Taxonomy",
     content: (
-      <>
-        <p className="mb-5">We categorize our Cookies into the following functional tiers:</p>
-        <ul className="list-disc list-inside space-y-3 mb-6">
-          <li>
-            <strong>Strictly Essential Cookies:</strong> Indispensable for the core operability of the Services.
-            Absent these nodes, secure authentication and basic navigation cannot be effectuated.
-          </li>
-          <li>
-            <strong>Functionality Cookies:</strong> Enable personalized attributes, such as remembering your
-            archival configurations or selected dashboard layouts.
-          </li>
-          <li>
-            <strong>Analytical/Performance Cookies:</strong> Facilitate pseudonymous telemetry to measure
-            engagement metrics, error frequencies, and navigational paths.
-          </li>
-          <li>
-            <strong>Targeting and Social Cookies:</strong> Where applicable, used to calibrate content relevance
-            and facilitate social media integrations.
-          </li>
-        </ul>
-      </>
+      <div className="space-y-6">
+        {[
+          { title: "Strictly Essential", desc: "Indispensable for core operability and secure authentication." },
+          { title: "Functionality", desc: "Enable personalized attributes and archival configurations." },
+          { title: "Analytical", desc: "Measure engagement metrics and navigational paths." }
+        ].map((item, i) => (
+          <div key={i} className="flex gap-4 p-6 bg-white/[0.01] rounded-3xl border border-white/5 italic">
+            <div className="w-2 h-2 rounded-full bg-emerald-500/50 mt-1.5 shrink-0" />
+            <div>
+               <h4 className="text-white font-black uppercase text-xs tracking-widest mb-2">{item.title} Nodes</h4>
+               <p className="text-zinc-500 text-sm">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     ),
   },
   {
     id: 5,
-    slug: "third-party",
-    title: "Third-Party Cookies and External SDKs",
+    slug: "managing-cookies",
+    title: "Governance Controls",
     content: (
-      <p className="mb-5">
-        In certain contexts, Cookies may be deployed by vetted third-party providers (e.g., Supabase for
-        authentication nodes, or Google Analytics for telemetry). These entities exercise independent control
-        over their respective Cookies, governed by their own privacy and data protection postures. We counsel
-        independent appraisal of their respective notices.
-      </p>
+      <>
+        <p className="mb-6">
+          You possess the inherent right to regulate Cookie deployment via browser-level configurations or system
+          preferences:
+        </p>
+        <ul className="space-y-3 mb-6">
+          {[
+            "Inspect and selectively delete Cookies.",
+            "Block third-party Cookies in toto.",
+            "Honor Universal Opt-Out signals (DNT headers).",
+            "Actuate 'Incognito' mode for session purging."
+          ].map((item, i) => (
+            <li key={i} className="flex items-center gap-3 text-zinc-500 text-sm">
+              <div className="w-1 h-1 rounded-full bg-zinc-800" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </>
     ),
   },
   {
     id: 6,
-    slug: "managing-cookies",
-    title: "Governance: Managing Your Preferences",
-    content: (
-      <>
-        <p className="mb-5">
-          You possess the inherent right to regulate Cookie deployment via browser-level configurations or system
-          preferences. Most modern browsers allow you to:
-        </p>
-        <ul className="list-disc list-inside space-y-2 mb-6">
-          <li>Inspect and selectively delete Cookies.</li>
-          <li>Block third-party Cookies in <em>toto</em>.</li>
-          <li>Inhibit all Cookie activity (note: this may render essential Services inoperable).</li>
-          <li>Actuate “Incognito” or “Private” modes which purge local artifacts upon session termination.</li>
-        </ul>
-        <p className="mb-5">
-          Where available, we honor Universal Opt-Out signals and “Do Not Track” (DNT) headers to the extent
-          technically feasible within contemporary standards.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: 7,
-    slug: "modifications",
-    title: "Modifications and Effective Date",
-    content: (
-      <p className="mb-5">
-        This Policy may be modified to reflect technological evolutions or regulatory shifts. Material
-        alterations shall be conspicuously noticed. Continued engagement with the Services following such notice
-        constitutes acknowledgment of the recalibrated Policy.
-      </p>
-    ),
-  },
-  {
-    id: 8,
     slug: "contact",
-    title: "Contact and Inquiries",
+    title: "Contact Protocol",
     content: (
-      <>
-        <p className="mb-5">
-          For clarifications respecting our Cookie governance or to invoke data subject rights, please direct
-          communications to:
-        </p>
-        <address className="not-italic text-blue-700 font-medium">
-          VSAV GYANTAPA — MARGDARSHAK
-          <br />
-          Email:{" "}
-          <a
-            href="mailto:support@margdarshan.tech"
-            className="text-blue-600 underline hover:text-blue-800"
-          >
-            support@margdarshan.tech
-          </a>
+      <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] mt-8">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 mb-4 italic">Communications Uplink</h4>
+        <address className="not-italic text-zinc-400 font-medium text-lg leading-relaxed mb-6">
+          VSAV GYANTAPA — MARGDARSHAK ARCHITECTURAL SUITE
         </address>
-      </>
+        <a
+          href="mailto:support@margdarshan.tech"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:scale-105 transition-all"
+        >
+          support@margdarshan.tech <ChevronRight size={14} />
+        </a>
+      </div>
     ),
   },
 ];
 
-const CookiePolicy: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
+const CookiePolicy: React.FC = () => {
   return (
-    <div id="top" className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/50">
-      {/* Hero */}
-      <header className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6 pt-16 pb-8">
-          <div className="relative rounded-3xl border border-indigo-300/40 bg-white/70 backdrop-blur-xl shadow-2xl">
-            <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-indigo-400/30" />
-            <div className="flex flex-col md:flex-row items-center gap-6 px-8 py-10">
-              <img
-                src={logo}
-                alt="MARGDARSHAK Logo"
-                className="w-16 h-16 rounded bg-white shadow"
-                draggable={false}
-              />
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-700 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
-                  Cookie Policy
-                </h1>
-                <p className="mt-3 text-slate-600">
-                  Transparency regarding our utilization of local storage nodes, telemetry trackers, and
-                  session primitives.
-                </p>
-                <p className="mt-2 text-sm text-slate-500">
-                  Effective Date: <time dateTime="2025-07-25">July 25, 2025</time>
-                </p>
+    <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden relative">
+      {/* Background Aesthetics */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+        
+        <motion.div 
+          animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1] }}
+          transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
+          className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
+        />
+        <motion.div 
+          animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.3, 1] }}
+          transition={{ repeat: Infinity, duration: 20, ease: 'easeInOut', delay: 2 }}
+          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"
+        />
+
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
+      </div>
+
+      <ScrollArea className="h-screen w-full relative z-10">
+        <div className="max-w-7xl mx-auto px-6 py-24">
+          
+          {/* Header Identity */}
+          <div className="flex flex-col items-center mb-24 text-center">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="group relative mb-8"
+            >
+              <div className="absolute inset-0 bg-emerald-500/20 blur-[60px] rounded-full group-hover:bg-emerald-500/40 transition-all duration-700" />
+              <div className="p-5 rounded-[2.5rem] bg-white border border-white/20 relative z-10 shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-1">
+                <img src={logo} alt="Margdarshak Official" className="w-16 h-16 object-contain" />
               </div>
-              {onBack && (
-                <button
-                  onClick={onBack}
-                  className="rounded-full px-6 py-3 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-300 transition"
-                >
-                  Back
-                </button>
-              )}
+            </motion.div>
+
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic text-white mb-6">
+              Cookie <span className="text-emerald-500">Policy</span>
+            </h1>
+            <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em] italic mb-12">
+              Margdarshak Ecosystem // Local Storage Nodes & Telemetry
+            </p>
+            <div className="flex items-center gap-6">
+                <Link to="/">
+                    <Button variant="ghost" className="text-zinc-600 hover:text-white uppercase font-black text-[10px] tracking-widest gap-2">
+                        <ArrowLeft size={14} /> Protocol Hub
+                    </Button>
+                </Link>
+                <div className="w-px h-4 bg-white/10" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Effective: July 2025</p>
             </div>
           </div>
-        </div>
-      </header>
 
-      {/* Body */}
-      <main className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sticky TOC */}
-          <aside className="lg:col-span-4">
-            <div className="lg:sticky lg:top-8">
-              <div className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl shadow-xl p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">Table of Contents</h2>
-                <ol className="text-sm space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+          {/* Policy Matrix */}
+          <div className="grid lg:grid-cols-12 gap-16">
+            <aside className="lg:col-span-4 lg:sticky lg:top-8 h-fit">
+              <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/5 rounded-[3rem] p-10 space-y-8">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Core Sections</h2>
+                <div className="flex flex-col gap-4">
                   {sections.map((s) => (
-                    <li key={s.id} className="group">
-                      <a
-                        href={`#section-${s.slug}`}
-                        className="inline-flex items-start gap-2 text-slate-700 hover:text-indigo-700"
-                      >
-                        <span className="mt-0.5 inline-block h-1.5 w-1.5 rounded-full bg-indigo-400/70 group-hover:bg-indigo-500" />
-                        <span>
-                          {s.id}. {s.title}
-                        </span>
-                      </a>
-                    </li>
+                    <a
+                      key={s.id}
+                      href={`#section-${s.slug}`}
+                      className="group flex items-center gap-4 text-[11px] font-bold text-zinc-600 hover:text-emerald-400 transition-all duration-500"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/5 group-hover:bg-emerald-500 group-hover:scale-125 transition-all" />
+                      <span className="tracking-widest uppercase italic">{s.title}</span>
+                    </a>
                   ))}
-                </ol>
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
 
-          {/* Content */}
-          <section className="lg:col-span-8">
-            <div className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl shadow-xl p-6 mb-8">
-              <p className="text-lg text-slate-800">
-                This Cookie Policy governs the utilization of tracking technologies by <strong>MARGDARSHAK</strong>.
-                Our objective is to ensure that your experience is performant, secure, and personalized while
-                maintaining the highest standards of transparency and user agency.
-              </p>
+            <div className="lg:col-span-8 space-y-16">
+              {sections.map((s) => (
+                <article
+                  key={s.slug}
+                  id={`section-${s.slug}`}
+                  className="group relative bg-white/[0.01] backdrop-blur-3xl border border-white/5 rounded-[3.5rem] p-12 hover:border-emerald-500/20 transition-all duration-700 overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <header className="mb-8">
+                    <span className="text-[10px] font-black text-emerald-500/50 mb-4 block italic">SECTION_0{s.id}</span>
+                    <h3 className="text-3xl font-black italic uppercase tracking-tight text-white">{s.title}</h3>
+                  </header>
+                  <div className="text-zinc-400 text-lg leading-relaxed font-medium">
+                    {s.content}
+                  </div>
+                </article>
+              ))}
             </div>
+          </div>
 
-            {sections.map((s) => (
-              <article
-                key={s.slug}
-                id={`section-${s.slug}`}
-                className="group relative mb-8 rounded-2xl border border-slate-200 bg-white/90 shadow-xl transition hover:shadow-2xl"
-              >
-                <div className="absolute inset-y-0 left-0 w-1 rounded-l-2xl bg-gradient-to-b from-indigo-400 via-purple-400 to-indigo-500 opacity-80" />
-                <header className="px-6 pt-6">
-                  <h3 className="text-2xl font-bold tracking-tight text-slate-900">
-                    {s.id}. {s.title}
-                  </h3>
-                </header>
-                <div className="px-6 py-5 text-slate-800 leading-relaxed">{s.content}</div>
-              </article>
-            ))}
-          </section>
+          {/* Absolute Footer Navigation */}
+          <div className="mt-32 pt-16 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-4">
+               <Shield size={16} className="text-zinc-700" />
+               <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-[0.4em]">MARGDARSHAK_SECURITY_COMPLIANCE_PROTOCOL</p>
+            </div>
+            <Link to="/privacy" className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-all">
+                Access Privacy Accord <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
         </div>
-      </main>
-
-      {/* App Footer */}
+      </ScrollArea>
     </div>
   );
 };

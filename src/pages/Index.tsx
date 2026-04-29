@@ -21,7 +21,7 @@ const CourseManagement = lazy(() => import('@/components/courses/CourseManagemen
 const ProgressTracker = lazy(() => import('@/components/progress/ProgressTracker'));
 const PrivacyPolicy = lazy(() => import('@/components/legal/PrivacyPolicy'));
 const TermsAndConditions = lazy(() => import('@/components/legal/TermsAndConditions'));
-const UpgradePage = lazy(() => import('./UpgradePage'));
+const Upgrade = lazy(() => import('./Upgrade'));
 
 const Index = () => {
   const { session, loading } = useAuth();
@@ -125,7 +125,7 @@ const Index = () => {
         case 'settings':
           return <Settings onBack={handleBackToDashboard} />;
         case 'upgrade':
-          return <UpgradePage onBack={handleBackToDashboard} />;
+          return <Upgrade />;
         default:
           return <Dashboard onNavigate={handleNavigation} />;
       }

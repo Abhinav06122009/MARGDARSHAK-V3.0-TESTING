@@ -4,7 +4,7 @@ import { CustomCursor, ScrollProgressBar } from '@/components/landing/UIEffects'
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { BackgroundScene } from '@/components/landing/BackgroundScene';
-import Footer from '@/components/Footer';
+
 
 // Lazy load heavy sections for performance
 const Features = lazy(() => import('@/components/landing/LandingSections').then(m => ({ default: m.Features })));
