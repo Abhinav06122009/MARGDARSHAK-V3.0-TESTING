@@ -5,7 +5,7 @@ import {
   Users, Award, Bell, Search, BrainCircuit, Target, 
   TrendingUp, Clock, CheckCircle2, ChevronRight, Sparkles,
   Lock, Play, Zap, GraduationCap, BarChart3, 
-  Shield, Activity, Globe, MessageSquare, ArrowUp
+  Shield, Activity, Globe, MessageSquare, ArrowUp, Rocket, Map
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
