@@ -8,8 +8,8 @@ export const initConsoleGuard = () => {
   // To test in development, comment out the line below.
   if (import.meta.env.DEV) return;
 
-  const warningTitle = 'Stop!';
-  const warningText = 'Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS.Do not enter or paste code that you do not understand.';
+  const warningTitle = '⚠️ SECURITY WARNING!';
+  const warningText = 'Using this console may allow attackers to impersonate you and steal your information using an attack called Self-XSS. Do not enter or paste code that you do not understand. If someone told you to paste something here, they are trying to hack you.';
 
 
   const titleStyle = [

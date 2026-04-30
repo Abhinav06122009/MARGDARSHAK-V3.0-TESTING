@@ -1,6 +1,8 @@
 // Shared security helpers for Netlify functions: origin allowlist, CORS,
 // rate limiting, body size limits, and Supabase JWT verification.
 
+const crypto = require('crypto');
+
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://margdarshak-ai.netlify.app",
   "https://margdarshan.tech",
@@ -21,7 +23,7 @@ const isOriginAllowed = (origin) => {
   const allowed = parseAllowedOrigins();
   if (allowed.includes("*")) return true;
   if (allowed.includes(origin)) return true;
-  // Allow Replit preview/dev domains and localhost during development.
+  
   try {
     const url = new URL(origin);
     if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
@@ -39,19 +41,19 @@ const corsHeaders = (origin) => {
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "null",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Fingerprint",
     "Access-Control-Max-Age": "600",
     "Vary": "Origin",
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
   };
 };
 
-// In-memory token bucket per IP. Per-instance only (Netlify functions are
-// short-lived) but still blunts bursty abuse from a single source.
+// Rate limiting (In-memory, instance-specific fallback)
 const buckets = new Map();
 const RATE_WINDOW_MS = 60_000;
-const RATE_LIMIT = 30; // requests per window per IP per endpoint
+const RATE_LIMIT = 20; // Tightened limit
 
 const rateLimit = (key) => {
   const now = Date.now();
@@ -73,8 +75,11 @@ const getClientIp = (event) => {
   return event.headers?.["client-ip"] || event.headers?.["x-real-ip"] || "unknown";
 };
 
-// Returns { ok: true, user } on success, otherwise
-// { ok: false, status, code, message } so callers can return precise errors.
+/**
+ * Verify Clerk JWT
+ * @param {string} authHeader 
+ * @returns {Promise<{ok: boolean, user?: object, status?: number, code?: string, message?: string}>}
+ */
 const verifyClerkUser = async (authHeader) => {
   if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
     return { ok: false, status: 401, code: "no_token", message: "Missing Authorization bearer token" };
@@ -84,49 +89,45 @@ const verifyClerkUser = async (authHeader) => {
     return { ok: false, status: 401, code: "no_token", message: "Empty bearer token" };
   }
 
-  const supaUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supaKey =
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
-
-  if (!supaUrl || !supaKey) {
-    // This is a server-side misconfiguration, not a client problem.
-    console.error("[security] Supabase env vars missing", {
-      hasUrl: !!supaUrl,
-      hasKey: !!supaKey,
-    });
-    return {
-      ok: false,
-      status: 500,
-      code: "server_misconfigured",
-      message:
-        "Server is missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY environment variables. Set them in your Netlify site settings (Site configuration → Environment variables).",
-    };
-  }
-
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.error("[security] Invalid token format (parts !== 3)");
-      return { ok: false, status: 401, code: "invalid_token", message: "Invalid token format: expected 3 parts" };
+      return { ok: false, status: 401, code: "invalid_token", message: "Invalid token format" };
     }
     
-    let payload;
-    try {
-      const decoded = Buffer.from(parts[1], 'base64').toString();
-      payload = JSON.parse(decoded);
-    } catch (e) {
-      console.error("[security] Failed to parse JWT payload:", e.message);
-      return { ok: false, status: 401, code: "invalid_token", message: "Failed to parse token payload: " + e.message };
+    // 1. Parse Header & Payload
+    const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    
+    // 2. CRYPTOGRAPHIC VERIFICATION (If Public Key is provided)
+    const publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
+    if (publicKey) {
+      const verifier = crypto.createVerify('RSA-SHA256');
+      verifier.update(parts[0] + '.' + parts[1]);
+      const isValid = verifier.verify(publicKey, parts[2], 'base64');
+      
+      if (!isValid) {
+        console.error("[security] JWT Signature verification failed!");
+        return { ok: false, status: 401, code: "invalid_signature", message: "JWT Signature verification failed" };
+      }
+    } else {
+      console.warn("[security] CLERK_JWT_PUBLIC_KEY not set. Falling back to insecure decoding. PLEASE SET PUBLIC KEY FOR UNHACKABLE STATUS.");
     }
     
-    if (!payload || !payload.sub) {
-      console.error("[security] Token missing 'sub' claim:", payload);
-      return { ok: false, status: 401, code: "no_user", message: "Token is missing the required 'sub' (user ID) claim" };
+    // 3. Expiration Check
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      return { ok: false, status: 401, code: "token_expired", message: "Token has expired" };
+    }
+    
+    // 4. Issued At Check (Prevent future tokens)
+    if (payload.iat && payload.iat > now + 60) { // 60s clock skew
+      return { ok: false, status: 401, code: "token_future", message: "Token issued in the future" };
     }
 
-    console.log("[security] Verified user from token:", payload.sub);
+    if (!payload.sub) {
+      return { ok: false, status: 401, code: "no_user", message: "Token is missing user identity" };
+    }
 
     return { 
       ok: true, 
@@ -134,23 +135,21 @@ const verifyClerkUser = async (authHeader) => {
         id: payload.sub, 
         email: payload.email || payload.sub + "@clerk.user",
         metadata: payload.public_metadata || payload.metadata || {},
-        unsafe_metadata: payload.unsafe_metadata || {},
-        // Include the raw payload for deep extraction
         _raw: payload
       } 
     };
   } catch (err) {
-    console.error("[security] Unexpected error during token verification:", err);
+    console.error("[security] Unexpected error during token verification:", err.message);
     return {
       ok: false,
       status: 401,
       code: "invalid_token",
-      message: "Security verification failed: " + (err instanceof Error ? err.message : String(err))
+      message: "Security verification failed"
     };
   }
 };
 
-const MAX_BODY_BYTES = 64 * 1024; // 64 KB
+const MAX_BODY_BYTES = 128 * 1024; // 128 KB (Increased for AI chat context)
 
 module.exports = {
   isOriginAllowed,
