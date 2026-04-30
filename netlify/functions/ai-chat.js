@@ -67,28 +67,18 @@ exports.handler = async (event) => {
     .eq('id', user.id)
     .single();
 
-  // --- ROBUST TIER DETECTION (CLERK-FIRST) ---
+  // --- ROBUST TIER DETECTION (EXACT MATCH ONLY) ---
   const metadata = user.metadata || {};
-  const unsafeMetadata = user.unsafe_metadata || {};
   const jwtPayload = user._raw || {};
   
-  // Extract from multiple possible JWT paths
-  const subscription = metadata.subscription || unsafeMetadata.subscription || jwtPayload.subscription || {};
+  const subscription = metadata.subscription || jwtPayload.subscription || {};
   let userTier = (
     subscription.tier || 
     metadata.subscription_tier || 
-    unsafeMetadata.subscription_tier || 
     metadata.tier || 
     profile?.subscription_tier || 
     'free'
   ).toLowerCase();
-
-  // Fuzzy Search in JWT (Powerful fallback for all users)
-  const rawTokenData = JSON.stringify(user._raw).toLowerCase();
-  if (userTier === 'free') {
-    if (rawTokenData.includes('elite')) userTier = 'premium_elite';
-    else if (rawTokenData.includes('premium')) userTier = 'premium';
-  }
 
   // MASTER OVERRIDES
   const MASTER_IDS = [
@@ -118,10 +108,8 @@ exports.handler = async (event) => {
         }) 
       };
     }
-    // For non-elite, we ONLY use their provided key
     apiKeyToUse = userApiKey;
   } else {
-    // For elite, use their key if provided, otherwise fallback to inbuilt
     apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY || process.env.VITE_OPENAI_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
   }
 
@@ -144,23 +132,7 @@ exports.handler = async (event) => {
   if (!incoming || incoming.length === 0) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "messages[] is required" }) };
   }
-  if (incoming.length > 60) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "Too many messages" }) };
-  }
-  for (const m of incoming) {
-    if (!m || typeof m.role !== "string") {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: "Each message needs a role string" }) };
-    }
-    if (typeof m.content === "string") {
-      if (m.content.length > 30000) {
-        return { statusCode: 400, headers, body: JSON.stringify({ error: "Message content too long" }) };
-      }
-    } else if (!Array.isArray(m.content)) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: "Message content must be string or array" }) };
-    }
-  }
 
-  // Handle system prompt attachment logic whether the first message content is string or array
   let messages = [...incoming];
   if (messages[0]?.role === "system") {
     if (typeof messages[0].content === "string") {
@@ -172,7 +144,6 @@ exports.handler = async (event) => {
 
   const isPremium = userTier === 'premium' || isElite;
   
-  // Decide model: Upgrade if elite/premium and current model is free or default
   let modelToUse = payload.model || DEFAULT_FREE_MODEL;
   if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
     if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
@@ -197,12 +168,12 @@ exports.handler = async (event) => {
     });
     const data = await upstream.json();
     if (!upstream.ok) {
-      const isInvalidKey = upstream.status === 401 || data?.error?.code === 'invalid_api_key' || (typeof data?.error?.message === 'string' && data.error.message.toLowerCase().includes('api key'));
+      const isInvalidKey = upstream.status === 401 || data?.error?.code === 'invalid_api_key';
       return {
         statusCode: upstream.status,
         headers,
         body: JSON.stringify({ 
-          error: isInvalidKey ? "🔑 Invalid API Key: The OpenRouter key provided is incorrect or has expired. Please check your settings." : (data?.error?.message || "OpenRouter request failed"),
+          error: isInvalidKey ? "🔑 Invalid API Key" : (data?.error?.message || "OpenRouter request failed"),
           code: isInvalidKey ? "INVALID_KEY" : "UPSTREAM_ERROR"
         }),
       };
@@ -217,6 +188,6 @@ exports.handler = async (event) => {
       }),
     };
   } catch (err) {
-    return { statusCode: 502, headers, body: JSON.stringify({ error: err instanceof Error ? err.message : "Upstream error" }) };
+    return { statusCode: 502, headers, body: JSON.stringify({ error: "Upstream error" }) };
   }
 };

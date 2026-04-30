@@ -154,15 +154,6 @@ export const supabaseHelpers = {
                    (unsafeMetadata as any).tier || 
                    'free');
       let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
-
-      // NUCLEAR FUZZY FALLBACK: If "premium", "elite", "plus", or "pro" is found anywhere in the raw user object, force it
-      if (tier === 'free') {
-        const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-        if (fullUserStr.includes('elite')) tier = 'premium_elite';
-        else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
-          tier = 'premium';
-        }
-      }
       
       // MASTER OVERRIDES: Hardcoded bypass for power users
       const MASTER_IDS = [

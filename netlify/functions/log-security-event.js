@@ -165,7 +165,7 @@ exports.handler = async (event) => {
 
   // Insert via REST with service role key (bypasses RLS)
   try {
-    const insertRes = await fetch(`${supabaseUrl}/rest/v1/security_events`, {
+    const insertRes = await fetch(`${supabaseUrl}/rest/v1/security_logs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

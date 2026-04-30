@@ -97,10 +97,11 @@ exports.handler = async (event) => {
     .eq('id', translatedId)
     .maybeSingle();
 
-  const newUserType = clerkMetadata.role || metadata.role || 'student';
+  // ONLY TRUST VERIFIED CLERK METADATA FOR ROLE
+  const newUserType = (clerkMetadata.role || clerkMetadata.subscription_tier || 'student').toLowerCase();
   
-  // If the user is already an admin in Supabase, preserve it unless the sync explicitly provides a role
-  const finalUserType = (existingProfile?.user_type === 'admin' && newUserType === 'student') 
+  // Master safeguard: Only preserve admin if already exists, OR if coming from verified JWT
+  const finalUserType = (existingProfile?.user_type === 'admin' && newUserType !== 'admin' && !clerkMetadata.role) 
     ? 'admin' 
     : newUserType;
 
