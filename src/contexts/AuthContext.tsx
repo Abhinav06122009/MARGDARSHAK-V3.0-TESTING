@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             updated_at: new Date().toISOString()
           };
 
-          const token = clerkSession ? await clerkSession.getToken({ template: 'supabase' }) : null;
+          const token = clerkSession ? await clerkSession.getToken() : null;
           
           // Fire and forget sync (mostly)
           fetch('/.netlify/functions/profile-sync', {
