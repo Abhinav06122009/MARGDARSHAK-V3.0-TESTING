@@ -175,6 +175,25 @@ const verifyClerkUser = async (authHeader) => {
   }
 };
 
+/**
+ * ID Translation Protocol (Deterministic UUID generation)
+ */
+const translateClerkIdToUUID = (clerkId) => {
+  if (!clerkId) return '';
+  if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
+
+  const salt = process.env.ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+  const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
+  
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    '8' + hash.slice(17, 20),
+    hash.slice(20, 32)
+  ].join('-');
+};
+
 const MAX_BODY_BYTES = 128 * 1024;
 
 module.exports = {
@@ -184,5 +203,6 @@ module.exports = {
   getClientIp,
   verifyClerkUser,
   checkFirewall,
+  translateClerkIdToUUID,
   MAX_BODY_BYTES,
 };

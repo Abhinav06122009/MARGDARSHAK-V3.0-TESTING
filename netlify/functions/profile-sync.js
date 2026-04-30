@@ -5,31 +5,10 @@ const {
   rateLimit,
   getClientIp,
   verifyClerkUser,
+  translateClerkIdToUUID,
   MAX_BODY_BYTES,
 } = require('./_shared/security');
 
-/**
- * ID Translation Protocol (Node.js Version)
- * Deterministically maps Clerk User IDs (strings) to valid Postgres UUIDs.
- */
-const translateClerkIdToUUID = (clerkId) => {
-  if (!clerkId) return '';
-  if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
-
-  const salt = process.env.ID_SALT;
-  if (!salt) {
-    throw new Error('CRITICAL SECURITY ERROR: ID_SALT is not configured.');
-  }
-  const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
-  
-  return [
-    hash.slice(0, 8),
-    hash.slice(8, 12),
-    '4' + hash.slice(13, 16),
-    '8' + hash.slice(17, 20),
-    hash.slice(20, 32)
-  ].join('-');
-};
 
 exports.handler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin || null;

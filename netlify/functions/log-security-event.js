@@ -11,6 +11,7 @@ const {
   rateLimit,
   getClientIp,
   verifyClerkUser,
+  translateClerkIdToUUID,
   MAX_BODY_BYTES,
 } = require("./_shared/security");
 
@@ -144,7 +145,7 @@ exports.handler = async (event) => {
   const riskScore = computeRiskScore(eventType, anomalies);
 
   const row = {
-    user_id: verifiedUser?.id || null,
+    user_id: verifiedUser?.id ? translateClerkIdToUUID(verifiedUser.id) : null,
     email: userEmail,
     full_name: fullName,
     event_type: eventType,
