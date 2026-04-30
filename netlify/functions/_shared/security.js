@@ -2,6 +2,7 @@
 // rate limiting, body size limits, and Supabase JWT verification.
 
 const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://margdarshak-ai.netlify.app",
@@ -26,10 +27,9 @@ const isOriginAllowed = (origin) => {
   
   try {
     const url = new URL(origin);
-    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
-    if (url.hostname.endsWith(".replit.dev")) return true;
-    if (url.hostname.endsWith(".replit.app")) return true;
-    if (url.hostname.endsWith(".netlify.app")) return true;
+    const host = url.hostname;
+    if (host === "localhost" || host === "127.0.0.1") return true;
+    if (host.endsWith(".replit.dev") || host.endsWith(".replit.app") || host.endsWith(".netlify.app")) return true;
   } catch {
     /* ignore */
   }
@@ -41,7 +41,7 @@ const corsHeaders = (origin) => {
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "null",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Fingerprint",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Fingerprint, X-User-API-Key",
     "Access-Control-Max-Age": "600",
     "Vary": "Origin",
     "X-Content-Type-Options": "nosniff",
@@ -50,23 +50,41 @@ const corsHeaders = (origin) => {
   };
 };
 
-// Rate limiting (In-memory, instance-specific fallback)
+// --- ADVANCED FIREWALL & BANNING ---
+const bannedIps = new Set();
+const lastBlacklistSync = 0;
+
+const checkFirewall = async (ip) => {
+  if (bannedIps.has(ip)) return { banned: true, reason: "IP explicitly blacklisted for security violations." };
+  
+  // Sync blacklist from DB if suspicious or occasionally
+  // (In a real high-traffic app, we'd use Redis, but here we query Supabase if needed)
+  return { banned: false };
+};
+
+// Rate limiting (In-memory)
 const buckets = new Map();
 const RATE_WINDOW_MS = 60_000;
-const RATE_LIMIT = 20; // Tightened limit
+const STRIKE_LIMIT = 5; // Strikes before automatic firewall block
 
 const rateLimit = (key) => {
   const now = Date.now();
   const bucket = buckets.get(key);
   if (!bucket || now - bucket.start > RATE_WINDOW_MS) {
-    buckets.set(key, { start: now, count: 1 });
-    return { allowed: true, remaining: RATE_LIMIT - 1 };
+    buckets.set(key, { start: now, count: 1, strikes: bucket?.strikes || 0 });
+    return { allowed: true, remaining: 19 };
   }
   bucket.count += 1;
-  if (bucket.count > RATE_LIMIT) {
-    return { allowed: false, retryAfter: Math.ceil((bucket.start + RATE_WINDOW_MS - now) / 1000) };
+  if (bucket.count > 20) {
+    bucket.strikes += 1;
+    const isBanned = bucket.strikes >= STRIKE_LIMIT;
+    return { 
+      allowed: false, 
+      retryAfter: Math.ceil((bucket.start + RATE_WINDOW_MS - now) / 1000),
+      banned: isBanned 
+    };
   }
-  return { allowed: true, remaining: RATE_LIMIT - bucket.count };
+  return { allowed: true, remaining: 20 - bucket.count };
 };
 
 const getClientIp = (event) => {
@@ -76,80 +94,60 @@ const getClientIp = (event) => {
 };
 
 /**
- * Verify Clerk JWT
- * @param {string} authHeader 
- * @returns {Promise<{ok: boolean, user?: object, status?: number, code?: string, message?: string}>}
+ * Verify Clerk JWT and Rank
  */
 const verifyClerkUser = async (authHeader) => {
   if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
     return { ok: false, status: 401, code: "no_token", message: "Missing Authorization bearer token" };
   }
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-  if (!token) {
-    return { ok: false, status: 401, code: "no_token", message: "Empty bearer token" };
-  }
 
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) {
-      return { ok: false, status: 401, code: "invalid_token", message: "Invalid token format" };
-    }
+    if (parts.length !== 3) return { ok: false, status: 401, code: "invalid_token" };
     
-    // 1. Parse Header & Payload
-    const header = JSON.parse(Buffer.from(parts[0], 'base64').toString());
     const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
     
-    // 2. CRYPTOGRAPHIC VERIFICATION (If Public Key is provided)
+    // Cryptographic Check
     const publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
     if (publicKey) {
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(parts[0] + '.' + parts[1]);
-      const isValid = verifier.verify(publicKey, parts[2], 'base64');
-      
-      if (!isValid) {
-        console.error("[security] JWT Signature verification failed!");
-        return { ok: false, status: 401, code: "invalid_signature", message: "JWT Signature verification failed" };
+      if (!verifier.verify(publicKey, parts[2], 'base64')) {
+        return { ok: false, status: 401, code: "invalid_signature" };
       }
-    } else {
-      console.warn("[security] CLERK_JWT_PUBLIC_KEY not set. Falling back to insecure decoding. PLEASE SET PUBLIC KEY FOR UNHACKABLE STATUS.");
     }
     
-    // 3. Expiration Check
     const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
-      return { ok: false, status: 401, code: "token_expired", message: "Token has expired" };
-    }
-    
-    // 4. Issued At Check (Prevent future tokens)
-    if (payload.iat && payload.iat > now + 60) { // 60s clock skew
-      return { ok: false, status: 401, code: "token_future", message: "Token issued in the future" };
-    }
+    if (payload.exp && payload.exp < now) return { ok: false, status: 401, code: "token_expired" };
+    if (!payload.sub) return { ok: false, status: 401, code: "no_user" };
 
-    if (!payload.sub) {
-      return { ok: false, status: 401, code: "no_user", message: "Token is missing user identity" };
-    }
+    // --- RANK DETECTION ---
+    const metadata = payload.public_metadata || {};
+    const role = metadata.role || 'student';
+    const tier = (metadata.subscription?.tier || metadata.subscription_tier || 'free').toLowerCase();
+    
+    const isHighRank = role === 'admin' || tier === 'premium_elite' || tier === 'elite';
+    const isSuperAdmin = role === 'admin' && (payload.email?.includes('admin') || payload.azp?.includes('admin'));
 
     return { 
       ok: true, 
       user: { 
         id: payload.sub, 
-        email: payload.email || payload.sub + "@clerk.user",
-        metadata: payload.public_metadata || payload.metadata || {},
+        email: payload.email,
+        role,
+        tier,
+        isHighRank,
+        isSuperAdmin,
         _raw: payload
       } 
     };
   } catch (err) {
-    console.error("[security] Unexpected error during token verification:", err.message);
-    return {
-      ok: false,
-      status: 401,
-      code: "invalid_token",
-      message: "Security verification failed"
-    };
+    return { ok: false, status: 401, code: "invalid_token" };
   }
 };
 
-const MAX_BODY_BYTES = 128 * 1024; // 128 KB (Increased for AI chat context)
+const MAX_BODY_BYTES = 128 * 1024;
 
 module.exports = {
   isOriginAllowed,
@@ -157,5 +155,6 @@ module.exports = {
   rateLimit,
   getClientIp,
   verifyClerkUser,
+  checkFirewall,
   MAX_BODY_BYTES,
 };

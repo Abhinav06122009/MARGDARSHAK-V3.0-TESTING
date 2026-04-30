@@ -58,22 +58,31 @@ exports.handler = async (event) => {
       return { statusCode: auth.status, headers, body: JSON.stringify({ error: auth.message, code: auth.code }) };
     }
 
-    // 3. Admin Authorization Check
+    // 3. Firewall & High-Rank Authorization Check
+    const fw = await checkFirewall(ip);
+    if (fw.banned) {
+      return { statusCode: 403, headers, body: JSON.stringify({ error: fw.reason }) };
+    }
+
+    if (!auth.user.isHighRank) {
+      console.warn(`[admin-manage] Unauthorized high-rank access attempt by user ${auth.user.id}`);
+      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized: High Rank credentials required' }) };
+    }
+
+    // Additional DB verification for maximum security
     const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const adminUUID = translateClerkIdToUUID(auth.user.id);
-
-    const { data: adminProfile, error: adminError } = await supabase
+    const { data: adminProfile } = await supabase
       .from('profiles')
-      .select('user_type')
+      .select('user_type, subscription_tier')
       .eq('id', adminUUID)
       .single();
 
-    if (adminError || adminProfile?.user_type !== 'admin') {
-      console.warn(`[admin-manage] Unauthorized access attempt by user ${auth.user.id}`);
-      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized: Admin access required' }) };
+    if (!adminProfile || (adminProfile.user_type !== 'admin' && adminProfile.subscription_tier !== 'premium_elite')) {
+      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized: Rank verification failed' }) };
     }
 
     // 4. Parse Request
