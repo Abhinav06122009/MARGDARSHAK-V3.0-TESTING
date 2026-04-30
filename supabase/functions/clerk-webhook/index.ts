@@ -18,7 +18,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 serve(async (req) => {
   // CORS Preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: { "Access-Control-Allow-Origin": "*" } });
+    return new Response("ok");
   }
 
   const payload = await req.text();
@@ -44,7 +44,11 @@ serve(async (req) => {
   const eventType = evt.type;
 
   // CRITICAL: Translate Clerk ID to Deterministic UUID for RLS compatibility
-  const salt = Deno.env.get("ID_SALT") || "mg_default_internal_salt_v1";
+  const salt = Deno.env.get("ID_SALT");
+  if (!salt) {
+    console.error("CRITICAL SECURITY ERROR: ID_SALT is not configured.");
+    return new Response("Internal Security Error", { status: 500 });
+  }
   const id = await (async (clerkId: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(clerkId + salt);
@@ -108,7 +112,7 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { "Content-Type": "application/json" },
       status: 200,
     });
 
@@ -116,7 +120,7 @@ serve(async (req) => {
     console.error("Database operation failed:", err.message);
     return new Response(JSON.stringify({ error: err.message }), { 
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { "Content-Type": "application/json" }
     });
   }
 });

@@ -16,7 +16,10 @@ const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
   if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
 
-  const salt = process.env.ID_SALT || 'mg_default_internal_salt_v1';
+  const salt = process.env.ID_SALT;
+  if (!salt) {
+    throw new Error('CRITICAL SECURITY ERROR: ID_SALT is not configured.');
+  }
   const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
   
   return [

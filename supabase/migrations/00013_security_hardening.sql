@@ -59,8 +59,8 @@ BEGIN
         jsonb_build_object(
             'table', TG_TABLE_NAME,
             'operation', TG_OP,
-            'old_data', to_jsonb(OLD),
-            'new_data', to_jsonb(NEW)
+            'old_data', to_jsonb(OLD) - 'email' - 'full_name' - 'phone_number',
+            'new_data', to_jsonb(NEW) - 'email' - 'full_name' - 'phone_number'
         )
     );
     RETURN NEW;
