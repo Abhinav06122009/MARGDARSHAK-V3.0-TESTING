@@ -31,7 +31,7 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     if (!loading && session) {
-      navigate('/profile', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [session, loading, navigate]);
 
