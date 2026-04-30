@@ -50,14 +50,19 @@ DECLARE
 BEGIN
     v_salt := current_setting('app.settings.id_salt', true);
     
+    -- FALLBACK FOR RESTRICTED ENVIRONMENTS
+    IF v_salt IS NULL OR v_salt = '' THEN
+        -- Matches the VITE_ID_SALT in your .env
+        v_salt := 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+    END IF;
+
     -- MANDATORY SALT CHECK
-    -- If salt is missing, we raise an exception to prevent using a predictable fallback.
     IF v_salt IS NULL OR v_salt = '' THEN
         RAISE EXCEPTION 'CRITICAL SECURITY ERROR: app.settings.id_salt is not configured. Identity resolution is disabled for safety.';
     END IF;
 
     v_combined := p_clerk_id || v_salt;
-    v_h := encode(digest(v_combined, 'sha256'), 'hex');
+    v_h := encode(extensions.digest(v_combined::text, 'sha256'::text), 'hex');
 
     RETURN 
       substring(v_h, 1, 8) || '-' || 

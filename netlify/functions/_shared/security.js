@@ -121,15 +121,24 @@ const verifyClerkUser = async (authHeader) => {
     const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
     
     // Cryptographic Check - MANDATORY
-    const publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
+    let publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
     if (!publicKey) {
       console.error('CRITICAL: CLERK_JWT_PUBLIC_KEY is missing from environment.');
       return { ok: false, status: 500, code: "server_config_error", message: "Internal Security Configuration Error" };
     }
 
+    // Handle escaped newlines if the key was provided as a quoted string in .env
+    if (publicKey.includes('\\n')) {
+      publicKey = publicKey.replace(/\\n/g, '\n');
+    }
+    
+    // Ensure it's not wrapped in quotes if it came from a poorly formatted .env
+    publicKey = publicKey.replace(/^"|"$/g, '');
+
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(parts[0] + '.' + parts[1]);
     if (!verifier.verify(publicKey, parts[2], 'base64')) {
+      console.warn('[AUTH] Signature verification failed for token sub:', payload.sub);
       return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
     }
     

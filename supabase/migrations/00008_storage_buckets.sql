@@ -8,33 +8,36 @@ ON CONFLICT (id) DO NOTHING;
 
 -- STORAGE POLICIES
 -- 1. Allow public access to view avatars
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 CREATE POLICY "Public Access"
 ON storage.objects FOR SELECT
 USING ( bucket_id = 'avatars' );
 
 -- 2. Allow authenticated users to upload their own avatar
--- Note: We use auth.uid() which works with Supabase Auth or synced Clerk IDs
+DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
 CREATE POLICY "Users can upload their own avatar"
 ON storage.objects FOR INSERT
 WITH CHECK (
   bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
 -- 3. Allow users to update their own avatar
+DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
 CREATE POLICY "Users can update their own avatar"
 ON storage.objects FOR UPDATE
 USING (
   bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
 -- 4. Allow users to delete their own avatar
+DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
 CREATE POLICY "Users can delete their own avatar"
 ON storage.objects FOR DELETE
 USING (
   bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()
+  AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
 -- Ensure the profiles table is ready for the URLs

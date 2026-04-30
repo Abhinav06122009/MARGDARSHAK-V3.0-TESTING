@@ -1,5 +1,13 @@
--- ENSURE ADMIN ACCESS FOR THE PRIMARY USER
--- This migration forces the admin role for the specific user ID provided in the logs.
+-- CLEANUP STALE TRIGGERS (Prevents "ip_address" missing column errors from old versions)
+DROP TRIGGER IF EXISTS tr_forensic_log_profiles ON public.profiles;
+DROP TRIGGER IF EXISTS trigger_auto_ban ON public.security_logs;
+
+-- FIX: Ensure security_logs has the required columns for forensic logging
+ALTER TABLE public.security_logs ADD COLUMN IF NOT EXISTS ip_address TEXT;
+ALTER TABLE public.security_logs ADD COLUMN IF NOT EXISTS user_agent TEXT;
+
+-- Remove any existing profile with this email to avoid unique constraint violations
+DELETE FROM public.profiles WHERE email = 'abhinavjha393@gmail.com' AND id != 'user_3CyueymOUFein248UifL5xSPBOU';
 
 -- Update the profile to admin
 INSERT INTO public.profiles (id, email, full_name, user_type, subscription_tier)

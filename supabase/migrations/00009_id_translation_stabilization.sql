@@ -12,7 +12,7 @@ LANGUAGE sql STABLE
 AS $$
   SELECT (
     WITH hash AS (
-      SELECT encode(digest(p_clerk_id, 'sha256'), 'hex') as h
+      SELECT encode(extensions.digest(p_clerk_id::text, 'sha256'::text), 'hex') as h
     )
     SELECT 
       substring(h, 1, 8) || '-' || 

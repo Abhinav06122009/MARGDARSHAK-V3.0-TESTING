@@ -22,7 +22,14 @@ DECLARE
 BEGIN
     -- Check if the current user is an admin or using service role
     -- auth.role() returns 'service_role' for administrative operations
-    v_is_admin := (public.get_current_user_role() = 'admin') OR (current_setting('role', true) = 'service_role');
+    v_is_admin := (public.get_current_user_role() = 'admin') 
+               OR (current_setting('role', true) = 'service_role')
+               OR (auth.role() = 'service_role')
+               OR (current_user = 'service_role')
+               OR (current_user = 'postgres');
+
+    -- DEBUG (Visible in Supabase Logs)
+    -- RAISE NOTICE 'Security Check: User: %, Role: %, CurrentUser: %, IsAdmin: %', public.requesting_user_id(), auth.role(), current_user, v_is_admin;
 
     -- If not admin, prevent modification of sensitive fields
     IF NOT v_is_admin THEN

@@ -5,6 +5,7 @@
 -- 1. FIX: Allow Anonymous Security Threat Logging
 -- Currently, guests cannot log threats because 'null = null' is UNKNOWN.
 DROP POLICY IF EXISTS "Standard INSERT for security_threats" ON public.security_threats;
+DROP POLICY IF EXISTS "Allow anonymous threat logging" ON public.security_threats;
 
 CREATE POLICY "Allow anonymous threat logging"
 ON public.security_threats
@@ -38,7 +39,7 @@ BEGIN
     END IF;
 
     v_combined := p_clerk_id || v_salt;
-    v_h := encode(digest(v_combined, 'sha256'), 'hex');
+    v_h := encode(extensions.digest(v_combined::text, 'sha256'::text), 'hex');
 
     RETURN 
       substring(v_h, 1, 8) || '-' || 

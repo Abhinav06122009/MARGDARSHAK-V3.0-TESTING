@@ -21,7 +21,7 @@ BEGIN
     END IF;
 
     v_combined := p_clerk_id || v_salt;
-    v_h := encode(digest(v_combined, 'sha256'), 'hex');
+    v_h := encode(extensions.digest(v_combined::text, 'sha256'::text), 'hex');
 
     RETURN 
       substring(v_h, 1, 8) || '-' || 

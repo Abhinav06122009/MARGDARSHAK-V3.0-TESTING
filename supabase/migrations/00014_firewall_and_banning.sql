@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.security_blacklist (
 
 -- Enable RLS (Only admins can see/edit the blacklist)
 ALTER TABLE public.security_blacklist ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admins can manage blacklist" ON public.security_blacklist;
 CREATE POLICY "Admins can manage blacklist" ON public.security_blacklist
     FOR ALL USING (
         EXISTS (

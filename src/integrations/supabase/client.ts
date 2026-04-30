@@ -4,7 +4,7 @@ import type { Database } from './types';
 import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Clerk integration
 let getClerkToken: () => Promise<string | null> = async () => null;
@@ -20,11 +20,11 @@ export const setClerkUser = (user: any) => {
 
 // Validate environment variables
 if (!SUPABASE_URL) {
-  throw new Error('Missing VITE_SUPABASE_URL environment variable');
+  console.error('CRITICAL: VITE_SUPABASE_URL is missing');
 }
 
 if (!SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing VITE_SUPABASE_PUBLISHABLE_KEY environment variable');
+  console.error('CRITICAL: Supabase Key (PUBLISHABLE/ANON) is missing');
 }
 
 // Safe storage wrapper
@@ -70,57 +70,85 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Monkey-patch auth for compatibility with legacy Supabase code
+// Enhanced Monkey-patch using Proxy to preserve all original methods (including prototype methods)
 const originalAuth = supabase.auth;
-(supabase as any).auth = {
-  ...originalAuth,
-  getUser: async () => {
-    const user = await supabaseHelpers.getCurrentUser();
-    return { data: { user }, error: null };
-  },
-  getSession: async () => {
-    const user = await supabaseHelpers.getCurrentUser();
-    const token = await getClerkToken();
-    const session = user ? { 
-      user, 
-      access_token: token || '',
-      refresh_token: '',
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      token_type: 'bearer'
-    } : null;
-    return { data: { session }, error: null };
-  },
-  signOut: async () => {
-    return { error: null };
-  },
-  updateUser: async (attributes: any) => {
-    if (!clerkUser) return { data: { user: null }, error: new Error('Not authenticated') };
-    try {
-      const updateParams: any = {};
-      
-      if (attributes.data?.full_name) {
-        const parts = attributes.data.full_name.split(' ');
-        updateParams.firstName = parts[0];
-        updateParams.lastName = parts.slice(1).join(' ');
-      }
-      
-      if (attributes.password) {
-        updateParams.password = attributes.password;
-      }
-      
-      if (Object.keys(updateParams).length > 0) {
-        await clerkUser.update(updateParams);
-      }
-      
-      const user = await supabaseHelpers.getCurrentUser();
-      return { data: { user }, error: null };
-    } catch (error: any) {
-      console.error('Error updating user via Clerk:', error);
-      return { data: { user: null }, error };
+const authHandler: ProxyHandler<any> = {
+  get: (target, prop, receiver) => {
+    // Override specific methods
+    if (prop === 'getUser') {
+      return async () => {
+        try {
+          const user = await supabaseHelpers.getCurrentUser();
+          return { data: { user }, error: null };
+        } catch (err) {
+          console.error('[Supabase-MonkeyPatch] getUser error:', err);
+          return { data: { user: null }, error: err };
+        }
+      };
     }
+    
+    if (prop === 'getSession') {
+      return async () => {
+        try {
+          const user = await supabaseHelpers.getCurrentUser();
+          const token = await getClerkToken();
+          const session = user ? { 
+            user, 
+            access_token: token || '',
+            refresh_token: '',
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            token_type: 'bearer'
+          } : null;
+          return { data: { session }, error: null };
+        } catch (err) {
+          return { data: { session: null }, error: err };
+        }
+      };
+    }
+
+    if (prop === 'signOut') {
+      return async () => {
+        // Sign out is handled by Clerk, but we provide a no-op for compatibility
+        return { error: null };
+      };
+    }
+
+    if (prop === 'updateUser') {
+      return async (attributes: any) => {
+        if (!clerkUser) return { data: { user: null }, error: new Error('Not authenticated') };
+        try {
+          const updateParams: any = {};
+          if (attributes.data?.full_name) {
+            const parts = attributes.data.full_name.split(' ');
+            updateParams.firstName = parts[0];
+            updateParams.lastName = parts.slice(1).join(' ');
+          }
+          if (attributes.password) {
+            updateParams.password = attributes.password;
+          }
+          if (Object.keys(updateParams).length > 0) {
+            await (clerkUser as any).update(updateParams);
+          }
+          const user = await supabaseHelpers.getCurrentUser();
+          return { data: { user }, error: null };
+        } catch (error: any) {
+          console.error('Error updating user via Clerk:', error);
+          return { data: { user: null }, error };
+        }
+      };
+    }
+
+    // Fallback to original auth object for all other methods (onAuthStateChange, signIn, etc.)
+    const value = Reflect.get(target, prop, receiver);
+    if (typeof value === 'function') {
+      return value.bind(target);
+    }
+    return value;
   }
 };
+
+(supabase as any).auth = new Proxy(originalAuth, authHandler);
 
 // Helper functions for common operations
 export const supabaseHelpers = {

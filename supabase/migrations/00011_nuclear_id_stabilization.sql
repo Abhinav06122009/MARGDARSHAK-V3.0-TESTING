@@ -9,6 +9,9 @@ DECLARE
     v_column RECORD;
 BEGIN
     RAISE NOTICE '🚀 Starting Global Identity Harmonization...';
+    
+    -- Temporarily disable triggers to allow movement of sensitive data
+    ALTER TABLE public.profiles DISABLE TRIGGER ALL;
 
     -- 1. Loop through all profiles that have a Clerk ID
     FOR v_row IN (SELECT * FROM public.profiles WHERE clerk_id IS NOT NULL) LOOP
@@ -46,6 +49,9 @@ BEGIN
             RAISE NOTICE '✅ Successfully harmonized user: %', v_row.email;
         END IF;
     END LOOP;
+
+    -- Re-enable triggers
+    ALTER TABLE public.profiles ENABLE TRIGGER ALL;
 
     RAISE NOTICE '🏁 Global Harmonization Complete!';
 END $$;

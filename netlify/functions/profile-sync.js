@@ -91,19 +91,22 @@ exports.handler = async (event) => {
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // --- PREVENT ADMIN DOWNGRADE ---
+  // --- PREVENT ADMIN DOWNGRADE & PROTECT INTEGRITY ---
   const translatedId = translateClerkIdToUUID(auth.user.id);
 
-  // Fetch existing profile to check current role
+  // Fetch existing profile to preserve sensitive fields
   const { data: existingProfile } = await supabase
     .from('profiles')
-    .select('user_type')
+    .select('user_type, subscription_tier, is_blocked, blocked_reason')
     .eq('id', translatedId)
     .maybeSingle();
 
-  // ONLY TRUST VERIFIED CLERK METADATA FROM JWT FOR ROLE/TIER
-  const finalUserType = auth.user.role;
-  const finalTier = auth.user.tier;
+  // ONLY TRUST VERIFIED CLERK METADATA FROM JWT FOR ROLE/TIER IF DB IS EMPTY
+  // If the user is already an admin in the DB, KEEP IT.
+  const finalUserType = (existingProfile?.user_type === 'admin') ? 'admin' : (auth.user.role || 'student');
+  const finalTier = (existingProfile?.subscription_tier === 'pro' || existingProfile?.subscription_tier === 'infinity') 
+    ? existingProfile.subscription_tier 
+    : (auth.user.tier || 'free');
 
   const profileRow = {
     id: translatedId,
@@ -113,6 +116,8 @@ exports.handler = async (event) => {
     avatar_url: metadata.avatar_url || null,
     user_type: finalUserType,
     subscription_tier: finalTier,
+    is_blocked: existingProfile?.is_blocked || false,
+    blocked_reason: existingProfile?.blocked_reason || null,
     subscription_status: subscription.status || 'inactive',
     subscription_period_end: subscription.period_end ? new Date(subscription.period_end).toISOString() : null,
     updated_at: new Date().toISOString(),
