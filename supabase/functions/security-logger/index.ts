@@ -173,6 +173,24 @@ const analyzeThreat = (params: {
   return { score, level, flags, summary };
 };
 
+const translateClerkIdToUUID = async (clerkId: string) => {
+  const salt = Deno.env.get("ID_SALT") || "mg_default_internal_salt_v1";
+  const encoder = new TextEncoder();
+  const data = encoder.encode(clerkId + salt);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const h = Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  
+  return [
+    h.substring(0, 8),
+    h.substring(8, 12),
+    '4' + h.substring(13, 16),
+    '8' + h.substring(17, 20),
+    h.substring(20, 32)
+  ].join('-');
+};
+
 const resolveAuthenticatedUser = async (
   req: Request,
   supabaseUrl: string,
@@ -187,7 +205,12 @@ const resolveAuthenticatedUser = async (
 
   const { data, error } = await authClient.auth.getUser();
   if (error) return null;
-  return data.user;
+  
+  // CRITICAL: Translate User ID to UUID
+  const rawId = data.user.id;
+  const uuid = await translateClerkIdToUUID(rawId);
+  
+  return { ...data.user, id: uuid, rawId };
 };
 
 Deno.serve(async (req: Request) => {

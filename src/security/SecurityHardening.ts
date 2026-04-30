@@ -35,10 +35,11 @@ export const initSecurityHardening = () => {
       const clerk = (window as any).Clerk;
       if (!clerk?.user) return false;
       
+      // CRITICAL FIX: Only use publicMetadata for role checks. 
+      // unsafeMetadata can be modified by the user from the client.
       const metadata = clerk.user.publicMetadata || {};
-      const unsafeMetadata = clerk.user.unsafeMetadata || {};
-      const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-      const rawRoles = subscription.role || (metadata as any).role || (unsafeMetadata as any).role || [];
+      const subscription = (metadata.subscription as any) || {};
+      const rawRoles = subscription.role || (metadata as any).role || [];
       const roles = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
       const normalizedRoles = roles.map((r: any) => String(r).toLowerCase().replace(/_/g, ''));
 
@@ -120,7 +121,7 @@ export const initSecurityHardening = () => {
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 2 }
         });
         if (userId) {
-          await supabase.from('profiles').update({ is_blocked: true, blocked_reason: `STRIKE 2: Security violation (${type})` }).eq('id', userId);
+          // Client-side block attempt removed: Handled server-side via log-security-event
         }
         window.dispatchEvent(new CustomEvent('security-ban', { detail: { type, ip: currentIP } }));
       }

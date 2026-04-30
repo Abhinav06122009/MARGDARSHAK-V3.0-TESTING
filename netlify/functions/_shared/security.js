@@ -88,9 +88,21 @@ const rateLimit = (key) => {
 };
 
 const getClientIp = (event) => {
+  // On Netlify/Vercel, 'client-ip' or 'x-real-ip' are usually set by the load balancer.
+  // X-Forwarded-For can be spoofed unless we know the proxy count.
+  const verifiedIp = event.headers?.["client-ip"] || 
+                    event.headers?.["x-real-ip"] || 
+                    event.headers?.["x-nf-client-connection-ip"]; // Netlify specific
+  
+  if (verifiedIp) return verifiedIp;
+
   const fwd = event.headers?.["x-forwarded-for"] || event.headers?.["X-Forwarded-For"];
-  if (typeof fwd === "string" && fwd.length > 0) return fwd.split(",")[0].trim();
-  return event.headers?.["client-ip"] || event.headers?.["x-real-ip"] || "unknown";
+  if (typeof fwd === "string" && fwd.length > 0) {
+    // If multiple IPs, take the first one (most likely client)
+    return fwd.split(",")[0].trim();
+  }
+  
+  return "unknown";
 };
 
 /**
@@ -108,14 +120,17 @@ const verifyClerkUser = async (authHeader) => {
     
     const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
     
-    // Cryptographic Check
+    // Cryptographic Check - MANDATORY
     const publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
-    if (publicKey) {
-      const verifier = crypto.createVerify('RSA-SHA256');
-      verifier.update(parts[0] + '.' + parts[1]);
-      if (!verifier.verify(publicKey, parts[2], 'base64')) {
-        return { ok: false, status: 401, code: "invalid_signature" };
-      }
+    if (!publicKey) {
+      console.error('CRITICAL: CLERK_JWT_PUBLIC_KEY is missing from environment.');
+      return { ok: false, status: 500, code: "server_config_error", message: "Internal Security Configuration Error" };
+    }
+
+    const verifier = crypto.createVerify('RSA-SHA256');
+    verifier.update(parts[0] + '.' + parts[1]);
+    if (!verifier.verify(publicKey, parts[2], 'base64')) {
+      return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
     }
     
     const now = Math.floor(Date.now() / 1000);
@@ -124,11 +139,14 @@ const verifyClerkUser = async (authHeader) => {
 
     // --- RANK DETECTION ---
     const metadata = payload.public_metadata || {};
-    const role = metadata.role || 'student';
+    const role = (metadata.role || 'student').toLowerCase();
     const tier = (metadata.subscription?.tier || metadata.subscription_tier || 'free').toLowerCase();
     
-    const isHighRank = role === 'admin' || tier === 'premium_elite' || tier === 'elite';
-    const isSuperAdmin = role === 'admin' && (payload.email?.includes('admin') || payload.azp?.includes('admin'));
+    // CRITICAL SECURITY FIX: Only 'admin' role grants high rank. 
+    // Subscription tiers (like premium_elite) should NOT grant administrative privileges.
+    const isHighRank = role === 'admin' || role === 'superadmin';
+    const isSuperAdmin = (role === 'admin' || role === 'superadmin') && 
+                        (payload.email?.toLowerCase().includes('admin') || payload.azp?.includes('admin'));
 
     return { 
       ok: true, 
@@ -143,7 +161,8 @@ const verifyClerkUser = async (authHeader) => {
       } 
     };
   } catch (err) {
-    return { ok: false, status: 401, code: "invalid_token" };
+    console.error('[AUTH ERROR] Token verification failed:', err.message);
+    return { ok: false, status: 401, code: "invalid_token", message: "Invalid or malformed token" };
   }
 };
 

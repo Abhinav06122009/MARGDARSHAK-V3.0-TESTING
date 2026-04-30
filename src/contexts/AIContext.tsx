@@ -42,26 +42,14 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (clerkUser) {
         // ROBUST CLERK EXTRACTION
         const metadata = clerkUser.publicMetadata || {};
-        const unsafeMetadata = clerkUser.unsafeMetadata || {};
-        const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+        const subscription = (metadata.subscription as any) || {};
         
         let tier = (
           subscription.tier || 
           (metadata as any).subscription_tier || 
-          (unsafeMetadata as any).subscription_tier || 
           (metadata as any).tier || 
-          (unsafeMetadata as any).tier || 
           'free'
         ).toLowerCase();
-
-        // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
-        if (tier === 'free') {
-          const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-          if (fullUserStr.includes('elite')) tier = 'premium_elite';
-          else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
-            tier = 'premium';
-          }
-        }
 
         // MASTER OVERRIDES
         const MASTER_IDS = [

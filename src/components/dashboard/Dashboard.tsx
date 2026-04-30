@@ -208,32 +208,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const realSubscriptionTier = useMemo(() => {
     if (!clerkLoaded || !clerkUser) return currentUser?.profile?.subscription_tier || null;
     const metadata = clerkUser.publicMetadata || {};
-    const unsafeMetadata = clerkUser.unsafeMetadata || {};
     
     // Deep Extraction from all known Clerk paths
-    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
+    const subscription = (metadata.subscription as any) || {};
     const rawTier = (
       subscription.tier || 
       (metadata as any).subscription_tier || 
-      (unsafeMetadata as any).subscription_tier || 
       (metadata as any).tier || 
-      (unsafeMetadata as any).tier || 
       currentUser?.profile?.subscription_tier || 
       'free'
     );
     
     let tier = Array.isArray(rawTier) ? String(rawTier[0]).toLowerCase() : String(rawTier).toLowerCase();
     
-    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object for keywords
-    // This catches cases where metadata is empty but the subscription exists in other fields
-    if (tier === 'free') {
-      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-      if (fullUserStr.includes('elite')) tier = 'premium_elite';
-      else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
-        tier = 'premium';
-      }
-    }
-
     // MASTER OVERRIDES for specific power users
     const MASTER_IDS = [
       'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', // Admin

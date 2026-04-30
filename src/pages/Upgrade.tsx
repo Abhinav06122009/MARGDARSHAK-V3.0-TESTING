@@ -224,7 +224,7 @@ const Upgrade = () => {
                 <a
                   href="#"
                   className="uropay-btn w-full block text-center py-6 text-[10px] font-black tracking-[0.3em] uppercase rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 transform active:scale-95 italic"
-                  data-uropay-api-key="PLSKD1Y8ILA2EJGYC4XDDVTBRTVWFYF4"
+                  data-uropay-api-key={import.meta.env.VITE_UROPAY_API_KEY || "ENV_MISSING"}
                   data-uropay-button-id="ECHO559265"
                   data-uropay-environment="LIVE"
                   data-uropay-amount="750"
@@ -285,7 +285,7 @@ const Upgrade = () => {
                 <a
                   href="#"
                   className="uropay-btn w-full block text-center py-6 text-[10px] font-black tracking-[0.3em] uppercase rounded-2xl bg-emerald-500 text-black hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/20 transform active:scale-95 italic"
-                  data-uropay-api-key="PLSKD1Y8ILA2EJGYC4XDDVTBRTVWFYF4"
+                  data-uropay-api-key={import.meta.env.VITE_UROPAY_API_KEY || "ENV_MISSING"}
                   data-uropay-button-id="VICTOR148602"
                   data-uropay-environment="LIVE"
                   data-uropay-amount="1200"

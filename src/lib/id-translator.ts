@@ -18,8 +18,9 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
   }
 
   try {
-    // 1. Encode the clerkId as UTF-8
-    const msgBuffer = new TextEncoder().encode(clerkId);
+    // 1. Combine with salt and encode as UTF-8
+    const salt = import.meta.env.VITE_ID_SALT || 'mg_default_internal_salt_v1';
+    const msgBuffer = new TextEncoder().encode(clerkId + salt);
     
     // 2. Generate SHA-256 hash
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);

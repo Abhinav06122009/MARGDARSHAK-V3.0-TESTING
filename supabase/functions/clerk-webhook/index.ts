@@ -40,10 +40,29 @@ serve(async (req) => {
     return new Response("Invalid signature", { status: 400 });
   }
 
-  const { id, ...attributes } = evt.data;
+  const { id: rawId, ...attributes } = evt.data;
   const eventType = evt.type;
 
-  console.log(`Processing ${eventType} for user: ${id}`);
+  // CRITICAL: Translate Clerk ID to Deterministic UUID for RLS compatibility
+  const salt = Deno.env.get("ID_SALT") || "mg_default_internal_salt_v1";
+  const id = await (async (clerkId: string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(clerkId + salt);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const h = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    return [
+      h.substring(0, 8),
+      h.substring(8, 12),
+      '4' + h.substring(13, 16),
+      '8' + h.substring(17, 20),
+      h.substring(20, 32)
+    ].join('-');
+  })(rawId);
+
+  console.log(`Processing ${eventType} for user: ${rawId} (UUID: ${id})`);
 
   try {
     // 1. Sync Create & Update

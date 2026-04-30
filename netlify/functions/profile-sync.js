@@ -16,7 +16,8 @@ const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
   if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
 
-  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
+  const salt = process.env.ID_SALT || 'mg_default_internal_salt_v1';
+  const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
   
   return [
     hash.slice(0, 8),
@@ -97,13 +98,9 @@ exports.handler = async (event) => {
     .eq('id', translatedId)
     .maybeSingle();
 
-  // ONLY TRUST VERIFIED CLERK METADATA FOR ROLE
-  const newUserType = (clerkMetadata.role || clerkMetadata.subscription_tier || 'student').toLowerCase();
-  
-  // Master safeguard: Only preserve admin if already exists, OR if coming from verified JWT
-  const finalUserType = (existingProfile?.user_type === 'admin' && newUserType !== 'admin' && !clerkMetadata.role) 
-    ? 'admin' 
-    : newUserType;
+  // ONLY TRUST VERIFIED CLERK METADATA FROM JWT FOR ROLE/TIER
+  const finalUserType = auth.user.role;
+  const finalTier = auth.user.tier;
 
   const profileRow = {
     id: translatedId,
@@ -112,7 +109,7 @@ exports.handler = async (event) => {
     full_name: fullName,
     avatar_url: metadata.avatar_url || null,
     user_type: finalUserType,
-    subscription_tier: subscription.tier || clerkMetadata.subscription_tier || 'free',
+    subscription_tier: finalTier,
     subscription_status: subscription.status || 'inactive',
     subscription_period_end: subscription.period_end ? new Date(subscription.period_end).toISOString() : null,
     updated_at: new Date().toISOString(),

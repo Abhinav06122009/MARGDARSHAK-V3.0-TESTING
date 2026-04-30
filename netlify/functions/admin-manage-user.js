@@ -17,7 +17,8 @@ const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
   if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
 
-  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
+  const salt = process.env.ID_SALT || 'mg_z3n1th_0rigin_d3fault_v1_0xf8';
+  const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
   
   return [
     hash.slice(0, 8),
@@ -81,8 +82,9 @@ exports.handler = async (event) => {
       .eq('id', adminUUID)
       .single();
 
-    if (!adminProfile || (adminProfile.user_type !== 'admin' && adminProfile.subscription_tier !== 'premium_elite')) {
-      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized: Rank verification failed' }) };
+    if (!adminProfile || adminProfile.user_type !== 'admin') {
+      console.warn(`[admin-manage] Rank verification failed for user ${auth.user.id}`);
+      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized: Admin rank verification failed' }) };
     }
 
     // 4. Parse Request

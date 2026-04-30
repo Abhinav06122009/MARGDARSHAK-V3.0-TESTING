@@ -33,18 +33,12 @@ export const initConsoleGuard = () => {
   const originalError = console.error;
   const originalWarn = console.warn;
 
-  // EXPOSE DEBUG TRACE (Hidden back-door for debugging)
-  (window as any)._trace = {
-    log: originalLog,
-    error: originalError,
-    warn: originalWarn,
-    clear: originalClear
-  };
 
-  // Check for Debug Bypass
-  const isDebug = 
+  // Check for Debug Bypass - ONLY ALLOWED IN DEV
+  const isDebug = import.meta.env.DEV && (
     localStorage.getItem('debug') === 'true' || 
-    window.location.search.includes('debug=true');
+    window.location.search.includes('debug=true')
+  );
 
   const showWarning = () => {
     if (isDebug) {

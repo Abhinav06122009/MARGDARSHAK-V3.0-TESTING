@@ -182,6 +182,24 @@ exports.handler = async (event) => {
       // Still return 200 to client — logging failure is non-fatal
     } else {
       console.log(`[log-security-event] Logged '${eventType}' for ${userEmail || "anonymous"} from ${ip}`);
+      
+      // --- AUTOMATED ACCOUNT BLOCKING ---
+      if (riskScore >= 100 && verifiedUser?.id) {
+        console.warn(`[log-security-event] CRITICAL RISK DETECTED. Blocking account: ${verifiedUser.id}`);
+        await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${verifiedUser.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: serviceRoleKey,
+            Authorization: `Bearer ${serviceRoleKey}`,
+          },
+          body: JSON.stringify({
+            is_blocked: true,
+            blocked_reason: `Automated security block: ${eventType} (Risk: ${riskScore})`,
+            updated_at: new Date().toISOString()
+          }),
+        }).catch(e => console.error("[log-security-event] Account block failed:", e.message));
+      }
     }
   } catch (e) {
     console.error("[log-security-event] Network error during insert:", e.message);

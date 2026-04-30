@@ -198,22 +198,8 @@ export const securityFeatures = {
   },
 
   checkRateLimit: (email: string) => {
-    const attempts = localStorage.getItem(`auth_attempts_${email}`);
-    const lastAttempt = localStorage.getItem(`last_attempt_${email}`);
-    
-    if (attempts && parseInt(attempts) >= 10) { // Increased limit for better UX
-      const timeDiff = Date.now() - parseInt(lastAttempt || '0');
-      const lockTime = 2 * 60 * 1000; // 2 minutes instead of 10
-      if (timeDiff < lockTime) {
-        const remaining = lockTime - timeDiff;
-        const seconds = Math.ceil(remaining / 1000);
-        return { allowed: false, remainingTime: `${seconds}s` };
-      } else { 
-        localStorage.removeItem(`auth_attempts_${email}`);
-        localStorage.removeItem(`last_attempt_${email}`);
-      }
-    }
-    
+    // Client-side rate limiting removed (insecure). 
+    // Rate limiting is now strictly enforced server-side in Netlify functions.
     return { allowed: true };
   },
 

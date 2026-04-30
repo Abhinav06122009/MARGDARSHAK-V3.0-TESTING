@@ -78,8 +78,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     // Check both the RPC role and the Profile role
     // Support Clerk-based roles in metadata as a fallback
     const metadata = clerkUser?.publicMetadata || {};
-    const unsafeMetadata = clerkUser?.unsafeMetadata || {};
-    const rawClerkRole = metadata.role || unsafeMetadata.role || (metadata as any).user_type || (unsafeMetadata as any).user_type || '';
+    const rawClerkRole = metadata.role || (metadata as any).user_type || '';
     
     // Normalize Clerk roles to an array
     const clerkRoles = Array.isArray(rawClerkRole) 

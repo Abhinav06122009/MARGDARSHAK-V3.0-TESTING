@@ -78,17 +78,10 @@ export const PremiumEliteRoute = ({ children }: { children: React.ReactNode }) =
     }
 
     const metadata = clerkUser.publicMetadata || {};
-    const unsafeMetadata = clerkUser.unsafeMetadata || {};
-    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-    const rawTier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free');
+    const subscription = (metadata.subscription as any) || {};
+    const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free');
     let tier = Array.isArray(rawTier) ? String(rawTier[0]).toLowerCase() : String(rawTier).toLowerCase();
     
-    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
-    if (tier === 'free') {
-      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-      if (fullUserStr.includes('elite')) tier = 'premium_elite';
-    }
-
     // MASTER OVERRIDES
     const MASTER_IDS = [
       'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
@@ -124,20 +117,10 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     const metadata = clerkUser.publicMetadata || {};
-    const unsafeMetadata = clerkUser.unsafeMetadata || {};
-    const subscription = (metadata.subscription as any) || (unsafeMetadata.subscription as any) || {};
-    const rawTier = (subscription.tier || (metadata as any).subscription_tier || (unsafeMetadata as any).subscription_tier || (metadata as any).tier || (unsafeMetadata as any).tier || 'free');
+    const subscription = (metadata.subscription as any) || {};
+    const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free');
     let tier = Array.isArray(rawTier) ? String(rawTier[0]).toLowerCase() : String(rawTier).toLowerCase();
     
-    // NUCLEAR FUZZY FALLBACK: Scan the entire Clerk User object
-    if (tier === 'free') {
-      const fullUserStr = JSON.stringify(clerkUser).toLowerCase();
-      if (fullUserStr.includes('elite')) tier = 'premium_elite';
-      else if (fullUserStr.includes('premium') || fullUserStr.includes('plus') || fullUserStr.includes('pro')) {
-        tier = 'premium';
-      }
-    }
-
     // MASTER OVERRIDES
     const MASTER_IDS = [
       'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
