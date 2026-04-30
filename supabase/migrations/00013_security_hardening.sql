@@ -81,19 +81,23 @@ END $$;
 
 -- 5. STORAGE BUCKET HARDENING
 -- Ensure avatars and reports buckets are private and only accessible by owners
--- (Assuming storage schema exists)
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'storage') THEN
         -- Avatars: Public to read, Owner to write
-        DELETE FROM storage.policies WHERE name = 'Avatar visibility';
-        INSERT INTO storage.policies (name, bucket_id, definition, check_expression, operation)
-        VALUES ('Avatar visibility', 'avatars', '(bucket_id = ''avatars'')', NULL, 'SELECT');
+        DROP POLICY IF EXISTS "Avatar visibility" ON storage.objects;
+        CREATE POLICY "Avatar visibility" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+        
+        DROP POLICY IF EXISTS "Avatar upload" ON storage.objects;
+        CREATE POLICY "Avatar upload" ON storage.objects FOR ALL USING (
+            bucket_id = 'avatars' AND (storage.foldername(name))[1] = public.requesting_user_id()
+        );
         
         -- Reports: Only owner can read/write
-        DELETE FROM storage.policies WHERE name = 'Report privacy';
-        INSERT INTO storage.policies (name, bucket_id, definition, check_expression, operation)
-        VALUES ('Report privacy', 'reports', '(bucket_id = ''reports'' AND (storage.foldername(name))[1] = public.requesting_user_id())', NULL, 'ALL');
+        DROP POLICY IF EXISTS "Report privacy" ON storage.objects;
+        CREATE POLICY "Report privacy" ON storage.objects FOR ALL USING (
+            bucket_id = 'reports' AND (storage.foldername(name))[1] = public.requesting_user_id()
+        );
     END IF;
 END $$;
 
