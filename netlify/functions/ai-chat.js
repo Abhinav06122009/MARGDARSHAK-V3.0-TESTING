@@ -110,7 +110,7 @@ exports.handler = async (event) => {
     }
     apiKeyToUse = userApiKey;
   } else {
-    apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY || process.env.VITE_OPENAI_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
+    apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
   }
 
   if (!apiKeyToUse) {

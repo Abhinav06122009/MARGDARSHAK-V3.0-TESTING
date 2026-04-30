@@ -46,43 +46,8 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
     ? [{ role: 'system', content: options.systemPrompt }, ...messages]
     : messages;
 
-  // Local testing bypass - Enhanced with real OpenRouter linkage
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('webcontainer')) {
-    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
-    if (apiKey) {
-      try {
-        const isElite = options.tier === 'premium_elite' || options.tier === 'extra_plus' || options.tier === 'premium_plus';
-        const isPremium = options.tier === 'premium' || isElite;
-        
-        const modelToUse = options.model || (isElite ? ELITE_TEXT_MODEL : isPremium ? PREMIUM_TEXT_MODEL : DEFAULT_TEXT_MODEL);
-        
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://margdarshak.ai',
-            'X-Title': 'Margdarshak AI Orchestrator',
-          },
-          body: JSON.stringify({
-            model: modelToUse,
-            messages: payload,
-            temperature: 0.7,
-            max_tokens: 2000,
-          }),
-        });
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`OpenRouter Error (${res.status}): ${errorText}`);
-        }
-        const data = await res.json();
-        return data.choices?.[0]?.message?.content || '';
-      } catch (e: any) {
-        console.error("OpenRouter API error:", e);
-        throw new Error(`AI Linkage Failed: ${e.message}`);
-      }
-    }
-  }
+  // All AI requests must go through the secure backend gateway.
+  // We no longer allow client-side OpenRouter calls to prevent API key leakage.
 
   const { authedFetch, readErrorMessage } = await import('@/lib/ai/authedFetch');
   
@@ -107,65 +72,7 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
 const callGateway = async (messages: any[], options: RouterOptions): Promise<string> => {
   const hasImage = options.imageFile instanceof File;
 
-  // Local testing bypass for images
-  if (hasImage && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_OPENAI_API_KEY;
-    if (apiKey) {
-      try {
-        // Convert File to Base64
-        const fileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
-        const base64Image = await fileToBase64(options.imageFile as File);
-        
-        // Construct vision payload
-        const visionMessages = messages.map(msg => {
-          if (msg.role === 'user') {
-            return {
-              role: 'user',
-              content: [
-                { type: 'text', text: msg.content },
-                { type: 'image_url', image_url: { url: base64Image } }
-              ]
-            };
-          }
-          return msg;
-        });
-
-        const payload = options.systemPrompt
-          ? [{ role: 'system', content: options.systemPrompt }, ...visionMessages]
-          : visionMessages;
-
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Margdarshak Local Vision Test',
-          },
-          body: JSON.stringify({
-            model: options.model || 'google/gemini-2.5-flash',
-            messages: payload,
-          }),
-        });
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`Local OpenRouter Vision request failed (${res.status}): ${errorText}`);
-        }
-        const data = await res.json();
-        return data.choices?.[0]?.message?.content || '';
-      } catch (e: any) {
-        console.error("Local testing API error:", e);
-        throw new Error(`Local OpenRouter Vision error: ${e.message}. Please check your API key in .env`);
-      }
-    }
-  }
+  // Vision requests are also strictly proxied through the backend.
 
   // Text-only requests use our own secure backend endpoint that calls
   // OpenRouter (NVIDIA Nemotron 3) using the server-side OPENAI_API_KEY.

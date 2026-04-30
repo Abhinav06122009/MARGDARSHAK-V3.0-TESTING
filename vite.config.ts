@@ -158,10 +158,10 @@ const aiPlugin = (): Plugin => ({
   configureServer(server) {
     const callOpenRouter = async (body: any, origin: string | null, userApiKey?: string) => {
       // Logic: If user provides a key, use it. Otherwise, use inbuilt if it's elite context.
-      const inbuiltKey = process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY || process.env.VITE_OPENAI_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
+      const inbuiltKey = process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
       const apiKeyToUse = userApiKey || inbuiltKey;
 
-      if (!apiKeyToUse) return { status: 500, body: { error: "No AI API Key available" } };
+      if (!apiKeyToUse) return { status: 500, body: { error: "No AI API Key available. Please configure OPENAI_API_KEY in your environment." } };
       
       const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",

@@ -167,6 +167,13 @@ const DashboardRouteWrapper = () => {
 const AppContent = () => {
   const location = useLocation();
 
+  useEffect(() => {
+    // INITIALIZE UNHACKABLE PROTOCOL V3 (Zero-Threat Shield)
+    import('@/components/auth/AuthSecurity').then(({ securityFeatures }) => {
+      securityFeatures.initZeroThreatShield();
+    });
+  }, []);
+
   return (
     <ClerkSupabaseBridge>
       <TooltipProvider>
