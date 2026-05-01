@@ -1,19 +1,10 @@
-[functions]
-  node_bundler = "esbuild"
-
-[functions."neuro-engine"]
-  timeout = 26
-
-[functions."ai-chat"]
-  timeout = 26
-
 [build]
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "18"
   SECRETS_SCAN_OMIT_KEYS = "ID_SALT,SUPABASE_SERVICE_ROLE_KEY,FUNCTION_SUPABASE_SERVICE_ROLE_KEY,SAMBANOVA_API_KEY,SERPER_API_KEY,OPENROUTER_API_KEY,VITE_GITHUB_AI_TOKEN,VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,OPENAI_API_KEY"
 
 [[redirects]]

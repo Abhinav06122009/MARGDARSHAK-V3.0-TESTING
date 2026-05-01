@@ -30,7 +30,9 @@ exports.handler = async (event) => {
     // Robust token parse
     let user;
     try {
-      user = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+      // Use standard base64 decoding but replace URL-safe chars if needed
+      const base64 = token.split(".")[1].replace(/-/g, '+').replace(/_/g, '/');
+      user = JSON.parse(Buffer.from(base64, "base64").toString());
     } catch (e) {
       return { statusCode: 401, headers, body: JSON.stringify({ error: "Invalid identity token" }) };
     }
