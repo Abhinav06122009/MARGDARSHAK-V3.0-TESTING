@@ -157,8 +157,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
       const body = JSON.stringify({
         model: selectedModel,
-        messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
-        response_format: payload.jsonMode ? { type: "json_object" } : undefined
+        messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem]
       });
       
       const pollHeaders = {
