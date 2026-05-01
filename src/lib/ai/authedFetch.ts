@@ -32,23 +32,27 @@ export async function authedFetch(
   
   let token = null;
   try {
+    // 1. Try to get from Supabase (which should be bridged to Clerk)
     const { data: { session } } = await supabase.auth.getSession();
     token = session?.access_token;
+    
+    // 2. Fallback: Try to get directly from global Clerk instance if available
+    if (!token && (window as any).Clerk?.session) {
+      console.log('[authedFetch] Supabase token missing, pulling directly from Clerk.');
+      token = await (window as any).Clerk.session.getToken();
+    }
   } catch (err) {
-    console.warn('[authedFetch] Supabase session check failed, using fallback.');
+    console.warn('[authedFetch] Token retrieval failed:', err);
   }
   
   if (!token) {
-    // If supabase doesn't have it, we might be in a transitional state.
-    // We throw a clear error that can be caught by UI components.
     throw new Error("UNAUTHORIZED_AI_ACCESS: Please ensure you are signed in and your session is active.");
   }
 
   let res = await attach(token);
   
-  // If we get a 401, it means the token was present but rejected.
   if (res.status === 401) {
-    console.error(`[authedFetch] 401 Unauthorized for ${input}. Token may be invalid or expired.`);
+    console.error(`[authedFetch] 401 Unauthorized for ${input}. Token may be invalid or rejected by backend.`);
   } else if (!res.ok) {
     const errorMsg = await readErrorMessage(res);
     console.error(`[authedFetch] Error ${res.status}: ${errorMsg}`);

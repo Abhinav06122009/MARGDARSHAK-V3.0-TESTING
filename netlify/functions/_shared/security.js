@@ -135,15 +135,16 @@ const verifyClerkUser = async (authHeader) => {
     // Ensure it's not wrapped in quotes if it came from a poorly formatted .env
     publicKey = publicKey.replace(/^"|"$/g, '');
 
-    const verifier = crypto.createVerify('RSA-SHA256');
-    verifier.update(parts[0] + '.' + parts[1]);
-    
-    // Clerk uses base64url for signatures. Convert to base64 for crypto.verify
-    const base64Signature = parts[2].replace(/-/g, '+').replace(/_/g, '/');
-    
-    if (!verifier.verify(publicKey, base64Signature, 'base64')) {
-      console.warn('[AUTH] Signature verification failed for token sub:', payload.sub);
-      return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
+    // Clerk uses base64url for signatures. Node.js Buffer handles this natively.
+    try {
+      const signatureBuffer = Buffer.from(parts[2], 'base64url');
+      if (!verifier.verify(publicKey, signatureBuffer)) {
+        console.warn('[AUTH] Signature verification failed for token sub:', payload.sub);
+        return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
+      }
+    } catch (verifyErr) {
+      console.error('[AUTH] Cryptographic error during verification:', verifyErr.message);
+      return { ok: false, status: 401, code: "crypto_error", message: "Verification process failed" };
     }
     
     const now = Math.floor(Date.now() / 1000);

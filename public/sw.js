@@ -31,14 +31,6 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Original legacy logic
-self.options = {
-    "domain": "5gvci.com",
-    "zoneId": 10569681
-}
-self.lary = ""
-try {
-  importScripts('https://5gvci.com/act/files/service-worker.min.js?r=sw')
-} catch (e) {
-  console.log('Legacy SW script failed to load');
-}
+// Original legacy logic removed due to CSP violations and stability issues
+// self.options = { ... }
+// importScripts('...')

@@ -103,8 +103,13 @@ const Flashcards: React.FC = () => {
         setSourceText('');
         setView('decks');
       }
-    } catch (e) {
-      toast({ title: 'Flashcard Error', description: 'Flashcard synthesis failed. Please try again.', variant: 'destructive' });
+    } catch (e: any) {
+      console.error('[Flashcards] Synthesis failed:', e);
+      toast({ 
+        title: 'Flashcard Error', 
+        description: e.message || 'Flashcard synthesis failed. Please try again.', 
+        variant: 'destructive' 
+      });
     } finally {
       setIsGenerating(false);
     }
