@@ -122,24 +122,43 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
+      
+      // Fallback keys if env vars are missing
+      const DEFAULT_KEY = 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv';
+      const TIMETABLE_KEY = 'sk_Hq0l9zsr4yj3INNmvDSXsW8xHWml3EUZ';
+
       const apiKey = selectedModel === 'qwen-safety'
-        ? process.env.POLLINATIONS_TIMETABLE_KEY
-        : (process.env.POLLINATIONS_API_KEY || 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv');
+        ? (process.env.POLLINATIONS_TIMETABLE_KEY || TIMETABLE_KEY)
+        : (process.env.POLLINATIONS_API_KEY || DEFAULT_KEY);
+
+      if (!apiKey) {
+        throw new Error(`Missing API key for model: ${selectedModel}`);
+      }
+
       const body = JSON.stringify({
         model: selectedModel,
         messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
         response_format: payload.jsonMode ? { type: "json_object" } : undefined
       });
+      
       const pollHeaders = {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       };
-      const res = await fetch(pollUrl, { method: "POST", headers: pollHeaders, body });
-      const rawText = await res.text();
-      let data;
-      try { data = JSON.parse(rawText); } catch(e) {
-        throw new Error(`Non-JSON from provider (${res.status}): ${rawText.substring(0, 150)}`);
+
+      const res = await fetch(pollUrl, { 
+        method: "POST", 
+        headers: pollHeaders, 
+        body,
+        signal: AbortSignal.timeout(25000) // 25s timeout to stay under Netlify's 30s limit
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Pollinations API error (${res.status}): ${errText.substring(0, 200)}`);
       }
+
+      const data = await res.json();
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       return data;
     };
