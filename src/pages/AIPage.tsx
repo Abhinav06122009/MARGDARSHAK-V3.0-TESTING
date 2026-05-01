@@ -55,7 +55,11 @@ const SmartTutorPage = () => {
       const role = String((metadata as any).role || '').toLowerCase();
       
       const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
-      if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin') {
+      
+      const rawRoleData = metadata.role;
+      const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
+      
+      if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin' || isCeo) {
         tier = 'premium_elite';
       }
       

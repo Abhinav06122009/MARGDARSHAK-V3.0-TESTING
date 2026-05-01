@@ -221,13 +221,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     
     let tier = Array.isArray(rawTier) ? String(rawTier[0]).toLowerCase() : String(rawTier).toLowerCase();
     
-    // MASTER OVERRIDES for specific power users
     const MASTER_IDS = [
       'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', // Admin
       'user_3CylWpMJnNbVpgJcpk9eSIf73gS'  // User from logs
     ];
     
-    if (MASTER_IDS.includes(clerkUser.id)) {
+    const rawRoleData = metadata.role;
+    const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
+    
+    if (MASTER_IDS.includes(clerkUser.id) || isCeo) {
       tier = 'premium_elite';
     }
     
