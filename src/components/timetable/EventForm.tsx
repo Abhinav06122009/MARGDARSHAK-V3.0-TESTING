@@ -16,6 +16,7 @@ interface EventFormProps {
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   editingEvent: any | null;
   hasPremiumAccess: boolean;
+  onSuggestTime: () => void;
   onClose: () => void;
 }
 
@@ -25,6 +26,7 @@ const EventForm: React.FC<EventFormProps> = ({
   handleSubmit,
   editingEvent,
   hasPremiumAccess,
+  onSuggestTime,
   onClose,
 }) => {
   const { toast } = useToast();
@@ -40,9 +42,7 @@ const EventForm: React.FC<EventFormProps> = ({
         return;
     }
     // The actual suggestion logic is in the parent component
-    // This button will trigger the function passed via props if we move the logic
-    // For now, we just call a prop function.
-    (window as any).handleSuggestTime(); // This is a temporary way to call parent function
+    onSuggestTime();
   };
 
   return (

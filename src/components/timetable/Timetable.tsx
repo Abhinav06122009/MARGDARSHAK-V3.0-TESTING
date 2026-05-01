@@ -992,6 +992,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
                   handleSubmit={handleSubmit}
                   editingEvent={editingEvent}
                   hasPremiumAccess={hasPremiumAccess}
+                  onSuggestTime={handleSuggestTime}
                   onClose={() => {
                     setIsSheetOpen(false);
                     resetForm();
