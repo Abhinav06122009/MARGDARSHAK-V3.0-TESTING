@@ -220,15 +220,27 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
 
   const handleGeneratePath = async () => {
     if (!currentUser) return;
-    if (currentUser.profile?.subscription_tier !== 'premium_elite') {
-      toast({ title: "Elite Feature", description: "Upgrade to generate AI Learning Paths.", variant: "destructive" });
+    
+    const isPremium = ['premium_elite', 'premium_plus', 'premium+elite'].includes(currentUser.profile?.subscription_tier || '');
+    if (!isPremium) {
+      toast({ title: "Elite Feature", description: "Upgrade to premium_elite to generate AI Learning Paths.", variant: "destructive" });
       navigate('/upgrade');
       return;
     }
 
-    const path = await recommendationService.generateLearningPath(currentUser.id, "Academic Path");
-    setLearningPath(path);
-    setIsPathModalOpen(true);
+    toast({
+      title: "🧠 Saarthi is Designing Your Path...",
+      description: "Analyzing your current courses and tasks to build a sequence.",
+      className: "bg-black border border-amber-500/50 shadow-xl"
+    });
+
+    try {
+      const path = await recommendationService.generateLearningPath(currentUser.id, "High-Performance Academic Journey");
+      setLearningPath(path);
+      setIsPathModalOpen(true);
+    } catch (err) {
+      toast({ title: "Generation Failed", description: "AI encountered an issue. Please try again.", variant: "destructive" });
+    }
   };
 
   if (loading || !securityVerified) {

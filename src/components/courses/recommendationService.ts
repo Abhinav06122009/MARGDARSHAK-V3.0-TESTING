@@ -1,6 +1,7 @@
 import type { Course } from '@/components/dashboard/course';
 import type { Task } from '@/components/tasks/types';
 import { supabase } from '@/integrations/supabase/client';
+import { authedFetch } from '@/lib/ai/authedFetch';
 
 export interface RecommendedCourse extends Course {
   recommendationReason: string;
@@ -9,7 +10,7 @@ export interface RecommendedCourse extends Course {
 export interface LearningPath {
   title: string;
   description: string;
-  steps: Course[];
+  steps: any[];
 }
 
 export interface CuratedContent {
@@ -23,46 +24,24 @@ const recommendationService = {
     userId: string,
     existingCourses: Course[]
   ): Promise<RecommendedCourse[]> => {
+    // Keep this as a fast heuristic for the sidebar/quick recs
     const existingCourseIds = new Set(existingCourses.map(c => c.id));
-
-    const { data: allCoursesData, error } = await supabase
-      .from('courses')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching all courses for recommendations:', error);
-      return [];
-    }
-
+    const { data: allCoursesData, error } = await supabase.from('courses').select('*');
+    if (error) return [];
     const allCourses: Course[] = allCoursesData || [];
-
     const recommendations: RecommendedCourse[] = [];
-
     const lastCourse = existingCourses[existingCourses.length - 1];
+    
     if (lastCourse && lastCourse.difficulty === 'beginner') {
       const nextLevelCourse = allCourses.find(c => !existingCourseIds.has(c.id) && c.difficulty === 'intermediate');
       if (nextLevelCourse) {
-        recommendations.push({
-          ...nextLevelCourse,
-          recommendationReason: `Based on your completion of ${lastCourse.name}, this is a great next step.`
-        });
+        recommendations.push({ ...nextLevelCourse, recommendationReason: `Based on your completion of ${lastCourse.name}, this is a great next step.` });
       }
     }
-
+    
     const foundationalCourse = allCourses.find(c => c.code?.toUpperCase().includes('CS') && c.difficulty === 'intermediate' && !existingCourseIds.has(c.id));
     if (foundationalCourse) {
-      recommendations.push({
-        ...foundationalCourse,
-        recommendationReason: 'This is a foundational course for many advanced topics.'
-      });
-    }
-
-    const anotherRec = allCourses.find(c => !c.code?.toUpperCase().includes('CS') && !existingCourseIds.has(c.id));
-    if (anotherRec && recommendations.length < 2) {
-      recommendations.push({
-        ...anotherRec,
-        recommendationReason: 'Cloud skills are in high demand across the industry.'
-      });
+      recommendations.push({ ...foundationalCourse, recommendationReason: 'This is a foundational course for many advanced topics.' });
     }
 
     if (recommendations.length < 3) {
@@ -77,24 +56,72 @@ const recommendationService = {
   },
 
   generateLearningPath: async (userId: string, goal: string): Promise<LearningPath> => {
-    const { data: allCourses, error } = await supabase.from('courses').select('*');
-    if (error || !allCourses) return { title: 'Could not generate path', description: 'Error fetching courses.', steps: [] };
+    try {
+      // 1. Fetch academic context (syllabi, tasks, courses)
+      const ctxRes = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'fetch-context', userId })
+      });
+      const ctx = ctxRes.ok ? await ctxRes.json() : { events: [], tasks: [], syllabi: [], studyPlans: [] };
 
-    const beginner = allCourses.find(c => c.difficulty === 'beginner');
-    const intermediate = allCourses.find(c => c.difficulty === 'intermediate' && c.id !== beginner?.id);
-    const advanced = allCourses.find(c => c.difficulty === 'advanced' && c.id !== beginner?.id && c.id !== intermediate?.id);
+      // 2. Format context for AI
+      const coursesCtx = (ctx.syllabi || []).map((s: any) => 
+        `• ${s.course_name}${s.exam_date ? ` (Exam: ${s.exam_date})` : ''}: ${s.topics?.slice(0,3).join(', ') || 'General curriculum'}`
+      ).join('\n') || '(No current courses)';
 
-    const steps = [beginner, intermediate, advanced].filter((c): c is Course => !!c);
+      const tasksCtx = (ctx.tasks || []).slice(0, 10).map((t: any) => 
+        `• ${t.title} [Due: ${t.due_date || 'N/A'}]`
+      ).join('\n') || '(No pending tasks)';
 
-    return {
-      title: 'Learning Path',
-      description: 'A recommended sequence of courses to achieve your goal.',
-      steps: steps.length > 1 ? steps : [
-        { id: 'db-102', name: 'Database Design', code: 'DB102', difficulty: 'beginner', priority: 'medium', credits: 3, description: 'Understand relational database design.' },
-        { id: 'ds-201', name: 'Data Structures & Algorithms', code: 'DS201', difficulty: 'intermediate', priority: 'high', credits: 4, description: 'Master core data structures.' },
-        { id: 'web-301', name: 'Advanced Web Development', code: 'WEB301', difficulty: 'advanced', priority: 'high', credits: 4, description: 'Build complex web applications.' },
-      ]
-    };
+      const prompt = `You are Saarthi, an elite academic learning path designer. 
+Generate a high-fidelity learning path for a student with the following goal: "${goal}"
+
+STUDENT CONTEXT:
+📚 CURRENT COURSES:
+${coursesCtx}
+
+📝 PENDING TASKS:
+${tasksCtx}
+
+INSTRUCTIONS:
+- Design a logical 4-step learning sequence.
+- Each step should be a specific module or course.
+- Be pedagogical and reference their existing courses where relevant.
+- Return ONLY this JSON: { "title": "...", "description": "...", "steps": [ { "id": "step-1", "name": "...", "description": "...", "difficulty": "beginner/intermediate/advanced", "credits": 3 } ] }`;
+
+      // 3. Call AI
+      const aiRes = await authedFetch('/.netlify/functions/neuro-engine', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          messages: [{ role: 'user', content: prompt }], 
+          model: 'qwen-safety', 
+          jsonMode: true,
+          task: 'research'
+        })
+      });
+
+      if (!aiRes.ok) throw new Error('AI generation failed');
+      const data = await aiRes.json();
+      const result = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+
+      return {
+        title: result.title || 'AI Generated Path',
+        description: result.description || 'Custom path created by Saarthi.',
+        steps: result.steps || []
+      };
+
+    } catch (error) {
+      console.error('Error generating AI Learning Path:', error);
+      return {
+        title: 'Academic Path (Fallback)',
+        description: 'Saarthi encountered an error, using default sequence.',
+        steps: [
+          { id: 'db-102', name: 'Database Design', description: 'Understand relational database design.', difficulty: 'beginner', credits: 3 },
+          { id: 'ds-201', name: 'Data Structures', description: 'Master core data structures.', difficulty: 'intermediate', credits: 4 },
+          { id: 'web-301', name: 'Advanced Web Dev', description: 'Build complex web applications.', difficulty: 'advanced', credits: 4 },
+        ]
+      };
+    }
   },
 
   getCuratedContent: async (course: Course): Promise<CuratedContent[]> => {
