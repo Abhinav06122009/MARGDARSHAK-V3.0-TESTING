@@ -57,9 +57,35 @@ const DoubtSolver: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSelectedFile(file);
+    
+    // Auto Enhance Blur Image via Canvas Filtering
     const reader = new FileReader();
-    reader.onload = (event) => setImage(event.target?.result as string);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        if(ctx) {
+           // Apply contrast and sharpening filter to enhance blurry text
+           ctx.filter = 'contrast(1.3) saturate(1.2) brightness(1.1)';
+           ctx.drawImage(img, 0, 0);
+        }
+        const enhancedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        setImage(enhancedDataUrl);
+        
+        canvas.toBlob((blob) => {
+           if(blob) {
+             const enhancedFile = new File([blob], `enhanced_${file.name}`, { type: 'image/jpeg' });
+             setSelectedFile(enhancedFile);
+           } else {
+             setSelectedFile(file); // Fallback
+           }
+        }, 'image/jpeg', 0.95);
+      };
+      img.src = event.target?.result as string;
+    };
     reader.readAsDataURL(file);
   };
 
@@ -70,11 +96,11 @@ const DoubtSolver: React.FC = () => {
     }
 
     setIsProcessing(true);
-    setSolution(null);
+    // DO NOT CLEAR solution - keep it for context!
 
     try {
       const prompt = `Act as an expert Math, Physics, and Chemistry tutor.
-${textQuery ? `The user's question is: "${textQuery}"` : "Analyze the attached image and solve the problem shown."}
+${solution ? `PREVIOUS CONTEXT: You have already solved this image once. Your previous solution was: ${JSON.stringify(solution)}. \n\nNOW, the user has a follow-up question: "${textQuery}"` : `The user's question is: "${textQuery || 'Analyze the attached image and solve the problem shown.'}"`}
 Analyze all provided data carefully and provide a detailed, step-by-step solution.
 Return ONLY a valid JSON object with this exact structure:
 {
@@ -98,6 +124,7 @@ Return ONLY a valid JSON object with this exact structure:
 
       if (generatedSolution && generatedSolution.steps) {
         setSolution(generatedSolution);
+        setTextQuery(''); // Clear query for next follow-up
       } else {
         throw new Error('Invalid solution structure from AI');
       }

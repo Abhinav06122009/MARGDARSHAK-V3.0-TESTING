@@ -89,32 +89,7 @@ exports.handler = async (event) => {
       systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
     }
 
-    // DOUBT SOLVER INTERCEPT (Pollinations.ai Text API)
-    if (payload.task === 'research') {
-      try {
-        const pollUrl = `https://text.pollinations.ai/openai/v1/chat/completions`;
-        const pollRes = await fetch(pollUrl, {
-          method: "POST",
-          headers: { 
-            "Authorization": "Bearer pk_zsdrdBr8qAO7Cbbp",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-             model: "openai", 
-             messages: [{ role: "system", content: systemPrompt }, ...messages]
-          })
-        });
-        
-        const pollData = await pollRes.json();
-        if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
-        
-        const text = pollData?.choices?.[0]?.message?.content || "";
-        return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gpt-4o-mini" }) };
-      } catch (err) {
-        console.error("[NEURO-ENGINE] Pollinations Text error:", err);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `Pollinations Error: ${err.message}` }) };
-      }
-    }
+
 
 
     const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
@@ -196,17 +171,30 @@ exports.handler = async (event) => {
     // Fallback/Default: OpenRouter
     let openRouterModel = modelToUse;
     if (hasImages || payload.jsonMode || payload.task === 'research') {
-      openRouterModel = "google/gemma-3-27b-it:free"; 
+      openRouterModel = "bytedance-seed/seedream-4.5"; // Primary fallback requested by user
     } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
       openRouterModel = ELITE_UPGRADE_MODEL;
     }
 
-    const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    let orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
-      body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages] })
+      headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshak.tech" },
+      body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages], response_format: payload.jsonMode ? { type: "json_object" } : undefined })
     });
-    const orData = await orRes.json();
+    let orData = await orRes.json();
+    
+    // AUTO-ENHANCE FAULT TOLERANCE: If Bytedance fails or no credits, instantly retry with free Gemma Vision
+    if (orData.error && (orData.error.message?.includes("not found") || orData.error.message?.includes("credit") || orData.error.message?.includes("balance"))) {
+      console.warn(`[NEURO-ENGINE] ${openRouterModel} failed: ${orData.error.message}. Auto-retrying with free Gemma 3 Vision!`);
+      openRouterModel = "google/gemma-3-27b-it:free";
+      
+      orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshak.tech" },
+        body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages], response_format: payload.jsonMode ? { type: "json_object" } : undefined })
+      });
+      orData = await orRes.json();
+    }
     
     if (orData.error) {
       console.error("[NEURO-ENGINE] OpenRouter API Error:", orData.error);
@@ -219,7 +207,7 @@ exports.handler = async (event) => {
       return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
     }
     
-    return { statusCode: 200, headers, body: JSON.stringify({ response: orText, model: modelToUse }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ response: orText, model: openRouterModel }) };
 
   } catch (err) {
     console.error("[NEURO-ENGINE] Fatal Error:", err);
