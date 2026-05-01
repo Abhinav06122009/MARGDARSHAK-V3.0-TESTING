@@ -149,7 +149,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         method: "POST", 
         headers: pollHeaders, 
         body,
-        signal: AbortSignal.timeout(25000) // 25s timeout to stay under Netlify's 30s limit
+        signal: AbortSignal.timeout(28000) // 28s timeout to stay under Netlify's 30s limit
       });
 
       if (!res.ok) {
@@ -164,12 +164,17 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     try {
       let pollData;
+      const isSlowModel = payload.model === 'qwen-safety';
+
       try {
         pollData = await callPollinations();
       } catch (firstErr) {
-        console.warn("[NEURO-ENGINE] First attempt failed, retrying in 1.5s:", firstErr.message);
-        await new Promise(r => setTimeout(r, 1500));
-        pollData = await callPollinations(); // retry once
+        if (isSlowModel) {
+          throw firstErr; // Don't retry slow models to avoid Netlify timeout
+        }
+        console.warn("[NEURO-ENGINE] First attempt failed, retrying in 1s:", firstErr.message);
+        await new Promise(r => setTimeout(r, 1000));
+        pollData = await callPollinations(); // retry once for fast models
       }
 
       const text = pollData?.choices?.[0]?.message?.content || "";

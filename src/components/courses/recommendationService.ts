@@ -65,11 +65,11 @@ const recommendationService = {
       const ctx = ctxRes.ok ? await ctxRes.json() : { events: [], tasks: [], syllabi: [], studyPlans: [] };
 
       // 2. Format context for AI
-      const coursesCtx = (ctx.syllabi || []).map((s: any) => 
-        `• ${s.course_name}${s.exam_date ? ` (Exam: ${s.exam_date})` : ''}: ${s.topics?.slice(0,3).join(', ') || 'General curriculum'}`
+      const coursesCtx = (ctx.syllabi || []).slice(0, 5).map((s: any) => 
+        `• ${s.course_name}${s.exam_date ? ` (Exam: ${s.exam_date})` : ''}: ${s.topics?.slice(0,2).join(', ') || 'General curriculum'}`
       ).join('\n') || '(No current courses)';
 
-      const tasksCtx = (ctx.tasks || []).slice(0, 10).map((t: any) => 
+      const tasksCtx = (ctx.tasks || []).slice(0, 5).map((t: any) => 
         `• ${t.title} [Due: ${t.due_date || 'N/A'}]`
       ).join('\n') || '(No pending tasks)';
 
