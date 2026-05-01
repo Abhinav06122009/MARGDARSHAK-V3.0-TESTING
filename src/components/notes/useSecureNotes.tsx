@@ -14,7 +14,6 @@ import { translateClerkIdToUUID } from '@/lib/id-translator';
 // Secure helper functions for Notes
 const notesHelpers = {
   fetchUserNotes: async (userId: string, folder?: string) => {
-    // Synchronize with Zenith Identity Protocol
     const translatedId = await translateClerkIdToUUID(userId);
     try {
       let query = supabase
@@ -71,9 +70,10 @@ const notesHelpers = {
       const stats = {
         total_notes: notes?.length || 0,
         total_folders: folders?.length || 0,
-        favorites: notes?.filter((n: any) => n.is_favorite).length || 0,
-        highlighted: notes?.filter((n: any) => n.is_highlighted).length || 0,
-        by_folder: (notes || []).reduce((acc: any, n: any) => {
+        favorite_notes: notes?.filter((n: any) => n.is_favorite).length || 0,
+        highlighted_notes: notes?.filter((n: any) => n.is_highlighted).length || 0,
+        total_reading_time: Math.ceil((notes || []).reduce((acc: number, n: any) => acc + (n.content?.length || 0), 0) / 1000),
+        notes_in_folder: (notes || []).reduce((acc: any, n: any) => {
           acc[n.folder || 'none'] = (acc[n.folder || 'none'] || 0) + 1;
           return acc;
         }, {})
@@ -184,6 +184,24 @@ const notesHelpers = {
 
     if (error) throw error;
     return true;
+  },
+
+  addFolder: async (userId: string, folderName: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { data, error } = await supabase
+      .from('note_folders')
+      .insert({
+        user_id: translatedId,
+        name: folderName,
+        icon: 'default',
+        color: '#4F46E5',
+        sort_order: 0
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
   }
 };
 
@@ -243,8 +261,12 @@ export const useSecureNotes = () => {
 
   const refreshNotes = useCallback(async () => {
     if (!currentUser) return;
-    const userNotes = await notesHelpers.fetchUserNotes(currentUser.id, selectedFolder !== 'all' ? selectedFolder : undefined);
+    const [userNotes, stats] = await Promise.all([
+      notesHelpers.fetchUserNotes(currentUser.id, selectedFolder !== 'all' ? selectedFolder : undefined),
+      notesHelpers.getNotesStatistics(currentUser.id)
+    ]);
     setNotes(userNotes);
+    setNoteStats(stats);
   }, [currentUser, selectedFolder]);
 
   const initializeSecureNotes = useCallback(async () => {
@@ -257,7 +279,6 @@ export const useSecureNotes = () => {
         setSecurityVerified(true); setLoading(false); return;
       }
       
-      // Strict metadata-driven user state
       const resolvedUser: SecureUser = {
         id: authUser.id,
         email: authUser.primaryEmailAddress?.emailAddress || '',
@@ -271,7 +292,6 @@ export const useSecureNotes = () => {
       setCurrentUser(resolvedUser);
       setSecurityVerified(true);
 
-      // Enforce premium features based on Zenith Identity Protocol
       const userTier = resolvedUser.profile?.subscription_tier || 'free';
       const userRole = resolvedUser.profile?.role || 'student';
       const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
@@ -353,6 +373,18 @@ export const useSecureNotes = () => {
       } catch (error: any) {
         toast({ title: "Error Deleting Notes", description: `Failed to delete notes: ${error.message || 'Please try again.'}`, variant: "destructive" });
       }
+    }
+  };
+
+  const onAddFolder = async (folderName: string) => {
+    if (!currentUser) return;
+    try {
+      await notesHelpers.addFolder(currentUser.id, folderName);
+      const updatedFolders = await notesHelpers.fetchUserFolders(currentUser.id);
+      setFolders(updatedFolders);
+      showSecureToast("Folder Created", `"${folderName}" is now available.`, <Plus className="text-emerald-400" />);
+    } catch (error: any) {
+      toast({ title: "Error creating folder", description: error.message, variant: "destructive" });
     }
   };
 
@@ -466,5 +498,5 @@ export const useSecureNotes = () => {
   const getRecentNotes = () => notes.slice(0, 5);
   const getHighlightedNotes = () => notes.filter(note => note.is_highlighted);
 
-  return { currentUser, notes, folders, noteStats, isSheetOpen, setIsSheetOpen, editingNote, loading, securityVerified, isProcessingSummary, getSmartSummary, searchTerm, setSearchTerm, selectedFolder, selectedNotes, currentView, setCurrentView, formData, setFormData, handleSubmit, handleEdit, handleDelete, handleBulkDelete, handleToggleFavorite, handleSearch, handleFolderSelect, handleCreateNote, getRecentNotes, getHighlightedNotes, refreshNotes, showShareModal, noteToShare, openShareModal, closeShareModal, isSubmitting, handleSelectNote, handleSelectAllNotes, handleExportCSV, handleExportPDF, hasPremiumAccess };
+  return { currentUser, notes, folders, noteStats, isSheetOpen, setIsSheetOpen, editingNote, loading, securityVerified, isProcessingSummary, getSmartSummary, searchTerm, setSearchTerm, selectedFolder, selectedNotes, currentView, setCurrentView, formData, setFormData, handleSubmit, handleEdit, handleDelete, handleBulkDelete, handleToggleFavorite, handleSearch, handleFolderSelect, handleCreateNote, getRecentNotes, getHighlightedNotes, refreshNotes, showShareModal, noteToShare, openShareModal, closeShareModal, isSubmitting, handleSelectNote, handleSelectAllNotes, handleExportCSV, handleExportPDF, hasPremiumAccess, onAddFolder };
 };
