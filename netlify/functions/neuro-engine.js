@@ -148,9 +148,10 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large', 'openai'].includes(payload.model) ? payload.model : 'gemini-fast';
 
       // Productivity tasks (JSON-heavy) benefit from structural models
-      // Defaulting to 'gemini-fast' for maximum reliability on Pollinations
+      // If no model is specified or gemini-fast is default, we use OpenAI for reliability
+      // But if qwen-coder is explicitly requested (as in Notes), we keep it.
       if ((payload.task === 'tasks' || payload.task === 'notes') && selectedModel === 'gemini-fast') {
-        selectedModel = 'openai'; // OpenAI is superior for complex JSON structures
+        selectedModel = 'openai'; 
       }
       
       const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || selectedModel === 'openai' || payload.task === 'notes' || payload.task === 'tasks')

@@ -444,7 +444,7 @@ export const useSecureNotes = () => {
     try {
       const prompt = `Provide a concise, professional summary of the following academic notes:\n\n${content.substring(0, 4000)}`;
       const summary = await modelRouter.complete(prompt, {
-        model: 'qwen-safety',
+        model: 'qwen-coder',
         task: 'notes',
         tier: hasPremiumAccess ? 'premium_elite' : 'free'
       });
