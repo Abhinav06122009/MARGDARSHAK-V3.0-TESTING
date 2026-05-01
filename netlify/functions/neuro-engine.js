@@ -89,156 +89,32 @@ exports.handler = async (event) => {
       systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
     }
 
-    // DOUBT SOLVER INTERCEPT (Pollinations.ai gen.pollinations.ai API)
-    if (payload.task === 'research') {
-      try {
-        const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
-        const pollRes = await fetch(pollUrl, {
-          method: "POST",
-          headers: { 
-            "Authorization": "Bearer sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-             model: "gemini-fast", 
-             messages: [{ role: "system", content: systemPrompt }, ...messages],
-             response_format: payload.jsonMode ? { type: "json_object" } : undefined
-          })
-        });
-        
-        const pollData = await pollRes.json();
-        if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
-        
-        const text = pollData?.choices?.[0]?.message?.content || "";
-        return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
-      } catch (err) {
-        console.error("[NEURO-ENGINE] Pollinations API error:", err);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `Pollinations Error: ${err.message}` }) };
-      }
-    }
-
-
-
-
-    const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
-    let modelToUse = payload.model || DEFAULT_FREE_MODEL;
-    if (payload.task === 'research' || hasImages || payload.jsonMode) modelToUse = VISION_RESEARCH_MODEL;
-    else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
-      if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
-      else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
-    }
-
-    console.log(`[NEURO-ENGINE] ${user.sub} | ${userTier} | ${modelToUse} | JSON: ${!!payload.jsonMode}`);
-
-    // 4. Provider Execution
-    const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
-    let googleFailed = false;
-    let googleErrorMsg = "";
-    
-    if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
-      const googleModel = modelToUse.replace('google/', '');
-      const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
-      
-      const contents = messages.filter(m => m.role !== 'system').map(m => {
-        const parts = Array.isArray(m.content) ? m.content.map(p => {
-          if (p.type === 'text') return { text: p.text };
-          if (p.type === 'image_url') {
-            const url = p.image_url.url;
-            const mimeMatch = url.match(/^data:(image\/[a-zA-Z]+);base64,/);
-            const mime_type = mimeMatch ? mimeMatch[1] : "image/jpeg";
-            const data = url.includes(',') ? url.split(',')[1] : url;
-            return { inline_data: { mime_type, data } };
-          }
-          return null;
-        }).filter(Boolean) : [{ text: m.content }];
-        return { role: m.role === 'assistant' ? 'model' : 'user', parts };
-      });
-
-      const generationConfig = {
-        temperature: 0.1,
-        top_p: 0.95,
-        top_k: 40,
-        max_output_tokens: 2048,
-        response_mime_type: payload.jsonMode ? "application/json" : "text/plain",
-      };
-
-      try {
-        const gRes = await fetch(googleUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            contents, 
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            generationConfig,
-            safetySettings: [
-              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-            ]
-          })
-        });
-        const gData = await gRes.json();
-        if (gData.error) {
-          console.warn("[NEURO-ENGINE] Native Google API Failed (Quota/Error). Failing over to OpenRouter. Error:", gData.error.message);
-          googleFailed = true;
-          googleErrorMsg = gData.error.message;
-        } else {
-          const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
-        }
-      } catch (err) { 
-        console.warn("[NEURO-ENGINE] Google Network Failure. Failing over to OpenRouter.", err.message);
-        googleFailed = true;
-        googleErrorMsg = err.message;
-      }
-    } else if (isGoogle) {
-      googleFailed = true;
-    }
-
-    // Fallback/Default: OpenRouter
-    let openRouterModel = modelToUse;
-    if (hasImages || payload.jsonMode || payload.task === 'research') {
-      openRouterModel = "bytedance-seed/seedream-4.5"; // Primary fallback requested by user
-    } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
-      openRouterModel = ELITE_UPGRADE_MODEL;
-    }
-
-    let orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshak.tech" },
-      body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages], response_format: payload.jsonMode ? { type: "json_object" } : undefined })
-    });
-    let orData = await orRes.json();
-    
-    // AUTO-ENHANCE FAULT TOLERANCE: If Bytedance fails or no credits, instantly retry with free Gemma Vision
-    if (orData.error && (orData.error.message?.includes("not found") || orData.error.message?.includes("credit") || orData.error.message?.includes("balance"))) {
-      console.warn(`[NEURO-ENGINE] ${openRouterModel} failed: ${orData.error.message}. Auto-retrying with free Gemma 3 Vision!`);
-      openRouterModel = "google/gemma-3-27b-it:free";
-      
-      orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    try {
+      const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
+      const pollRes = await fetch(pollUrl, {
         method: "POST",
-        headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshak.tech" },
-        body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages], response_format: payload.jsonMode ? { type: "json_object" } : undefined })
+        headers: { 
+          "Authorization": "Bearer sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+           model: "gemini-fast", 
+           messages: [{ role: "system", content: systemPrompt }, ...messages],
+           response_format: payload.jsonMode ? { type: "json_object" } : undefined
+        })
       });
-      orData = await orRes.json();
-    }
-    
-    if (orData.error) {
-      console.error("[NEURO-ENGINE] OpenRouter API Error:", orData.error);
-      const rootError = googleFailed ? `Google: ${googleErrorMsg} | OpenRouter: ${orData.error.message}` : orData.error.message;
-      return { statusCode: 400, headers, body: JSON.stringify({ error: `Provider Error: ${rootError}` }) };
-    }
+      
+      const pollData = await pollRes.json();
+      if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
+      
+      const text = pollData?.choices?.[0]?.message?.content || "";
+      if (!text) {
+        return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
+      }
 
-    const orText = orData?.choices?.[0]?.message?.content || "";
-    if (!orText) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
+    } catch (err) {
+      console.error("[NEURO-ENGINE] Fatal Error:", err);
+      return { statusCode: 502, headers, body: JSON.stringify({ error: `Pollinations API Error: ${err.message}`, stack: err.stack }) };
     }
-    
-    return { statusCode: 200, headers, body: JSON.stringify({ response: orText, model: openRouterModel }) };
-
-  } catch (err) {
-    console.error("[NEURO-ENGINE] Fatal Error:", err);
-    return { statusCode: 502, headers, body: JSON.stringify({ error: err.message, stack: err.stack }) };
-  }
 };
