@@ -178,10 +178,16 @@ export const modelRouter = {
     const raw = await modelRouter.complete(jsonPrompt, { ...options, jsonMode: true });
     console.log(`[RAW-AI-OUTPUT] Snippet: ${raw.substring(0, 500)}`);
 
-    // Strip code fences if the model wrapped output in ```json ... ```
+    // --- ROBUST CLEANING ---
     let text = raw.trim();
+    
+    // Remove markdown fences if present
     const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     if (fence) text = fence[1].trim();
+    
+    // Remove non-JSON content before/after
+    const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+    if (jsonMatch) text = jsonMatch[0];
 
     const tryParse = (s: string): T | null => {
       try { return JSON.parse(s) as T; } catch { return null; }
