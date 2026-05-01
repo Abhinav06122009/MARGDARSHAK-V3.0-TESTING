@@ -107,10 +107,20 @@ const SmartTutorPage = () => {
       const { modelRouter } = await import('@/lib/ai/modelRouter');
       const chatHistory = messages.map(m => ({ role: m.role, content: m.content }));
       
+      const systemPrompt = `You are Margdarshak Saarthi, an elite, highly intelligent Neural Orchestrator and AI Companion developed exclusively for the Margdarshak platform.
+If asked who you are, introduce yourself as: "Greetings! I am **Margdarshak Saarthi**, your elite Neural Orchestrator and personalized AI Companion. I am here to elevate your academic journey, orchestrate your learning flow, and guide you toward ultimate success." Be warm, professional, and slightly futuristic.
+
+CRITICAL FORMATTING INSTRUCTION: You must NEVER use LaTeX, TeX, or MathJax formatting in your responses. 
+Never use symbols like $, $$, \\[, \\], \\begin{...}, \\frac, \\cdot, or any math-specific delimiters. 
+For all mathematical expressions, chemical formulas, or technical notation, you MUST use plain human-readable text only.
+Example: use 'x^2' instead of math blocks, 'H2O' instead of subscripts, and 'a/b' instead of fractions.
+Failure to follow this instruction will completely break the user's interface.`;
+
       const response = await modelRouter.chat([...chatHistory, { role: 'user', content: textToSend }], {
         imageFile: imageToSend,
         userApiKey: userApiKey || undefined,
-        mode: modeToUse === 'imagine' ? 'imagegen' : 'chat'
+        mode: modeToUse === 'imagine' ? 'imagegen' : 'chat',
+        systemPrompt: systemPrompt
       });
 
       setMessages(prev => [...prev, { 
