@@ -26,7 +26,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sync Clerk Session with Supabase Client
   useEffect(() => {
     if (sessionLoaded && clerkSession) {
-      setClerkTokenProvider(() => clerkSession.getToken({ template: 'supabase' }));
+      setClerkTokenProvider(async () => {
+        try {
+          const token = await clerkSession.getToken({ template: 'supabase' });
+          if (token) return token;
+          console.warn('[AUTH] Missing "supabase" JWT template in Clerk. Falling back to default session token.');
+          return await clerkSession.getToken();
+        } catch (e) {
+          console.error('[AUTH] Failed to fetch Supabase token, falling back:', e);
+          return await clerkSession.getToken();
+        }
+      });
     }
     if (userLoaded && clerkUser) {
       setClerkUser(clerkUser);

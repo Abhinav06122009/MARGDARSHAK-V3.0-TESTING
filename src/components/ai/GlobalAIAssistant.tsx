@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrainCircuit, X, Send, Minimize2, Sparkles, Loader2, MessageSquare } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { modelRouter } from '@/lib/ai/modelRouter';
+import modelRouter from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -40,6 +41,7 @@ const GlobalAIAssistant: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const { isAIReady } = useAI();
+  const { user: authUser } = useAuth();
 
   const currentPageContext = PAGE_CONTEXT[location.pathname] || 'student platform';
 
@@ -84,7 +86,11 @@ const GlobalAIAssistant: React.FC = () => {
       const history = messages.slice(-6).map(m => ({ role: m.role, content: m.content }));
       const allMessages = [...history, { role: 'user', content: text }];
 
-      const response = await modelRouter.chat(allMessages, { systemPrompt });
+      const userTier = authUser?.publicMetadata?.subscription?.tier || authUser?.publicMetadata?.subscription_tier || 'free';
+      const response = await modelRouter.chat(allMessages, { 
+        systemPrompt,
+        tier: userTier
+      });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch {
       setMessages(prev => [...prev, {

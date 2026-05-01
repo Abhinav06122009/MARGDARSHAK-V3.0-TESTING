@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader2, Wand2, ListTodo, ChevronDown, ChevronUp, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { modelRouter } from '@/lib/ai/modelRouter';
+import modelRouter from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
 import { useAuth } from '@/contexts/AuthContext';
 
