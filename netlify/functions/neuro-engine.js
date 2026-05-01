@@ -15,7 +15,7 @@ exports.handler = async (event) => {
   const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
   const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
   const ELITE_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-  const VISION_RESEARCH_MODEL = "google/gemini-1.5-flash";
+  const VISION_RESEARCH_MODEL = "google/gemini-2.0-flash";
 
   const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Never use symbols like $, $$, \\[, \\], \\begin{...}, or any math-specific delimiters. For all mathematical expressions, chemical formulas, or technical notation, use plain human-readable text only (e.g., use 'x^2' instead of LaTeX math, and 'H2O' instead of subscripted text). If you ignore this, the user's interface will break.`;
 
@@ -82,8 +82,7 @@ exports.handler = async (event) => {
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Google AI Studio API Key is not configured in Netlify Environment Variables." }) };
       }
       
-      let googleModel = modelToUse.replace('google/', '');
-      if (googleModel === 'gemini-1.5-flash') googleModel = 'gemini-1.5-flash-latest';
+      const googleModel = modelToUse.replace('google/', '');
       
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
