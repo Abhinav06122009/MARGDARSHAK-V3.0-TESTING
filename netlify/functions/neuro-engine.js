@@ -76,27 +76,30 @@ exports.handler = async (event) => {
 
     // 4. Provider Execution
     const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
+    let googleFailed = false;
+    let googleErrorMsg = "";
     
-    if (isGoogle) {
-      if (!process.env.GOOGLE_AI_STUDIO_KEY) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Google AI Studio API Key is not configured in Netlify Environment Variables." }) };
-      }
-      
+    if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
       const googleModel = modelToUse.replace('google/', '');
-      
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
       const contents = messages.filter(m => m.role !== 'system').map(m => {
         const parts = Array.isArray(m.content) ? m.content.map(p => {
           if (p.type === 'text') return { text: p.text };
-          if (p.type === 'image_url') return { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } };
+          if (p.type === 'image_url') {
+            const url = p.image_url.url;
+            const mimeMatch = url.match(/^data:(image\/[a-zA-Z]+);base64,/);
+            const mime_type = mimeMatch ? mimeMatch[1] : "image/jpeg";
+            const data = url.includes(',') ? url.split(',')[1] : url;
+            return { inline_data: { mime_type, data } };
+          }
           return null;
         }).filter(Boolean) : [{ text: m.content }];
         return { role: m.role === 'assistant' ? 'model' : 'user', parts };
       });
 
       const generationConfig = {
-        temperature: 0.1, // Lower temperature for more deterministic JSON
+        temperature: 0.1,
         top_p: 0.95,
         top_k: 40,
         max_output_tokens: 2048,
@@ -121,22 +124,25 @@ exports.handler = async (event) => {
         });
         const gData = await gRes.json();
         if (gData.error) {
-          console.error("[NEURO-ENGINE] Gemini API Error:", gData.error);
-          return { statusCode: 400, headers, body: JSON.stringify({ error: `Gemini Error: ${gData.error.message || JSON.stringify(gData.error)}` }) };
+          console.warn("[NEURO-ENGINE] Native Google API Failed (Quota/Error). Failing over to OpenRouter. Error:", gData.error.message);
+          googleFailed = true;
+          googleErrorMsg = gData.error.message;
         } else {
           const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
         }
       } catch (err) { 
-        console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: `Gemini Network Failure: ${err.message}` }) };
+        console.warn("[NEURO-ENGINE] Google Network Failure. Failing over to OpenRouter.", err.message);
+        googleFailed = true;
+        googleErrorMsg = err.message;
       }
+    } else if (isGoogle) {
+      googleFailed = true;
     }
 
     // Fallback/Default: OpenRouter
     let openRouterModel = modelToUse;
     if (hasImages || payload.jsonMode || payload.task === 'research') {
-      // Must use a vision/json capable model on OpenRouter if Google AI Studio fails/is missing
       openRouterModel = "google/gemini-flash-1.5"; 
     } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
       openRouterModel = ELITE_UPGRADE_MODEL;
@@ -151,7 +157,8 @@ exports.handler = async (event) => {
     
     if (orData.error) {
       console.error("[NEURO-ENGINE] OpenRouter API Error:", orData.error);
-      return { statusCode: 400, headers, body: JSON.stringify({ error: `Provider Error: ${orData.error.message || JSON.stringify(orData.error)}` }) };
+      const rootError = googleFailed ? `Google: ${googleErrorMsg} | OpenRouter: ${orData.error.message}` : orData.error.message;
+      return { statusCode: 400, headers, body: JSON.stringify({ error: `Provider Error: ${rootError}` }) };
     }
 
     const orText = orData?.choices?.[0]?.message?.content || "";
