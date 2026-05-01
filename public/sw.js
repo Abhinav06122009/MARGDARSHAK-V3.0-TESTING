@@ -1,4 +1,4 @@
-const CACHE_NAME = 'margdarshak-v2';
+const CACHE_NAME = 'margdarshak-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -17,18 +17,18 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // STRATEGY: Network-First for API requests, Cache-First for static assets
-  if (url.origin === self.location.origin && !url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
-  } else {
-    // API requests or external requests (Supabase) - ALWAYS Network Only
-    // We don't want to cache 401/403 errors or dynamic data
-    event.respondWith(fetch(event.request));
+  // ONLY handle local assets to avoid CSP interference with external fetches
+  if (url.origin === self.location.origin) {
+    if (!url.pathname.startsWith('/api/')) {
+      event.respondWith(
+        caches.match(event.request).then((response) => {
+          return response || fetch(event.request);
+        })
+      );
+    }
+    // API requests on same origin (Netlify functions) are handled naturally by the browser
   }
+  // External requests are NOT intercepted, avoiding Service Worker CSP restrictions
 });
 
 // Original legacy logic removed due to CSP violations and stability issues
