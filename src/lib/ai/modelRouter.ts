@@ -232,8 +232,6 @@ export const modelRouter = {
         }
       }
 
-    if (start !== -1) {
-      // Walk forward tracking string state and depth to find the matching close.
       // Fallback: greedy lastIndexOf for the matching close character.
       const end = text.lastIndexOf(closeCh);
       if (end > start) {
