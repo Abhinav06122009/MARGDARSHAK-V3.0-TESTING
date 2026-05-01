@@ -124,19 +124,27 @@ export interface TimetableEvent {
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+
+        // --- STRICT SUBSCRIPTION SYNC (CLERK METADATA) ---
+        const metadata = (user as any).user_metadata || {};
+        const subscription = metadata.subscription || {};
+        const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+        const role = roleArray[0] || 'student';
+        const tier = (subscription.tier || metadata.subscription_tier || 'free').toLowerCase();
   
         return {
           id: user.id,
           email: user.email || '',
-          profile: profile ? {
-            full_name: profile.full_name || 'User',
-            user_type: profile.user_type || 'student',
-            student_id: profile.student_id,
-            department: profile.department,
-            academic_year: profile.academic_year || '2024-25',
-            role: profile.role || 'user' // Default role
-          } : { role: 'user' }
+          profile: {
+            full_name: metadata.full_name || profile?.full_name || 'User',
+            user_type: profile?.user_type || 'student',
+            student_id: user.id.substring(0, 8),
+            department: profile?.department,
+            academic_year: profile?.academic_year || '2024-25',
+            role: role,
+            subscription_tier: tier
+          } as any
         };
       } catch (error) {
         console.error('Error getting current user:', error);

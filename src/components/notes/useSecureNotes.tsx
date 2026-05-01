@@ -8,6 +8,7 @@ import Papa from 'papaparse';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { modelRouter } from '@/lib/ai/modelRouter';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Secure helper functions for Notes
 const notesHelpers = {
@@ -229,7 +230,7 @@ export const useSecureNotes = () => {
   const [selectedFolder, setSelectedFolder] = useState('all');
   const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
   const [currentView, setCurrentView] = useState<'main' | 'folder' | 'search'>('main');
-  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+  const { user: authUser, clerkUser, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
@@ -264,35 +265,50 @@ export const useSecureNotes = () => {
 
   const initializeSecureNotes = useCallback(async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
-      const user = await notesHelpers.getCurrentUser();
-      if (!user) {
+      
+      if (!authUser) {
         toast({ title: "Authentication Required", description: "Please log in to access your notes.", variant: "destructive" });
         setSecurityVerified(true); setLoading(false); return;
       }
-      setCurrentUser(user);
+      
+      setCurrentUser({
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'User',
+          role: authUser.profile?.role || 'student',
+          student_id: authUser.id.substring(0, 8)
+        }
+      } as SecureUser);
+      
       setSecurityVerified(true);
 
-      const premiumRoles = ['premium', 'bdo', 'admin', 'superadmin'];
-      const userRole = user.profile?.role || 'student';
-      setHasPremiumAccess(premiumRoles.includes(userRole));
+      // Check premium status strictly from Clerk-synced metadata
+      const userTier = authUser.profile?.subscription_tier || 'free';
+      const userRole = authUser.profile?.role || 'student';
+      const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
+      const isAdminRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
+      
+      setHasPremiumAccess(isPremiumTier || isAdminRole);
 
       const [userNotes, userFolders, stats] = await Promise.all([
-        notesHelpers.fetchUserNotes(user.id),
-        notesHelpers.fetchUserFolders(user.id),
-        notesHelpers.getNotesStatistics(user.id)
+        notesHelpers.fetchUserNotes(authUser.id),
+        notesHelpers.fetchUserFolders(authUser.id),
+        notesHelpers.getNotesStatistics(authUser.id)
       ]);
       setNotes(userNotes);
       if (userFolders.length > 0) setFolders(userFolders);
       setNoteStats(stats);
-      showSecureToast("Secure Access Verified", `Welcome ${user.profile?.full_name || 'User'}! Your notes are private and secure.`, <Shield className="text-emerald-400" />);
+      showSecureToast("Secure Access Verified", `Welcome ${authUser.fullName || 'User'}! Your notes are private and secure.`, <Shield className="text-emerald-400" />);
     } catch (error) {
       console.error('Error initializing secure notes:', error);
       toast({ title: "Initialization Error", description: "Failed to initialize secure notes system.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [toast, showSecureToast]);
+  }, [toast, showSecureToast, authUser, authLoading]);
 
   useEffect(() => {
     initializeSecureNotes();

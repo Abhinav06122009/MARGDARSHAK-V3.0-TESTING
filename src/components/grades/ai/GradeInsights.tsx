@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
 import cacheService from '@/lib/ai/cacheService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GradeData {
   subject: string;
@@ -31,6 +32,7 @@ const GradeInsights: React.FC<GradeInsightsProps> = ({ grades }) => {
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { isAIReady } = useAI();
+  const { user: authUser } = useAuth();
 
   const hasEnoughData = grades.length >= 3;
 
@@ -76,8 +78,11 @@ Analyze and return ONLY valid JSON:
 }`;
 
     try {
+      const userTier = authUser?.profile?.subscription_tier || 'free';
+      
       const result = await modelRouter.generateJSON<InsightResult>(prompt, {
         systemPrompt: 'You are an academic advisor analyzing student grade data. Be specific and encouraging.',
+        tier: userTier,
       });
 
       if (result) {

@@ -25,6 +25,7 @@ import logo from "@/components/logo/logo.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUser } from '@clerk/react';
 import { authedFetch } from '@/lib/ai/authedFetch';
+import { useAuth } from '@/contexts/AuthContext';
 
 // src/components/timetable/Timetable.tsx
 
@@ -51,6 +52,7 @@ const Timetable: React.FC = () => {
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null);
   const [workloadSuggestions, setWorkloadSuggestions] = useState<WorkloadSuggestion[] | null>(null);
+  const { user: authUser, loading: authLoading } = useAuth();
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   const [formData, setFormData] = useState<EventFormData>({
@@ -93,11 +95,10 @@ const Timetable: React.FC = () => {
 
   const initializeSecureTimetable = async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
 
-      const user = await timetableHelpers.getCurrentUser();
-
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Authentication Required",
           description: "Please log in to access your timetable.",
@@ -108,39 +109,43 @@ const Timetable: React.FC = () => {
         return;
       }
 
-      setCurrentUser(user);
+      setCurrentUser({
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'User',
+          role: authUser.profile?.role || 'student',
+          student_id: authUser.id.substring(0, 8),
+          subscription_tier: authUser.profile?.subscription_tier || 'free'
+        }
+      } as any);
+      
       setSecurityVerified(true);
 
       // --- CLERK SUBSCRIPTION RESOLUTION ---
-      // Read exclusively from Clerk publicMetadata
-      const PREMIUM_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite'];
-      const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
+      const userTier = authUser.profile?.subscription_tier || 'free';
+      const userRole = authUser.profile?.role || 'student';
+      const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
+      const isAdminRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
+      
+      setHasPremiumAccess(isPremiumTier || isAdminRole);
 
-      let clerkPremium = false;
-      if (clerkUser) {
-        const metadata = clerkUser.publicMetadata || {};
-        const subscription = (metadata.subscription as any) || {};
-        const rawTier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
-        const tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
-
-        const rawRoles = (metadata as any).role || [];
-        const roles: string[] = Array.isArray(rawRoles) ? rawRoles.map((r: any) => String(r).toLowerCase()) : [String(rawRoles).toLowerCase()];
-        const isCEO = roles.some(r => ['ceo', 'cto', 'cfo', 'admin', 'superadmin'].includes(r));
-        const isMaster = MASTER_IDS.includes(clerkUser.id);
-
-        clerkPremium = isMaster || isCEO || PREMIUM_TIERS.includes(tier);
-      }
-
-      setHasPremiumAccess(clerkPremium);
-
-      const userTimetable = await timetableHelpers.fetchUserTimetable(user.id);
-
+      const userTimetable = await timetableHelpers.fetchUserTimetable(authUser.id);
       setEvents(userTimetable);
 
       toast({
-        title: "Timetable Ready",
-        description: `Welcome back, ${user.profile?.full_name}! Your schedule is synchronized.`,
-        variant: "premium"
+        title: (
+          <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent font-bold">
+            Timetable Ready!
+          </span>
+        ),
+        description: (
+          <span className="text-white font-medium">
+            Welcome Back <span className="text-emerald-400 font-semibold">{authUser.fullName || 'User'}</span>! Your schedule is synchronized.
+          </span>
+        ),
+        className: "bg-black border border-blue-400/50 shadow-xl",
+        icon: <CalendarCheck className="text-emerald-400" />
       });
 
     } catch (error) {

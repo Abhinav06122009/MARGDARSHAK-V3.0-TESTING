@@ -64,8 +64,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const metadata = clerkUser.publicMetadata || {};
           const subscription = (metadata.subscription as any) || {};
           
+          // STRICT METADATA RESOLUTION (Clerk-First)
           const tier = (subscription.tier || (metadata as any).subscription_tier || 'free').toLowerCase();
-          const role = metadata.role || (metadata as any).user_type || 'student';
+          const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+          const role = roleArray[0] || 'student';
 
           // Set the augmented user state immediately for the app to use
           setUser({

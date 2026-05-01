@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Task {
   title: string;
@@ -31,6 +32,7 @@ const TaskAIPanel: React.FC<TaskAIPanelProps> = ({ tasks, onAddSubtasks }) => {
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { isAIReady } = useAI();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
 
   const pendingTasks = tasks.filter(t => t.status !== 'completed');
@@ -63,11 +65,15 @@ Return ONLY valid JSON:
 }`;
 
     try {
+      const userTier = authUser?.profile?.subscription_tier || 'free';
+
       const result = await modelRouter.generateJSON<TaskAnalysis>(prompt, {
         useCache: true,
         cacheKey: `task_analysis_v2_${pendingTasks.length}_${overdueTasks.length}`,
         cacheTtl: 10 * 60 * 1000,
-        tier: 'premium', // Use the premium model for better analysis
+        tier: userTier, // Use the user's actual tier from Clerk metadata
+        model: 'qwen-safety', // Use the robust qwen-safety model as requested
+        task: 'research', // Ensure it routes to the correct API key
       });
 
       if (result) {

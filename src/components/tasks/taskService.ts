@@ -14,10 +14,22 @@ export const taskService = {
       .eq('id', user.id)
       .maybeSingle();
 
+    // --- STRICT SUBSCRIPTION SYNC (CLERK METADATA) ---
+    const metadata = (user as any).user_metadata || {};
+    const subscription = metadata.subscription || {};
+    const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+    const role = roleArray[0] || 'student';
+    const tier = (subscription.tier || metadata.subscription_tier || 'free').toLowerCase();
+
     return {
       id: user.id,
       email: user.email || '',
-      profile: profile || undefined,
+      profile: {
+        full_name: metadata.full_name || profile?.full_name || 'User',
+        role: role,
+        student_id: user.id.substring(0, 8),
+        subscription_tier: tier
+      } as any,
     };
   },
 

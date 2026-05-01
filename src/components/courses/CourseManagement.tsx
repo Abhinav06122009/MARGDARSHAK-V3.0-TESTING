@@ -20,7 +20,6 @@ import CourseCard from './CourseCard';
 import CourseTable from './CourseTable';
 import CourseGrid from './CourseGrid';
 import CourseStats from './CourseStats';
-import CourseToolkit from './CourseToolkit';
 import CourseFocusView from './CourseFocusView';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
@@ -54,8 +53,6 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
     onConfirm: () => { },
   });
   const [recommendations, setRecommendations] = useState<RecommendedCourse[]>([]);
-  const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
-  const [isPathModalOpen, setIsPathModalOpen] = useState(false);
   const [focusedCourse, setFocusedCourse] = useState<Course | null>(null);
   const [curatedContent, setCuratedContent] = useState<CuratedContent[]>([]);
 
@@ -276,9 +273,6 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
 
         {/* Stats Section */}
         <CourseStats stats={courseStats} />
-
-        {/* AI Toolkit */}
-        <CourseToolkit currentUser={currentUser} />
 
         {/* Filters & View Toggle */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-8 p-4 rounded-3xl bg-zinc-900/40 border border-white/5 backdrop-blur-xl">

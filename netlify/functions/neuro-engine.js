@@ -58,30 +58,54 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       return { statusCode: 401, headers, body: JSON.stringify({ error: "Invalid identity token" }) };
     }
 
-    // 2. Fetch User Tier
+    // 2. Fetch User Tier (Priority: Clerk JWT Metadata -> Supabase Profile)
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    let userTier = "free";
-    try {
-      const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.sub}&select=subscription_tier`, {
-        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
-      });
-      const profiles = await profileRes.json();
-      userTier = profiles?.[0]?.subscription_tier || "free";
-    } catch (e) { console.error("[NEURO-ENGINE] Profile fetch failed:", e.message); }
+    // Extract from Clerk Metadata if available in JWT
+    const jwtMetadata = user.unsafe_metadata || user.public_metadata || {};
+    const jwtSubscription = jwtMetadata.subscription || {};
+    const jwtTier = (jwtSubscription.tier || jwtMetadata.subscription_tier || '').toLowerCase();
+    
+    let userTier = jwtTier;
+    
+    // Fallback to Supabase if JWT doesn't have it (or to verify)
+    if (!userTier) {
+      try {
+        const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.sub}&select=subscription_tier`, {
+          headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+        });
+        const profiles = await profileRes.json();
+        userTier = profiles?.[0]?.subscription_tier || "free";
+      } catch (e) { 
+        console.error("[NEURO-ENGINE] Profile fetch failed:", e.message); 
+        userTier = "free";
+      }
+    }
 
     const isElite = ["premium_elite", "extra_plus", "premium_plus"].includes(userTier);
-    const isPremium = userTier === "premium" || isElite;
+    const isPremium = ["premium", "premium_elite", "extra_plus", "premium_plus"].includes(userTier);
     const apiKeyToUse = isElite ? process.env.OPENAI_API_KEY : (userApiKey || process.env.OPENAI_API_KEY);
 
     // 3. Request Parsing
     const payload = JSON.parse(event.body || "{}");
-    const messages = Array.isArray(payload.messages) ? payload.messages : [];
-    if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
+    const mode = payload.mode || 'chat';
+    const task = payload.task || 'general';
+    const messages = payload.messages || [];
+
+    // 4. Access Control Matrix
     
+    // Enforcement: Certain modes/tasks require premium
+    if (mode === 'imagegen' && !isPremium) {
+      return { statusCode: 403, headers, body: JSON.stringify({ error: "Premium subscription required for image generation." }) };
+    }
+    
+    if (['quiz', 'essay', 'doubt-solver'].includes(task) && !isElite) {
+      return { statusCode: 403, headers, body: JSON.stringify({ error: "Premium Elite subscription required for this AI module." }) };
+    }
+
     // IMAGE GENERATION INTERCEPT (Pollinations.ai / FLUX)
-    if (payload.mode === 'imagegen') {
+    if (mode === 'imagegen') {
       try {
         const lastMsg = messages[messages.length - 1];
         const promptText = typeof lastMsg.content === 'string' ? lastMsg.content : lastMsg.content[0]?.text || "A beautiful artwork";

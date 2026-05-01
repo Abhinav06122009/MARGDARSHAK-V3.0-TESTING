@@ -35,8 +35,17 @@ const EventForm: React.FC<EventFormProps> = ({
   const handleSuggestTime = () => {
     if (!hasPremiumAccess) {
         toast({
-            title: "Premium Feature",
-            description: "Upgrade to premium_elite to use AI-powered time suggestions.",
+            title: (
+              <span className="bg-gradient-to-r from-red-400 to-rose-600 bg-clip-text text-transparent font-bold">
+                Premium Feature
+              </span>
+            ),
+            description: (
+              <span className="text-white font-medium">
+                Upgrade to <span className="text-rose-400 font-semibold">premium_elite</span> to use AI-powered time suggestions.
+              </span>
+            ),
+            className: "bg-black border border-red-500/50 shadow-xl",
             variant: "destructive",
         });
         return;

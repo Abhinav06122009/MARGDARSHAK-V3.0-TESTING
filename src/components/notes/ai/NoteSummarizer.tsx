@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAI } from '@/contexts/AIContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NoteSummarizerProps {
   noteContent: string;
@@ -18,6 +19,7 @@ const NoteSummarizer: React.FC<NoteSummarizerProps> = ({ noteContent, noteTitle 
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const { isAIReady } = useAI();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
 
   const truncatedContent = noteContent.substring(0, 3000);
@@ -49,9 +51,12 @@ Return ONLY valid JSON:
   "keyPoints": ["point 1", "point 2", "point 3"]
 }`;
 
+      const userTier = authUser?.profile?.subscription_tier || 'free';
+
       const result = await modelRouter.generateJSON<{ summary: string; keyPoints: string[] }>(prompt, {
         model: 'qwen-safety',
         task: 'notes',
+        tier: userTier,
         useCache: true,
         cacheKey: `note_summary_${noteTitle}_${noteContent.substring(0, 100)}`,
       });

@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { taskService } from './taskService';
 import { courseService } from '@/components/dashboard/courseService';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Task, TaskFormData, SecureUser, TaskStats } from './types';
 import type { Course } from '@/components/dashboard/course';
 import ParallaxBackground from '@/components/ui/ParallaxBackground';
@@ -210,6 +211,7 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'kanban' | 'calendar'>('grid');
+  const { user: authUser, loading: authLoading } = useAuth();
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
   const [celebratingTaskId, setCelebratingTaskId] = useState<string | null>(null);
   const [modalState, setModalState] = useState({
@@ -311,11 +313,10 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const initializeSecureTasks = async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
 
-      const user = await taskService.getCurrentUser();
-
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Authentication Required",
           description: "Please log in to manage your tasks.",
@@ -326,17 +327,31 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         return;
       }
 
-      setCurrentUser(user);
+      setCurrentUser({
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'User',
+          role: authUser.profile?.role || 'student',
+          student_id: authUser.id.substring(0, 8),
+          subscription_tier: authUser.profile?.subscription_tier || 'free'
+        }
+      } as SecureUser);
+      
       setSecurityVerified(true);
 
-      const premiumRoles = ['premium', 'bdo', 'admin', 'superadmin'];
-      const userRole = user.profile?.role || 'student';
-      setHasPremiumAccess(premiumRoles.includes(userRole));
+      // Check premium status strictly from Clerk-synced metadata
+      const userTier = authUser.profile?.subscription_tier || 'free';
+      const userRole = authUser.profile?.role || 'student';
+      const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
+      const isAdminRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
+      
+      setHasPremiumAccess(isPremiumTier || isAdminRole);
 
       const [userTasks, stats, userCourses] = await Promise.all([
-        taskService.fetchUserTasks(user.id),
-        taskService.getTaskStatistics(user.id),
-        courseService.fetchUserCourses(user.id)
+        taskService.fetchUserTasks(authUser.id),
+        taskService.getTaskStatistics(authUser.id),
+        courseService.fetchUserCourses(authUser.id)
       ]);
 
       setTasks(userTasks);
@@ -351,7 +366,7 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         ),
         description: (
           <span className="text-white font-medium">
-            Welcome Back <span className="text-emerald-400 font-semibold">{user.profile?.full_name}</span>! Your tasks are ready.
+            Welcome Back <span className="text-emerald-400 font-semibold">{authUser.fullName || 'User'}</span>! Your tasks are ready.
           </span>
         ),
         className: "bg-black border border-blue-400/50 shadow-xl",
