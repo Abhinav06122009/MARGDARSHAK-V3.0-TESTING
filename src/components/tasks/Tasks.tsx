@@ -32,6 +32,7 @@ import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import TaskCard from './TaskCard';
 import KanbanBoard from './KanbanBoard';
 import TaskGrid from './TaskGrid';
+import { modelRouter } from '@/lib/ai/modelRouter';
 
 // Social Icons
 const LinkedinLogo = () => (
