@@ -119,7 +119,7 @@ exports.handler = async (event) => {
     const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKeyToUse}`,
         "Content-Type": "application/json",
         "HTTP-Referer": origin || "https://margdarshak-ai.netlify.app",
         "X-Title": "MARGDARSHAK AI Tutor",

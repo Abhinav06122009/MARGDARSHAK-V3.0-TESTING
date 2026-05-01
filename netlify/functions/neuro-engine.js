@@ -89,7 +89,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         
         const pollRes = await fetch(pollUrl, {
           method: "GET",
-          headers: { "Authorization": "Bearer pk_zsdrdBr8qAO7Cbbp" }
+          headers: { "Authorization": `Bearer ${process.env.POLLINATIONS_IMAGE_KEY || 'pk_zsdrdBr8qAO7Cbbp'}` }
         });
         
         if (!pollRes.ok) throw new Error("Pollinations API rejected the request.");
@@ -123,13 +123,9 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
       
-      // User provided key for Notes/Timetable
-      const NOTES_TIMETABLE_KEY = 'sk_Hq0l9zsr4yj3INNmvDSXsW8xHWml3EUZ';
-      const DEFAULT_KEY = 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv';
-
       const apiKey = (selectedModel === 'qwen-safety' || payload.task === 'notes')
-        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || NOTES_TIMETABLE_KEY)
-        : (process.env.POLLINATIONS_API_KEY || DEFAULT_KEY);
+        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY)
+        : (process.env.POLLINATIONS_API_KEY);
 
       if (!apiKey) {
         throw new Error(`Missing API key for model: ${selectedModel}`);
