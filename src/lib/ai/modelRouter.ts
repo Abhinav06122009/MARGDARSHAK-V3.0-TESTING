@@ -69,7 +69,8 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
     body: JSON.stringify({ 
       messages: payload,
       model: modelToUse,
-      task: options.task
+      task: options.task,
+      jsonMode: options.jsonMode
     }),
   });
   if (!res.ok) {
@@ -233,7 +234,8 @@ export const modelRouter = {
       }
     }
 
-    throw new Error("AI output was not in a valid format. Please try again with different content.");
+    console.error('[JSON-PARSE-ERROR] Raw output snippet:', text.substring(0, 200));
+    throw new Error("AI output was not in a valid JSON format. This usually happens when the source text is too complex or the model adds commentary. Please try again with a shorter snippet.");
   },
 };
 

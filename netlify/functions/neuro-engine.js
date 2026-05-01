@@ -58,6 +58,11 @@ exports.handler = async (event) => {
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
   if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
 
+  let systemPrompt = FORMATTING_SYSTEM_PROMPT;
+  if (payload.jsonMode) {
+    systemPrompt += "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences (```), no preamble, no explanation. Just the raw JSON string.";
+  }
+
   const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
   let modelToUse = payload.model || DEFAULT_FREE_MODEL;
   if (payload.task === 'research' || hasImages) modelToUse = VISION_RESEARCH_MODEL;
@@ -73,7 +78,13 @@ exports.handler = async (event) => {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelToUse.replace('google/', '')}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: Array.isArray(m.content) ? m.content.map(p => (p.type === 'text' ? { text: p.text } : { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } })) : [{ text: m.content }] })), system_instruction: { parts: [{ text: FORMATTING_SYSTEM_PROMPT }] } })
+        body: JSON.stringify({ 
+          contents: messages.filter(m => m.role !== 'system').map(m => ({ 
+            role: m.role === 'assistant' ? 'model' : 'user', 
+            parts: Array.isArray(m.content) ? m.content.map(p => (p.type === 'text' ? { text: p.text } : { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } })) : [{ text: m.content }] 
+          })), 
+          system_instruction: { parts: [{ text: systemPrompt }] } 
+        })
       });
       const data = await res.json();
       return { statusCode: 200, headers, body: JSON.stringify({ response: data?.candidates?.[0]?.content?.parts?.[0]?.text || "", model: modelToUse }) };
@@ -81,10 +92,11 @@ exports.handler = async (event) => {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
-        body: JSON.stringify({ model: modelToUse, messages: [{ role: "system", content: FORMATTING_SYSTEM_PROMPT }, ...messages] })
+        body: JSON.stringify({ model: modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
       });
       const data = await res.json();
-      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.choices?.[0]?.message?.content || "", model: modelToUse }) };
+      let text = data?.choices?.[0]?.message?.content || "";
+      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
     }
   } catch (err) { return { statusCode: 502, headers, body: JSON.stringify({ error: err.message }) }; }
 };
