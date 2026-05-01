@@ -218,21 +218,9 @@ export const useTimetable = () => {
       setTimetableStats(stats);
 
       toast({
-        title: (
-          <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent font-bold">
-            Timetable Ready
-          </span>
-        ),
-        description: (
-          <span className="text-white font-medium">
-            Welcome <span className="text-cyan-400 font-semibold">{user.profile?.full_name}</span>! Your timetable was loaded successfully.
-          </span>
-        ),
-        className: "bg-black border border-cyan-500/50 shadow-xl",
-        icon: <CalendarCheck className="text-cyan-400" />,
-        duration: 5000,
-        isClosable: true,
-        position: "top-right"
+        title: "Timetable Ready",
+        description: `Welcome back, ${user.profile?.full_name}! Your schedule is synchronized.`,
+        variant: "premium"
       });
 
     } catch (error) {
@@ -297,40 +285,16 @@ export const useTimetable = () => {
       if (editingEvent) {
         await timetableHelpers.updateEvent(editingEvent.id, formData, currentUser.id);
         toast({
-          title: (
-            <span className="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent font-bold">
-              Event Updated!
-            </span>
-          ),
-          description: (
-            <span className="text-white font-medium">
-              "<span className="font-semibold text-pink-400">{formData.title}</span>" has been updated.
-            </span>
-          ),
-          className: "bg-black border border-pink-500/60 shadow-xl",
-          icon: <Edit3 className="text-pink-400" />,
-          duration: 5000,
-          isClosable: true,
-          position: "top-right",
+          title: "Event Updated",
+          description: `"${formData.title}" has been successfully modified.`,
+          variant: "success"
         });
       } else {
         await timetableHelpers.createEvent(formData, currentUser.id);
         toast({
-          title: (
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-bold">
-              Event Created!
-            </span>
-          ),
-          description: (
-            <span className="text-white font-medium">
-              "<span className="font-semibold text-indigo-400">{formData.title}</span>" event has been successfully added.
-            </span>
-          ),
-          className: "bg-black border border-indigo-500/60 shadow-lg",
-          icon: <CalendarPlus className="text-indigo-400" />,
-          duration: 5000,
-          isClosable: true,
-          position: "top-right",
+          title: "Event Created",
+          description: `"${formData.title}" added to your schedule.`,
+          variant: "success"
         });
       }
 
@@ -344,8 +308,8 @@ export const useTimetable = () => {
     } catch (error: any) {
       console.error('Error saving event:', error);
       toast({
-        title: 'Error Saving Event',
-        description: `Failed to save event: ${error.message || 'Please try again.'}`,
+        title: 'Save Failed',
+        description: "Could not save event. Check your connection.",
         variant: 'destructive',
       });
     }
@@ -390,21 +354,9 @@ export const useTimetable = () => {
       await timetableHelpers.deleteEvent(id, currentUser.id);
       
       toast({
-        title: (
-          <span className="bg-gradient-to-r from-red-500 via-pink-600 to-rose-400 bg-clip-text text-transparent font-bold">
-            Event Deleted Successfully
-          </span>
-        ),
-        description: (
-          <span className="text-white font-medium">
-            "<span className="text-rose-400 font-semibold">{title}</span>" has been removed from your timetable.
-          </span>
-        ),
-        className: "bg-black border border-red-500/50 shadow-2xl",
-        icon: <Trash2 className="text-rose-400" />,
-        duration: 5000,
-        isClosable: true,
-        position: "top-right"
+        title: "Event Removed",
+        description: `"${title}" has been deleted from your schedule.`,
+        variant: "destructive"
       });
 
       const userTimetable = await timetableHelpers.fetchUserTimetable(currentUser.id);
@@ -414,8 +366,8 @@ export const useTimetable = () => {
     } catch (error: any) {
       console.error('Error deleting event:', error);
       toast({
-        title: "Error Deleting Event",
-        description: `Failed to delete event: ${error.message}`,
+        title: "Delete Failed",
+        description: "Could not remove event.",
         variant: "destructive",
       });
     }
@@ -496,7 +448,7 @@ export const useTimetable = () => {
     
     await Promise.all(selectedEvents.map(id => timetableHelpers.deleteEvent(id, currentUser.id)));
     
-    toast({ title: "Bulk Delete Successful", description: `${selectedEvents.length} events have been removed.` });
+    toast({ title: "Bulk Delete Successful", description: `${selectedEvents.length} events have been removed.`, variant: "success" });
     
     const userTimetable = await timetableHelpers.fetchUserTimetable(currentUser.id);
     setEvents(userTimetable);
@@ -508,9 +460,9 @@ export const useTimetable = () => {
     const suggestion = smartScheduler.findNextAvailableSlot(events, tempEvent, new Date().getDay());
     if (suggestion) {
       setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
-      toast({ title: "Time Suggested!", description: `We found an open slot for you on ${timetableHelpers.getDayNames()[suggestion.day]} at ${timetableHelpers.formatTime(suggestion.start_time)}.`, icon: <Zap className="text-yellow-400" /> });
+      toast({ title: "Time Suggested!", description: `Optimal slot found on ${timetableHelpers.getDayNames()[suggestion.day]} at ${timetableHelpers.formatTime(suggestion.start_time)}.`, variant: "success" });
     } else {
-      toast({ title: "No Obvious Slots", description: "Your schedule is looking full!", variant: "destructive" });
+      toast({ title: "No Obvious Slots", description: "Your schedule is looking full!", variant: "warning" });
     }
   }, [events, formData, toast]);
 
@@ -521,7 +473,7 @@ export const useTimetable = () => {
       if (suggestions && suggestions.length > 0) {
         setWorkloadSuggestions(suggestions);
       } else {
-        toast({ title: "Schedule is Already Balanced", description: "Your workload seems well-distributed.", icon: <CheckCircle className="text-green-400" /> });
+        toast({ title: "Schedule is Balanced", description: "Your workload seems well-distributed.", variant: "success" });
       }
     }
   }, [events, toast]);
@@ -553,7 +505,7 @@ export const useTimetable = () => {
     setEvents(events.map(e => e.id === eventToMove.id ? updatedEventData : e));
     await timetableHelpers.updateEvent(eventToMove.id, updatedEventData, currentUser.id);
 
-    toast({ title: "Workload Balanced!", description: `Moved "${eventToMove.title}" to a less busy day.` });
+    toast({ title: "Workload Balanced!", description: `Moved "${eventToMove.title}" to a less busy day.`, variant: "success" });
     setWorkloadSuggestions(null);
   }, [workloadSuggestions, currentUser, events, toast]);
 

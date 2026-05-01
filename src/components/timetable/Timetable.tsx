@@ -138,21 +138,9 @@ const Timetable: React.FC = () => {
       setEvents(userTimetable);
 
       toast({
-        title: (
-          <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent font-bold">
-            Timetable Ready
-          </span>
-        ),
-        description: (
-          <span className="text-white font-medium">
-            Welcome <span className="text-cyan-400 font-semibold">{user.profile?.full_name}</span>! Your timetable was loaded successfully.
-          </span>
-        ),
-        className: "bg-black border border-cyan-500/50 shadow-xl",
-        icon: <CalendarCheck className="text-cyan-400" />,
-        duration: 5000,
-        isClosable: true,
-        position: "top-right"
+        title: "Timetable Ready",
+        description: `Welcome back, ${user.profile?.full_name}! Your schedule is synchronized.`,
+        variant: "premium"
       });
 
     } catch (error) {
@@ -234,41 +222,17 @@ const Timetable: React.FC = () => {
         savedEvent = await timetableHelpers.updateEvent(editingEvent.id, formData, currentUser.id);
         setEvents(events.map(e => e.id === savedEvent.id ? savedEvent : e));
         toast({
-          title: (
-            <span className="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent font-bold">
-              Event Updated!
-            </span>
-          ),
-          description: (
-            <span className="text-white font-medium">
-              "<span className="font-semibold text-pink-400">{savedEvent.title}</span>" has been updated.
-            </span>
-          ),
-          className: "bg-black border border-pink-500/60 shadow-xl",
-          icon: <Edit3 className="text-pink-400" />,
-          duration: 5000,
-          isClosable: true,
-          position: "top-right",
+          title: "Event Updated",
+          description: `"${savedEvent.title}" has been successfully modified.`,
+          variant: "success"
         });
       } else {
         savedEvent = await timetableHelpers.createEvent(formData, currentUser.id);
         setEvents([...events, savedEvent]);
         toast({
-          title: (
-            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-bold">
-              Event Created!
-            </span>
-          ),
-          description: (
-            <span className="text-white font-medium">
-              "<span className="font-semibold text-indigo-400">{savedEvent.title}</span>" event has been successfully added.
-            </span>
-          ),
-          className: "bg-black border border-indigo-500/60 shadow-lg",
-          icon: <CalendarPlus className="text-indigo-400" />,
-          duration: 5000,
-          isClosable: true,
-          position: "top-right",
+          title: "Event Created",
+          description: `"${savedEvent.title}" added to your schedule.`,
+          variant: "success"
         });
       }
 
@@ -276,12 +240,12 @@ const Timetable: React.FC = () => {
       setEditingEvent(null);
       resetForm();
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving event:', error);
       toast({
-        title: 'Error Saving Event',
-        description: `Failed to save event: ${error.message || 'Please try again.'}`,
-        variant: 'destructive',
+        title: "Save Failed",
+        description: "Could not save event. Check your connection.",
+        variant: "destructive"
       });
     }
   };
@@ -562,7 +526,7 @@ Return ONLY this JSON: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time
       toast({
         title: "🧠 Saarthi is deep-analyzing...",
         description: "Reading your courses, tasks and entire schedule to balance workload.",
-        className: "bg-black border border-blue-500/50 shadow-xl",
+        variant: "premium",
       });
 
       try {
@@ -634,6 +598,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
               toDay: suggestion.toDay,
               workloadBefore: wkLoad[suggestion.fromDay] || 0,
               workloadAfter: wkLoad[suggestion.toDay] || 0,
+              reason: suggestion.reason
             }]);
             return;
           }
@@ -649,8 +614,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
           toast({
             title: "Schedule is Balanced",
             description: "Your workload is well-distributed across the week.",
-            icon: <CheckCircle className="text-green-400" />,
-            className: "bg-black border border-green-500/50 shadow-xl",
+            variant: "success"
           });
         }
       }
@@ -712,14 +676,9 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
     setEvents(events.map(e => e.id === eventToMove.id ? updatedEventData : e));
 
     toast({
-      title: (
-        <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
-          AI Workload Balanced!
-        </span>
-      ),
+      title: "AI Workload Balanced!",
       description: `Moved "${eventToMove.title}" to a less busy day to improve your schedule.`,
-      className: "bg-black border border-blue-500/50 shadow-xl", // Info: Blue
-      icon: <Zap className="text-blue-400" />,
+      variant: "success"
     });
 
     setWorkloadSuggestions(null);

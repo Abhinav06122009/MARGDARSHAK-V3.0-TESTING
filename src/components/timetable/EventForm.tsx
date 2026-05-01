@@ -36,7 +36,7 @@ const EventForm: React.FC<EventFormProps> = ({
     if (!hasPremiumAccess) {
         toast({
             title: "Premium Feature",
-            description: "Upgrade to a Pro plan to use AI-powered time suggestions.",
+            description: "Upgrade to premium_elite to use AI-powered time suggestions.",
             variant: "destructive",
         });
         return;

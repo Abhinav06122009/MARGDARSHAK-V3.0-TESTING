@@ -157,10 +157,9 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
     onSave(formData);
     onClose();
     toast({
-      title: editingEvent ? "Event Updated!" : "Event Created!",
-      description: `"${formData.title}" has been ${editingEvent ? 'updated' : 'added'} to your timetable.`,
-      className: "bg-black border border-blue-400/50 shadow-xl",
-      icon: <Save className="text-emerald-400" />,
+      title: editingEvent ? "Event Updated" : "Event Created",
+      description: `"${formData.title}" has been successfully ${editingEvent ? 'modified' : 'added'}.`,
+      variant: "success",
     });
   };
 
