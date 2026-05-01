@@ -89,7 +89,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         
         const pollRes = await fetch(pollUrl, {
           method: "GET",
-          headers: { "Authorization": `Bearer ${process.env.POLLINATIONS_IMAGE_KEY || 'pk_zsdrdBr8qAO7Cbbp'}` }
+          headers: { "Authorization": `Bearer ${process.env.POLLINATIONS_IMAGE_KEY}` }
         });
         
         if (!pollRes.ok) throw new Error("Pollinations API rejected the request.");

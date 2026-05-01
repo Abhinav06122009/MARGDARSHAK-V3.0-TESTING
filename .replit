@@ -42,7 +42,7 @@ externalPort = 3000
 [userenv]
 
 [userenv.shared]
-VITE_POLLINATIONS_KEY = "pk_zsdrdBr8qAO7Cbbp"
+# VITE_POLLINATIONS_KEY removed for security
 
 [deployment]
 run = ["sh", "-c", "streamlit run --server.address 0.0.0.0 --server.headless true --server.enableCORS=false --server.enableWebsocketCompression=false main.py"]
