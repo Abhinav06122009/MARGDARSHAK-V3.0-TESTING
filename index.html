@@ -24,6 +24,32 @@
     <meta name="keywords" content="student learning platform, academic productivity, grade tracker, task manager, study timer, pomodoro, scientific calculator, online timetable maker, AI tutor, MARGDARSHAK" />
     <meta name="author" content="ABHINAV JHA" />
     
+    <script>
+      // SELF-HEALING ASSET RECOVERY: Detect stale hashes and reload
+      window.addEventListener('error', function(e) {
+        const isModuleError = e.message && (
+          e.message.includes('Failed to load module script') || 
+          e.message.includes('MIME type') ||
+          e.message.includes('strict MIME checking')
+        );
+        const isAssetError = e.target && (e.target.src || e.target.href) && (
+          (e.target.src && e.target.src.includes('/assets/')) || 
+          (e.target.href && e.target.href.includes('/assets/'))
+        );
+        
+        if (isModuleError || isAssetError) {
+          console.warn('🛡️ STALE ASSET DETECTED. RECOVERING LATEST BUILD...');
+          // Prevent infinite reload loops by checking session storage
+          const lastReload = sessionStorage.getItem('last_asset_reload');
+          const now = Date.now();
+          if (!lastReload || (now - parseInt(lastReload)) > 5000) {
+            sessionStorage.setItem('last_asset_reload', now.toString());
+            window.location.reload();
+          }
+        }
+      }, true);
+    </script>
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://margdarshan.tech/" />

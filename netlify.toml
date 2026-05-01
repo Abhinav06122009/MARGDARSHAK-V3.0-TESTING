@@ -14,7 +14,18 @@
   force = true
 
 # ZENITH FIX: Ensure missing assets return 404 instead of index.html
-# This prevents "MIME type text/html" errors when an asset is missing/stale.
+[[redirects]]
+  from = "/assets/*.js"
+  to = "/404-js"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/assets/*.css"
+  to = "/404-css"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/assets/*"
   to = "/index.html"

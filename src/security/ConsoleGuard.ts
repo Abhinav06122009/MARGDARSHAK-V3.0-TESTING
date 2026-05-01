@@ -40,29 +40,68 @@ export const initConsoleGuard = () => {
     window.location.search.includes('debug=true')
   );
 
+  // --- EXTREME LOCKDOWN ---
+  const blockConsole = () => {
+    if (isDebug) return;
+
+    // 1. Infinite Debugger Trap: Crashes/Freezes the debugger if opened
+    const trap = () => {
+      try {
+        (function() {
+          (function a() {
+            debugger;
+            a();
+          }());
+        }());
+      } catch (e) {}
+    };
+
+    // 2. Overwrite all methods with empty stubs
+    const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'group', 'groupCollapsed', 'groupEnd', 'clear', 'time', 'timeEnd', 'count', 'assert'];
+    
+    const silentConsole: any = {};
+    methods.forEach(m => {
+      silentConsole[m] = () => {};
+    });
+
+    // 3. Force console object to be immutable
+    try {
+      Object.defineProperty(window, 'console', {
+        value: silentConsole,
+        writable: false,
+        configurable: false
+      });
+    } catch (e) {
+      // Fallback for browsers that don't allow console overwrite
+      methods.forEach(m => {
+        try {
+          Object.defineProperty(console, m, {
+            value: () => {},
+            writable: false,
+            configurable: false
+          });
+        } catch (err) {}
+      });
+    }
+
+    // 4. Start the trap
+    setInterval(trap, 500);
+  };
+
+  // Run immediately
+  blockConsole();
+
   const showWarning = () => {
     if (isDebug) {
       originalLog.call(console, '🛠️ DEBUG MODE ACTIVE: Console Guard Bypassed.');
       return;
     }
+    // We can't log the warning if we've blocked the console, 
+    // so we use the original log one last time before blocking.
     originalClear.call(console);
     originalLog.call(console, `%c${warningTitle}`, titleStyle);
     originalLog.call(console, `%c${warningText}`, textStyle);
   };
 
-  // Run immediately
-  showWarning();
-
-  // If debug is active, we don't override the console
-  if (isDebug) return;
-
-  // Override console methods to prevent other logs
-  const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'group', 'groupCollapsed', 'groupEnd'];
-  
-  methods.forEach(method => {
-    (console as any)[method] = (...args: any[]) => {
-      // Just keep it quiet, but still log to Sentry if available
-      // originalError.call(console, ...args); // Uncomment for invisible debugging
-    };
-  });
+  if (!isDebug) showWarning();
 };

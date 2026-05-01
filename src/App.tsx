@@ -97,6 +97,7 @@ import { trackActivity } from '@/lib/security/activityTracker';
 
 import SSOCallback from '@/components/auth/SSOCallback';
 import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
+import DevVerificationGuard from './components/security/DevVerificationGuard';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -333,7 +334,8 @@ const AppContent = () => {
                       </Routes>
                     </AnimatePresence>
                     <AIWidgetWrapper />
-                    <GlobalWellnessBar />
+                    <RankEntryOverlay />
+                    <DevVerificationGuard />
                     <GlobalQuickActions />
                     <MobileNavbar />
                     <ShortcutsOverlay />

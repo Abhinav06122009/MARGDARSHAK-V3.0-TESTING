@@ -207,48 +207,61 @@ export const initSecurityHardening = () => {
   setInterval(checkDevTools, 5000);
 
 
-  // --- 6. VISUAL LOCKDOWN ---
+  // --- 6. VISUAL LOCKDOWN (TOTAL SHIELD) ---
+  const applyVisualLockdown = async () => {
+    const isOfficer = await isEliteOfficer();
+    if (isOfficer) return;
 
-  const style = document.createElement('style');
-  style.innerHTML = `
-    /* Visual Lockdown - Softened */
-    /* * {
-      -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-      user-select: none !important;
-      -webkit-user-drag: none !important;
-      -webkit-tap-highlight-color: transparent !important;
-    } */
-    input, textarea, [contenteditable="true"] {
-      cursor: text !important;
-    }
-    img {
-      pointer-events: none !important;
-      -webkit-touch-callout: none !important;
-    }
-    @media print {
-      body {
-        display: none !important;
+    const style = document.createElement('style');
+    style.innerHTML = `
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-user-drag: none !important;
+        -webkit-tap-highlight-color: transparent !important;
       }
+      input, textarea, [contenteditable="true"], .selectable {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+        cursor: text !important;
+      }
+      img {
+        pointer-events: none !important;
+        -webkit-touch-callout: none !important;
+      }
+      @media print {
+        body {
+          display: none !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  };
+  applyVisualLockdown();
+
+  // --- 7. DEVELOPER 2-STEP VERIFICATION (Dev2SV) ---
+  const initDev2SV = async () => {
+    const isOfficer = await isEliteOfficer();
+    if (!isOfficer) return;
+
+    // Check if verified in this session
+    const isVerified = sessionStorage.getItem('mg_dev_verified') === 'true';
+    if (!isVerified) {
+      window.dispatchEvent(new CustomEvent('dev-verification-required'));
     }
-  `;
-  document.head.appendChild(style);
+  };
+  initDev2SV();
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       console.clear();
+      // Anti-tab-switching: Detect if user is trying to find bypasses elsewhere
     }
   });
 
-  // --- 7. TAMPER DETECTION ---
-
-  const tamperCheck = () => {
-    if (console.log.toString().includes('[native code]') && !isDev) {
-      // Tamper logic here if needed
-    }
-  };
-  setInterval(tamperCheck, 15000); // Increased interval
-
-  console.log('%c🛡️ MAX SECURITY ACTIVE', 'color: green; font-weight: bold; font-size: 20px;');
+  console.log('%c🛡️ SUPREME SECURITY ACTIVE: Brand VSAV Gyantapa Protocol', 'color: #10b981; font-weight: bold; font-size: 20px; text-shadow: 0 0 10px rgba(16,185,129,0.5)');
 };
