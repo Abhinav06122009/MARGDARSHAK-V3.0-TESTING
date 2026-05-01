@@ -12,6 +12,7 @@ export async function authedFetch(
   init: RequestInit = {}
 ): Promise<Response> {
   const attach = async (token: string) => {
+    console.log(`[authedFetch] Calling: ${input}`);
     const headers = new Headers(init.headers || {});
     headers.set("Authorization", `Bearer ${token}`);
     if (init.body && !headers.has("Content-Type")) {

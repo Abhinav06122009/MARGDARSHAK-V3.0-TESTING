@@ -8,8 +8,9 @@ const {
 } = require("./_shared/security");
 
 const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-const ELITE_UPGRADE_MODEL = "anthropic/claude-3.5-sonnet";
-const PREMIUM_UPGRADE_MODEL = "google/gemini-2.0-flash-001";
+const ELITE_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
+const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b";
+const VISION_RESEARCH_MODEL = "google/gemini-2.0-flash-001";
 
 const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Under no circumstances should you output math delimiters like \\(, \\), \\[, \\], or $$, nor should you use backslash commands like \\frac, \\theta, \\sqrt, \\times, or \\cdot.
 
@@ -144,13 +145,21 @@ exports.handler = async (event) => {
 
   const isPremium = userTier === 'premium' || isElite;
   
+  const isResearch = payload.task === 'research';
+  const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
+
   let modelToUse = payload.model || DEFAULT_FREE_MODEL;
-  if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
+  
+  // FORCE Gemini for Vision/Research
+  if (isResearch || hasImages) {
+    modelToUse = VISION_RESEARCH_MODEL;
+  } else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
+    // Standard Chat Upgrades
     if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
     else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
   }
 
-  console.log(`[AI-CHAT] User: ${user.id} | Tier: ${userTier} | Model: ${modelToUse}`);
+  console.log(`[AI-CHAT] User: ${user.id} | Tier: ${userTier} | Task: ${payload.task || 'chat'} | Model: ${modelToUse}`);
 
   const isGoogleModel = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
 
