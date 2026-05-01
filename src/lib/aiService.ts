@@ -250,11 +250,10 @@ export const aiService = {
     `;
 
     try {
-      const rawContent = await modelRouter.complete(systemPrompt, {
+      const briefing = await modelRouter.generateJSON(systemPrompt, {
         tier: 'premium',
       });
 
-      const briefing = cleanAndParseJSON(rawContent);
       if (!briefing) throw new Error("Invalid JSON from AI");
 
       return briefing;
@@ -314,10 +313,10 @@ export const aiService = {
         }
       `;
 
-      const rawContent = await modelRouter.complete(systemPrompt, {
+      const syllabus = await modelRouter.generateJSON(systemPrompt, {
         tier: 'premium',
       });
-      return cleanAndParseJSON(rawContent) || { modules: [] };
+      return syllabus || { modules: [] };
     } catch (e) {
       console.error("AI Syllabus Error", e);
       return { modules: [] };
@@ -386,8 +385,8 @@ export const aiService = {
         SOURCE MATERIAL:
         ${sourceMaterial}
       `;
-      const rawContent = await modelRouter.complete(systemPrompt, { tier: 'premium' });
-      return cleanAndParseJSON(rawContent) || { flashcards: [] };
+      const result = await modelRouter.generateJSON(systemPrompt, { tier: 'premium' });
+      return result || { flashcards: [] };
     } catch (e) {
       console.error("Flashcard Gen Error", e);
       return { flashcards: [] };
@@ -443,8 +442,8 @@ export const aiService = {
           ]
         }
       `;
-      const rawContent = await modelRouter.complete(systemPrompt, { tier: 'premium' });
-      return cleanAndParseJSON(rawContent) || { questions: [] };
+      const result = await modelRouter.generateJSON(systemPrompt, { tier: 'premium' });
+      return result || { questions: [] };
     } catch (e) {
       console.error("Mock Test Gen Error", e);
       return { questions: [] };
@@ -474,8 +473,8 @@ export const aiService = {
         - Overdue Tasks: ${stats.overdueTasks}
         - Completion Rate: ${stats.completionRate}%
       `;
-      const rawContent = await modelRouter.complete(systemPrompt, { tier: 'premium' });
-      return cleanAndParseJSON(rawContent) || null;
+      const result = await modelRouter.generateJSON(systemPrompt, { tier: 'premium' });
+      return result || null;
     } catch (e) {
       console.error("Burnout Predictor Error", e);
       return null;

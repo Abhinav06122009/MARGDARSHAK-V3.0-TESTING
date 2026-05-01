@@ -255,13 +255,8 @@ const SmartTutorPage = () => {
                   else handleSend();
                 }
               }}
-              onClick={() => {
-                if (subscriptionTier === 'free') setShowUpgradeModal(true);
-                else if (subscriptionTier === 'premium' && !byokKey) setShowByokModal(true);
-              }}
-              readOnly={subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey)}
-              placeholder={subscriptionTier === 'free' ? "Upgrade to use Saarthi..." : (subscriptionTier === 'premium' && !byokKey) ? "Initialize API Key to type..." : "Ask Saarthi anything..."}
-              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${(subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey)) ? 'cursor-pointer' : ''}`}
+              placeholder={subscriptionTier === 'free' ? "Ask Saarthi anything..." : (subscriptionTier === 'premium' && !byokKey) ? "Initialize API Key to type..." : "Ask Saarthi anything..."}
+              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide`}
             />
             <Button 
               onClick={() => {
