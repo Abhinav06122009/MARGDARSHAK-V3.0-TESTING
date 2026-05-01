@@ -266,13 +266,6 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
 
           <div className="flex items-center gap-3">
             <Button 
-              variant="outline" 
-              onClick={handleGeneratePath}
-              className="rounded-2xl border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10"
-            >
-              <Route className="w-4 h-4 mr-2" /> AI Path
-            </Button>
-            <Button 
               onClick={() => { resetForm(); setEditingCourse(null); setIsSheetOpen(true); }}
               className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 px-8 font-bold"
             >
@@ -382,51 +375,8 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
         />
       )}
 
-      <LearningPathDialog 
-        isOpen={isPathModalOpen} 
-        onClose={() => setIsPathModalOpen(false)} 
-        path={learningPath} 
-      />
-
     </div>
   );
 };
-
-// Internal Helper Modal for Learning Path
-const LearningPathDialog: React.FC<{ isOpen: boolean, onClose: () => void, path: LearningPath | null }> = ({ isOpen, onClose, path }) => (
-  <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="bg-zinc-950/95 backdrop-blur-2xl border-white/10 text-white max-w-2xl">
-      <DialogHeader>
-        <div className="p-3 w-fit rounded-2xl bg-amber-500/20 mb-4">
-          <Route className="w-6 h-6 text-amber-400" />
-        </div>
-        <DialogTitle className="text-3xl font-black tracking-tighter">{path?.title || 'Learning Path'}</DialogTitle>
-        <DialogDescription className="text-zinc-400">{path?.description}</DialogDescription>
-      </DialogHeader>
-      <div className="py-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-        {path?.steps.map((step, i) => (
-          <div key={step.id} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm shrink-0">
-              {i + 1}
-            </div>
-            <div>
-              <h4 className="font-bold text-white">{step.name}</h4>
-              <p className="text-sm text-zinc-500 mt-1">{step.description}</p>
-              <div className="flex gap-2 mt-3">
-                <Badge variant="secondary" className="bg-white/5 text-[10px] uppercase">{step.difficulty}</Badge>
-                <Badge variant="secondary" className="bg-white/5 text-[10px]">{step.credits} Credits</Badge>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <DialogFooter>
-        <Button onClick={onClose} className="w-full bg-amber-500 hover:bg-amber-600 text-black font-black rounded-xl py-6">
-          Begin Journey
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
 
 export default CourseManagement;
