@@ -37,8 +37,7 @@ const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
       icon: <Zap size={20} className="text-amber-500" />,
       links: [
         { name: 'Progress Tracer', path: '/tracer', description: 'Real-time academic telemetry for Elite users.' },
-        { name: 'Grades Analytics', path: '/grades', description: 'Quantitative academic performance metrics.' },
-        { name: 'Attendance Monitor', path: '/attendance', description: 'Log and verify presence protocols.' },
+        { name: 'Grade Management', path: '/grades', description: 'Monitor academic performance metrics.' },
         { name: 'Course Management', path: '/courses', description: 'Universal syllabus and curriculum hub.' }
       ]
     },

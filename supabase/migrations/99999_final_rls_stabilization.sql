@@ -1,17 +1,17 @@
 -- 99999_final_rls_stabilization.sql
--- ZENITH ARCHITECTURE: CRITICAL IDENTITY ALIGNMENT & POLICY RESTORATION
+-- ZENITH ARCHITECTURE: CRITICAL IDENTITY ALIGNMENT & TYPE-SAFE RESOLUTION
 -- This migration ensures that the Postgres identity translation perfectly matches the JS implementation.
--- It resolves the 403 RLS violation errors by harmonizing the hashing protocol and salt handling.
+-- It resolves the "column user_id is of type uuid but expression is of type text" error by returning UUID type.
 
 -- 1. CLEANUP EXISTING IDENTITY CHAIN
 -- We must DROP with CASCADE because policies and other functions depend on these.
--- This resolves the "42P13: cannot change return type of existing function" error.
 DROP FUNCTION IF EXISTS public.requesting_user_id() CASCADE;
 DROP FUNCTION IF EXISTS public.translate_clerk_id_to_uuid(text) CASCADE;
 
 -- 2. RE-ESTABLISH THE DETERMINISTIC IDENTITY FUNCTION
+-- We return UUID type now to satisfy Postgres type strictness on UUID columns.
 CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
-RETURNS text
+RETURNS uuid
 LANGUAGE plpgsql STABLE
 AS $$
 DECLARE
@@ -19,6 +19,7 @@ DECLARE
     v_combined text;
     v_h text;
     v_clean_clerk_id text;
+    v_uuid_str text;
 BEGIN
     -- Handle null/empty inputs immediately
     IF p_clerk_id IS NULL OR p_clerk_id = '' THEN
@@ -27,10 +28,9 @@ BEGIN
 
     v_clean_clerk_id := trim(p_clerk_id);
 
-    -- 1. UUID Check: If already a valid UUID, return as-is.
-    -- This matches the JS 'if (clerkId.includes("-") && clerkId.length === 36)' check.
+    -- 1. UUID Check: If already a valid UUID, return it as a UUID type.
     IF v_clean_clerk_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
-        RETURN v_clean_clerk_id;
+        RETURN v_clean_clerk_id::uuid;
     END IF;
 
     -- 2. Get Salt (Must match VITE_ID_SALT in .env)
@@ -46,18 +46,20 @@ BEGIN
     v_h := encode(extensions.digest(v_combined::text, 'sha256'::text), 'hex');
 
     -- 4. UUID Construction (8-4-4-4-12 format)
-    RETURN 
+    v_uuid_str := 
       substring(v_h, 1, 8) || '-' || 
       substring(v_h, 9, 4) || '-' || 
       '4' || substring(v_h, 14, 3) || '-' || 
       '8' || substring(v_h, 18, 3) || '-' || 
       substring(v_h, 21, 12);
+      
+    RETURN v_uuid_str::uuid;
 END;
 $$;
 
 -- 3. RE-ESTABLISH THE REQUESTING USER IDENTITY HELPER
 CREATE OR REPLACE FUNCTION public.requesting_user_id()
-RETURNS text
+RETURNS uuid
 LANGUAGE sql STABLE
 AS $$
   SELECT public.translate_clerk_id_to_uuid(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::text);
@@ -68,7 +70,7 @@ DO $$
 DECLARE
     v_table text;
     v_tables text[] := ARRAY[
-        'profiles', 'courses', 'attendance', 'notes', 'note_folders', 'tasks', 'todos', 
+        'profiles', 'courses', 'notes', 'note_folders', 'tasks', 'todos', 
         'ai_neural_memory', 'exams', 'grades', 'assignments', 'submissions', 
         'study_sessions', 'user_timetables', 'enrollments', 'announcements', 
         'medications', 'symptoms', 'reports', 'timetable_events', 'study_plans', 
@@ -89,6 +91,7 @@ BEGIN
 
         -- Check if table exists before creating policies
         IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = v_table AND table_schema = 'public') THEN
+            -- Use ::text = ::text comparison for maximum compatibility across column types
             EXECUTE format('DROP POLICY IF EXISTS "Standard SELECT for %I" ON public.%I', v_table, v_table);
             EXECUTE format('CREATE POLICY "Standard SELECT for %I" ON public.%I FOR SELECT USING (%I::text = public.requesting_user_id()::text)', v_table, v_table, v_user_id_col);
             
@@ -114,5 +117,5 @@ BEGIN
     END IF;
 END $$;
 
-COMMENT ON FUNCTION public.translate_clerk_id_to_uuid(text) IS 'Deterministic UUID translation harmonized with frontend id-translator.ts.';
-COMMENT ON FUNCTION public.requesting_user_id() IS 'Security-hardened identity resolver for RLS policies.';
+COMMENT ON FUNCTION public.translate_clerk_id_to_uuid(text) IS 'Deterministic UUID translation harmonized with frontend id-translator.ts. Returns UUID type.';
+COMMENT ON FUNCTION public.requesting_user_id() IS 'Security-hardened identity resolver for RLS policies. Returns UUID type.';

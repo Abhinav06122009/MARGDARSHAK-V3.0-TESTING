@@ -9,43 +9,18 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { modelRouter } from '@/lib/ai/modelRouter';
 import { useAuth } from '@/contexts/AuthContext';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 
 // Secure helper functions for Notes
 const notesHelpers = {
-  getCurrentUser: async (): Promise<SecureUser | null> => {
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return null;
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) return null;
-
-      return {
-        id: user.id,
-        email: user.email || '',
-        profile: {
-          full_name: profile.full_name || 'User',
-          role: profile.role || 'student',
-          student_id: profile.student_id
-        }
-      };
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
-  },
-
   fetchUserNotes: async (userId: string, folder?: string) => {
+    // Synchronize with Zenith Identity Protocol
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       let query = supabase
         .from('notes')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', translatedId)
         .eq('is_deleted', false);
 
       if (folder && folder !== 'all') {
@@ -63,11 +38,12 @@ const notesHelpers = {
   },
 
   fetchUserFolders: async (userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
         .from('note_folders')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', translatedId)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
@@ -79,17 +55,18 @@ const notesHelpers = {
   },
 
   getNotesStatistics: async (userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data: notes } = await supabase
         .from('notes')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', translatedId)
         .eq('is_deleted', false);
 
       const { data: folders } = await supabase
         .from('note_folders')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', translatedId);
       
       const stats = {
         total_notes: notes?.length || 0,
@@ -110,11 +87,12 @@ const notesHelpers = {
   },
 
   searchNotes: async (userId: string, query: string, folder?: string, tags?: string[]) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       let q = supabase
         .from('notes')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', translatedId)
         .eq('is_deleted', false);
       
       if (query) {
@@ -134,9 +112,10 @@ const notesHelpers = {
   },
 
   createNote: async (noteData: any, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const newNote = {
       ...noteData,
-      user_id: userId,
+      user_id: translatedId,
       tags: typeof noteData.tags === 'string' ? noteData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : (noteData.tags || []),
       is_deleted: false,
       last_accessed: new Date().toISOString()
@@ -148,6 +127,7 @@ const notesHelpers = {
   },
 
   updateNote: async (noteId: string, noteData: any, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const update = {
       ...noteData,
       tags: typeof noteData.tags === 'string' ? noteData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : (noteData.tags || []),
@@ -159,7 +139,7 @@ const notesHelpers = {
       .from('notes')
       .update(update)
       .eq('id', noteId)
-      .eq('user_id', userId)
+      .eq('user_id', translatedId)
       .select()
       .single();
 
@@ -168,28 +148,31 @@ const notesHelpers = {
   },
 
   deleteNote: async (noteId: string, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { error } = await supabase
       .from('notes')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .eq('id', noteId)
-      .eq('user_id', userId);
+      .eq('user_id', translatedId);
 
     if (error) throw error;
     return true;
   },
 
   bulkDeleteNotes: async (noteIds: string[], userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { error } = await supabase
       .from('notes')
       .update({ is_deleted: true, deleted_at: new Date().toISOString() })
       .in('id', noteIds)
-      .eq('user_id', userId);
+      .eq('user_id', translatedId);
 
     if (error) throw error;
     return true;
   },
 
   toggleNoteFavorite: async (noteId: string, isFavorite: boolean, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const { error } = await supabase
       .from('notes')
       .update({ 
@@ -197,7 +180,7 @@ const notesHelpers = {
         last_accessed: new Date().toISOString()
       })
       .eq('id', noteId)
-      .eq('user_id', userId);
+      .eq('user_id', translatedId);
 
     if (error) throw error;
     return true;
@@ -230,7 +213,8 @@ export const useSecureNotes = () => {
   const [selectedFolder, setSelectedFolder] = useState('all');
   const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
   const [currentView, setCurrentView] = useState<'main' | 'folder' | 'search'>('main');
-  const { user: authUser, clerkUser, loading: authLoading } = useAuth();
+  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+  const { user: authUser, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
@@ -273,25 +257,27 @@ export const useSecureNotes = () => {
         setSecurityVerified(true); setLoading(false); return;
       }
       
-      setCurrentUser({
+      // Strict metadata-driven user state
+      const resolvedUser: SecureUser = {
         id: authUser.id,
         email: authUser.primaryEmailAddress?.emailAddress || '',
         profile: {
           full_name: authUser.fullName || 'User',
           role: authUser.profile?.role || 'student',
-          student_id: authUser.id.substring(0, 8)
+          subscription_tier: authUser.profile?.subscription_tier || 'free'
         }
-      } as SecureUser);
-      
+      };
+
+      setCurrentUser(resolvedUser);
       setSecurityVerified(true);
 
-      // Check premium status strictly from Clerk-synced metadata
-      const userTier = authUser.profile?.subscription_tier || 'free';
-      const userRole = authUser.profile?.role || 'student';
+      // Enforce premium features based on Zenith Identity Protocol
+      const userTier = resolvedUser.profile?.subscription_tier || 'free';
+      const userRole = resolvedUser.profile?.role || 'student';
       const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
-      const isAdminRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
+      const isOverrideRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
       
-      setHasPremiumAccess(isPremiumTier || isAdminRole);
+      setHasPremiumAccess(isPremiumTier || isOverrideRole);
 
       const [userNotes, userFolders, stats] = await Promise.all([
         notesHelpers.fetchUserNotes(authUser.id),
@@ -301,6 +287,7 @@ export const useSecureNotes = () => {
       setNotes(userNotes);
       if (userFolders.length > 0) setFolders(userFolders);
       setNoteStats(stats);
+      
       showSecureToast("Secure Access Verified", `Welcome ${authUser.fullName || 'User'}! Your notes are private and secure.`, <Shield className="text-emerald-400" />);
     } catch (error) {
       console.error('Error initializing secure notes:', error);

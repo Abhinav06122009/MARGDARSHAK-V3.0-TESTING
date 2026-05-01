@@ -51,7 +51,6 @@ import AdminSettings from '@/pages/admin/AdminSettings';
 // Features - eagerly loaded
 import Tasks from "@/components/tasks/Tasks";
 import Grades from "@/components/grades/Grades";
-import Attendance from "@/components/attendance/Attendance";
 import Notes from "@/components/notes/Notes";
 import StudyTimer from "@/components/timer/StudyTimer";
 import Calculator from "@/components/calculator/Calculator";
@@ -220,7 +219,6 @@ const AppContent = () => {
                         {/* Core Features */}
                         <Route path="/tasks" element={<ProtectedRoute><SEO title="Task Manager | MARGDARSHAK" description="Organize your academic tasks and deadlines efficiently." /><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/grades" element={<ProtectedRoute><SEO title="Grade Tracker | MARGDARSHAK" description="Track your academic performance and calculate your GPA automatically." /><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/attendance" element={<ProtectedRoute><SEO title="Attendance Tracker | MARGDARSHAK" description="Stay on top of your class attendance and requirements." /><Attendance onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/notes" element={<ProtectedRoute><SEO title="Digital Notes | MARGDARSHAK" description="Create and organize your study notes in one secure place." /><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/calendar" element={<ProtectedRoute><SEO title="Academic Calendar | MARGDARSHAK" description="Sync your schedule and never miss an important event." /><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/timetable" element={<ProtectedRoute><SEO title="Timetable Maker | MARGDARSHAK" description="Create a perfect study schedule with our automated timetable generator." /><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />

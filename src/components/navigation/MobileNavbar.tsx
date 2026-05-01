@@ -18,7 +18,7 @@ const MobileNavbar = () => {
   // And only on dashboard-related pages
   const dashboardPages = [
     '/dashboard', '/ai-assistant', '/tasks', '/courses', '/settings', 
-    '/grades', '/attendance', '/notes', '/calendar', '/timetable', 
+    '/grades', '/notes', '/calendar', '/timetable', 
     '/syllabus', '/progress', '/wellness', '/achievements'
   ];
   

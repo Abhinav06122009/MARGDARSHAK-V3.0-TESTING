@@ -53,7 +53,6 @@ const GlobalQuickActions: React.FC = () => {
     { icon: MousePointer2, title: 'Calculator', color: 'from-slate-400 to-slate-600', path: '/calculator' },
     { icon: Briefcase, title: 'Tasks', color: 'from-blue-400 to-indigo-600', path: '/tasks' },
     { icon: GraduationCap, title: 'Grades', color: 'from-yellow-500 to-amber-600', path: '/grades' },
-    { icon: Clock, title: 'Attendance', color: 'from-green-400 to-emerald-600', path: '/attendance' },
     { icon: Book, title: 'Notes', color: 'from-orange-400 to-amber-600', path: '/notes' },
     { icon: Calendar, title: 'Calendar', color: 'from-pink-400 to-rose-600', path: '/calendar' },
     { icon: Command, title: 'Timetable', color: 'from-cyan-400 to-blue-600', path: '/timetable' },
