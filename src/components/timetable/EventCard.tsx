@@ -99,6 +99,11 @@ const EventCard = ({ event, onEdit, onDelete, dayIndex, onDragStart, onSelect, i
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    // ZENITH FIX: Prevent card click if a button inside was clicked
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+
     e.stopPropagation();
     if (e.ctrlKey || e.metaKey) {
       onSelect(event.id);
@@ -193,18 +198,20 @@ const EventCard = ({ event, onEdit, onDelete, dayIndex, onDragStart, onSelect, i
       </div>
 
       {/* Action Hover Overlays */}
-      <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 z-[40]">
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onEdit(event); }}
-          className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg border border-white/10 backdrop-blur-md transition-all"
+          className="p-2 bg-white/10 hover:bg-white/25 rounded-xl border border-white/20 backdrop-blur-md transition-all shadow-lg hover:scale-110 active:scale-95"
         >
-          <Edit className="w-3 h-3 text-white" />
+          <Edit className="w-3.5 h-3.5 text-white" />
         </button>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(event.id, event.title); }}
-          className="p-1.5 bg-red-500/20 hover:bg-red-500/40 rounded-lg border border-red-500/20 backdrop-blur-md transition-all"
+          className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-xl border border-red-500/30 backdrop-blur-md transition-all shadow-lg hover:scale-110 active:scale-95"
         >
-          <Trash2 className="w-3 h-3 text-red-400" />
+          <Trash2 className="w-3.5 h-3.5 text-red-400" />
         </button>
       </div>
 

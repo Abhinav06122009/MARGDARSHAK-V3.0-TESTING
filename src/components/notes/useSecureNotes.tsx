@@ -294,10 +294,10 @@ export const useSecureNotes = () => {
 
       const userTier = resolvedUser.profile?.subscription_tier || 'free';
       const userRole = resolvedUser.profile?.role || 'student';
-      const isPremiumTier = ['premium', 'premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
+      const isEliteTier = ['premium_elite', 'extra_plus', 'premium_plus'].includes(userTier);
       const isOverrideRole = ['admin', 'superadmin', 'ceo', 'bdo'].includes(userRole);
       
-      setHasPremiumAccess(isPremiumTier || isOverrideRole);
+      setHasPremiumAccess(isEliteTier || isOverrideRole);
 
       const [userNotes, userFolders, stats] = await Promise.all([
         notesHelpers.fetchUserNotes(authUser.id),

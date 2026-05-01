@@ -50,7 +50,7 @@ const SmartTutorPage = () => {
     if (clerkLoaded && clerkUser) {
       const metadata = clerkUser.publicMetadata || {};
       const subscription = (metadata.subscription as any) || {};
-      
+
       // STRICT METADATA RESOLUTION (Matches AuthContext)
       let tier = (subscription.tier || 'free').toLowerCase();
       const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];

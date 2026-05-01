@@ -45,7 +45,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     const authHeader = event.headers.authorization || "";
     const userApiKey = event.headers["x-user-api-key"] || "";
     const token = authHeader.replace("Bearer ", "");
-    
+
     if (!token) return { statusCode: 401, headers, body: JSON.stringify({ error: "Authentication required" }) };
 
     // Robust token parse
@@ -61,14 +61,14 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     // 2. Fetch User Tier (Priority: Clerk JWT Metadata -> Supabase Profile)
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
+
     // Extract from Clerk Metadata if available in JWT
     const jwtMetadata = user.unsafe_metadata || user.public_metadata || {};
     const jwtSubscription = jwtMetadata.subscription || {};
     const jwtTier = (jwtSubscription.tier || jwtMetadata.subscription_tier || '').toLowerCase();
-    
+
     let userTier = jwtTier;
-    
+
     // Fallback to Supabase if JWT doesn't have it (or to verify)
     if (!userTier) {
       try {
@@ -77,8 +77,8 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         });
         const profiles = await profileRes.json();
         userTier = profiles?.[0]?.subscription_tier || "free";
-      } catch (e) { 
-        console.error("[NEURO-ENGINE] Profile fetch failed:", e.message); 
+      } catch (e) {
+        console.error("[NEURO-ENGINE] Profile fetch failed:", e.message);
         userTier = "free";
       }
     }
@@ -94,13 +94,13 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     const messages = payload.messages || [];
 
     // 4. Access Control Matrix
-    
+
     // Enforcement: Certain modes/tasks require premium
     if (mode === 'imagegen' && !isPremium) {
       return { statusCode: 403, headers, body: JSON.stringify({ error: "Premium subscription required for image generation." }) };
     }
-    
-    if (['quiz', 'essay', 'doubt-solver'].includes(task) && !isElite) {
+
+    if (['quiz', 'essay', 'doubt-solver', 'notes'].includes(task) && !isElite) {
       return { statusCode: 403, headers, body: JSON.stringify({ error: "Premium Elite subscription required for this AI module." }) };
     }
 
@@ -110,18 +110,18 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         const lastMsg = messages[messages.length - 1];
         const promptText = typeof lastMsg.content === 'string' ? lastMsg.content : lastMsg.content[0]?.text || "A beautiful artwork";
         const pollUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=flux&width=1024&height=1024&nologo=true`;
-        
+
         const pollRes = await fetch(pollUrl, {
           method: "GET",
           headers: { "Authorization": `Bearer ${process.env.POLLINATIONS_IMAGE_KEY}` }
         });
-        
+
         if (!pollRes.ok) throw new Error("Pollinations API rejected the request.");
-        
+
         const buffer = await pollRes.arrayBuffer();
         const base64 = Buffer.from(buffer).toString('base64');
         const markdownImage = `![Generated Image](data:image/jpeg;base64,${base64})`;
-        
+
         return { statusCode: 200, headers, body: JSON.stringify({ response: markdownImage, model: "pollinations/flux" }) };
       } catch (err) {
         console.error("[NEURO-ENGINE] Image generation error:", err);
@@ -151,9 +151,9 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       // If no model is specified or gemini-fast is default, we use OpenAI for reliability
       // But if qwen-coder is explicitly requested (as in Notes), we keep it.
       if ((payload.task === 'tasks' || payload.task === 'notes') && selectedModel === 'gemini-fast') {
-        selectedModel = 'openai'; 
+        selectedModel = 'openai';
       }
-      
+
       const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || selectedModel === 'openai' || payload.task === 'notes' || payload.task === 'tasks')
         ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || process.env.POLLINATIONS_API_KEY)
         : (process.env.POLLINATIONS_API_KEY);
@@ -167,7 +167,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
         jsonMode: payload.jsonMode === true
       });
-      
+
       const pollHeaders = {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json"
@@ -177,9 +177,9 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const timeoutId = setTimeout(() => controller.abort(), 9000); // 9s limit (Netlify default is 10s)
 
       try {
-        const res = await fetch(pollUrl, { 
-          method: "POST", 
-          headers: pollHeaders, 
+        const res = await fetch(pollUrl, {
+          method: "POST",
+          headers: pollHeaders,
           body,
           signal: controller.signal
         });
@@ -236,20 +236,22 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     } catch (err) {
       console.error("[NEURO-ENGINE] Request processing failed:", err.message);
       const isTimeout = err.name === 'AbortError' || err.message.includes('timeout');
-      return { 
-        statusCode: isTimeout ? 504 : 502, 
-        headers, 
-        body: JSON.stringify({ 
+      return {
+        statusCode: isTimeout ? 504 : 502,
+        headers,
+        body: JSON.stringify({
           error: isTimeout ? "AI request timed out. Please try a shorter prompt." : `AI provider error: ${err.message}`,
           code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR"
-        }) 
+        })
       };
     }
   } catch (globalErr) {
     console.error("[NEURO-ENGINE] Global Fatal Error:", globalErr);
-    return { statusCode: 500, headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "application/json"
-    }, body: JSON.stringify({ error: `Execution Error: ${globalErr.message}` }) };
+    return {
+      statusCode: 500, headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json"
+      }, body: JSON.stringify({ error: `Execution Error: ${globalErr.message}` })
+    };
   }
 };

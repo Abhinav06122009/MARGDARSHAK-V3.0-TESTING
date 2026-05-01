@@ -96,6 +96,7 @@ import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay
 import { trackActivity } from '@/lib/security/activityTracker';
 
 import SSOCallback from '@/components/auth/SSOCallback';
+import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -182,6 +183,7 @@ const AppContent = () => {
               <AIProvider>
                 <div className="bg-[#050505] min-h-screen text-white">
                   <GlobalSecurityGuard>
+                    <RankEntryOverlay />
                     <NavigationTracker />
                     <SecurityWarningOverlay />
                     <AnimatePresence mode="wait">

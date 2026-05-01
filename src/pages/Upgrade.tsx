@@ -33,8 +33,16 @@ const Upgrade = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserTier = async () => {
       try {
+        // --- ZENITH SYNC: Prioritize Clerk Metadata ---
+        const clerkTier = clerkUser?.publicMetadata?.subscription?.tier;
+        if (clerkTier) {
+          setCurrentTier(clerkTier as string);
+          return;
+        }
+
+        // Fallback to Supabase Profile
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (authUser) {
           const { data: profile } = await supabase
@@ -47,12 +55,12 @@ const Upgrade = () => {
           setCurrentTier('free');
         }
       } catch (err) {
-        console.error("Error fetching user tier:", err);
+        console.error("Error syncing user tier:", err);
         setCurrentTier('free');
       }
     };
-    fetchUser();
-  }, []);
+    fetchUserTier();
+  }, [clerkUser]);
 
   useEffect(() => {
     // Inject Uropay Script
@@ -130,6 +138,29 @@ const Upgrade = () => {
               Unlock Your <br />
               <span className="text-emerald-500 underline decoration-emerald-500/20 underline-offset-8">Elite Potential</span>
             </h1>
+            
+            {/* Current Status Badge */}
+            <div className="flex justify-center mt-6">
+              <div className="px-6 py-4 bg-white/[0.03] border border-white/10 rounded-2xl backdrop-blur-xl flex items-center gap-6 shadow-2xl">
+                <div className="flex flex-col items-start">
+                  <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Active Deployment</span>
+                  <span className="text-sm font-black text-white uppercase tracking-tighter italic">
+                    {currentTier === 'free' ? 'Starter Suite (Free)' : 
+                     currentTier === 'premium' ? 'Premium Protocol' : 
+                     ['premium_elite', 'extra_plus', 'premium_plus'].includes(currentTier || '') ? 'Elite Cognitive Core' : 
+                     (currentTier || 'Starter Suite').toUpperCase()}
+                  </span>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex flex-col items-start">
+                   <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Security Identity</span>
+                   <span className="text-xs font-bold text-emerald-500/80 truncate max-w-[120px]">
+                      {clerkUser?.username || clerkUser?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Unknown'}
+                   </span>
+                </div>
+              </div>
+            </div>
+
             <p className="text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl mx-auto mb-12 italic border-l-2 border-emerald-500/20 pl-8">
               Engineer your academic trajectory with the most powerful <span className="text-white font-bold">Neural Core</span> available. Unlimited research, high-fidelity analytics, and priority support.
             </p>
@@ -277,7 +308,7 @@ const Upgrade = () => {
 
               <p className="text-sm text-zinc-400 mb-10 h-10 font-medium italic leading-relaxed">The definitive cognitive arsenal. All systems unrestricted.</p>
 
-              {currentTier === 'premium_elite' ? (
+              {['premium_elite', 'extra_plus', 'premium_plus'].includes(currentTier || '') ? (
                 <div className="w-full py-6 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-black text-[10px] tracking-[0.3em] uppercase text-center italic cursor-default">
                   Active Instance
                 </div>
