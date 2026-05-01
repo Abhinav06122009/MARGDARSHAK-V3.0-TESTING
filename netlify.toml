@@ -8,21 +8,28 @@
   SECRETS_SCAN_OMIT_KEYS = "ID_SALT,SUPABASE_SERVICE_ROLE_KEY,FUNCTION_SUPABASE_SERVICE_ROLE_KEY,SAMBANOVA_API_KEY,SERPER_API_KEY,OPENROUTER_API_KEY,VITE_GITHUB_AI_TOKEN,VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,OPENAI_API_KEY"
 
 [[redirects]]
-  from = "/api/ai-chat"
-  to = "/.netlify/functions/ai-chat"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
+# ZENITH FIX: Ensure missing assets return 404 instead of index.html
+# This prevents "MIME type text/html" errors when an asset is missing/stale.
+[[redirects]]
+  from = "/assets/*"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
 
 [[headers]]
   for = "/*"
