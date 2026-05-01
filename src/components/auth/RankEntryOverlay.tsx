@@ -37,24 +37,25 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       
       let info: any = null;
 
-      // A+ CLASS: Dual High Ranked (Multiple C-Suite Roles)
+      // A+ CLASS: RHODIUM ZENITH (Dual C-Suite)
       if (userCSuiteCount >= 2) {
         info = {
           tier: 'A+',
           title: 'ZENITH HIGH COMMAND',
           icon: Crown,
           style: {
-            gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
-            glow: 'rgba(255, 215, 0, 0.6)',
-            accent: '#FFD700',
-            particles: 'bg-[#FFD700]',
-            shimmer: 'from-yellow-400/20 via-transparent to-yellow-600/20',
-            border: 'border-yellow-500/50',
-            shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.3)]'
+            gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
+            glow: 'rgba(255, 255, 255, 0.7)',
+            accent: '#FFFFFF',
+            particles: 'bg-white',
+            shimmer: 'from-white/30 via-transparent to-white/30',
+            border: 'border-white/60',
+            shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
+            theme: 'rhodium'
           }
         };
       }
-      // A CLASS: High Command (Single C-Suite Role)
+      // A CLASS: PLATINUM ASTRAL (Single C-Suite)
       else if (userCSuiteCount === 1) {
         const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
         info = {
@@ -63,16 +64,17 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           icon: Shield,
           style: {
             gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
-            glow: 'rgba(0, 245, 255, 0.4)',
+            glow: 'rgba(0, 245, 255, 0.5)',
             accent: '#00F5FF',
             particles: 'bg-[#E5E4E2]',
-            shimmer: 'from-blue-400/20 via-transparent to-cyan-600/20',
+            shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
             border: 'border-cyan-500/50',
-            shadow: 'shadow-[0_0_100px_rgba(0,245,255,0.2)]'
+            shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
+            theme: 'platinum'
           }
         };
       }
-      // B- CLASS: Sovereign Command
+      // B- CLASS: IMPERIAL GOLD (Sovereign)
       else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
         const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
         info = {
@@ -80,13 +82,14 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
           icon: Zap,
           style: {
-            gradient: 'from-[#CD7F32] via-[#A9A9A9] to-[#4A4A4A]',
-            glow: 'rgba(205, 127, 50, 0.3)',
-            accent: '#CD7F32',
-            particles: 'bg-[#A9A9A9]',
-            shimmer: 'from-orange-400/20 via-transparent to-zinc-600/20',
-            border: 'border-orange-500/40',
-            shadow: 'shadow-[0_0_100px_rgba(205,127,50,0.15)]'
+            gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
+            glow: 'rgba(255, 215, 0, 0.5)',
+            accent: '#FFD700',
+            particles: 'bg-[#FFD700]',
+            shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
+            border: 'border-yellow-500/50',
+            shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
+            theme: 'gold'
           }
         };
       }
@@ -100,7 +103,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
         const timer = setTimeout(() => {
           setShow(false);
           if (onComplete) onComplete();
-        }, 5500); // Slightly longer for more impact
+        }, 6500); // More time forRhadium visuals
         return () => clearTimeout(timer);
       }
     }
@@ -124,192 +127,208 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseMove={handleMouseMove}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/98 backdrop-blur-3xl overflow-hidden cursor-none"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden cursor-none"
         >
-          {/* Animated Background Orbs */}
+          {/* Advanced Geometric Crystal Layer */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+             {[...Array(6)].map((_, i) => (
+               <motion.div
+                 key={i}
+                 initial={{ opacity: 0, scale: 0 }}
+                 animate={{ 
+                    opacity: [0, 0.1, 0], 
+                    scale: [0.5, 1.2, 0.5],
+                    rotate: [0, 180, 360],
+                    x: (Math.random() - 0.5) * 1000,
+                    y: (Math.random() - 0.5) * 1000
+                 }}
+                 transition={{ duration: 10 + i * 2, repeat: Infinity, ease: "easeInOut" }}
+                 className="absolute top-1/2 left-1/2 w-[400px] h-[400px] border border-white/5 rotate-45 backdrop-blur-3xl"
+                 style={{ 
+                   background: `linear-gradient(135deg, ${rankInfo.style.accent}05, transparent)`,
+                   clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' 
+                 }}
+               />
+             ))}
+          </div>
+
+          {/* Liquid Refraction Orb */}
           <div className="absolute inset-0 pointer-events-none">
             <motion.div
               animate={{ 
-                x: [0, 100, -100, 0],
-                y: [0, -50, 50, 0],
-                opacity: [0.1, 0.3, 0.1],
-                scale: [1, 1.5, 1]
+                x: [0, 50, -50, 0],
+                y: [0, -30, 30, 0],
+                opacity: [0.15, 0.25, 0.15],
+                scale: [1, 1.2, 1]
               }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute top-1/4 left-1/4 w-[800px] h-[800px] rounded-full blur-[150px]"
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[180px]"
               style={{ backgroundColor: rankInfo.style.accent }}
-            />
-            <motion.div
-              animate={{ 
-                x: [0, -100, 100, 0],
-                y: [0, 50, -50, 0],
-                opacity: [0.05, 0.2, 0.05],
-                scale: [1, 1.8, 1]
-              }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: 2 }}
-              className="absolute bottom-1/4 right-1/4 w-[800px] h-[800px] rounded-full blur-[150px] bg-white/5"
-            />
-            
-            {/* Neural Grid with Ripple */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:100px_100px]" />
-            <motion.div 
-               animate={{ opacity: [0, 0.1, 0], scale: [0.5, 1.5, 0.5] }}
-               transition={{ duration: 10, repeat: Infinity }}
-               className="absolute inset-0 bg-[radial-gradient(circle_at_center,white_0%,transparent_70%)] opacity-5"
             />
           </div>
 
           {/* 3D Container */}
           <motion.div
-            style={{ rotateX, rotateY, perspective: 2000 }}
+            style={{ rotateX, rotateY, perspective: 2500 }}
             className="relative flex flex-col items-center"
           >
             {/* Rank Identifier Card */}
             <motion.div
-              initial={{ y: 100, opacity: 0, scale: 0.5, rotateY: -90 }}
-              animate={{ y: 0, opacity: 1, scale: 1, rotateY: 0 }}
-              transition={{ delay: 0.3, duration: 1, type: "spring", bounce: 0.4 }}
-              className={`relative p-12 rounded-[5rem] bg-white/[0.02] border-2 ${rankInfo.style.border} backdrop-blur-3xl ${rankInfo.style.shadow} group`}
+              initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
+              animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
+              transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
+              className={`relative p-16 rounded-[6rem] bg-black/40 border-2 ${rankInfo.style.border} backdrop-blur-[100px] ${rankInfo.style.shadow} group`}
             >
-              {/* Shimmer Effect */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-40 rounded-[5rem] overflow-hidden`}>
+              {/* Glass Refraction Texture */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden rounded-[6rem]">
+                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-overlay" />
+              </div>
+
+              {/* Shimmer / Liquid Light */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-20 rounded-[6rem] overflow-hidden`}>
                 <motion.div 
-                  animate={{ x: ["-100%", "200%"] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-20deg]"
+                  animate={{ x: ["-200%", "200%"], y: ["-100%", "100%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-35deg]"
                 />
               </div>
 
-              {/* Energy Arcs (SVG) */}
+              {/* Energy Arcs (High Fidelity) */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
                 <motion.circle
-                  cx="50%" cy="50%" r="48%"
+                  cx="50%" cy="50%" r="52%"
                   fill="none"
                   stroke={rankInfo.style.accent}
-                  strokeWidth="1"
-                  strokeDasharray="10 20"
-                  animate={{ rotate: 360, opacity: [0.1, 0.5, 0.1] }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  strokeWidth="0.5"
+                  strokeDasharray="5 15"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 />
-                <motion.circle
-                  cx="50%" cy="50%" r="45%"
-                  fill="none"
-                  stroke={rankInfo.style.accent}
-                  strokeWidth="2"
-                  strokeDasharray="100 200"
-                  animate={{ rotate: -360, opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                <motion.path
+                   d="M 50,0 A 50,50 0 1 1 50,100 A 50,50 0 1 1 50,0"
+                   fill="none"
+                   stroke={rankInfo.style.accent}
+                   strokeWidth="1"
+                   strokeDasharray="40 160"
+                   className="opacity-40"
+                   style={{ transformOrigin: 'center', transform: 'scale(1.15)' }}
+                   animate={{ rotate: -360 }}
+                   transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                 />
               </svg>
 
               <div className="relative z-10 flex flex-col items-center">
+                {/* Brand Watermark */}
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.8, type: "spring", damping: 12 }}
-                  className="mb-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.4 }}
+                  transition={{ delay: 2 }}
+                  className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black tracking-[1.2em] text-white uppercase italic"
                 >
-                  <rankInfo.icon className="w-32 h-32" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 20px ${rankInfo.style.glow})` }} />
+                  BRAND VSAV GYANTAPA
+                </motion.div>
+
+                <motion.div
+                  initial={{ scale: 0, filter: 'blur(20px)' }}
+                  animate={{ scale: 1, filter: 'blur(0px)' }}
+                  transition={{ delay: 1, type: "spring", damping: 15 }}
+                  className="mb-10 relative"
+                >
+                   <div className="absolute inset-0 blur-[40px] opacity-60" style={{ backgroundColor: rankInfo.style.accent }} />
+                   <rankInfo.icon className="w-40 h-40 relative z-10" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 30px ${rankInfo.style.glow})` }} />
                 </motion.div>
                 
                 <div className="flex flex-col items-center text-center">
-                   <div className="inline-flex items-center gap-4 mb-4 px-6 py-2 rounded-full bg-white/5 border border-white/10">
-                      <Fingerprint className="w-4 h-4 text-zinc-500" />
-                      <span className="text-[10px] font-black tracking-[0.6em] text-zinc-400 uppercase italic">
-                        Biometric Auth Success
+                   <div className="inline-flex items-center gap-4 mb-6 px-8 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
+                      <Fingerprint className="w-5 h-5 text-zinc-400" />
+                      <span className="text-[11px] font-black tracking-[0.8em] text-zinc-300 uppercase italic">
+                         Verified Official Identity
                       </span>
                    </div>
 
-                   <h2 className={`text-8xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-12 mb-6`}>
+                   <h2 className={`text-9xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-16 mb-8`}>
                       <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.2, duration: 1 }}
+                        initial={{ letterSpacing: "0.5em", opacity: 0 }}
+                        animate={{ letterSpacing: "-0.05em", opacity: 1 }}
+                        transition={{ delay: 1.5, duration: 1.2, ease: "circOut" }}
                       >
                         {rankInfo.tier} Class
                       </motion.span>
                    </h2>
 
-                   <div className="relative h-8 overflow-hidden mb-8">
+                   <div className="relative h-12 overflow-hidden mb-10">
                      <motion.div
-                       initial={{ y: 50 }}
-                       animate={{ y: 0 }}
-                       transition={{ delay: 1.5, duration: 0.8, ease: "circOut" }}
-                       className="text-2xl font-black text-white/90 italic tracking-widest uppercase"
+                       initial={{ y: 80, skewY: 10 }}
+                       animate={{ y: 0, skewY: 0 }}
+                       transition={{ delay: 2, duration: 1, ease: "backOut" }}
+                       className="text-3xl font-black text-white italic tracking-[0.3em] uppercase flex items-center gap-4"
                      >
+                       <Sparkles className="w-6 h-6" style={{ color: rankInfo.style.accent }} />
                        {rankInfo.title}
+                       <Sparkles className="w-6 h-6" style={{ color: rankInfo.style.accent }} />
                      </motion.div>
                    </div>
 
-                   <div className="flex gap-1.5">
-                      {[...Array(5)].map((_, i) => (
+                   {/* Rank Achievement Badges */}
+                   <div className="flex gap-4">
+                      {[...Array(3)].map((_, i) => (
                         <motion.div
                           key={i}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 1.8 + i * 0.1 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 2.5 + i * 0.2 }}
+                          className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2"
                         >
-                          <Star className="w-4 h-4 fill-white text-white" />
+                           <Star className="w-3 h-3 fill-white text-white" />
+                           <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Excellence_{i+1}</span>
                         </motion.div>
                       ))}
                    </div>
                 </div>
               </div>
 
-              {/* Decorative Corner Ornaments */}
-              <div className="absolute top-8 left-8 flex flex-col gap-1">
-                 <div className="w-8 h-[2px] bg-white/20" />
-                 <div className="w-[2px] h-8 bg-white/20" />
-              </div>
-              <div className="absolute top-8 right-8 flex flex-col items-end gap-1">
-                 <div className="w-8 h-[2px] bg-white/20" />
-                 <div className="w-[2px] h-8 bg-white/20" />
+              {/* Corner High-Command Branding */}
+              <div className="absolute bottom-10 left-10 opacity-30 flex items-center gap-3">
+                 <Hexagon size={16} />
+                 <span className="text-[8px] font-black tracking-widest">ENCLAVE_NODE_SECURE</span>
               </div>
             </motion.div>
 
             {/* Greeting Sub-Section */}
             <motion.div
-              initial={{ y: 50, opacity: 0 }}
+              initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 2.2 }}
-              className="mt-16 flex flex-col items-center"
+              transition={{ delay: 3 }}
+              className="mt-20 flex flex-col items-center"
             >
-              <div className="relative mb-6">
-                <div className="absolute inset-0 blur-xl opacity-20" style={{ backgroundColor: rankInfo.style.accent }} />
-                <h3 className="relative text-4xl font-black text-white italic uppercase tracking-tight">
-                  Welcome Back, Agent {clerkUser?.firstName || clerkUser?.username}
-                </h3>
-              </div>
+              <h3 className="text-5xl font-black text-white italic uppercase tracking-tighter mb-4">
+                Welcome, Commander {clerkUser?.firstName || clerkUser?.username}
+              </h3>
               
-              <div className="flex items-center gap-8 text-[9px] font-black text-zinc-500 uppercase tracking-[0.4em]">
-                 <div className="flex items-center gap-3">
-                    <Activity className="w-4 h-4 text-emerald-500" />
-                    <span>Neural Link: 99.8%</span>
+              <div className="flex items-center gap-12 text-[10px] font-black text-zinc-500 uppercase tracking-[0.5em]">
+                 <div className="flex items-center gap-4 group">
+                    <Activity className="w-5 h-5 text-emerald-500 group-hover:animate-pulse" />
+                    <span>Neural Link: Synchronized</span>
                  </div>
-                 <div className="w-px h-6 bg-white/10" />
-                 <div className="flex items-center gap-3">
-                    <Hexagon className="w-4 h-4 text-blue-500" />
-                    <span>Enclave 7 Secured</span>
-                 </div>
-                 <div className="w-px h-6 bg-white/10" />
-                 <div className="flex items-center gap-3">
-                    <Cpu className="w-4 h-4 text-purple-500" />
-                    <span>Qwen_Core Primed</span>
+                 <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                 <div className="flex items-center gap-4 group">
+                    <Cpu className="w-5 h-5 text-blue-500 group-hover:rotate-90 transition-transform" />
+                    <span>Margdarshak Core: Online</span>
                  </div>
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Luxury Border Mask */}
-          <div className="absolute inset-0 border-[40px] border-black z-50 pointer-events-none" />
-          <div className="absolute inset-0 border border-white/5 z-50 pointer-events-none" />
+          {/* Luxury Frame & Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
+          <div className="absolute inset-0 border-[60px] border-black z-[100] pointer-events-none" />
           
-          {/* Progress Bar (Entry Duration) */}
+          {/* Progress / Duration Bar */}
           <motion.div 
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 5.5, ease: "linear" }}
-            className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent origin-left z-[100]"
+            transition={{ duration: 6.5, ease: "linear" }}
+            className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-white/50 to-transparent origin-left z-[110]"
           />
         </motion.div>
       )}
