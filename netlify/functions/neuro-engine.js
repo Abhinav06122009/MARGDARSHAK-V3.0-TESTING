@@ -123,7 +123,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
       const apiKey = selectedModel === 'qwen-safety'
-        ? (process.env.POLLINATIONS_TIMETABLE_KEY || 'sk_Hq0l9zsr4yj3INNmvDSXsW8xHWml3EUZ')
+        ? process.env.POLLINATIONS_TIMETABLE_KEY
         : (process.env.POLLINATIONS_API_KEY || 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv');
       const body = JSON.stringify({
         model: selectedModel,
