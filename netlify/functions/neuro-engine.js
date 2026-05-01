@@ -123,11 +123,12 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
       
-      // Fallback keys if env vars are missing
+      // User provided key for Notes/Timetable
+      const NOTES_TIMETABLE_KEY = 'sk_Hq0l9zsr4yj3INNmvDSXsW8xHWml3EUZ';
       const DEFAULT_KEY = 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv';
 
-      const apiKey = selectedModel === 'qwen-safety'
-        ? process.env.POLLINATIONS_TIMETABLE_KEY
+      const apiKey = (selectedModel === 'qwen-safety' || payload.task === 'notes')
+        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || NOTES_TIMETABLE_KEY)
         : (process.env.POLLINATIONS_API_KEY || DEFAULT_KEY);
 
       if (!apiKey) {

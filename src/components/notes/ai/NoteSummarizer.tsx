@@ -50,6 +50,8 @@ Return ONLY valid JSON:
 }`;
 
       const result = await modelRouter.generateJSON<{ summary: string; keyPoints: string[] }>(prompt, {
+        model: 'qwen-safety',
+        task: 'notes',
         useCache: true,
         cacheKey: `note_summary_${noteTitle}_${noteContent.substring(0, 100)}`,
       });

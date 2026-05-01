@@ -1,5 +1,5 @@
 export type ModelProvider = 'sambanova' | 'gemini' | 'puter';
-export type TaskType = 'chat' | 'analysis' | 'creative' | 'research' | 'summarize' | 'quiz' | 'plan';
+export type TaskType = 'chat' | 'analysis' | 'creative' | 'research' | 'summarize' | 'quiz' | 'plan' | 'notes';
 export type SubscriptionTier = 'free' | 'premium' | 'premium_elite' | 'extra_plus' | 'premium_plus';
 
 export interface ModelConfig {
