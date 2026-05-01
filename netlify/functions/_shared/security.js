@@ -149,13 +149,23 @@ const verifyClerkUser = async (authHeader) => {
     // Clerk uses base64url for signatures. Node.js Buffer handles this natively.
     try {
       const signatureBuffer = Buffer.from(parts[2], 'base64url');
-      if (!verifier.verify(publicKey, signatureBuffer)) {
+      
+      // Use createPublicKey for more robust PEM handling
+      const pubKeyObject = crypto.createPublicKey({
+        key: publicKey,
+        format: 'pem',
+        type: 'spki'
+      });
+
+      if (!verifier.verify(pubKeyObject, signatureBuffer)) {
         console.warn('[AUTH] Signature verification failed for token sub:', payload.sub);
+        // LOG THE TOKEN STRUCTURE FOR DEBUGGING (Sensitive data masked)
+        console.log('[AUTH DIAGNOSTIC] Payload keys:', Object.keys(payload));
         return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
       }
     } catch (verifyErr) {
       console.error('[AUTH] Cryptographic error during verification:', verifyErr.message);
-      return { ok: false, status: 401, code: "crypto_error", message: "Verification process failed" };
+      return { ok: false, status: 401, code: "crypto_error", message: `Verification process failed: ${verifyErr.message}` };
     }
     
     const now = Math.floor(Date.now() / 1000);
