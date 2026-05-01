@@ -100,7 +100,7 @@ exports.handler = async (event) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-             model: "gpt-4o-mini", // User requested GPT Image 1 Mini -> assuming gpt-4o-mini vision capability
+             model: "openai", 
              messages: [{ role: "system", content: systemPrompt }, ...messages]
           })
         });
