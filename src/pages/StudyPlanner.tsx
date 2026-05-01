@@ -111,45 +111,19 @@ const StudyPlanner: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       ? `Exam is in ${daysUntilExam} days (${config.examDate})`
       : 'No specific exam date (general study plan for 7 days)';
 
-    const prompt = `Create a detailed study plan for a student.
+    const prompt = `Synthesize a high-density study plan for: ${config.subjects}.
+Deadline: ${daysInfo}.
+Available: ${config.dailyHours}h/day.
+Focus: ${config.weakAreas || 'Balanced'}.
+Style: ${config.studyStyle}.
 
-Subjects/Topics: ${config.subjects}
-${daysInfo}
-Daily Study Hours Available: ${config.dailyHours} hours
-Weak Areas: ${config.weakAreas || 'None specified'}
-Study Style Preference: ${config.studyStyle}
-
-Generate a realistic ${config.examDate && daysUntilExam <= 7 ? daysUntilExam : 7}-day study plan.
-
-Return ONLY valid JSON with this exact structure:
+Generate a 7-day schedule. Return ONLY valid JSON:
 {
-  "overview": "2-3 sentence summary of the study strategy",
-  "schedule": [
-    {
-      "day": "Monday / Day 1",
-      "sessions": [
-        {
-          "time": "9:00 AM - 10:30 AM",
-          "subject": "Subject name",
-          "activity": "What to study (e.g., Read chapters 1-3, Practice problems)",
-          "duration": "1.5 hours"
-        }
-      ],
-      "totalHours": 3
-    }
-  ],
-  "tips": [
-    "Specific study tip 1",
-    "Specific study tip 2",
-    "Specific study tip 3"
-  ],
-  "milestones": [
-    "Complete X by Day 2",
-    "Review Y by Day 4"
-  ]
-}
-
-Make the schedule realistic, with breaks built in. Focus more time on weak areas.`;
+  "overview": "Summary",
+  "schedule": [{"day": "Day 1", "sessions": [{"time": "Slot", "subject": "Topic", "activity": "Task", "duration": "Duration"}], "totalHours": 0}],
+  "tips": ["Tip 1", "Tip 2"],
+  "milestones": ["M1"]
+}`;
 
     try {
       const result = await modelRouter.generateJSON<StudyPlan>(prompt);
