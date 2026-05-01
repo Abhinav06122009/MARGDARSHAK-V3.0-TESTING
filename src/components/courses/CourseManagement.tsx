@@ -218,35 +218,6 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
     });
   };
 
-  const handleGeneratePath = async () => {
-    if (!currentUser) return;
-    
-    const isPremiumElite = (currentUser.profile?.subscription_tier === 'premium_elite');
-    if (!isPremiumElite) {
-      toast({ 
-        title: "Elite Feature", 
-        description: "Saarthi Learning Paths are exclusive to premium_elite users.", 
-        variant: "destructive" 
-      });
-      navigate('/upgrade');
-      return;
-    }
-
-    toast({
-      title: "🧠 Saarthi is Designing Your Path...",
-      description: "Analyzing your current courses and tasks to build a sequence.",
-      className: "bg-black border border-amber-500/50 shadow-xl"
-    });
-
-    try {
-      const path = await recommendationService.generateLearningPath(currentUser.id, "High-Performance Academic Journey");
-      setLearningPath(path);
-      setIsPathModalOpen(true);
-    } catch (err) {
-      toast({ title: "Generation Failed", description: "AI encountered an issue. Please try again.", variant: "destructive" });
-    }
-  };
-
   if (loading || !securityVerified) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">

@@ -1,12 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+  .premium-card {
+    @apply rounded-[2rem] border border-white/5 bg-zinc-900/40 backdrop-blur-2xl transition-all duration-500 hover:border-indigo-500/30 hover:bg-zinc-900/60;
+  }
+}
+
 /* VSAV EDUKEEDA Enhanced Design System */
 
 @layer base {
   :root {
+    font-family: 'Outfit', 'Inter', sans-serif;
+  }
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
