@@ -1,4 +1,4 @@
-const CACHE_NAME = 'margdarshak-v3-clear';
+const CACHE_NAME = 'margdarshak-v3-clear-v2';
 
 // IMMEDIATE KILL-SWITCH: Clear all caches and deactivate
 self.addEventListener('install', (event) => {
@@ -19,7 +19,5 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  // Pass-through: Do not intercept or cache anything during recovery
-  return;
-});
+// REMOVED fetch handler to eliminate 'no-op fetch handler' browser warning.
+// Navigation will now proceed naturally without Service Worker overhead.

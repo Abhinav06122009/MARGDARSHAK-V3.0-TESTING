@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useUser } from '@clerk/react';
-import { Crown, Shield, Zap, Sparkles, Star, Cpu, Award, Hexagon, Fingerprint, Activity } from 'lucide-react';
+import { Crown, Shield, Zap, Sparkles, Star, Cpu, Award, Hexagon, Fingerprint, Activity, X } from 'lucide-react';
 
 interface RankEntryOverlayProps {
   onComplete?: () => void;
@@ -335,13 +335,6 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
           <div className="absolute inset-0 border-[60px] border-black z-[100] pointer-events-none" />
           
-          {/* Progress / Duration Bar */}
-          <motion.div 
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 6.5, ease: "linear" }}
-            className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-white/50 to-transparent origin-left z-[110]"
-          />
         </motion.div>
       )}
     </AnimatePresence>
