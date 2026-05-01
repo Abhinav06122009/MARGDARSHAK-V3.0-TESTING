@@ -24,90 +24,85 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-15, 15]), { stiffness: 100, damping: 30 });
 
   useEffect(() => {
-    const checkVerificationAndTrigger = () => {
-      if (isLoaded && clerkUser) {
-        // High Command Gating: Only show rank animation IF verified
-        const isVerified = sessionStorage.getItem('mg_dev_verified') === 'true';
-        if (!isVerified) return;
+    if (isLoaded && clerkUser) {
+      const metadata = clerkUser.publicMetadata || {};
+      const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+      const normalizedRoles = roles.map((r: string) => r.toLowerCase());
 
-        const metadata = clerkUser.publicMetadata || {};
-        const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
-        const normalizedRoles = roles.map((r: string) => r.toLowerCase());
+      const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
+      const sovereignRoles = ['owner', 'superadmin', 'admin'];
 
-        const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
-        const sovereignRoles = ['owner', 'superadmin', 'admin'];
+      // Count how many C-Suite roles the user has
+      const userCSuiteCount = normalizedRoles.filter(r => cSuiteRoles.includes(r)).length;
+      
+      let info: any = null;
 
-        const userCSuiteCount = normalizedRoles.filter(r => cSuiteRoles.includes(r)).length;
-        
-        let info: any = null;
-
-        if (userCSuiteCount >= 2) {
-          info = {
-            tier: 'A+',
-            title: 'ZENITH HIGH COMMAND',
-            icon: Crown,
-            style: {
-              gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
-              glow: 'rgba(255, 255, 255, 0.7)',
-              accent: '#FFFFFF',
-              particles: 'bg-white',
-              shimmer: 'from-white/30 via-transparent to-white/30',
-              border: 'border-white/60',
-              shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
-              theme: 'rhodium'
-            }
-          };
-        }
-        else if (userCSuiteCount === 1) {
-          const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
-          info = {
-            tier: 'A',
-            title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
-            icon: Shield,
-            style: {
-              gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
-              glow: 'rgba(0, 245, 255, 0.5)',
-              accent: '#00F5FF',
-              particles: 'bg-[#E5E4E2]',
-              shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
-              border: 'border-cyan-500/50',
-              shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
-              theme: 'platinum'
-            }
-          };
-        }
-        else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
-          const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
-          info = {
-            tier: 'B-',
-            title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
-            icon: Zap,
-            style: {
-              gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
-              glow: 'rgba(255, 215, 0, 0.5)',
-              accent: '#FFD700',
-              particles: 'bg-[#FFD700]',
-              shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
-              border: 'border-yellow-500/50',
-              shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
-              theme: 'gold'
-            }
-          };
-        }
-
-        if (info && !show) {
-          setRankInfo(info);
-          setShow(true);
-        }
+      // A+ CLASS: RHODIUM ZENITH (Dual C-Suite)
+      if (userCSuiteCount >= 2) {
+        info = {
+          tier: 'A+',
+          title: 'ZENITH HIGH COMMAND',
+          icon: Crown,
+          style: {
+            gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
+            glow: 'rgba(255, 255, 255, 0.7)',
+            accent: '#FFFFFF',
+            particles: 'bg-white',
+            shimmer: 'from-white/30 via-transparent to-white/30',
+            border: 'border-white/60',
+            shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
+            theme: 'rhodium'
+          }
+        };
       }
-    };
+      // A CLASS: PLATINUM ASTRAL (Single C-Suite)
+      else if (userCSuiteCount === 1) {
+        const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
+        info = {
+          tier: 'A',
+          title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
+          icon: Shield,
+          style: {
+            gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
+            glow: 'rgba(0, 245, 255, 0.5)',
+            accent: '#00F5FF',
+            particles: 'bg-[#E5E4E2]',
+            shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
+            border: 'border-cyan-500/50',
+            shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
+            theme: 'platinum'
+          }
+        };
+      }
+      // B- CLASS: IMPERIAL GOLD (Sovereign)
+      else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
+        const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
+        info = {
+          tier: 'B-',
+          title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
+          icon: Zap,
+          style: {
+            gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
+            glow: 'rgba(255, 215, 0, 0.5)',
+            accent: '#FFD700',
+            particles: 'bg-[#FFD700]',
+            shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
+            border: 'border-yellow-500/50',
+            shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
+            theme: 'gold'
+          }
+        };
+      }
 
-    checkVerificationAndTrigger();
-    
-    // Periodically check if verification was successful to trigger animation
-    const interval = setInterval(checkVerificationAndTrigger, 1000);
-    return () => clearInterval(interval);
-  }, [isLoaded, clerkUser, show]);
+      if (!info) return;
+
+      if (info) {
+        setRankInfo(info);
+        setShow(true);
+        // Timeout removed: Stays until officer clicks X
+      }
+    }
+  }, [isLoaded, clerkUser, onComplete]);
 
   const handleClose = () => {
     setShow(false);
@@ -134,17 +129,6 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden"
         >
-          {/* Close Button (X) */}
-          <motion.button
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1 }}
-            onClick={handleClose}
-            className="absolute top-8 right-8 z-[150] w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-          >
-            <X size={20} className="text-white group-hover:text-emerald-400 group-hover:rotate-90 transition-all" />
-          </motion.button>
-
           {/* Advanced Geometric Crystal Layer */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
              {[...Array(6)].map((_, i) => (
@@ -328,6 +312,16 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
           <div className="absolute inset-0 border-[20px] border-black z-[100] pointer-events-none" />
           
+          {/* Close Button (X) - Moved to apex of stack for click reliability */}
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+            onClick={handleClose}
+            className="absolute top-8 right-8 z-[999999] w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all cursor-pointer shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-auto"
+          >
+            <X size={24} className="text-white group-hover:text-emerald-400 group-hover:rotate-90 transition-all" />
+          </motion.button>
         </motion.div>
       )}
     </AnimatePresence>
