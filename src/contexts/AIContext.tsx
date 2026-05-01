@@ -56,7 +56,11 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
           'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
         ];
-        if (MASTER_IDS.includes(clerkUser.id)) {
+        
+        const rawRoleData = metadata.role;
+        const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
+        
+        if (MASTER_IDS.includes(clerkUser.id) || isCeo) {
           tier = 'premium_elite';
         }
 

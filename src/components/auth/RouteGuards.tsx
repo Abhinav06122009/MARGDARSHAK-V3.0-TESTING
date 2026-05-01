@@ -88,7 +88,11 @@ export const PremiumEliteRoute = ({ children }: { children: React.ReactNode }) =
       'user_3CylWpMJnNbVpgJcpk9eSIf73gS',
       'user_3CyueymOUFein248UifL5xSPBOU'
     ];
-    if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
+    
+    const rawRoleData = metadata.role;
+    const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
+    
+    if (MASTER_IDS.includes(clerkUser.id) || isCeo) tier = 'premium_elite';
 
     if (tier.includes('elite')) {
       setIsElite(true);
@@ -127,7 +131,11 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
       'user_3CylWpMJnNbVpgJcpk9eSIf73gS',
       'user_3CyueymOUFein248UifL5xSPBOU'
     ];
-    if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
+    
+    const rawRoleData = metadata.role;
+    const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
+    
+    if (MASTER_IDS.includes(clerkUser.id) || isCeo) tier = 'premium_elite';
 
     if (tier.includes('premium') || tier.includes('elite')) {
       setIsPremium(true);
