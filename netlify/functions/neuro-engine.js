@@ -137,7 +137,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     let finalSystemPrompt;
     if (payload.jsonMode) {
       // JSON mode: strip identity, add JSON constraint
-      finalSystemPrompt = (externalSystemContent || FORMATTING_SYSTEM_PROMPT) + "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
+      finalSystemPrompt = (externalSystemContent || FORMATTING_SYSTEM_PROMPT) + "\n\nCRITICAL: Respond with VALID JSON ONLY. Do NOT use markdown code fences (```json). Do NOT add any preamble or postscript. Your entire response must be a single parseable JSON object or array.";
     } else {
       // Normal mode: use frontend persona if provided, else use default
       finalSystemPrompt = externalSystemContent || FORMATTING_SYSTEM_PROMPT;
@@ -207,9 +207,17 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         pollData = await callPollinations(); // retry once for fast models
       }
 
-      const text = pollData?.choices?.[0]?.message?.content || "";
+      let text = pollData?.choices?.[0]?.message?.content || "";
       if (!text) {
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
+      }
+
+      // --- ROBUST JSON CLEANING (Backend Layer) ---
+      if (payload.jsonMode) {
+        const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+        if (jsonMatch) {
+          text = jsonMatch[0];
+        }
       }
 
       return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: payload.model || "pollinations/gemini-fast" }) };
