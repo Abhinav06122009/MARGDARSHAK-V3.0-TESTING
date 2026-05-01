@@ -1445,7 +1445,7 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                               }
                               setIsSubmitting(true);
                               try {
-                                const userTier = authUser?.profile?.subscription_tier || 'free';
+                                const userTier = authUser?.publicMetadata?.subscription?.tier || authUser?.publicMetadata?.tier || 'free';
                                 const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { 
                                   tier: userTier,
                                   task: 'tasks'
