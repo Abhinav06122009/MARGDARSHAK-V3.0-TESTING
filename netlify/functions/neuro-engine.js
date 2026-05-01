@@ -166,21 +166,31 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         "Content-Type": "application/json"
       };
 
-      const res = await fetch(pollUrl, { 
-        method: "POST", 
-        headers: pollHeaders, 
-        body,
-        signal: AbortSignal.timeout(28000) // 28s timeout to stay under Netlify's 30s limit
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s limit
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Pollinations API error (${res.status}): ${errText.substring(0, 200)}`);
+      try {
+        const res = await fetch(pollUrl, { 
+          method: "POST", 
+          headers: pollHeaders, 
+          body,
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Pollinations API error (${res.status}): ${errText.substring(0, 200)}`);
+        }
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+        return data;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
       }
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-      return data;
     };
 
     try {
@@ -203,10 +213,18 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
       }
 
-      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: payload.model || "pollinations/gemini-fast" }) };
     } catch (err) {
-      console.error("[NEURO-ENGINE] Both attempts failed:", err.message);
-      return { statusCode: 502, headers, body: JSON.stringify({ error: `AI provider temporarily unavailable. Please try again in a moment.` }) };
+      console.error("[NEURO-ENGINE] Request processing failed:", err.message);
+      const isTimeout = err.name === 'AbortError' || err.message.includes('timeout');
+      return { 
+        statusCode: isTimeout ? 504 : 502, 
+        headers, 
+        body: JSON.stringify({ 
+          error: isTimeout ? "AI request timed out. Please try a shorter prompt." : `AI provider error: ${err.message}`,
+          code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR"
+        }) 
+      };
     }
   } catch (globalErr) {
     console.error("[NEURO-ENGINE] Global Fatal Error:", globalErr);
