@@ -137,34 +137,48 @@ exports.handler = async (event) => {
 
     // --- COURSES SECTION ---
     if (action === "list-courses") {
-      const { data, error } = await supabase.from('courses').select('*').eq('user_id', supabaseUserId).order('created_at', { ascending: false });
-      if (error) throw error;
+      const res = await fetch(`${supabaseUrl}/rest/v1/courses?user_id=eq.${supabaseUserId}&order=created_at.desc`, { headers: supabaseHeaders });
+      if (!res.ok) throw new Error(`Supabase error: ${await res.text()}`);
+      const data = await res.json();
       return { statusCode: 200, headers, body: JSON.stringify(data || []) };
     }
 
     if (action === "create-course") {
-      const { data, error } = await supabase.from('courses').insert({ user_id: supabaseUserId, ...payload.courseData }).select().single();
-      if (error) throw error;
-      return { statusCode: 201, headers, body: JSON.stringify(data) };
+      const res = await fetch(`${supabaseUrl}/rest/v1/courses`, {
+        method: 'POST',
+        headers: { ...supabaseHeaders, "Prefer": "return=representation" },
+        body: JSON.stringify({ user_id: supabaseUserId, ...payload.courseData })
+      });
+      if (!res.ok) throw new Error(`Supabase error: ${await res.text()}`);
+      const data = await res.json();
+      return { statusCode: 201, headers, body: JSON.stringify(data[0] || data) };
     }
 
     if (action === "update-course") {
-      const { data, error } = await supabase.from('courses').update({ ...payload.courseData, updated_at: new Date().toISOString() }).match({ id: payload.courseId, user_id: supabaseUserId }).select().single();
-      if (error) throw error;
-      return { statusCode: 200, headers, body: JSON.stringify(data) };
+      const res = await fetch(`${supabaseUrl}/rest/v1/courses?id=eq.${payload.courseId}&user_id=eq.${supabaseUserId}`, {
+        method: 'PATCH',
+        headers: { ...supabaseHeaders, "Prefer": "return=representation" },
+        body: JSON.stringify({ ...payload.courseData, updated_at: new Date().toISOString() })
+      });
+      if (!res.ok) throw new Error(`Supabase error: ${await res.text()}`);
+      const data = await res.json();
+      return { statusCode: 200, headers, body: JSON.stringify(data[0] || data) };
     }
 
     if (action === "delete-course") {
-      const { error } = await supabase.from('courses').delete().match({ id: payload.courseId, user_id: supabaseUserId });
-      if (error) throw error;
+      const res = await fetch(`${supabaseUrl}/rest/v1/courses?id=eq.${payload.courseId}&user_id=eq.${supabaseUserId}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+      if (!res.ok) throw new Error(`Supabase error: ${await res.text()}`);
       return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     }
 
     if (action === "get-course-statistics") {
-      // Aggregate attendance stats
-      const { data: attendance, error: attError } = await supabase.from('attendance').select('*').eq('user_id', supabaseUserId);
-      if (attError) throw attError;
-      return { statusCode: 200, headers, body: JSON.stringify(attendance || []) };
+      const res = await fetch(`${supabaseUrl}/rest/v1/attendance?user_id=eq.${supabaseUserId}`, { headers: supabaseHeaders });
+      if (!res.ok) throw new Error(`Supabase error: ${await res.text()}`);
+      const data = await res.json();
+      return { statusCode: 200, headers, body: JSON.stringify(data || []) };
     }
 
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Unknown action" }) };
