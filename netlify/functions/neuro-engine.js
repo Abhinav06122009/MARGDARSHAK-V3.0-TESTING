@@ -88,6 +88,14 @@ exports.handler = async (event) => {
         return { role: m.role === 'assistant' ? 'model' : 'user', parts };
       });
 
+      const generationConfig = {
+        temperature: 0.1, // Lower temperature for more deterministic JSON
+        top_p: 0.95,
+        top_k: 40,
+        max_output_tokens: 2048,
+        response_mime_type: payload.jsonMode ? "application/json" : "text/plain",
+      };
+
       try {
         const gRes = await fetch(googleUrl, {
           method: "POST",
@@ -95,7 +103,7 @@ exports.handler = async (event) => {
           body: JSON.stringify({ 
             contents, 
             system_instruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: payload.jsonMode ? { response_mime_type: "application/json" } : {},
+            generationConfig,
             safetySettings: [
               { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
               { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -106,7 +114,7 @@ exports.handler = async (event) => {
         });
         const gData = await gRes.json();
         const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+        if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
       } catch (err) { console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message); }
     }
 

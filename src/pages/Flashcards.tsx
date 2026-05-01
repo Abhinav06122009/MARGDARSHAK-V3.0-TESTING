@@ -77,13 +77,11 @@ const Flashcards: React.FC = () => {
     }
     setIsGenerating(true);
     try {
-      const prompt = `Synthesize exactly 8 high-utility flashcards from this content for a Spaced Repetition System. Focus on fundamental principles, critical definitions, and conceptual links.
-      
-      STRUCTURE:
-      [{"front": "Concise Question/Concept", "back": "Direct Answer/Explanation"}]
+    const prompt = `Synthesize 8 flashcards. Focus on fundamentals and definitions.
+Output Format: [{"front": "Question", "back": "Answer"}]
 
-      CONTENT:
-      ${sourceText}`;
+Content:
+${sourceText}`;
 
       const generatedCards = await modelRouter.generateJSON<{ front: string, back: string }[]>(prompt);
 
