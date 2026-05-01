@@ -126,7 +126,14 @@ exports.handler = async (event) => {
 
       return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
     } catch (err) {
-      console.error("[NEURO-ENGINE] Fatal Error:", err);
+      console.error("[NEURO-ENGINE] Inner Fatal Error:", err);
       return { statusCode: 500, headers, body: JSON.stringify({ error: `Internal API Error: ${err.message}` }) };
     }
+  } catch (globalErr) {
+    console.error("[NEURO-ENGINE] Global Fatal Error:", globalErr);
+    return { statusCode: 500, headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/json"
+    }, body: JSON.stringify({ error: `Execution Error: ${globalErr.message}` }) };
+  }
 };
