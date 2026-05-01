@@ -194,7 +194,7 @@ const SmartTutorPage = () => {
           </div>
 
           <div className="flex items-center gap-4 mt-6 md:mt-0">
-            {getUserApiKey() !== null && (
+            {subscriptionTier === 'premium' && (
               <button 
                 onClick={() => setShowByokModal(true)} 
                 className={`h-10 px-5 border rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${byokKey ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' : 'border-red-500/30 text-red-400 animate-pulse bg-red-500/5'}`}
@@ -250,26 +250,26 @@ const SmartTutorPage = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  if (subscriptionTier === 'free' && !byokKey) setShowUpgradeModal(true);
+                  if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                  else if (subscriptionTier === 'premium' && !byokKey) setShowByokModal(true);
                   else handleSend();
                 }
               }}
               onClick={() => {
-                if (subscriptionTier === 'free' && !byokKey) setShowUpgradeModal(true);
+                if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                else if (subscriptionTier === 'premium' && !byokKey) setShowByokModal(true);
               }}
-              readOnly={subscriptionTier === 'free' && !byokKey}
-              placeholder={subscriptionTier === 'free' && !byokKey ? "Upgrade to use Saarthi..." : "Ask Saarthi anything..."}
-              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${(subscriptionTier === 'free' && !byokKey) ? 'cursor-pointer' : ''}`}
+              readOnly={subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey)}
+              placeholder={subscriptionTier === 'free' ? "Upgrade to use Saarthi..." : (subscriptionTier === 'premium' && !byokKey) ? "Initialize API Key to type..." : "Ask Saarthi anything..."}
+              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${(subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey)) ? 'cursor-pointer' : ''}`}
             />
             <Button 
               onClick={() => {
-                if (subscriptionTier === 'free' && !byokKey) {
-                  setShowUpgradeModal(true);
-                  return;
-                }
-                handleSend();
+                if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                else if (subscriptionTier === 'premium' && !byokKey) setShowByokModal(true);
+                else handleSend();
               }} 
-              disabled={loading || ((subscriptionTier === 'free' && !byokKey) || (!input.trim() && !selectedImage))} 
+              disabled={loading || subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey) || (!input.trim() && !selectedImage)} 
               className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
