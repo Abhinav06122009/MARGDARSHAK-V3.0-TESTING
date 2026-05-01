@@ -46,6 +46,7 @@ const Flashcards: React.FC = () => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [sourceText, setSourceText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [cardType, setCardType] = useState<'concept' | 'numerical'>('concept');
 
   // Review State
   const [reviewQueue, setReviewQueue] = useState<Flashcard[]>([]);
@@ -77,8 +78,24 @@ const Flashcards: React.FC = () => {
     }
     setIsGenerating(true);
     try {
-    const prompt = `Synthesize 8 flashcards. Focus on fundamentals and definitions.
+    const prompt = cardType === 'numerical'
+      ? `You are an expert PCMB tutor. Generate 8 numerical problem flashcards from the content below.
+Each card's FRONT must be a solvable numerical problem with values given.
+Each card's BACK must show the COMPLETE step-by-step solution using the Physical Notebook format:
+- Use Unicode superscripts for powers: x\u00b2, 10\u00b3
+- Use Unicode subscripts for formulas: H\u2082O, v\u1d62
+- Use \u221a for radicals, \u00f7 for division, line-by-line working
+- Bold the final answer using **answer**
+- NEVER use LaTeX, backslashes, or curly braces
+
+Output ONLY a JSON array: [{"front": "Numerical Problem", "back": "Step-by-step Solution"}]
+
+Content:
+${sourceText}`
+      : `Synthesize 8 flashcards. Focus on fundamentals and definitions.
 Output Format: [{"front": "Question", "back": "Answer"}]
+
+Formatting: Use Unicode superscripts (x\u00b2), subscripts (H\u2082O), \u221a for radicals. No LaTeX.
 
 Content:
 ${sourceText}`;
@@ -301,8 +318,36 @@ ${sourceText}`;
                   <div className="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mx-auto mb-6 border border-amber-500/20 rotate-3">
                     <Sparkles className="w-10 h-10 text-amber-500" />
                   </div>
-                  <h2 className="text-3xl font-black text-white tracking-tight mb-2">Flashcard Revision</h2>
-                  <p className="text-zinc-500 font-medium">Inject raw data to extract optimized flashcards using our AI.</p>
+                  <h2 className="text-3xl font-black text-white tracking-tight mb-2">Flashcard Synthesis</h2>
+                  <p className="text-zinc-500 font-medium">Inject raw data to extract optimized flashcards using AI.</p>
+                </div>
+
+                {/* Card Type Toggle */}
+                <div className="mb-8">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 ml-1">Card Type</p>
+                  <div className="flex p-1 bg-black/40 rounded-2xl border border-white/5">
+                    <button
+                      onClick={() => setCardType('concept')}
+                      className={`flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                        cardType === 'concept' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      📖 Conceptual
+                    </button>
+                    <button
+                      onClick={() => setCardType('numerical')}
+                      className={`flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                        cardType === 'numerical' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      🔢 Numerical
+                    </button>
+                  </div>
+                  {cardType === 'numerical' && (
+                    <p className="text-[10px] text-amber-500/70 mt-2 ml-1 font-bold">
+                      ⚡ Will generate solvable problems with full step-by-step solutions
+                    </p>
+                  )}
                 </div>
 
                 <Textarea
