@@ -26,17 +26,22 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   useEffect(() => {
     if (isLoaded && clerkUser) {
       const metadata = clerkUser.publicMetadata || {};
-      const role = (Array.isArray(metadata.role) ? metadata.role[0] : metadata.role || 'student').toLowerCase();
-      const subscription = (metadata.subscription as any) || {};
-      const tier = (subscription.tier || 'free').toLowerCase();
+      const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+      const normalizedRoles = roles.map((r: string) => r.toLowerCase());
 
+      const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
+      const sovereignRoles = ['owner', 'superadmin', 'admin'];
+
+      // Count how many C-Suite roles the user has
+      const userCSuiteCount = normalizedRoles.filter(r => cSuiteRoles.includes(r)).length;
+      
       let info: any = null;
 
-      // A+ CLASS: High Rankers (High Command)
-      if (['ceo', 'superadmin', 'super_elite'].includes(role)) {
+      // A+ CLASS: Dual High Ranked (Multiple C-Suite Roles)
+      if (userCSuiteCount >= 2) {
         info = {
           tier: 'A+',
-          title: 'SUPREME HIGH COMMAND',
+          title: 'ZENITH HIGH COMMAND',
           icon: Crown,
           style: {
             gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
@@ -48,12 +53,13 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.3)]'
           }
         };
-      } 
-      // A CLASS: Elite Operatives
-      else if (['admin', 'premium_elite', 'premium_plus'].includes(role) || ['premium_elite', 'premium_plus'].includes(tier)) {
+      }
+      // A CLASS: High Command (Single C-Suite Role)
+      else if (userCSuiteCount === 1) {
+        const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
         info = {
           tier: 'A',
-          title: 'ELITE VETERAN OPERATIVE',
+          title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
           icon: Shield,
           style: {
             gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
@@ -66,11 +72,12 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           }
         };
       }
-      // B- CLASS: Professional Core
-      else if (['mod', 'bdo', 'premium'].includes(role) || tier === 'premium') {
+      // B- CLASS: Sovereign Command
+      else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
+        const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
         info = {
           tier: 'B-',
-          title: 'TACTICAL PROFICIENCY UNIT',
+          title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
           icon: Zap,
           style: {
             gradient: 'from-[#CD7F32] via-[#A9A9A9] to-[#4A4A4A]',
@@ -84,19 +91,17 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
         };
       }
 
+      if (!info) return;
+
       if (info) {
-        const hasShown = sessionStorage.getItem('rank_entry_shown');
-        if (!hasShown) {
-          setRankInfo(info);
-          setShow(true);
-          sessionStorage.setItem('rank_entry_shown', 'true');
-          
-          const timer = setTimeout(() => {
-            setShow(false);
-            if (onComplete) onComplete();
-          }, 5500); // Slightly longer for more impact
-          return () => clearTimeout(timer);
-        }
+        setRankInfo(info);
+        setShow(true);
+        
+        const timer = setTimeout(() => {
+          setShow(false);
+          if (onComplete) onComplete();
+        }, 5500); // Slightly longer for more impact
+        return () => clearTimeout(timer);
       }
     }
   }, [isLoaded, clerkUser, onComplete]);
