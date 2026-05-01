@@ -555,7 +555,7 @@ const Timetable: React.FC = () => {
           method: 'POST',
           body: JSON.stringify({
             messages: [{ role: 'user', content: prompt }],
-            model: 'qwen-coder',
+            model: 'qwen-safety',
             jsonMode: true,
             task: 'research'
           }),

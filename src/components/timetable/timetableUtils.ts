@@ -146,16 +146,14 @@ export interface TimetableEvent {
   
     fetchUserTimetable: async (userId: string) => {
       try {
-        const { data, error } = await supabase
-          .from('timetable_events')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .order('day', { ascending: true })
-          .order('start_time', { ascending: true });
-  
-        if (error) throw error;
-        return data || [];
+        const { authedFetch } = await import('@/lib/ai/authedFetch');
+        const res = await authedFetch('/.netlify/functions/timetable-crud', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'fetch', userId })
+        });
+        if (!res.ok) throw new Error('Fetch failed');
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Error fetching user timetable:', error);
         return [];
@@ -205,30 +203,14 @@ export interface TimetableEvent {
   
     createEvent: async (eventData: any, userId: string) => {
       try {
-        // Ensure profile exists before creating event (fixes 23503 foreign key violation)
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData?.user) {
-          // Sync profile immediately to satisfy FK constraint
-          await supabase.from('profiles').upsert({
-            id: userId,
-            clerk_id: (authData.user as any).clerk_id || (authData.user as any).id,
-            email: authData.user.email || '',
-            full_name: (authData.user as any).user_metadata?.full_name || 'Scholar',
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
-        }
-
+        const { authedFetch } = await import('@/lib/ai/authedFetch');
         const cleanData = {
-          user_id: userId,
           title: eventData.title,
           description: eventData.description || null,
           day: eventData.day,
           start_time: eventData.start_time,
           end_time: eventData.end_time,
-          color: eventData.color || timetableHelpers.getSlotBackgroundColor({
-            category: eventData.category,
-            color: eventData.color
-          }),
+          color: eventData.color || timetableHelpers.getSlotBackgroundColor({ category: eventData.category, color: eventData.color }),
           location: eventData.location || null,
           instructor: eventData.instructor || null,
           course_code: eventData.course_code || null,
@@ -240,7 +222,7 @@ export interface TimetableEvent {
           recurrence_type: 'weekly',
           week_type: 'all',
           semester: eventData.semester || null,
-          academic_year: '2024-25', // Should be based on user profile or a setting
+          academic_year: '2024-25',
           credits: eventData.credits ?? null,
           attendance_required: eventData.attendance_required !== false,
           online_meeting_link: eventData.online_meeting_link || null,
@@ -252,19 +234,19 @@ export interface TimetableEvent {
           is_exam: eventData.is_exam || false,
           exam_type: eventData.exam_type || null,
           preparation_time: eventData.preparation_time ?? 0,
-        tags: typeof eventData.tags === 'string' 
-          ? eventData.tags.split(',').map((tag: string) => tag.trim()) 
-          : (eventData.tags || []),
+          tags: typeof eventData.tags === 'string'
+            ? eventData.tags.split(',').map((tag: string) => tag.trim())
+            : (eventData.tags || []),
         };
-  
-        const { data, error } = await supabase
-          .from('timetable_events')
-          .insert([cleanData])
-          .select()
-          .single();
-  
-        if (error) throw error;
-        return data;
+        const res = await authedFetch('/.netlify/functions/timetable-crud', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'create', userId, eventData: cleanData })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(err.error || 'Failed to create event');
+        }
+        return await res.json();
       } catch (error) {
         console.error('Error creating event:', error);
         throw error;
@@ -273,7 +255,8 @@ export interface TimetableEvent {
   
     updateEvent: async (eventId: string, eventData: any, userId: string) => {
       try {
-        const cleanData: Partial<TimetableEvent> = {
+        const { authedFetch } = await import('@/lib/ai/authedFetch');
+        const cleanData: any = {
           title: eventData.title,
           description: eventData.description || null,
           day: eventData.day,
@@ -305,27 +288,19 @@ export interface TimetableEvent {
           recurrence_type: eventData.recurrence_type || 'weekly',
           week_type: eventData.week_type || 'all',
           academic_year: eventData.academic_year || '2024-25',
-          attachments: eventData.attachments || [],
           color: eventData.color,
         };
-  
-        Object.keys(cleanData).forEach(key => {
-          const k = key as keyof typeof cleanData;
-          if (cleanData[k] === undefined) {
-            delete cleanData[k];
-          }
+        Object.keys(cleanData).forEach(key => { if (cleanData[key] === undefined) delete cleanData[key]; });
+
+        const res = await authedFetch('/.netlify/functions/timetable-crud', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update', userId, eventId, eventData: cleanData })
         });
-  
-        const { data, error } = await supabase
-          .from('timetable_events')
-          .update(cleanData)
-          .eq('id', eventId)
-          .eq('user_id', userId)
-          .select()
-          .single();
-  
-        if (error) throw error;
-        return data;
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(err.error || 'Failed to update event');
+        }
+        return await res.json();
       } catch (error) {
         console.error('Error updating event:', error);
         throw error;
@@ -334,13 +309,15 @@ export interface TimetableEvent {
   
     deleteEvent: async (eventId: string, userId: string) => {
       try {
-        const { error } = await supabase
-          .from('timetable_events')
-          .delete()
-          .eq('id', eventId)
-          .eq('user_id', userId);
-  
-        if (error) throw error;
+        const { authedFetch } = await import('@/lib/ai/authedFetch');
+        const res = await authedFetch('/.netlify/functions/timetable-crud', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'delete', userId, eventId })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(err.error || 'Failed to delete event');
+        }
         return true;
       } catch (error) {
         console.error('Error deleting event:', error);

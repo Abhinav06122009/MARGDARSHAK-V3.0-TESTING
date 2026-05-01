@@ -53,16 +53,16 @@ const SmartTutorPage = () => {
       const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free');
       let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
       const role = String((metadata as any).role || '').toLowerCase();
-      
+
       const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
-      
+
       const rawRoleData = metadata.role;
       const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
-      
+
       if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin' || isCeo) {
         tier = 'premium_elite';
       }
-      
+
       setSubscriptionTier(tier);
     }
   }, [clerkUser, clerkLoaded]);
@@ -95,18 +95,18 @@ const SmartTutorPage = () => {
       return;
     }
 
-     setMessages(prev => [...prev, {
-       role: 'user',
-       content: textToSend,
-       userImage: imageToSend ? URL.createObjectURL(imageToSend) : undefined
-     }]);
-  
+    setMessages(prev => [...prev, {
+      role: 'user',
+      content: textToSend,
+      userImage: imageToSend ? URL.createObjectURL(imageToSend) : undefined
+    }]);
+
     setLoading(true);
 
     try {
       const { modelRouter } = await import('@/lib/ai/modelRouter');
       const chatHistory = messages.map(m => ({ role: m.role, content: m.content }));
-      
+
       const systemPrompt = `Role: You are Margdarshak Saarthi, an elite, highly intelligent Neural Orchestrator and AI Companion developed exclusively for the Margdarshak platform. You provide mathematical and scientific explanations in a "Physical Notebook" format.
 
 If asked who you are, introduce yourself exactly like this: "✨ Greetings! I am **Margdarshak Saarthi**, your elite Neural Orchestrator and AI Companion. Designed with cutting-edge intelligence, I am here to elevate your academic journey, decode complex concepts, and guide you toward ultimate success. How may I assist you today?" Be warm, highly professional, and slightly futuristic.
@@ -135,10 +135,10 @@ Internal Check: Before sending your response, remove all curly braces and backsl
         systemPrompt: systemPrompt
       });
 
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: response, 
-        agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: response,
+        agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL
       }]);
     } catch (e: any) {
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${e.message}` }]);
@@ -179,28 +179,28 @@ Internal Check: Before sending your response, remove all curly braces and backsl
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-        
+
         {/* Animated Neural Orbs */}
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.1, 0.15, 0.1], scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, 30, 0] }}
           transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
           className="absolute top-0 -left-40 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[150px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.05, 0.1, 0.05], scale: [1, 1.3, 1], x: [0, -40, 0], y: [0, -20, 0] }}
           transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut', delay: 2 }}
           className="absolute bottom-0 -right-40 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px]"
         />
-        
+
         {/* Neural Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
       <UpgradeModal isOpen={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
-      <ByokModal 
-        isOpen={showByokModal} onOpenChange={setShowByokModal} 
-        byokInput={byokInput} setByokInput={setByokInput} 
-        onSave={saveByokKey} byokKey={byokKey} onClear={clearByokKey} 
+      <ByokModal
+        isOpen={showByokModal} onOpenChange={setShowByokModal}
+        byokInput={byokInput} setByokInput={setByokInput}
+        onSave={saveByokKey} byokKey={byokKey} onClear={clearByokKey}
       />
 
       <div className="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col p-4 md:p-8 gap-6">
@@ -221,8 +221,8 @@ Internal Check: Before sending your response, remove all curly braces and backsl
 
           <div className="flex items-center gap-4 mt-6 md:mt-0">
             {subscriptionTier === 'premium' && (
-              <button 
-                onClick={() => setShowByokModal(true)} 
+              <button
+                onClick={() => setShowByokModal(true)}
                 className={`h-10 px-5 border rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${byokKey ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' : 'border-red-500/30 text-red-400 animate-pulse bg-red-500/5'}`}
               >
                 <KeyRound size={12} /> {byokKey ? 'Handshake Active' : 'Initialize Key'}
@@ -256,7 +256,7 @@ Internal Check: Before sending your response, remove all curly braces and backsl
           <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-3 flex items-center gap-3 shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)] group">
             <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
             {preview && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 className="absolute -top-32 left-8 p-3 bg-[#0a0a0a] border border-white/10 rounded-[2rem] flex items-center gap-4 shadow-2xl"
               >
@@ -284,13 +284,13 @@ Internal Check: Before sending your response, remove all curly braces and backsl
               placeholder={subscriptionTier === 'free' ? "Ask Saarthi anything..." : (subscriptionTier === 'premium' && !byokKey) ? "Initialize API Key to type..." : "Ask Saarthi anything..."}
               className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide relative z-10`}
             />
-            <Button 
+            <Button
               onClick={() => {
                 if (subscriptionTier === 'free') setShowUpgradeModal(true);
                 else if (subscriptionTier === 'premium' && !byokKey) setShowByokModal(true);
                 else handleSend();
-              }} 
-              disabled={loading || subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey) || (!input.trim() && !selectedImage)} 
+              }}
+              disabled={loading || subscriptionTier === 'free' || (subscriptionTier === 'premium' && !byokKey) || (!input.trim() && !selectedImage)}
               className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
