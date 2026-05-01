@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Internal Services & Types
 import { courseService } from '@/components/dashboard/courseService';
@@ -71,6 +72,7 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user: authUser, loading: authLoading } = useAuth();
 
   const performSearch = useCallback(async () => {
     if (!currentUser) return;
@@ -89,14 +91,24 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
 
   const initializeSecureCourseManagement = useCallback(async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
-      const user = await courseService.getCurrentUser();
 
-      if (!user) {
+      if (!authUser) {
         setSecurityVerified(true);
         setLoading(false);
         return;
       }
+
+      const user = {
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'User',
+          role: authUser.profile?.role || 'student',
+          subscription_tier: authUser.profile?.subscription_tier || 'free'
+        }
+      } as any;
 
       setCurrentUser(user);
       setSecurityVerified(true);
@@ -122,11 +134,13 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, authUser, authLoading]);
 
   useEffect(() => {
-    initializeSecureCourseManagement();
-  }, [initializeSecureCourseManagement]);
+    if (!authLoading) {
+      initializeSecureCourseManagement();
+    }
+  }, [authLoading, authUser, initializeSecureCourseManagement]);
 
   useEffect(() => {
     if (currentUser) {

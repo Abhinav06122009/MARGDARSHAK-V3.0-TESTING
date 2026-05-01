@@ -73,7 +73,7 @@ Return ONLY valid JSON:
         cacheTtl: 10 * 60 * 1000,
         tier: userTier, // Use the user's actual tier from Clerk metadata
         model: 'qwen-safety', // Use the robust qwen-safety model as requested
-        task: 'research', // Ensure it routes to the correct API key
+        task: 'tasks', // Ensure it routes to the correct API key
       });
 
       if (result) {

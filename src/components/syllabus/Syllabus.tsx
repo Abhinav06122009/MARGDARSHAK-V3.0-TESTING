@@ -27,6 +27,7 @@ import { TiltCard } from '@/components/ui/TiltCard';
 import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -448,17 +449,20 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
     },
   });
 
+  const { user: authUser, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    initializeSecureSyllabus();
-  }, []);
+    if (!authLoading) {
+      initializeSecureSyllabus();
+    }
+  }, [authLoading, authUser]);
 
   const initializeSecureSyllabus = async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
 
-      const user = await syllabusHelpers.getCurrentUser();
-
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Authentication Required",
           description: "Please log in to access your syllabi.",
@@ -468,6 +472,17 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
         setLoading(false);
         return;
       }
+
+      const user = {
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'Scholar',
+          user_type: authUser.profile?.role || 'student',
+          student_id: authUser.id.substring(0, 8),
+          department: authUser.profile?.department
+        }
+      } as any;
 
       setCurrentUser(user);
       setSecurityVerified(true);

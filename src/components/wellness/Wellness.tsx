@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 import { dashboardService } from '@/lib/dashboardService';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/contexts/AuthContext';
+import { aiService } from '@/lib/aiService';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -134,9 +136,13 @@ const Wellness: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     completionRate: 0
   });
 
+  const { user: authUser, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    fetchWellnessData();
-  }, []);
+    if (!authLoading) {
+      fetchWellnessData();
+    }
+  }, [authLoading, authUser]);
 
   // Audio Playback Effect
   useEffect(() => {
@@ -166,8 +172,8 @@ const Wellness: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const fetchWellnessData = async () => {
     try {
-      const user = await dashboardService.getCurrentUser();
-      if (!user) return;
+      if (authLoading || !authUser) return;
+      const user = authUser;
 
       const data = await dashboardService.fetchAllUserData(user.id);
       const calculatedStats = dashboardService.calculateSecureStats(data);

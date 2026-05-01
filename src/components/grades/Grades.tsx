@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -23,6 +24,7 @@ import Achievements from './Achievements.tsx';
 import { achievementService } from './achievements';
 import type { Achievement } from './achievements';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Social Icons
 const linkedinLogo = () => (
@@ -192,13 +194,17 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const { toast } = useToast();
 
+  const { user: authUser, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    initializeSecureGrades();
-  }, []);
+    if (!authLoading) {
+      initializeSecureGrades();
+    }
+  }, [authLoading, authUser]);
 
   useEffect(() => {
     setSelectedGrades([]);
-  }, [viewMode, searchTerm, filterSubject, filterSemester, grades]); // Added grades to dependency array
+  }, [viewMode, searchTerm, filterSubject, filterSemester, grades]);
 
   useEffect(() => {
     let results = grades;
@@ -285,15 +291,25 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const initializeSecureGrades = async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
-      const user = await gradeService.getCurrentUser();
 
-      if (!user) {
+      if (!authUser) {
         toast({ title: "Authentication Required", description: "Please log in to manage your grades.", variant: "destructive" });
         setSecurityVerified(true);
         setLoading(false);
         return;
       }
+
+      const user = {
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'User',
+          role: authUser.profile?.role || 'student',
+          subscription_tier: authUser.profile?.subscription_tier || 'free'
+        }
+      } as any;
 
       setCurrentUser(user);
       setSecurityVerified(true);

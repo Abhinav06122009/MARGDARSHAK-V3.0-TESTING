@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -252,9 +253,13 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
     }]);
   }, [bulkDate]);
 
+  const { user: authUser, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    initializeSecureAttendance();
-  }, [initializeSecureAttendance]);
+    if (!authLoading) {
+      initializeSecureAttendance();
+    }
+  }, [authLoading, authUser, initializeSecureAttendance]);
 
   useEffect(() => {
     if (selectedCourse && currentUser) {
@@ -273,11 +278,10 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
 
   const initializeSecureAttendance = useCallback(async () => {
     try {
+      if (authLoading) return;
       setLoading(true);
       
-      const user = await secureAttendanceHelpers.getCurrentUser();
-      
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Authentication Required",
           description: "Please log in to access attendance management.",
@@ -286,6 +290,16 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
         onBack();
         return;
       }
+
+      const user = {
+        id: authUser.id,
+        email: authUser.primaryEmailAddress?.emailAddress || '',
+        profile: {
+          full_name: authUser.fullName || 'Unknown User',
+          user_type: authUser.profile?.role || 'student',
+          student_id: authUser.id.substring(0, 8)
+        }
+      } as any;
 
       setCurrentUser(user);
       setSecurityVerified(true);
@@ -315,7 +329,7 @@ const Attendance: React.FC<AttendanceProps> = ({ onBack }) => {
     } finally {
       setLoading(false);
     }
-  }, [onBack, toast, initializeBulkRecords]);
+  }, [onBack, toast, initializeBulkRecords, authUser, authLoading]);
 
   const fetchAttendance = useCallback(async () => {
     if (!currentUser) return;

@@ -147,8 +147,8 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
       
-      const apiKey = (selectedModel === 'qwen-safety' || payload.task === 'notes')
-        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY)
+      const apiKey = (selectedModel === 'qwen-safety' || payload.task === 'notes' || payload.task === 'tasks')
+        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || process.env.POLLINATIONS_API_KEY)
         : (process.env.POLLINATIONS_API_KEY);
 
       if (!apiKey) {

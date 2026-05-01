@@ -85,8 +85,10 @@ const Timetable: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    initializeSecureTimetable();
-  }, []);
+    if (!authLoading) {
+      initializeSecureTimetable();
+    }
+  }, [authLoading, authUser]);
 
   useEffect(() => {
     const stats = timetableHelpers.getTimetableStatistics(events);

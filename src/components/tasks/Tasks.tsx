@@ -241,8 +241,10 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    initializeSecureTasks();
-  }, []);
+    if (!authLoading) {
+      initializeSecureTasks();
+    }
+  }, [authLoading, authUser]);
 
   useEffect(() => {
     // Clear selection when view mode or filters change
@@ -1442,7 +1444,12 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                               }
                               setIsSubmitting(true);
                               try {
-                                const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { tier: 'premium' });
+                                const userTier = authUser?.profile?.subscription_tier || 'free';
+                                const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { 
+                                  tier: userTier,
+                                  model: 'qwen-safety',
+                                  task: 'tasks'
+                                });
                                 setFormData({ ...formData, description: desc });
                                 toast({ title: "AI Generation Complete", description: "AI has optimized your task description." });
                               } catch (e: any) {
