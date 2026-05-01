@@ -136,8 +136,8 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     let finalSystemPrompt;
     if (payload.jsonMode) {
-      // JSON mode: strip identity, add JSON constraint
-      finalSystemPrompt = (externalSystemContent || FORMATTING_SYSTEM_PROMPT) + "\n\nCRITICAL: Respond with VALID JSON ONLY. Do NOT use markdown code fences (```json). Do NOT add any preamble or postscript. Your entire response must be a single parseable JSON object or array.";
+      // JSON mode: strip identity, add JSON constraint and tagging
+      finalSystemPrompt = (externalSystemContent || FORMATTING_SYSTEM_PROMPT) + "\n\nCRITICAL: Respond with VALID JSON ONLY. Wrap your entire JSON response in [RESULT] and [/RESULT] tags. Do NOT add any preamble or postscript outside these tags.";
     } else {
       // Normal mode: use frontend persona if provided, else use default
       finalSystemPrompt = externalSystemContent || FORMATTING_SYSTEM_PROMPT;
@@ -147,9 +147,10 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large', 'openai'].includes(payload.model) ? payload.model : 'gemini-fast';
 
-      // Productivity tasks (JSON-heavy) benefit from the superior structural adherence of OpenAI
-      if ((payload.task === 'tasks' || payload.task === 'notes') && (selectedModel === 'gemini-fast' || selectedModel === 'qwen-coder')) {
-        selectedModel = 'openai';
+      // Productivity tasks (JSON-heavy) benefit from structural models
+      // Defaulting to 'gemini-fast' for maximum reliability on Pollinations
+      if ((payload.task === 'tasks' || payload.task === 'notes') && selectedModel === 'gemini-fast') {
+        selectedModel = 'openai'; // OpenAI is superior for complex JSON structures
       }
       
       const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || selectedModel === 'openai' || payload.task === 'notes' || payload.task === 'tasks')
@@ -199,17 +200,16 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     try {
       let pollData;
-      const isSlowModel = payload.model === 'qwen-safety';
 
       try {
         pollData = await callPollinations();
       } catch (firstErr) {
-        if (isSlowModel) {
-          throw firstErr; // Don't retry slow models to avoid Netlify timeout
-        }
-        console.warn("[NEURO-ENGINE] First attempt failed, retrying in 1s:", firstErr.message);
-        await new Promise(r => setTimeout(r, 1000));
-        pollData = await callPollinations(); // retry once for fast models
+        console.warn("[NEURO-ENGINE] First attempt failed, retrying with gemini-fast fallback...");
+        // Fallback to gemini-fast which is the most stable Pollinations endpoint
+        const originalModel = payload.model;
+        payload.model = 'gemini-fast';
+        pollData = await callPollinations();
+        payload.model = originalModel; // Restore for metadata
       }
 
       let text = pollData?.choices?.[0]?.message?.content || "";
@@ -217,11 +217,16 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
       }
 
-      // --- ROBUST JSON CLEANING (Backend Layer) ---
+      // --- ROBUST JSON EXTRACTION (Tag-First Strategy) ---
       if (payload.jsonMode) {
-        const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-        if (jsonMatch) {
-          text = jsonMatch[0];
+        // Try [RESULT] tags first
+        const tagMatch = text.match(/\[RESULT\]([\s\S]*?)\[\/RESULT\]/i);
+        if (tagMatch) {
+          text = tagMatch[1].trim();
+        } else {
+          // Fallback to outermost brace matching
+          const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+          if (jsonMatch) text = jsonMatch[0];
         }
       }
 
