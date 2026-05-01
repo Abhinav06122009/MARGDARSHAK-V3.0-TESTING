@@ -1,0 +1,5 @@
+# Netlify Redirects for SPA
+/api/*  /.netlify/functions/:splat  200!
+/assets/*.js  /404  404!
+/assets/*.css  /404  404!
+/*  /index.html  200
