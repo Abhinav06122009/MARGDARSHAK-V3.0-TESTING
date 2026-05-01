@@ -380,11 +380,11 @@ const Timetable: React.FC = () => {
         `  • ${e.title} | ${DAY_NAMES[e.day]} ${e.start_time}–${e.end_time} | ${e.category}${e.instructor ? ` | ${e.instructor}` : ''}`
       ).join('\n') || '  (No events yet)';
 
-      const tasksCtx = (ctx.tasks || []).slice(0, 15).map((t: any) =>
+      const tasksCtx = (ctx.tasks || []).slice(0, 10).map((t: any) =>
         `  • [${t.priority || 'medium'}] ${t.title}${t.due_date ? ` — due ${t.due_date}` : ''}${t.subject ? ` | ${t.subject}` : ''}`
       ).join('\n') || '  (No pending tasks)';
 
-      const coursesCtx = (ctx.syllabi || []).map((s: any) =>
+      const coursesCtx = (ctx.syllabi || []).slice(0, 10).map((s: any) =>
         `  • ${s.course_name}${s.exam_date ? ` | Exam: ${s.exam_date}` : ''}${s.topics?.length ? ` | Topics: ${s.topics.slice(0, 4).join(', ')}` : ''}`
       ).join('\n') || '  (No courses added)';
 
