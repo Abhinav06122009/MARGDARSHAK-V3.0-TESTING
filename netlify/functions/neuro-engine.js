@@ -145,9 +145,14 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
-      const selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
+      let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast';
+
+      // Productivity tasks (JSON-heavy) benefit from the precision of Qwen Coder
+      if ((payload.task === 'tasks' || payload.task === 'notes') && selectedModel === 'gemini-fast') {
+        selectedModel = 'qwen-coder';
+      }
       
-      const apiKey = (selectedModel === 'qwen-safety' || payload.task === 'notes' || payload.task === 'tasks')
+      const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || payload.task === 'notes' || payload.task === 'tasks')
         ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || process.env.POLLINATIONS_API_KEY)
         : (process.env.POLLINATIONS_API_KEY);
 
