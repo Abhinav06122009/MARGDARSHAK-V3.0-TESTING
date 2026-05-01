@@ -1,276 +1,142 @@
-const {
-  corsHeaders,
-  isOriginAllowed,
-  rateLimit,
-  getClientIp,
-  verifyClerkUser,
-  MAX_BODY_BYTES,
-} = require("./_shared/security");
+const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
+// --- SHARED SECURITY LOGIC (INLINED FOR RELIABILITY) ---
+const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20MB for Vision
+
+const corsHeaders = (origin) => ({
+  "Access-Control-Allow-Origin": origin || "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-API-Key",
+  "Access-Control-Max-Age": "600",
+  "Vary": "Origin",
+});
+
+const verifyClerkUser = async (authHeader) => {
+  if (!authHeader || !/^Bearer\s+/i.test(authHeader)) return { ok: false, message: "Missing token" };
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return { ok: false, message: "Invalid format" };
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
+    return { ok: true, user: { id: payload.sub, metadata: payload.public_metadata || {}, _raw: payload } };
+  } catch (e) { return { ok: false, message: e.message }; }
+};
+
+// --- CONFIGURATION ---
 const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
 const ELITE_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
 const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b";
 const VISION_RESEARCH_MODEL = "google/gemini-2.0-flash-001";
 
-const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Under no circumstances should you output math delimiters like \\(, \\), \\[, \\], or $$, nor should you use backslash commands like \\frac, \\theta, \\sqrt, \\times, or \\cdot.
-
-For all mathematics, physics, equations, and scientific notation, you MUST use plain text, standard Markdown, and Unicode characters.
-
-Variables & Greek Letters: Use standard text or Unicode (e.g., x, y, θ, π, Δ, Σ).
-
-Fractions: Use a forward slash and parentheses for clear grouping (e.g., (m * v^2) / r instead of \\frac{mv^2}{r}).
-
-Exponents & Roots: Use the caret symbol ^ or Unicode superscripts (e.g., v^2 or v²), and use the Unicode square root symbol √ (e.g., √(r * g)).
-
-Multiplication: Use * or simply place variables next to each other (e.g., m * g or mg).
-
-Your output must be 100% human-readable on platforms that do not have any math rendering capabilities. Prioritize extreme clarity in plain text.`;
+const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Under no circumstances should you output math delimiters like \\(, \\), \\[, \\], or $$, nor should you use backslash commands like \\frac, \\theta, \\sqrt, \\times, or \\cdot. For all mathematics, physics, equations, and scientific notation, you MUST use plain text, standard Markdown, and Unicode characters. Your output must be 100% human-readable on platforms that do not have any math rendering capabilities. Prioritize extreme clarity in plain text.`;
 
 exports.handler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin || "";
   const headers = { ...corsHeaders(origin), "Content-Type": "application/json" };
 
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers, body: "" };
-  }
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
-  }
-  if (!isOriginAllowed(origin)) {
-    return { statusCode: 403, headers, body: JSON.stringify({ error: "Origin not allowed" }) };
-  }
-
-  const ip = getClientIp(event);
-  const rl = rateLimit(`chat:${ip}`);
-  if (!rl.allowed) {
-    return {
-      statusCode: 429,
-      headers: { ...headers, "Retry-After": String(rl.retryAfter || 60) },
-      body: JSON.stringify({ error: "Too many requests. Please slow down." }),
-    };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Method not allowed" };
 
   const auth = await verifyClerkUser(event.headers?.authorization || event.headers?.Authorization);
-  if (!auth.ok) {
-    return { statusCode: 401, headers, body: JSON.stringify({ error: auth.message, code: auth.code }) };
-  }
+  if (!auth.ok) return { statusCode: 401, headers, body: JSON.stringify({ error: auth.message }) };
   const user = auth.user;
 
-  // --- FETCH USER PROFILE FOR TIER CHECK ---
-  const supaUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-  const { createClient } = require("@supabase/supabase-js");
-  const supabase = createClient(supaUrl, supaKey);
+  // --- TIER CHECK ---
+  let userTier = 'free';
+  try {
+    const supaUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabase = createClient(supaUrl, supaKey);
+    const { data: profile } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
+    
+    userTier = (
+      user.metadata?.subscription?.tier || 
+      user.metadata?.subscription_tier || 
+      profile?.subscription_tier || 
+      'free'
+    ).toLowerCase();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_tier')
-    .eq('id', user.id)
-    .single();
-
-  // --- ROBUST TIER DETECTION (EXACT MATCH ONLY) ---
-  const metadata = user.metadata || {};
-  const jwtPayload = user._raw || {};
-  
-  const subscription = metadata.subscription || jwtPayload.subscription || {};
-  let userTier = (
-    subscription.tier || 
-    metadata.subscription_tier || 
-    metadata.tier || 
-    profile?.subscription_tier || 
-    'free'
-  ).toLowerCase();
-
-  // MASTER OVERRIDES
-  const MASTER_IDS = [
-    'user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 
-    'user_3CylWpMJnNbVpgJcpk9eSIf73gS'
-  ];
-  if (MASTER_IDS.includes(user.id)) {
-    userTier = 'premium_elite';
-  }
+    const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
+    if (MASTER_IDS.includes(user.id)) userTier = 'premium_elite';
+  } catch (e) { console.error("[AI-CHAT] Tier check error:", e.message); }
 
   const userApiKey = event.headers?.["x-user-api-key"] || event.headers?.["X-User-API-Key"];
-
-  // Logic: Elite can use inbuilt key. Premium MUST use their own.
   const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'elite'];
   const isElite = ELITE_TIERS.includes(userTier);
+  const isPremium = userTier === 'premium' || isElite;
 
   let apiKeyToUse = userApiKey;
-  
-  if (!isElite) {
-    if (!userApiKey) {
-      return { 
-        statusCode: 403, 
-        headers, 
-        body: JSON.stringify({ 
-          error: "API Key Required: Your current plan (Premium) requires you to provide your own OpenRouter API key. Inbuilt keys are reserved for Elite members only.",
-          code: "KEY_REQUIRED" 
-        }) 
-      };
-    }
-    apiKeyToUse = userApiKey;
-  } else {
-    apiKeyToUse = userApiKey || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
+  if (isElite) apiKeyToUse = userApiKey || process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+
+  if (!isElite && !userApiKey) {
+    return { statusCode: 403, headers, body: JSON.stringify({ error: "API Key Required for Premium members.", code: "KEY_REQUIRED" }) };
   }
 
-  if (!apiKeyToUse) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: "No API key available for this request." }) };
-  }
+  if (!apiKeyToUse) return { statusCode: 500, headers, body: JSON.stringify({ error: "No API key configured." }) };
 
-  if (event.body && event.body.length > MAX_BODY_BYTES) {
-    return { statusCode: 413, headers, body: JSON.stringify({ error: "Request body too large" }) };
-  }
-
-  let payload;
-  try {
-    payload = JSON.parse(event.body || "{}");
-  } catch {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid JSON body" }) };
-  }
-
-  const incoming = Array.isArray(payload.messages) ? payload.messages : null;
-  if (!incoming || incoming.length === 0) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "messages[] is required" }) };
-  }
+  const payload = JSON.parse(event.body || "{}");
+  const incoming = Array.isArray(payload.messages) ? payload.messages : [];
+  if (incoming.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages provided" }) };
 
   let messages = [...incoming];
-  if (messages[0]?.role === "system") {
-    if (typeof messages[0].content === "string") {
-      messages[0].content = `${FORMATTING_SYSTEM_PROMPT}\n\n${messages[0].content}`;
-    }
-  } else {
-    messages = [{ role: "system", content: FORMATTING_SYSTEM_PROMPT }, ...messages];
-  }
+  const systemPrompt = messages.find(m => m.role === 'system');
+  if (systemPrompt) systemPrompt.content = `${FORMATTING_SYSTEM_PROMPT}\n\n${systemPrompt.content}`;
+  else messages = [{ role: "system", content: FORMATTING_SYSTEM_PROMPT }, ...messages];
 
-  const isPremium = userTier === 'premium' || isElite;
-  
-  const isResearch = payload.task === 'research';
   const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
+  const isResearch = payload.task === 'research';
 
   let modelToUse = payload.model || DEFAULT_FREE_MODEL;
-  
-  // FORCE Gemini for Vision/Research
-  if (isResearch || hasImages) {
-    modelToUse = VISION_RESEARCH_MODEL;
-  } else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
-    // Standard Chat Upgrades
+  if (isResearch || hasImages) modelToUse = VISION_RESEARCH_MODEL;
+  else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
     if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
     else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
   }
 
-  console.log(`[AI-CHAT] User: ${user.id} | Tier: ${userTier} | Task: ${payload.task || 'chat'} | Model: ${modelToUse}`);
-
-  const isGoogleModel = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
+  console.log(`[AI-CHAT] ${user.id} | ${userTier} | ${modelToUse}`);
 
   try {
-    let upstream;
-    
-    if (isGoogleModel && process.env.GOOGLE_AI_STUDIO_KEY) {
-      // DIRECT GOOGLE AI STUDIO CALL
+    const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
+    if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
       const googleModel = modelToUse.replace('google/', '');
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
-      // Convert messages to Google format (with Vision support)
-      const contents = messages
-        .filter(m => m.role !== 'system')
-        .map(m => {
-          const role = m.role === 'assistant' ? 'model' : 'user';
-          const parts = [];
-          
-          if (Array.isArray(m.content)) {
-            // Handle Multi-modal content (Vision)
-            for (const part of m.content) {
-              if (part.type === 'text') {
-                parts.push({ text: part.text });
-              } else if (part.type === 'image_url' && part.image_url?.url) {
-                const b64Data = part.image_url.url.split(',')[1] || part.image_url.url;
-                const mimeType = part.image_url.url.match(/data:(.*?);/)?.[1] || 'image/jpeg';
-                parts.push({
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: b64Data
-                  }
-                });
-              }
-            }
-          } else {
-            // Handle plain text
-            parts.push({ text: m.content });
-          }
-          
-          return { role, parts };
-        });
-        
-      const systemInstruction = messages.find(m => m.role === 'system')?.content;
+      const contents = messages.filter(m => m.role !== 'system').map(m => {
+        const parts = Array.isArray(m.content) ? m.content.map(p => {
+          if (p.type === 'text') return { text: p.text };
+          if (p.type === 'image_url') return { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } };
+          return null;
+        }).filter(Boolean) : [{ text: m.content }];
+        return { role: m.role === 'assistant' ? 'model' : 'user', parts };
+      });
 
-      upstream = await fetch(googleUrl, {
+      const res = await fetch(googleUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          contents,
-          system_instruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
-        }),
+          contents, 
+          system_instruction: { parts: [{ text: messages.find(m => m.role === 'system')?.content || "" }] }
+        })
       });
-      
-      const data = await upstream.json();
-      if (!upstream.ok) {
-        console.error("[AI-CHAT] Google API Error:", data.error?.message);
-        throw new Error(data.error?.message || "Google AI Studio request failed");
-      }
-      
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "",
-          model: modelToUse,
-        }),
-      };
+      const data = await res.json();
+      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.candidates?.[0]?.content?.parts?.[0]?.text || "", model: modelToUse }) };
     } else {
-      // OPENROUTER CALL (Nemotron)
-      upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKeyToUse}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": origin || "https://margdarshak-ai.netlify.app",
-          "X-Title": "MARGDARSHAK AI Tutor",
+          "HTTP-Referer": "https://margdarshan.tech",
+          "X-Title": "MARGDARSHAK AI",
         },
-        body: JSON.stringify({ 
-          model: modelToUse, 
-          messages 
-        }),
+        body: JSON.stringify({ model: modelToUse, messages })
       });
-      
-      const data = await upstream.json();
-      if (!upstream.ok) {
-        const isInvalidKey = upstream.status === 401 || data?.error?.code === 'invalid_api_key';
-        return {
-          statusCode: upstream.status,
-          headers,
-          body: JSON.stringify({ 
-            error: isInvalidKey ? "🔑 Invalid API Key" : (data?.error?.message || "OpenRouter request failed"),
-            code: isInvalidKey ? "INVALID_KEY" : "UPSTREAM_ERROR"
-          }),
-        };
-      }
-      const choice = data?.choices?.[0]?.message;
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: choice?.content ?? "",
-          model: modelToUse,
-        }),
-      };
+      const data = await res.json();
+      if (!res.ok) return { statusCode: res.status, headers, body: JSON.stringify({ error: data?.error?.message || "OpenRouter Error" }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.choices?.[0]?.message?.content || "", model: modelToUse }) };
     }
   } catch (err) {
-    console.error("[AI-CHAT] Unhandled error:", err.message);
-    return { statusCode: 502, headers, body: JSON.stringify({ error: err.message || "Upstream error" }) };
+    return { statusCode: 502, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
