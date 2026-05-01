@@ -69,7 +69,7 @@ Return ONLY valid JSON:
 
       const result = await modelRouter.generateJSON<TaskAnalysis>(prompt, {
         useCache: true,
-        cacheKey: `task_analysis_v4_${pendingTasks.length}_${overdueTasks.length}`,
+        cacheKey: `task_analysis_v5_${pendingTasks.length}_${overdueTasks.length}`,
         cacheTtl: 10 * 60 * 1000,
         tier: userTier, // Use the user's actual tier from Clerk metadata
         task: 'tasks', // Let the neuro-engine architecture handle optimal model selection

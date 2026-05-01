@@ -190,7 +190,17 @@ export const modelRouter = {
     if (jsonMatch) text = jsonMatch[0];
 
     const tryParse = (s: string): T | null => {
-      try { return JSON.parse(s) as T; } catch { return null; }
+      try { 
+        return JSON.parse(s) as T; 
+      } catch { 
+        // Auto-heal trailing commas (a very common LLM hallucination)
+        try {
+          const fixed = s.replace(/,\s*([\]}])/g, '$1');
+          return JSON.parse(fixed) as T;
+        } catch {
+          return null; 
+        }
+      }
     };
 
     // 1) Direct parse
