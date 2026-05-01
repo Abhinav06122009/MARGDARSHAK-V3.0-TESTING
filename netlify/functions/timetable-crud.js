@@ -110,6 +110,31 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify(data || []) };
     }
 
+    if (action === "fetch-context") {
+      // Fetch all context data in parallel for AI enrichment
+      const [eventsRes, tasksRes, syllabiRes, studyPlansRes] = await Promise.all([
+        fetch(`${supabaseUrl}/rest/v1/timetable_events?user_id=eq.${supabaseUserId}&status=eq.active&order=day.asc,start_time.asc`, { headers: supabaseHeaders }),
+        fetch(`${supabaseUrl}/rest/v1/tasks?user_id=eq.${supabaseUserId}&is_completed=eq.false&order=due_date.asc&limit=30`, { headers: supabaseHeaders }),
+        fetch(`${supabaseUrl}/rest/v1/syllabi?user_id=eq.${supabaseUserId}&is_deleted=eq.false&select=course_name,topics,objectives,exam_date&limit=20`, { headers: supabaseHeaders }),
+        fetch(`${supabaseUrl}/rest/v1/study_plans?user_id=eq.${supabaseUserId}&order=created_at.desc&limit=10`, { headers: supabaseHeaders }),
+      ]);
+      const [events, tasks, syllabi, studyPlans] = await Promise.all([
+        eventsRes.json().catch(() => []),
+        tasksRes.json().catch(() => []),
+        syllabiRes.json().catch(() => []),
+        studyPlansRes.json().catch(() => []),
+      ]);
+      return {
+        statusCode: 200, headers,
+        body: JSON.stringify({
+          events: Array.isArray(events) ? events : [],
+          tasks: Array.isArray(tasks) ? tasks : [],
+          syllabi: Array.isArray(syllabi) ? syllabi : [],
+          studyPlans: Array.isArray(studyPlans) ? studyPlans : [],
+        })
+      };
+    }
+
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Unknown action" }) };
 
   } catch (err) {

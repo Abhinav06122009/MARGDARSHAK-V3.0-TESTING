@@ -355,35 +355,75 @@ const Timetable: React.FC = () => {
 
   const handleSuggestTime = async () => {
     if (!hasPremiumAccess) {
-      toast({
-        title: "Premium Feature",
-        description: "Upgrade to a Pro plan to use AI-powered time suggestions.",
-        variant: "destructive",
-      });
+      toast({ title: "Premium Feature", description: "Upgrade to premium_elite to use AI scheduling.", variant: "destructive" });
       return;
     }
 
     toast({
-      title: "🧠 Saarthi is thinking...",
-      description: "Analyzing your schedule with AI to find the best slot.",
+      title: "🧠 Saarthi is analyzing your schedule...",
+      description: "Reading your courses, tasks and timetable for the best slot.",
       className: "bg-black border border-blue-500/50 shadow-xl",
     });
 
     try {
-      const eventSummary = events.map(e =>
-        `${e.title} | Day ${e.day} | ${e.start_time}-${e.end_time} | Category: ${e.category}`
-      ).join('\n');
+      // 1. Fetch full context from backend
+      const ctxRes = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'fetch-context', userId: currentUser?.id })
+      });
+      const ctx = ctxRes.ok ? await ctxRes.json() : { events: [], tasks: [], syllabi: [], studyPlans: [] };
 
-      const prompt = `You are a smart academic scheduler. Given this weekly timetable:\n${eventSummary}\n\nSuggest the best available time slot for a new event of type "${formData.category}" titled "${formData.title || 'New Event'}". Return ONLY a JSON object: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time": "HH:MM", "reason": "brief reason"}`;
+      const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+      // 2. Build context strings
+      const timetableCtx = (ctx.events || events).map((e: any) =>
+        `  • ${e.title} | ${DAY_NAMES[e.day]} ${e.start_time}–${e.end_time} | ${e.category}${e.instructor ? ` | ${e.instructor}` : ''}`
+      ).join('\n') || '  (No events yet)';
+
+      const tasksCtx = (ctx.tasks || []).slice(0, 15).map((t: any) =>
+        `  • [${t.priority || 'medium'}] ${t.title}${t.due_date ? ` — due ${t.due_date}` : ''}${t.subject ? ` | ${t.subject}` : ''}`
+      ).join('\n') || '  (No pending tasks)';
+
+      const coursesCtx = (ctx.syllabi || []).map((s: any) =>
+        `  • ${s.course_name}${s.exam_date ? ` | Exam: ${s.exam_date}` : ''}${s.topics?.length ? ` | Topics: ${s.topics.slice(0, 4).join(', ')}` : ''}`
+      ).join('\n') || '  (No courses added)';
+
+      const studyCtx = (ctx.studyPlans || []).slice(0, 5).map((p: any) =>
+        `  • ${p.subject || p.title || 'Study session'} | ${p.daily_hours || 2}h/day`
+      ).join('\n') || '  (No study plans)';
+
+      const prompt = `You are Saarthi, an elite academic schedule optimizer. Use ALL context below to suggest the BEST available time slot.
+
+📅 CURRENT TIMETABLE:
+${timetableCtx}
+
+📚 PENDING TASKS & DEADLINES:
+${tasksCtx}
+
+🎓 ENROLLED COURSES:
+${coursesCtx}
+
+📖 STUDY PLANS:
+${studyCtx}
+
+🎯 NEW EVENT TO SCHEDULE:
+Title: "${formData.title || 'New Event'}"
+Category: ${formData.category}
+Duration needed: ~1 hour
+
+INSTRUCTIONS:
+- Avoid time conflicts with existing events
+- For study/class events, prefer morning/afternoon (08:00–17:00)
+- For personal/break, prefer gaps between heavy sessions
+- If there are upcoming exam dates, prioritize study slots before them
+- Consider task deadlines when suggesting priority slots
+
+Return ONLY this JSON: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time": "HH:MM", "reason": "1-2 sentence explanation referencing specific context (tasks, courses, or exam dates)"}`;
+
+      // 3. Call qwen-safety
       const res = await authedFetch('/.netlify/functions/neuro-engine', {
         method: 'POST',
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: prompt }],
-          model: 'qwen-coder',
-          jsonMode: true,
-          task: 'research'
-        }),
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], model: 'qwen-safety', jsonMode: true, task: 'research' })
       });
 
       if (!res.ok) throw new Error('AI request failed');
@@ -391,33 +431,22 @@ const Timetable: React.FC = () => {
       const suggestion = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
 
       if (suggestion?.day !== undefined && suggestion?.start_time) {
-        setFormData(prev => ({
-          ...prev,
-          day: suggestion.day,
-          start_time: suggestion.start_time,
-          end_time: suggestion.end_time,
-        }));
+        setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
         toast({
-          title: (
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
-              ✨ AI Time Suggested!
-            </span>
-          ),
-          description: suggestion.reason || `Best slot found on ${timetableHelpers.getDayNames()[suggestion.day]} at ${suggestion.start_time}.`,
+          title: (<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">✨ AI Time Suggested!</span>),
+          description: suggestion.reason || `Best slot: ${DAY_NAMES[suggestion.day]} at ${suggestion.start_time}.`,
           className: "bg-black border border-blue-500/50 shadow-xl",
           icon: <Zap className="text-blue-400" />,
         });
-      } else {
-        throw new Error('Invalid AI response structure');
-      }
+      } else throw new Error('Invalid AI response');
+
     } catch (err: any) {
       console.error('[AI Suggest] Failed:', err);
-      // Graceful fallback to local algorithm
       const tempEvent = { ...formData, start_time: '09:00', end_time: '10:00' };
       const suggestion = smartScheduler.findNextAvailableSlot(events, tempEvent, new Date().getDay());
       if (suggestion) {
         setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
-        toast({ title: "Slot Found (Local)", description: `Suggested: Day ${suggestion.day}, ${suggestion.start_time}.`, className: "bg-black border border-amber-500/50" });
+        toast({ title: "Slot Found", description: `Suggested: ${timetableHelpers.getDayNames()[suggestion.day]} at ${suggestion.start_time}.`, className: "bg-black border border-amber-500/50" });
       } else {
         toast({ title: "No Slots Found", description: "Your schedule looks full!", className: "bg-black border border-red-500/50" });
       }
@@ -525,40 +554,69 @@ const Timetable: React.FC = () => {
 
   const handleSmartAction = async (action: 'balance' | 'breaks') => {
     if (!hasPremiumAccess) {
-      toast({
-        title: "Premium Feature",
-        description: "Upgrade to a Pro plan to use Smart Actions.",
-        variant: "destructive",
-      });
+      toast({ title: "Premium Feature", description: "Upgrade to premium_elite to use Smart Actions.", variant: "destructive" });
       return;
     }
 
     if (action === 'balance') {
       toast({
-        title: "🧠 Saarthi is analyzing...",
-        description: "AI is reviewing your weekly workload distribution.",
+        title: "🧠 Saarthi is deep-analyzing...",
+        description: "Reading your courses, tasks and entire schedule to balance workload.",
         className: "bg-black border border-blue-500/50 shadow-xl",
       });
 
       try {
-        const workload = smartScheduler.analyzeWorkload(events);
-        const eventSummary = events.map(e =>
-          `${e.title} | Day ${e.day} | ${e.start_time}-${e.end_time} | Category: ${e.category}`
-        ).join('\n');
-        const workloadSummary = Object.entries(workload)
-          .map(([day, hours]) => `${timetableHelpers.getDayNames()[parseInt(day)]}: ${hours.toFixed(1)}h`)
-          .join(', ');
+        // Fetch full context
+        const ctxRes = await authedFetch('/.netlify/functions/timetable-crud', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'fetch-context', userId: currentUser?.id })
+        });
+        const ctx = ctxRes.ok ? await ctxRes.json() : { events: [], tasks: [], syllabi: [], studyPlans: [] };
 
-        const prompt = `You are an academic schedule optimizer. Analyze this weekly timetable:\n${eventSummary}\n\nWorkload per day: ${workloadSummary}\n\nIdentify which day is overloaded and suggest moving ONE specific event to a lighter day. Return ONLY JSON: {"eventTitle": "exact title", "fromDay": <0-6>, "toDay": <0-6>, "newStartTime": "HH:MM", "newEndTime": "HH:MM", "reason": "brief explanation"}`;
+        const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const workload = smartScheduler.analyzeWorkload(events);
+
+        const timetableCtx = (ctx.events || events).map((e: any) =>
+          `  • ${e.title} | ${DAY_NAMES[e.day]} ${e.start_time}–${e.end_time} | ${e.category}`
+        ).join('\n') || '  (empty)';
+
+        const tasksCtx = (ctx.tasks || []).slice(0, 15).map((t: any) =>
+          `  • [${t.priority || 'medium'}] ${t.title}${t.due_date ? ` — due ${t.due_date}` : ''}`
+        ).join('\n') || '  (none)';
+
+        const coursesCtx = (ctx.syllabi || []).map((s: any) =>
+          `  • ${s.course_name}${s.exam_date ? ` | Exam: ${s.exam_date}` : ''}`
+        ).join('\n') || '  (none)';
+
+        const workloadCtx = Object.entries(workload)
+          .map(([day, hours]) => `  ${DAY_NAMES[parseInt(day)]}: ${(hours as number).toFixed(1)}h`).join('\n');
+
+        const prompt = `You are Saarthi, an elite academic schedule optimizer. Analyze ALL context below to find the BEST schedule rebalancing suggestion.
+
+📅 CURRENT TIMETABLE:
+${timetableCtx}
+
+⏱ WORKLOAD PER DAY:
+${workloadCtx}
+
+📚 PENDING TASKS:
+${tasksCtx}
+
+🎓 COURSES & EXAM DATES:
+${coursesCtx}
+
+INSTRUCTIONS:
+- Find the most overloaded day vs the lightest day
+- Suggest moving ONE specific event (prefer personal/seminar/break category) to balance the schedule
+- Consider upcoming exam dates: days before an exam should be lighter
+- Consider task deadlines when deciding what to move
+- Provide a meaningful reason that references specific courses or tasks
+
+Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "toDay": <0-6>, "newStartTime": "HH:MM", "newEndTime": "HH:MM", "reason": "1-2 sentences referencing specific tasks or exam dates"}`;
 
         const res = await authedFetch('/.netlify/functions/neuro-engine', {
           method: 'POST',
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'qwen-safety',
-            jsonMode: true,
-            task: 'research'
-          }),
+          body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], model: 'qwen-safety', jsonMode: true, task: 'research' })
         });
 
         if (!res.ok) throw new Error('AI request failed');
@@ -580,18 +638,17 @@ const Timetable: React.FC = () => {
             return;
           }
         }
-        throw new Error('AI could not identify a specific event to move');
+        throw new Error('AI could not match a specific event');
       } catch (err: any) {
-        console.error('[AI Balance] Failed, using local fallback:', err);
-        // Graceful local fallback
+        console.error('[AI Balance] Fallback:', err);
         const currentWorkload = smartScheduler.analyzeWorkload(events);
         const suggestions = smartScheduler.balanceWorkload(events, currentWorkload);
         if (suggestions && suggestions.length > 0) {
           setWorkloadSuggestions(suggestions);
         } else {
           toast({
-            title: "Schedule is Already Balanced",
-            description: "Your workload seems to be well-distributed. No changes needed.",
+            title: "Schedule is Balanced",
+            description: "Your workload is well-distributed across the week.",
             icon: <CheckCircle className="text-green-400" />,
             className: "bg-black border border-green-500/50 shadow-xl",
           });
