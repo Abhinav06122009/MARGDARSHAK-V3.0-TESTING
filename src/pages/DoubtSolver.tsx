@@ -91,10 +91,24 @@ Return ONLY a valid JSON object with this exact structure:
   "key_concept": "What is the core physics/math concept learned here?"
 }`;
 
-      const generatedSolution = await modelRouter.generateJSON<Solution>(prompt, { 
+      let rawResponse = await modelRouter.chat([{ role: 'user', content: prompt }], { 
         imageFile: selectedFile,
-        task: 'research' // Force Gemini 1.5 Flash for Doubt Solver
+        task: 'research',
+        jsonMode: true
       });
+
+      if (rawResponse.startsWith('![Generated Image]')) {
+        setSolution({
+          problem_understanding: "Image Generated via Pollinations AI",
+          steps: [],
+          final_answer: rawResponse,
+          key_concept: "FLUX.2 Klein 4B"
+        });
+        return;
+      }
+
+      const cleanJson = rawResponse.replace(/```json\n?|\n?```/g, '').trim();
+      const generatedSolution = JSON.parse(cleanJson) as Solution;
 
       if (generatedSolution && generatedSolution.steps) {
         setSolution(generatedSolution);

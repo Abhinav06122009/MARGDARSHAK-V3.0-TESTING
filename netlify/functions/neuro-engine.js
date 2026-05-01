@@ -60,7 +60,7 @@ exports.handler = async (event) => {
     if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
     
     // IMAGE GENERATION INTERCEPT (Pollinations.ai / FLUX)
-    if (payload.mode === 'imagegen') {
+    if (payload.mode === 'imagegen' || payload.task === 'research') {
       try {
         const lastMsg = messages[messages.length - 1];
         const promptText = typeof lastMsg.content === 'string' ? lastMsg.content : lastMsg.content[0]?.text || "A beautiful artwork";
@@ -168,7 +168,7 @@ exports.handler = async (event) => {
     // Fallback/Default: OpenRouter
     let openRouterModel = modelToUse;
     if (hasImages || payload.jsonMode || payload.task === 'research') {
-      openRouterModel = "google/gemini-flash-1.5"; 
+      openRouterModel = "google/gemini-2.5-flash"; 
     } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
       openRouterModel = ELITE_UPGRADE_MODEL;
     }
