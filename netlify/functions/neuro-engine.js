@@ -89,6 +89,34 @@ exports.handler = async (event) => {
       systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
     }
 
+    // DOUBT SOLVER INTERCEPT (Pollinations.ai Text API)
+    if (payload.task === 'research') {
+      try {
+        const pollUrl = `https://text.pollinations.ai/openai/v1/chat/completions`;
+        const pollRes = await fetch(pollUrl, {
+          method: "POST",
+          headers: { 
+            "Authorization": "Bearer pk_zsdrdBr8qAO7Cbbp",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+             model: "gpt-4o-mini", // User requested GPT Image 1 Mini -> assuming gpt-4o-mini vision capability
+             messages: [{ role: "system", content: systemPrompt }, ...messages]
+          })
+        });
+        
+        const pollData = await pollRes.json();
+        if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
+        
+        const text = pollData?.choices?.[0]?.message?.content || "";
+        return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gpt-4o-mini" }) };
+      } catch (err) {
+        console.error("[NEURO-ENGINE] Pollinations Text error:", err);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `Pollinations Error: ${err.message}` }) };
+      }
+    }
+
+
     const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
     let modelToUse = payload.model || DEFAULT_FREE_MODEL;
     if (payload.task === 'research' || hasImages || payload.jsonMode) modelToUse = VISION_RESEARCH_MODEL;
@@ -168,7 +196,7 @@ exports.handler = async (event) => {
     // Fallback/Default: OpenRouter
     let openRouterModel = modelToUse;
     if (hasImages || payload.jsonMode || payload.task === 'research') {
-      openRouterModel = "google/gemini-2.5-flash"; 
+      openRouterModel = "google/gemma-3-27b-it:free"; 
     } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
       openRouterModel = ELITE_UPGRADE_MODEL;
     }
