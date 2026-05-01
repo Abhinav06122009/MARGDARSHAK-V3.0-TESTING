@@ -82,7 +82,9 @@ exports.handler = async (event) => {
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Google AI Studio API Key is not configured in Netlify Environment Variables." }) };
       }
       
-      const googleModel = modelToUse.replace('google/', '');
+      let googleModel = modelToUse.replace('google/', '');
+      if (googleModel === 'gemini-1.5-flash') googleModel = 'gemini-1.5-flash-latest';
+      
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
       const contents = messages.filter(m => m.role !== 'system').map(m => {
