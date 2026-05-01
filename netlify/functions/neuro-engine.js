@@ -104,8 +104,20 @@ exports.handler = async (event) => {
         })
       });
       
-      const pollData = await pollRes.json();
-      if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
+      const rawText = await pollRes.text();
+      let pollData;
+      try {
+        pollData = JSON.parse(rawText);
+      } catch (e) {
+        console.error("[NEURO-ENGINE] Pollinations returned non-JSON:", rawText.substring(0, 200));
+        return { statusCode: 502, headers, body: JSON.stringify({ error: `Provider error: ${pollRes.status} ${pollRes.statusText}` }) };
+      }
+
+      if (pollData.error) {
+        // If the specific model failed with json_object, fallback to normal text
+        console.error("[NEURO-ENGINE] Pollinations error:", pollData.error);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: pollData.error.message || JSON.stringify(pollData.error) }) };
+      }
       
       const text = pollData?.choices?.[0]?.message?.content || "";
       if (!text) {
@@ -115,6 +127,6 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
     } catch (err) {
       console.error("[NEURO-ENGINE] Fatal Error:", err);
-      return { statusCode: 502, headers, body: JSON.stringify({ error: `Pollinations API Error: ${err.message}`, stack: err.stack }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: `Internal API Error: ${err.message}` }) };
     }
 };
