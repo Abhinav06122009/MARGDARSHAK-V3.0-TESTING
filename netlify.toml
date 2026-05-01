@@ -1,5 +1,10 @@
 [functions]
   node_bundler = "esbuild"
+
+[functions."neuro-engine"]
+  timeout = 26
+
+[functions."ai-chat"]
   timeout = 26
 
 [build]
