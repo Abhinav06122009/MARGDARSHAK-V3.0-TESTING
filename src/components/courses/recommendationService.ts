@@ -99,15 +99,24 @@ As Saarthi AI, create a 4-step path. Return ONLY valid JSON:
       if (!aiRes.ok) throw new Error('AI generation failed');
       const data = await aiRes.json();
       
-      // Clean up response string if it has markdown code blocks
-      let cleanResponse = data.response.trim();
-      if (cleanResponse.includes('```json')) {
-        cleanResponse = cleanResponse.split('```json')[1].split('```')[0].trim();
-      } else if (cleanResponse.includes('```')) {
-        cleanResponse = cleanResponse.split('```')[1].split('```')[0].trim();
-      }
+      let rawText = data.response || "";
+      let result;
 
-      const result = JSON.parse(cleanResponse);
+      try {
+        // Robust Extraction: Look for the first { and last }
+        const firstBrace = rawText.indexOf('{');
+        const lastBrace = rawText.lastIndexOf('}');
+        
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          const jsonCandidate = rawText.substring(firstBrace, lastBrace + 1);
+          result = JSON.parse(jsonCandidate);
+        } else {
+          throw new Error('No JSON object found in response');
+        }
+      } catch (parseErr) {
+        console.error('Failed to parse AI response:', rawText);
+        throw parseErr;
+      }
 
       return {
         title: result.title || 'AI Generated Path',
