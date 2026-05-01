@@ -129,10 +129,18 @@ exports.handler = async (event) => {
     }
 
     // Fallback/Default: OpenRouter
+    let openRouterModel = modelToUse;
+    if (hasImages || payload.jsonMode || payload.task === 'research') {
+      // Must use a vision/json capable model on OpenRouter if Google AI Studio fails/is missing
+      openRouterModel = "google/gemini-1.5-flash"; 
+    } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
+      openRouterModel = ELITE_UPGRADE_MODEL;
+    }
+
     const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
-      body: JSON.stringify({ model: modelToUse.includes('gemini') ? ELITE_UPGRADE_MODEL : modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
+      body: JSON.stringify({ model: openRouterModel, messages: [{ role: "system", content: systemPrompt }, ...messages] })
     });
     const orData = await orRes.json();
     

@@ -52,9 +52,13 @@ const SmartTutorPage = () => {
       const subscription = (metadata.subscription as any) || {};
       const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free');
       let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
+      const role = String((metadata as any).role || '').toLowerCase();
       
       const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
-      if (MASTER_IDS.includes(clerkUser.id)) tier = 'premium_elite';
+      if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin') {
+        tier = 'premium_elite';
+      }
+      
       setSubscriptionTier(tier);
     }
   }, [clerkUser, clerkLoaded]);
@@ -244,9 +248,18 @@ const SmartTutorPage = () => {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                  else handleSend();
+                }
+              }}
+              onClick={() => {
+                if (subscriptionTier === 'free') setShowUpgradeModal(true);
+              }}
+              readOnly={subscriptionTier === 'free'}
               placeholder={subscriptionTier === 'free' ? "Upgrade to use Saarthi..." : "Ask Saarthi anything..."}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide"
+              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${subscriptionTier === 'free' ? 'cursor-pointer' : ''}`}
             />
             <Button 
               onClick={() => {
