@@ -40,6 +40,11 @@ const ALLOWED_EVENTS = new Set([
   "login_anomaly_detected",
   "behavioral_anomaly_detected",
   "suspicious_activity",
+  "PENETRATION_ATTEMPT",
+  "HONEYPOT_CLICKED",
+  "DEBUGGER_DETECTED",
+  "dashboard_view",
+  "page_load_security_check",
 ]);
 
 // Compute a simple risk score from the event type and anomalies list.

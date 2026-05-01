@@ -143,6 +143,9 @@ const verifyClerkUser = async (authHeader) => {
       publicKey = `-----BEGIN PUBLIC KEY-----\n${wrappedBody}\n-----END PUBLIC KEY-----`;
     }
 
+    const verifier = crypto.createVerify('RSA-SHA256');
+    verifier.update(parts[0] + '.' + parts[1]);
+
     // Clerk uses base64url for signatures. Node.js Buffer handles this natively.
     try {
       const signatureBuffer = Buffer.from(parts[2], 'base64url');
@@ -195,7 +198,7 @@ const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
   if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
 
-  const salt = process.env.ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+  const salt = (process.env.ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa').trim();
   const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
   
   return [

@@ -32,14 +32,15 @@ export async function authedFetch(
   
   let token = null;
   try {
-    // 1. Try to get from Supabase (which should be bridged to Clerk)
-    const { data: { session } } = await supabase.auth.getSession();
-    token = session?.access_token;
-    
-    // 2. Fallback: Try to get directly from global Clerk instance if available
-    if (!token && (window as any).Clerk?.session) {
-      console.log('[authedFetch] Supabase token missing, pulling directly from Clerk.');
+    // 1. ALWAYS prioritize direct Clerk token for Netlify functions (standard RSA256)
+    if ((window as any).Clerk?.session) {
       token = await (window as any).Clerk.session.getToken();
+    }
+    
+    // 2. Fallback to Supabase session if Clerk global is not ready
+    if (!token) {
+      const { data: { session } } = await supabase.auth.getSession();
+      token = session?.access_token;
     }
   } catch (err) {
     console.warn('[authedFetch] Token retrieval failed:', err);
