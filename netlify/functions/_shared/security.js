@@ -137,7 +137,11 @@ const verifyClerkUser = async (authHeader) => {
 
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(parts[0] + '.' + parts[1]);
-    if (!verifier.verify(publicKey, parts[2], 'base64')) {
+    
+    // Clerk uses base64url for signatures. Convert to base64 for crypto.verify
+    const base64Signature = parts[2].replace(/-/g, '+').replace(/_/g, '/');
+    
+    if (!verifier.verify(publicKey, base64Signature, 'base64')) {
       console.warn('[AUTH] Signature verification failed for token sub:', payload.sub);
       return { ok: false, status: 401, code: "invalid_signature", message: "Invalid cryptographic signature" };
     }

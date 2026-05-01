@@ -30,15 +30,26 @@ export async function authedFetch(
   // The supabase client is already configured to use Clerk tokens via setClerkTokenProvider.
   // We can get the token from the supabase client's current session or directly from the provider.
   
-  const { data: { session } } = await supabase.auth.getSession();
+  let token = null;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    token = session?.access_token;
+  } catch (err) {
+    console.warn('[authedFetch] Supabase session check failed, using fallback.');
+  }
   
-  if (!session?.access_token) {
-    throw new Error("Please sign in to use AI features.");
+  if (!token) {
+    // If supabase doesn't have it, we might be in a transitional state.
+    // We throw a clear error that can be caught by UI components.
+    throw new Error("UNAUTHORIZED_AI_ACCESS: Please ensure you are signed in and your session is active.");
   }
 
-  let res = await attach(session.access_token);
+  let res = await attach(token);
   
-  if (!res.ok) {
+  // If we get a 401, it means the token was present but rejected.
+  if (res.status === 401) {
+    console.error(`[authedFetch] 401 Unauthorized for ${input}. Token may be invalid or expired.`);
+  } else if (!res.ok) {
     const errorMsg = await readErrorMessage(res);
     console.error(`[authedFetch] Error ${res.status}: ${errorMsg}`);
   }

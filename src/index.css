@@ -90,26 +90,46 @@
   :root {
     /* Fluid Typography - Scales between 320px and 2560px */
     --base-font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1.25rem);
+    
+    /* Universal Safe Areas for Notched Devices */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    
+    /* System Height to prevent keyboard issues */
+    --system-height: 100dvh;
   }
 
   html {
     font-size: var(--base-font-size);
+    /* Prevent overscroll bounce on mobile */
+    overscroll-behavior-y: none;
+    height: var(--system-height);
   }
 
   /* TV & Ultra-Wide Scaling (Universal View) */
   @media (min-width: 2560px) {
     :root {
-      --base-font-size: 1.5rem; /* Larger base for TV distance */
+      --base-font-size: 1.75rem; /* Even larger base for TV distance */
     }
     .container {
-      max-width: 2400px;
+      max-width: 2000px !important;
+      margin-left: auto;
+      margin-right: auto;
     }
-    /* Scale up all spacing for TV */
-    .p-4 { padding: 2rem; }
-    .p-8 { padding: 4rem; }
-    .gap-4 { gap: 2rem; }
-    .gap-8 { gap: 4rem; }
   }
+
+  @media (min-width: 3840px) {
+    :root {
+      --base-font-size: 2.5rem; /* 4K TV scaling */
+    }
+    .container {
+      max-width: 3000px !important;
+    }
+  }
+
+
 
   @media (min-width: 3840px) {
     :root {
@@ -134,7 +154,26 @@
 
   body {
     @apply bg-background text-foreground overflow-x-hidden;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+
+  /* Universal Screen Layout Utilities */
+  .universal-container {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  .universal-padding {
+    padding: clamp(1rem, 5vw, 3rem);
+  }
+
+  .universal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
   }
 }
 
