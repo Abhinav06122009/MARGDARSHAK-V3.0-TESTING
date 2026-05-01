@@ -115,8 +115,12 @@ exports.handler = async (event) => {
           })
         });
         const gData = await gRes.json();
-        const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+        if (gData.error) {
+          console.error("[NEURO-ENGINE] Gemini API Error:", gData.error);
+        } else {
+          const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+        }
       } catch (err) { console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message); }
     }
 
@@ -127,7 +131,17 @@ exports.handler = async (event) => {
       body: JSON.stringify({ model: modelToUse.includes('gemini') ? ELITE_UPGRADE_MODEL : modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
     });
     const orData = await orRes.json();
+    
+    if (orData.error) {
+      console.error("[NEURO-ENGINE] OpenRouter API Error:", orData.error);
+      return { statusCode: 400, headers, body: JSON.stringify({ error: `Provider Error: ${orData.error.message || JSON.stringify(orData.error)}` }) };
+    }
+
     const orText = orData?.choices?.[0]?.message?.content || "";
+    if (!orText) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
+    }
+    
     return { statusCode: 200, headers, body: JSON.stringify({ response: orText, model: modelToUse }) };
 
   } catch (err) {
