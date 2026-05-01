@@ -57,52 +57,57 @@ const recommendationService = {
 
   generateLearningPath: async (userId: string, goal: string): Promise<LearningPath> => {
     try {
-      // 1. Fetch academic context (syllabi, tasks, courses)
+      // 1. Fetch lightweight academic context
       const ctxRes = await authedFetch('/.netlify/functions/timetable-crud', {
         method: 'POST',
-        body: JSON.stringify({ action: 'fetch-context', userId })
+        body: JSON.stringify({ action: 'fetch-academic-context', userId })
       });
-      const ctx = ctxRes.ok ? await ctxRes.json() : { events: [], tasks: [], syllabi: [], studyPlans: [] };
+      const ctx = ctxRes.ok ? await ctxRes.json() : { tasks: [], syllabi: [] };
 
       // 2. Format context for AI
-      const coursesCtx = (ctx.syllabi || []).slice(0, 5).map((s: any) => 
-        `• ${s.course_name}${s.exam_date ? ` (Exam: ${s.exam_date})` : ''}: ${s.topics?.slice(0,2).join(', ') || 'General curriculum'}`
-      ).join('\n') || '(No current courses)';
+      const coursesCtx = (ctx.syllabi || []).slice(0, 3).map((s: any) => 
+        `- ${s.course_name}: ${s.topics?.slice(0,2).join(', ') || 'N/A'}`
+      ).join('\n') || 'None';
 
-      const tasksCtx = (ctx.tasks || []).slice(0, 5).map((t: any) => 
-        `• ${t.title} [Due: ${t.due_date || 'N/A'}]`
-      ).join('\n') || '(No pending tasks)';
+      const tasksCtx = (ctx.tasks || []).slice(0, 3).map((t: any) => 
+        `- ${t.title}`
+      ).join('\n') || 'None';
 
-      const prompt = `You are Saarthi, an elite academic learning path designer. 
-Generate a high-fidelity learning path for a student with the following goal: "${goal}"
+      const prompt = `Student Goal: "${goal}"
+Courses: ${coursesCtx}
+Tasks: ${tasksCtx}
 
-STUDENT CONTEXT:
-📚 CURRENT COURSES:
-${coursesCtx}
+As Saarthi AI, create a 4-step path. Return ONLY valid JSON:
+{
+  "title": "Path Name",
+  "description": "Short summary",
+  "steps": [
+    {"id": "1", "name": "Topic", "description": "Details", "difficulty": "intermediate", "credits": 3}
+  ]
+}`;
 
-📝 PENDING TASKS:
-${tasksCtx}
-
-INSTRUCTIONS:
-- Design a logical 4-step learning sequence.
-- Each step should be a specific module or course.
-- Be pedagogical and reference their existing courses where relevant.
-- Return ONLY this JSON: { "title": "...", "description": "...", "steps": [ { "id": "step-1", "name": "...", "description": "...", "difficulty": "beginner/intermediate/advanced", "credits": 3 } ] }`;
-
-      // 3. Call AI
+      // 3. Call AI without strict JSON mode (faster)
       const aiRes = await authedFetch('/.netlify/functions/neuro-engine', {
         method: 'POST',
         body: JSON.stringify({ 
           messages: [{ role: 'user', content: prompt }], 
-          model: 'qwen-safety', 
-          jsonMode: true,
+          model: 'qwen-safety',
           task: 'research'
         })
       });
 
       if (!aiRes.ok) throw new Error('AI generation failed');
       const data = await aiRes.json();
-      const result = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+      
+      // Clean up response string if it has markdown code blocks
+      let cleanResponse = data.response.trim();
+      if (cleanResponse.includes('```json')) {
+        cleanResponse = cleanResponse.split('```json')[1].split('```')[0].trim();
+      } else if (cleanResponse.includes('```')) {
+        cleanResponse = cleanResponse.split('```')[1].split('```')[0].trim();
+      }
+
+      const result = JSON.parse(cleanResponse);
 
       return {
         title: result.title || 'AI Generated Path',

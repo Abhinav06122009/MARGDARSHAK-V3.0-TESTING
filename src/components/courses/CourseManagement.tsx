@@ -221,9 +221,13 @@ const CourseManagement: React.FC<CourseManagementProps> = ({ onBack }) => {
   const handleGeneratePath = async () => {
     if (!currentUser) return;
     
-    const isPremium = ['premium_elite', 'premium_plus', 'premium+elite'].includes(currentUser.profile?.subscription_tier || '');
-    if (!isPremium) {
-      toast({ title: "Elite Feature", description: "Upgrade to premium_elite to generate AI Learning Paths.", variant: "destructive" });
+    const isPremiumElite = (currentUser.profile?.subscription_tier === 'premium_elite');
+    if (!isPremiumElite) {
+      toast({ 
+        title: "Elite Feature", 
+        description: "Saarthi Learning Paths are exclusive to premium_elite users.", 
+        variant: "destructive" 
+      });
       navigate('/upgrade');
       return;
     }

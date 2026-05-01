@@ -14,25 +14,32 @@ export const courseService = {
         .eq('id', clerkUser.id)
         .maybeSingle();
 
-      // Robust Metadata Extraction
-      const metadata = clerkUser.user_metadata || {};
-      const subscription = (clerkUser.subscription as any) || {};
+      // --- STRICT SUBSCRIPTION SYNC (CLERK METADATA) ---
+      const metadata = clerkUser.publicMetadata || clerkUser.user_metadata || {};
       
-      const fullName = clerkUser.fullName || clerkUser.user_metadata?.full_name || profile?.full_name || 'User';
-      const role = clerkUser.role || metadata.role || (metadata as any).user_type || profile?.user_type || 'student';
+      // Extract from the user's specific structure: { role: ["ceo"], subscription: { tier: "premium_elite", status: "active" } }
+      const subObj = metadata.subscription || {};
+      const rawRole = metadata.role;
       
-      const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || profile?.subscription_tier || 'free');
-      let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
-
-      // Fuzzy Fallback
-      const rawMetadataStr = JSON.stringify(metadata).toLowerCase() + JSON.stringify(subscription).toLowerCase();
-      if (tier === 'free') {
-        if (rawMetadataStr.includes('elite')) tier = 'premium_elite';
-        else if (rawMetadataStr.includes('premium')) tier = 'premium';
+      // Handle role as array or string
+      const role = Array.isArray(rawRole) ? rawRole[0] : (rawRole || 'student');
+      
+      // Extract Tier
+      let tier = (subObj.tier || metadata.subscription_tier || 'free').toLowerCase();
+      
+      // Status check (optional but good practice)
+      const isActive = subObj.status === 'active';
+      if (!isActive && tier !== 'free') {
+        // Optional: downgrade if not active? 
+        // tier = 'free'; 
       }
 
-      // MASTER OVERRIDE
-      if (clerkUser.clerk_id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') tier = 'premium_elite';
+      const fullName = clerkUser.fullName || clerkUser.user_metadata?.full_name || profile?.full_name || 'User';
+
+      // MASTER OVERRIDE for Admin/Testing
+      if (clerkUser.clerk_id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L' || role === 'ceo') {
+        tier = 'premium_elite';
+      }
 
       return {
         id: clerkUser.id,

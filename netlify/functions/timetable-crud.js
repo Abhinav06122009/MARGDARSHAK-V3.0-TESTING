@@ -135,6 +135,15 @@ exports.handler = async (event) => {
       };
     }
 
+    // --- LIGHTWEIGHT ACADEMIC CONTEXT ---
+    if (action === "fetch-academic-context") {
+      const [syllabi, tasks] = await Promise.all([
+        fetch(`${supabaseUrl}/rest/v1/syllabi?user_id=eq.${supabaseUserId}&select=*`, { headers: supabaseHeaders }).then(res => res.json()),
+        fetch(`${supabaseUrl}/rest/v1/tasks?user_id=eq.${supabaseUserId}&is_deleted=eq.false&select=id,title,due_date`, { headers: supabaseHeaders }).then(res => res.json())
+      ]);
+      return { statusCode: 200, headers, body: JSON.stringify({ syllabi: syllabi || [], tasks: tasks || [] }) };
+    }
+
     // --- COURSES SECTION ---
     if (action === "list-courses") {
       const res = await fetch(`${supabaseUrl}/rest/v1/courses?user_id=eq.${supabaseUserId}&order=created_at.desc`, { headers: supabaseHeaders });
