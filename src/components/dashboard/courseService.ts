@@ -1,5 +1,6 @@
 import { supabase, supabaseHelpers } from '@/integrations/supabase/client';
 import type { Course, CourseFormData, SecureUser, CourseStats } from './course';
+import { authedFetch } from '@/lib/ai/authedFetch';
 
 export const courseService = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
@@ -51,14 +52,12 @@ export const courseService = {
 
   fetchUserCourses: async (userId: string): Promise<Course[]> => {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'list-courses', userId })
+      });
+      if (!res.ok) throw new Error('Failed to fetch courses');
+      return await res.json();
     } catch (error) {
       console.error('Error fetching courses:', error);
       return [];
@@ -67,30 +66,12 @@ export const courseService = {
 
   createCourse: async (formData: CourseFormData, userId: string): Promise<Course | null> => {
     try {
-      // Ensure profile exists before creating course (fixes 23503 foreign key violation)
-      const { data: authData } = await supabase.auth.getUser();
-      if (authData?.user) {
-        await supabase.from('profiles').upsert({
-          id: userId,
-          clerk_id: (authData.user as any).clerk_id || (authData.user as any).id,
-          email: authData.user.email || '',
-          full_name: (authData.user as any).user_metadata?.full_name || 'Scholar',
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
-      }
-
-      const { data, error } = await supabase
-        .from('courses')
-        .insert({
-          user_id: userId,
-          ...formData,
-          academic_year: formData.academic_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'create-course', userId, courseData: formData })
+      });
+      if (!res.ok) throw new Error('Failed to create course');
+      return await res.json();
     } catch (error) {
       console.error('Error creating course:', error);
       throw error;
@@ -99,18 +80,12 @@ export const courseService = {
 
   updateCourse: async (courseId: string, formData: CourseFormData, userId: string): Promise<Course | null> => {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .update({
-          ...formData,
-          updated_at: new Date().toISOString()
-        })
-        .match({ id: courseId, user_id: userId })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'update-course', userId, courseId, courseData: formData })
+      });
+      if (!res.ok) throw new Error('Failed to update course');
+      return await res.json();
     } catch (error) {
       console.error('Error updating course:', error);
       throw error;
@@ -119,12 +94,11 @@ export const courseService = {
 
   deleteCourse: async (courseId: string, userId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('courses')
-        .delete()
-        .match({ id: courseId, user_id: userId });
-
-      if (error) throw error;
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete-course', userId, courseId })
+      });
+      if (!res.ok) throw new Error('Failed to delete course');
       return true;
     } catch (error) {
       console.error('Error deleting course:', error);
@@ -134,24 +108,27 @@ export const courseService = {
 
   searchUserCourses: async (userId: string, query?: string, grade?: string, difficulty?: string): Promise<Course[]> => {
     try {
-      let supabaseQuery = supabase
-        .from('courses')
-        .select('*')
-        .eq('user_id', userId);
-
+      // For now, reuse list-courses and filter on client to avoid complex backend logic, 
+      // or implement full search in backend if needed. 
+      // Given the previous 403, we must go through backend.
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'list-courses', userId })
+      });
+      if (!res.ok) throw new Error('Failed to search courses');
+      let courses = await res.json();
+      
       if (query) {
-        supabaseQuery = supabaseQuery.or(`name.ilike.%${query}%,code.ilike.%${query}%`);
+        const q = query.toLowerCase();
+        courses = courses.filter((c: any) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
       }
       if (grade && grade !== 'all') {
-        supabaseQuery = supabaseQuery.eq('grade_level', grade);
+        courses = courses.filter((c: any) => c.grade_level === grade);
       }
       if (difficulty && difficulty !== 'all') {
-        supabaseQuery = supabaseQuery.eq('difficulty', difficulty);
+        courses = courses.filter((c: any) => c.difficulty === difficulty);
       }
-
-      const { data, error } = await supabaseQuery.order('name');
-      if (error) throw error;
-      return data || [];
+      return courses;
     } catch (error) {
       console.error('Error searching courses:', error);
       return [];
@@ -160,25 +137,18 @@ export const courseService = {
 
   getCourseStatistics: async (userId: string): Promise<CourseStats | null> => {
     try {
-      const { data: courses, error: coursesError } = await supabase
-        .from('courses')
-        .select('id')
-        .eq('user_id', userId);
-
-      if (coursesError) throw coursesError;
-
-      const { data: attendance, error: attError } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (attError) throw attError;
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get-course-statistics', userId })
+      });
+      if (!res.ok) throw new Error('Failed to fetch attendance stats');
+      const attendance = await res.json();
 
       const total = attendance?.length || 0;
-      const present = attendance?.filter(a => a.status === 'present').length || 0;
-      const late = attendance?.filter(a => a.status === 'late').length || 0;
-      const excused = attendance?.filter(a => a.status === 'excused').length || 0;
-      const absent = attendance?.filter(a => a.status === 'absent').length || 0;
+      const present = attendance?.filter((a: any) => a.status === 'present').length || 0;
+      const late = attendance?.filter((a: any) => a.status === 'late').length || 0;
+      const excused = attendance?.filter((a: any) => a.status === 'excused').length || 0;
+      const absent = attendance?.filter((a: any) => a.status === 'absent').length || 0;
 
       return {
         totalSessions: total,
@@ -196,18 +166,19 @@ export const courseService = {
 
   getCourseStats: async (userId: string, courseId: string): Promise<CourseStats | null> => {
     try {
-      const { data, error } = await supabase
-        .from('attendance')
-        .select('*')
-        .match({ course_id: courseId, user_id: userId });
-
-      if (error) throw error;
+      const res = await authedFetch('/.netlify/functions/timetable-crud', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get-course-statistics', userId })
+      });
+      if (!res.ok) throw new Error('Failed to fetch course stats');
+      const allAttendance = await res.json();
+      const data = allAttendance.filter((a: any) => a.course_id === courseId);
 
       const total = data.length;
-      const present = data.filter(a => a.status === 'present').length;
-      const late = data.filter(a => a.status === 'late').length;
-      const excused = data.filter(a => a.status === 'excused').length;
-      const absent = data.filter(a => a.status === 'absent').length;
+      const present = data.filter((a: any) => a.status === 'present').length;
+      const late = data.filter((a: any) => a.status === 'late').length;
+      const excused = data.filter((a: any) => a.status === 'excused').length;
+      const absent = data.filter((a: any) => a.status === 'absent').length;
 
       return {
         totalSessions: total,
