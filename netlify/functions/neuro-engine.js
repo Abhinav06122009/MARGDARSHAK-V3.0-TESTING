@@ -92,7 +92,7 @@ exports.handler = async (event) => {
     // DOUBT SOLVER INTERCEPT (Pollinations.ai gen.pollinations.ai API)
     if (payload.task === 'research') {
       try {
-        const pollUrl = `https://gen.pollinations.ai/openai/v1/chat/completions`;
+        const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
         const pollRes = await fetch(pollUrl, {
           method: "POST",
           headers: { 
