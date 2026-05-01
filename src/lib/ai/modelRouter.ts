@@ -19,8 +19,8 @@ export interface RouterOptions {
 
 const AI_GATEWAY_URL = getConfiguredAIGatewayUrl();
 const DEFAULT_TEXT_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';
-const PREMIUM_TEXT_MODEL = 'google/gemini-2.0-flash-001'; // High-performance premium model
-const ELITE_TEXT_MODEL = 'anthropic/claude-3.5-sonnet'; // Top-tier elite model
+const DOUBT_IMAGE_MODEL = 'google/gemini-1.5-flash'; // Google AI Studio based
+const ELITE_TEXT_MODEL = 'nvidia/nemotron-4-340b-instruct'; // Top-tier Nemotron for elite
 
 /**
  * Maps backend gateway response codes to user-facing errors.
@@ -53,13 +53,23 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
   
   const isElite = options.tier === 'premium_elite' || options.tier === 'extra_plus' || options.tier === 'premium_plus';
   const isPremium = options.tier === 'premium' || isElite;
-  const modelToUse = options.model || (isElite ? ELITE_TEXT_MODEL : isPremium ? PREMIUM_TEXT_MODEL : DEFAULT_TEXT_MODEL);
+
+  // ROUTING LOGIC:
+  // 1. Doubt Solver (research) and vision tasks ALWAYS use Google Gemini
+  // 2. All other tasks use Nemotron (Nemotron 4 for elite, Nemotron 3 for others)
+  const isDoubtOrVision = options.task === 'research' || options.mode === 'deepresearch' || options.imageFile instanceof File;
+  
+  const modelToUse = options.model || (
+    isDoubtOrVision ? DOUBT_IMAGE_MODEL : 
+    (isElite ? ELITE_TEXT_MODEL : DEFAULT_TEXT_MODEL)
+  );
 
   const res = await authedFetch('/api/ai-chat', {
     method: 'POST',
     body: JSON.stringify({ 
       messages: payload,
-      model: modelToUse
+      model: modelToUse,
+      task: options.task // Pass task to backend for further routing if needed
     }),
   });
   if (!res.ok) {
@@ -94,7 +104,8 @@ const callGateway = async (messages: any[], options: RouterOptions): Promise<str
     : messages;
 
   const mode = options.mode || (options.task === 'research' ? 'deepresearch' : 'chat');
-  const model = options.model || DEFAULT_TEXT_MODEL;
+  const isDoubtOrVision = options.task === 'research' || mode === 'deepresearch' || hasImage;
+  const model = options.model || (isDoubtOrVision ? DOUBT_IMAGE_MODEL : DEFAULT_TEXT_MODEL);
   const headers: Record<string, string> = {
     Authorization: `Bearer ${session.access_token}`,
   };

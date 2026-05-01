@@ -152,42 +152,93 @@ exports.handler = async (event) => {
 
   console.log(`[AI-CHAT] User: ${user.id} | Tier: ${userTier} | Model: ${modelToUse}`);
 
+  const isGoogleModel = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
+
   try {
-    const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKeyToUse}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": origin || "https://margdarshak-ai.netlify.app",
-        "X-Title": "MARGDARSHAK AI Tutor",
-      },
-      body: JSON.stringify({ 
-        model: modelToUse, 
-        messages 
-      }),
-    });
-    const data = await upstream.json();
-    if (!upstream.ok) {
-      const isInvalidKey = upstream.status === 401 || data?.error?.code === 'invalid_api_key';
-      return {
-        statusCode: upstream.status,
-        headers,
+    let upstream;
+    
+    if (isGoogleModel && process.env.GOOGLE_AI_STUDIO_KEY) {
+      // DIRECT GOOGLE AI STUDIO CALL
+      const googleModel = modelToUse.replace('google/', '');
+      const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
+      
+      // Convert messages to Google format
+      const contents = messages
+        .filter(m => m.role !== 'system')
+        .map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        }));
+        
+      const systemInstruction = messages.find(m => m.role === 'system')?.content;
+
+      upstream = await fetch(googleUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          error: isInvalidKey ? "🔑 Invalid API Key" : (data?.error?.message || "OpenRouter request failed"),
-          code: isInvalidKey ? "INVALID_KEY" : "UPSTREAM_ERROR"
+          contents,
+          system_instruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
+        }),
+      });
+      
+      const data = await upstream.json();
+      if (!upstream.ok) {
+        console.error("[AI-CHAT] Google API Error:", data.error?.message);
+        throw new Error(data.error?.message || "Google AI Studio request failed");
+      }
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          response: data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "",
+          model: modelToUse,
+        }),
+      };
+    } else {
+      // OPENROUTER CALL (Nemotron)
+      upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKeyToUse}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": origin || "https://margdarshak-ai.netlify.app",
+          "X-Title": "MARGDARSHAK AI Tutor",
+        },
+        body: JSON.stringify({ 
+          model: modelToUse, 
+          messages 
+        }),
+      });
+      
+      const data = await upstream.json();
+      if (!upstream.ok) {
+        const isInvalidKey = upstream.status === 401 || data?.error?.code === 'invalid_api_key';
+        return {
+          statusCode: upstream.status,
+          headers,
+          body: JSON.stringify({ 
+            error: isInvalidKey ? "🔑 Invalid API Key" : (data?.error?.message || "OpenRouter request failed"),
+            code: isInvalidKey ? "INVALID_KEY" : "UPSTREAM_ERROR"
+          }),
+        };
+      }
+      const choice = data?.choices?.[0]?.message;
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          response: choice?.content ?? "",
+          model: modelToUse,
         }),
       };
     }
-    const choice = data?.choices?.[0]?.message;
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        response: choice?.content ?? "",
-        model: modelToUse,
-      }),
-    };
   } catch (err) {
-    return { statusCode: 502, headers, body: JSON.stringify({ error: "Upstream error" }) };
+    console.error("[AI-CHAT] Unhandled error:", err.message);
+    return { statusCode: 502, headers, body: JSON.stringify({ error: err.message || "Upstream error" }) };
   }
 };

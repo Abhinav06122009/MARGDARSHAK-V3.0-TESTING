@@ -46,6 +46,16 @@ export async function authedFetch(
     console.warn('[authedFetch] Token retrieval failed:', err);
   }
   
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const timeLeft = Math.floor(payload.exp - (Date.now() / 1000));
+      console.log(`[authedFetch] Token Diagnostic: Sub=${payload.sub.substring(0, 8)}..., ExpiresIn=${timeLeft}s, Iss=${payload.iss}`);
+    } catch (e) {
+      console.warn('[authedFetch] Failed to parse token for diagnostics');
+    }
+  }
+  
   if (!token) {
     throw new Error("UNAUTHORIZED_AI_ACCESS: Please ensure you are signed in and your session is active.");
   }

@@ -130,18 +130,21 @@ const verifyClerkUser = async (authHeader) => {
     // Ensure it's not wrapped in quotes
     publicKey = publicKey.replace(/^"|"$/g, '');
 
-    // PEM Normalization: Ensure headers and line breaks are present
+    // PEM Normalization: Handle literal \n strings, ensure headers, and wrap at 64 chars
+    publicKey = publicKey.replace(/\\n/g, '\n'); // Repair literal \n sequences
+    
     if (!publicKey.includes('-----BEGIN PUBLIC KEY-----')) {
       publicKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
     }
     
-    // If the key is a single line (except for headers), wrap it at 64 chars
-    const bodyMatch = publicKey.match(/-----BEGIN PUBLIC KEY-----([\s\S]*?)-----END PUBLIC KEY-----/);
-    if (bodyMatch) {
-      const body = bodyMatch[1].replace(/\s/g, ''); // Remove all whitespace
-      const wrappedBody = body.match(/.{1,64}/g).join('\n');
-      publicKey = `-----BEGIN PUBLIC KEY-----\n${wrappedBody}\n-----END PUBLIC KEY-----`;
-    }
+    // Clean up the body: remove headers, whitespace, and re-wrap
+    const bodyOnly = publicKey
+      .replace(/-----BEGIN PUBLIC KEY-----/, '')
+      .replace(/-----END PUBLIC KEY-----/, '')
+      .replace(/\s/g, ''); // Remove all whitespace/newlines
+      
+    const wrappedBody = bodyOnly.match(/.{1,64}/g).join('\n');
+    publicKey = `-----BEGIN PUBLIC KEY-----\n${wrappedBody}\n-----END PUBLIC KEY-----`;
 
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(parts[0] + '.' + parts[1]);
