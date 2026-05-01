@@ -88,18 +88,41 @@ exports.handler = async (event) => {
         return { role: m.role === 'assistant' ? 'model' : 'user', parts };
       });
 
-      const res = await fetch(googleUrl, {
+      let res;
+      try {
+        res = await fetch(googleUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            contents, 
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: payload.jsonMode ? { response_mime_type: "application/json" } : {},
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+          })
+        });
+        const data = await res.json();
+        const candidate = data?.candidates?.[0];
+        if (candidate?.content?.parts?.[0]?.text) {
+          return { statusCode: 200, headers, body: JSON.stringify({ response: candidate.content.parts[0].text, model: modelToUse }) };
+        }
+        console.warn("[NEURO-ENGINE] Gemini failed, falling back to OpenRouter. Reason:", candidate?.finishReason || data.error?.message);
+      } catch (err) {
+        console.error("[NEURO-ENGINE] Gemini crash, falling back to OpenRouter:", err.message);
+      }
+      
+      // FALLBACK TO OPENROUTER
+      const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          contents, 
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          generationConfig: payload.jsonMode ? { response_mime_type: "application/json" } : {}
-        })
+        headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
+        body: JSON.stringify({ model: ELITE_UPGRADE_MODEL, messages: [{ role: "system", content: systemPrompt }, ...messages] })
       });
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+      const fallbackData = await fallbackRes.json();
+      return { statusCode: 200, headers, body: JSON.stringify({ response: fallbackData?.choices?.[0]?.message?.content || "", model: "fallback-nemotron" }) };
     } else {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -107,8 +130,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ model: modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
       });
       const data = await res.json();
-      let text = data?.choices?.[0]?.message?.content || "";
-      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.choices?.[0]?.message?.content || "", model: modelToUse }) };
     }
   } catch (err) { return { statusCode: 502, headers, body: JSON.stringify({ error: err.message }) }; }
 };
