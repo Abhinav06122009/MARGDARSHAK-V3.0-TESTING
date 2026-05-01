@@ -28,7 +28,8 @@ const DevVerificationGuard = () => {
     if (pin.toUpperCase() === DEV_SECRET) {
       setSuccess(true);
       setTimeout(() => {
-        sessionStorage.setItem('mg_dev_verified', 'true');
+        (window as any).__MG_DEV_VERIFIED__ = true;
+        window.dispatchEvent(new CustomEvent('dev-verification-success'));
         setShow(false);
       }, 1000);
     } else {

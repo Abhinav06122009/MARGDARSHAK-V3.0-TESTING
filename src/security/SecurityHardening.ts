@@ -248,8 +248,8 @@ export const initSecurityHardening = () => {
     const isOfficer = await isEliteOfficer();
     if (!isOfficer) return;
 
-    // Check if verified in this session
-    const isVerified = sessionStorage.getItem('mg_dev_verified') === 'true';
+    // Check if verified in this volatile session
+    const isVerified = (window as any).__MG_DEV_VERIFIED__ === true;
     if (!isVerified) {
       window.dispatchEvent(new CustomEvent('dev-verification-required'));
     }

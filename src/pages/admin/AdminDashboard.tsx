@@ -9,11 +9,11 @@ import { SentryTestButton } from '@/integrations/SentryDiagnostics';
 
 const AdminDashboard = () => {
   const { stats, threats, users, tickets, loading } = useAdmin();
-  const [isVerified, setIsVerified] = useState(sessionStorage.getItem('mg_dev_verified') === 'true');
+  const [isVerified, setIsVerified] = useState((window as any).__MG_DEV_VERIFIED__ === true);
 
   useEffect(() => {
     const checkVerification = () => {
-      const verified = sessionStorage.getItem('mg_dev_verified') === 'true';
+      const verified = (window as any).__MG_DEV_VERIFIED__ === true;
       setIsVerified(verified);
       if (!verified) {
         window.dispatchEvent(new CustomEvent('dev-verification-required'));
@@ -21,14 +21,13 @@ const AdminDashboard = () => {
     };
 
     checkVerification();
+    
     // Listen for verification success
     const handleSuccess = () => setIsVerified(true);
-    window.addEventListener('storage', checkVerification); // Catch cross-tab verification
-    const interval = setInterval(checkVerification, 2000); // Poll for session storage change
+    window.addEventListener('dev-verification-success', handleSuccess);
     
     return () => {
-      window.removeEventListener('storage', checkVerification);
-      clearInterval(interval);
+      window.removeEventListener('dev-verification-success', handleSuccess);
     };
   }, []);
 
