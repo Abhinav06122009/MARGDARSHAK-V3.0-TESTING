@@ -9,7 +9,7 @@ export const AI_GATEWAY_NOT_CONFIGURED_MESSAGE = 'AI gateway is not configured. 
  * for all environments (production, deploy previews, and local dev).
  */
 export const getConfiguredAIGatewayUrl = (): string => {
-  const configuredUrl = (import.meta.env.VITE_AI_GATEWAY_URL as string | undefined)?.trim();
-  if (!configuredUrl) return '';
-  return configuredUrl.replace(/\/+$/, '');
+  // DEPRECATED: We now use the unified Netlify proxy at /api/ai-chat
+  // for improved security and zero-trust identity synchronization.
+  return '';
 };

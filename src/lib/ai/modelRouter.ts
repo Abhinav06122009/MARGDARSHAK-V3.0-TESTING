@@ -69,11 +69,14 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
     body: JSON.stringify({ 
       messages: payload,
       model: modelToUse,
-      task: options.task // Pass task to backend for further routing if needed
+      task: options.task
     }),
   });
   if (!res.ok) {
-    throw new Error(await readErrorMessage(res));
+    const errorMsg = await readErrorMessage(res);
+    const rawBody = await res.clone().text().catch(() => '');
+    console.error(`[AI-CHAT-DEBUG] Error: ${errorMsg} | Body: ${rawBody.substring(0, 100)}`);
+    throw new Error(errorMsg);
   }
   const data = await res.json().catch(() => ({}));
   return typeof data?.response === 'string' ? data.response : '';

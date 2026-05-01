@@ -96,65 +96,20 @@ const SmartTutorPage = () => {
     setLoading(true);
 
     try {
+      const { modelRouter } = await import('@/lib/ai/modelRouter');
       const chatHistory = messages.map(m => ({ role: m.role, content: m.content }));
       
-      if (!AI_GATEWAY_URL) {
-        const { authedFetch, readErrorMessage } = await import('@/lib/ai/authedFetch');
-        
-        let content: any = textToSend;
-        if (isVision && imageToSend) {
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve) => {
-            reader.onload = () => resolve(reader.result as string);
-            reader.readAsDataURL(imageToSend);
-          });
-          const base64 = await base64Promise;
-          content = [
-            { type: "text", text: textToSend || "Describe this image." },
-            { type: "image_url", image_url: { url: base64 } }
-          ];
-        }
+      const response = await modelRouter.chat([...chatHistory, { role: 'user', content: textToSend }], {
+        imageFile: imageToSend,
+        userApiKey: userApiKey || undefined,
+        mode: modeToUse === 'imagine' ? 'imagegen' : 'chat'
+      });
 
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (userApiKey) headers['X-User-API-Key'] = userApiKey;
-
-        const res = await authedFetch('/api/ai-chat', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ messages: [...chatHistory, { role: 'user', content }] }),
-        });
-
-        if (!res.ok) throw new Error(await readErrorMessage(res));
-        const data = await res.json();
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: data.response, 
-          agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL 
-        }]);
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      const headers: any = { Authorization: `Bearer ${session?.access_token}` };
-      if (userApiKey) headers['X-User-API-Key'] = userApiKey;
-
-      let res: Response;
-      if (isVision && imageToSend) {
-        const formData = new FormData();
-        formData.append('mode', REQUEST_MODE.CHAT);
-        formData.append('messages', JSON.stringify([...chatHistory, { role: 'user', content: textToSend || 'Describe this image.' }]));
-        formData.append('image', imageToSend);
-        res = await fetch(AI_GATEWAY_URL!, { method: 'POST', headers, body: formData });
-      } else {
-        res = await fetch(AI_GATEWAY_URL!, {
-          method: 'POST',
-          headers: { ...headers, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode: REQUEST_MODE.CHAT, messages: [...chatHistory, { role: 'user', content: textToSend }] }),
-        });
-      }
-
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response, diagram: data.image, agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL }]);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: response, 
+        agent: isVision ? VISION_MODEL_LABEL : TEXT_MODEL_LABEL 
+      }]);
     } catch (e: any) {
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${e.message}` }]);
     } finally {
