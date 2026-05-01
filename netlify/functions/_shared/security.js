@@ -127,13 +127,21 @@ const verifyClerkUser = async (authHeader) => {
       return { ok: false, status: 500, code: "server_config_error", message: "Internal Security Configuration Error" };
     }
 
-    // Handle escaped newlines if the key was provided as a quoted string in .env
-    if (publicKey.includes('\\n')) {
-      publicKey = publicKey.replace(/\\n/g, '\n');
+    // Ensure it's not wrapped in quotes
+    publicKey = publicKey.replace(/^"|"$/g, '');
+
+    // PEM Normalization: Ensure headers and line breaks are present
+    if (!publicKey.includes('-----BEGIN PUBLIC KEY-----')) {
+      publicKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
     }
     
-    // Ensure it's not wrapped in quotes if it came from a poorly formatted .env
-    publicKey = publicKey.replace(/^"|"$/g, '');
+    // If the key is a single line (except for headers), wrap it at 64 chars
+    const bodyMatch = publicKey.match(/-----BEGIN PUBLIC KEY-----([\s\S]*?)-----END PUBLIC KEY-----/);
+    if (bodyMatch) {
+      const body = bodyMatch[1].replace(/\s/g, ''); // Remove all whitespace
+      const wrappedBody = body.match(/.{1,64}/g).join('\n');
+      publicKey = `-----BEGIN PUBLIC KEY-----\n${wrappedBody}\n-----END PUBLIC KEY-----`;
+    }
 
     // Clerk uses base64url for signatures. Node.js Buffer handles this natively.
     try {

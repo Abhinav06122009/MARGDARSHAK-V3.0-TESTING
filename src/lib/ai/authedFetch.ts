@@ -52,7 +52,8 @@ export async function authedFetch(
   let res = await attach(token);
   
   if (res.status === 401) {
-    console.error(`[authedFetch] 401 Unauthorized for ${input}. Token may be invalid or rejected by backend.`);
+    const errorData = await res.json().catch(() => ({}));
+    console.error(`[authedFetch] 401 Unauthorized for ${input}. Code: ${errorData.code}, Message: ${errorData.error}`);
   } else if (!res.ok) {
     const errorMsg = await readErrorMessage(res);
     console.error(`[authedFetch] Error ${res.status}: ${errorMsg}`);
