@@ -141,7 +141,19 @@ Return ONLY valid JSON array with this exact structure:
 
 For True/False questions, options should be ["True", "False"].
 The "correct" field is the index (0-based) of the correct option.
-Make questions academically accurate and educational.`;
+Make questions academically accurate and educational.
+
+Formatting Constraints (STRICT):
+Zero LaTeX: Never use \\, {, }, ^, or _. Strictly forbid all LaTeX syntax, including block and inline math modes.
+Exponents & Powers: Use Unicode superscripts for all powers. Example: Write x², y³, 10⁶, nᵗʰ.
+Subscripts: Use Unicode subscripts for variables and chemical formulas. Example: Write H₂O, vᵢ, aₙ, log₁₀.
+Operations: Use standard arithmetic symbols found on a keyboard:
+- Addition/Subtraction: + and -
+- Multiplication: Use the asterisk (*) or a simple space between variables.
+- Division: Use the forward slash (/) or the division sign (÷).
+- Radicals: Use the square root symbol (√) followed by the number/variable.
+
+Internal Check: Before generating JSON, ensure absolutely no LaTeX or backslashes exist in the strings.`;
 
     try {
       const result = await modelRouter.generateJSON<QuizQuestion[]>(prompt);

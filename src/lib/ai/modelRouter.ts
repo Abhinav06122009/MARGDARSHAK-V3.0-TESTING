@@ -109,6 +109,7 @@ const callGateway = async (messages: any[], options: RouterOptions): Promise<str
   const base64 = await base64Promise;
 
   const visionMessages = [
+    ...(options.systemPrompt ? [{ role: 'system', content: options.systemPrompt }] : []),
     ...messages,
     {
       role: 'user',

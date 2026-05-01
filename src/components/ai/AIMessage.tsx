@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { Sparkles, Download, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Button } from "@/components/ui/button";
 
 export interface Message {
@@ -67,7 +70,10 @@ export const AIMessage: React.FC<AIMessageProps> = ({
             prose-pre:bg-zinc-950/80 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl
             prose-blockquote:border-l-4 prose-blockquote:border-amber-500/50 prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:px-5
             prose-a:text-amber-400 prose-a:font-bold">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm, remarkMath]} 
+              rehypePlugins={[rehypeKatex]}
+            >
               {message.content}
             </ReactMarkdown>
           </div>
