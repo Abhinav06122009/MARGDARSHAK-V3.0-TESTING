@@ -17,6 +17,7 @@
 # This prevents "MIME type text/html" errors when an asset is missing/stale.
 [[redirects]]
   from = "/assets/*"
+  to = "/index.html"
   status = 404
 
 [[redirects]]
