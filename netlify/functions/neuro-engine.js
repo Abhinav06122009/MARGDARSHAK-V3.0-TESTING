@@ -13,8 +13,8 @@ exports.handler = async (event) => {
 
   // CONSTANTS
   const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-  const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
-  const ELITE_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
+  const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+  const ELITE_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
   const VISION_RESEARCH_MODEL = "google/gemini-1.5-flash";
 
   const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Never use symbols like $, $$, \\[, \\], \\begin{...}, or any math-specific delimiters. For all mathematical expressions, chemical formulas, or technical notation, use plain human-readable text only (e.g., use 'x^2' instead of LaTeX math, and 'H2O' instead of subscripted text). If you ignore this, the user's interface will break.`;
@@ -117,11 +117,15 @@ exports.handler = async (event) => {
         const gData = await gRes.json();
         if (gData.error) {
           console.error("[NEURO-ENGINE] Gemini API Error:", gData.error);
+          return { statusCode: 400, headers, body: JSON.stringify({ error: `Gemini Error: ${gData.error.message || JSON.stringify(gData.error)}` }) };
         } else {
           const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text && text.trim().length > 2) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
         }
-      } catch (err) { console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message); }
+      } catch (err) { 
+        console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `Gemini Network Failure: ${err.message}` }) };
+      }
     }
 
     // Fallback/Default: OpenRouter
