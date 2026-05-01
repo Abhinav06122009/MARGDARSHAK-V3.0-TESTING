@@ -77,7 +77,11 @@ exports.handler = async (event) => {
     // 4. Provider Execution
     const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
     
-    if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
+    if (isGoogle) {
+      if (!process.env.GOOGLE_AI_STUDIO_KEY) {
+        return { statusCode: 500, headers, body: JSON.stringify({ error: "Google AI Studio API Key is not configured in Netlify Environment Variables." }) };
+      }
+      
       const googleModel = modelToUse.replace('google/', '');
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
@@ -132,7 +136,7 @@ exports.handler = async (event) => {
     let openRouterModel = modelToUse;
     if (hasImages || payload.jsonMode || payload.task === 'research') {
       // Must use a vision/json capable model on OpenRouter if Google AI Studio fails/is missing
-      openRouterModel = "google/gemini-1.5-flash"; 
+      openRouterModel = "google/gemini-flash-1.5"; 
     } else if (modelToUse.includes('gemini') || modelToUse === DEFAULT_FREE_MODEL) {
       openRouterModel = ELITE_UPGRADE_MODEL;
     }
