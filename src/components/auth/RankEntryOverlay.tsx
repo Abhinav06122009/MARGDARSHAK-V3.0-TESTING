@@ -99,15 +99,15 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       if (info) {
         setRankInfo(info);
         setShow(true);
-        
-        const timer = setTimeout(() => {
-          setShow(false);
-          if (onComplete) onComplete();
-        }, 6500); // More time forRhadium visuals
-        return () => clearTimeout(timer);
+        // Timeout removed: Stays until officer clicks X
       }
     }
   }, [isLoaded, clerkUser, onComplete]);
+
+  const handleClose = () => {
+    setShow(false);
+    if (onComplete) onComplete();
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -129,6 +129,18 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden cursor-none"
         >
+          {/* Close Button (X) */}
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 2 }}
+            onClick={handleClose}
+            className="absolute top-12 right-12 z-[150] w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group hover:bg-white/10 transition-all cursor-pointer"
+          >
+            <X size={24} className="text-white group-hover:rotate-90 transition-transform" />
+            <div className="absolute inset-0 rounded-full blur-[20px] group-hover:bg-white/10 transition-all" />
+          </motion.button>
+
           {/* Advanced Geometric Crystal Layer */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
              {[...Array(6)].map((_, i) => (
