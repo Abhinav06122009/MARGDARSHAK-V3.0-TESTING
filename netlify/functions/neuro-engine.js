@@ -167,7 +167,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s limit
+      const timeoutId = setTimeout(() => controller.abort(), 9000); // 9s limit (Netlify default is 10s)
 
       try {
         const res = await fetch(pollUrl, { 
