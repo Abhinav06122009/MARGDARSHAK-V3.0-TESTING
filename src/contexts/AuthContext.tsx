@@ -106,6 +106,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify(profileData),
+          }).then(async res => {
+            if (res.status === 401) {
+              const errorData = await res.json().catch(() => ({}));
+              console.error(`[AuthContext] 401 Unauthorized for profile-sync. Code: ${errorData.code}, Message: ${errorData.error}`);
+            } else if (!res.ok) {
+              console.warn('[AuthContext] Profile sync failed with status:', res.status);
+            }
           }).catch(err => console.error('Sync Fetch Error:', err));
 
           // Check if blocked in Supabase - Keep this fast

@@ -118,7 +118,7 @@ const verifyClerkUser = async (authHeader) => {
     const parts = token.split('.');
     if (parts.length !== 3) return { ok: false, status: 401, code: "invalid_token" };
     
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
     
     // Cryptographic Check - MANDATORY
     let publicKey = process.env.CLERK_JWT_PUBLIC_KEY;
