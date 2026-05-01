@@ -60,7 +60,7 @@ exports.handler = async (event) => {
     if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
     
     // IMAGE GENERATION INTERCEPT (Pollinations.ai / FLUX)
-    if (payload.mode === 'imagegen') {
+    if (payload.mode === 'imagegen' || payload.task === 'research') {
       try {
         const lastMsg = messages[messages.length - 1];
         const promptText = typeof lastMsg.content === 'string' ? lastMsg.content : lastMsg.content[0]?.text || "A beautiful artwork";
