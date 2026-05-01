@@ -125,10 +125,9 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       
       // Fallback keys if env vars are missing
       const DEFAULT_KEY = 'sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv';
-      const TIMETABLE_KEY = 'sk_Hq0l9zsr4yj3INNmvDSXsW8xHWml3EUZ';
 
       const apiKey = selectedModel === 'qwen-safety'
-        ? (process.env.POLLINATIONS_TIMETABLE_KEY || TIMETABLE_KEY)
+        ? process.env.POLLINATIONS_TIMETABLE_KEY
         : (process.env.POLLINATIONS_API_KEY || DEFAULT_KEY);
 
       if (!apiKey) {
