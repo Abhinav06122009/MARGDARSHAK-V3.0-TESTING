@@ -232,7 +232,7 @@ const SmartTutorPage = () => {
         {/* Input Bar */}
         <div className="sticky bottom-8 w-full max-w-4xl mx-auto px-4 z-50">
           <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-3 flex items-center gap-3 shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)] group">
-            <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
             {preview && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -260,7 +260,7 @@ const SmartTutorPage = () => {
                 }
               }}
               placeholder={subscriptionTier === 'free' ? "Ask Saarthi anything..." : (subscriptionTier === 'premium' && !byokKey) ? "Initialize API Key to type..." : "Ask Saarthi anything..."}
-              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide`}
+              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide relative z-10`}
             />
             <Button 
               onClick={() => {
