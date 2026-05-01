@@ -4,29 +4,8 @@ import type { Grade, GradeStats, SecureUser, GradeFormData } from './types';
 
 export const gradeService = {
   async getCurrentUser(): Promise<SecureUser | null> {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      return {
-        id: user.id,
-        email: user.email || '',
-        profile: profile ? {
-          full_name: profile.full_name || 'User',
-          user_type: profile.user_type || 'student',
-          student_id: profile.student_id,
-        } : undefined,
-      };
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
+    // Deprecated: We now use useAuth() from AuthContext to get Clerk-synced user data
+    return null;
   },
 
   async fetchUserGrades(userId: string): Promise<Grade[]> {

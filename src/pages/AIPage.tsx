@@ -50,16 +50,15 @@ const SmartTutorPage = () => {
     if (clerkLoaded && clerkUser) {
       const metadata = clerkUser.publicMetadata || {};
       const subscription = (metadata.subscription as any) || {};
-      const rawTier = (subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free');
-      let tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
-      const role = String((metadata as any).role || '').toLowerCase();
+      
+      // STRICT METADATA RESOLUTION (Matches AuthContext)
+      let tier = (subscription.tier || 'free').toLowerCase();
+      const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+      const role = (roleArray[0] || 'student').toLowerCase();
 
       const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
 
-      const rawRoleData = metadata.role;
-      const isCeo = Array.isArray(rawRoleData) ? rawRoleData.includes('ceo') : String(rawRoleData).toLowerCase() === 'ceo';
-
-      if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin' || isCeo) {
+      if (MASTER_IDS.includes(clerkUser.id) || role === 'admin' || role === 'superadmin' || role === 'ceo') {
         tier = 'premium_elite';
       }
 

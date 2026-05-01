@@ -29,7 +29,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setClerkTokenProvider(async () => {
         try {
           const token = await clerkSession.getToken({ template: 'supabase' });
-          if (token) return token;
+          if (token) {
+            console.log('[AUTH] Supabase handshake active (Template: supabase)');
+            return token;
+          }
           console.warn('[AUTH] Missing "supabase" JWT template in Clerk. Falling back to default session token.');
           return await clerkSession.getToken();
         } catch (e) {
@@ -71,13 +74,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log('⚡ Background Sync: Syncing profile for', clerkUser.id);
           
           const translatedId = await translateClerkIdToUUID(clerkUser.id);
+          console.log('[AUTH] Identity Resolved:', { clerkId: clerkUser.id, uuid: translatedId });
+          
           const metadata = clerkUser.publicMetadata || {};
           const subscription = (metadata.subscription as any) || {};
           
-          // STRICT METADATA RESOLUTION (Clerk-First)
-          const tier = (subscription.tier || (metadata as any).subscription_tier || 'free').toLowerCase();
+          // STRICT METADATA RESOLUTION (Clerk-Only as requested)
+          let tier = (subscription.tier || 'free').toLowerCase();
           const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
-          const role = roleArray[0] || 'student';
+          const role = (roleArray[0] || 'student').toLowerCase();
+
+          // SuperAdmin/CEO Overrides (Safety Net)
+          if (role === 'ceo' || role === 'admin' || role === 'superadmin') {
+            tier = 'premium_elite';
+          }
 
           // Set the augmented user state immediately for the app to use
           setUser({
@@ -102,8 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             subscription_tier: tier,
             subscription: {
               tier: tier,
-              status: subscription.status || (metadata as any).subscription_status || 'inactive',
-              period_end: subscription.period_end || (metadata as any).subscription_period_end || null,
+              status: subscription.status || 'active'
             },
             updated_at: new Date().toISOString()
           };
