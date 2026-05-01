@@ -46,6 +46,8 @@ interface Solution {
 
 const DoubtSolver: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [textQuery, setTextQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [solution, setSolution] = useState<Solution | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,23 +57,13 @@ const DoubtSolver: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Image too large', description: 'Please upload an image smaller than 5MB.', variant: 'destructive' });
-      return;
-    }
-
+    setSelectedFile(file);
     const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setImage(event.target.result as string);
-        solveProblem(file);
-      }
-    };
+    reader.onload = (event) => setImage(event.target?.result as string);
     reader.readAsDataURL(file);
   };
 
-  const solveProblem = async (file: File) => {
+  const solveProblem = async () => {
     if (!isAIReady) {
       toast({ title: 'AI not ready', description: 'Please wait for AI to initialize.', variant: 'destructive' });
       return;
@@ -81,8 +73,9 @@ const DoubtSolver: React.FC = () => {
     setSolution(null);
 
     try {
-      const prompt = `Act as an expert Math, Physics, and Chemistry tutor. I am uploading an image of a problem.
-Analyze the image carefully. Identify the problem and provide a detailed, step-by-step solution.
+      const prompt = `Act as an expert Math, Physics, and Chemistry tutor.
+${textQuery ? `The user's question is: "${textQuery}"` : "Analyze the attached image and solve the problem shown."}
+Analyze all provided data carefully and provide a detailed, step-by-step solution.
 Return ONLY a valid JSON object with this exact structure:
 {
   "problem_understanding": "Brief restatement of what we are trying to solve and given values",
@@ -98,8 +91,10 @@ Return ONLY a valid JSON object with this exact structure:
   "key_concept": "What is the core physics/math concept learned here?"
 }`;
 
-      // Pass the imageFile option so modelRouter knows to use Vision
-      const generatedSolution = await modelRouter.generateJSON<Solution>(prompt, { imageFile: file });
+      const generatedSolution = await modelRouter.generateJSON<Solution>(prompt, { 
+        imageFile: selectedFile,
+        task: 'research' // Force Gemini 1.5 Flash for Doubt Solver
+      });
 
       if (generatedSolution && generatedSolution.steps) {
         setSolution(generatedSolution);
@@ -107,8 +102,7 @@ Return ONLY a valid JSON object with this exact structure:
         throw new Error('Invalid solution structure from AI');
       }
     } catch (e: any) {
-      toast({ title: 'Analysis failed', description: e.message || 'Could not solve the problem. Please try a clearer image.', variant: 'destructive' });
-      setImage(null);
+      toast({ title: 'Solver failed', description: e.message || 'Could not solve the problem.', variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
@@ -174,35 +168,54 @@ Return ONLY a valid JSON object with this exact structure:
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Side: Upload Area (lg:span-5) */}
             <div className="lg:col-span-5 flex flex-col gap-6 sticky top-8">
-              <div className="bg-white/[0.02] border border-white/10 backdrop-blur-2xl rounded-[3rem] p-8 relative overflow-hidden flex flex-col items-center justify-center min-h-[450px] shadow-2xl transition-all hover:border-indigo-500/20 group">
+              <div className="bg-white/[0.02] border border-white/10 backdrop-blur-2xl rounded-[3rem] p-8 relative overflow-hidden flex flex-col gap-6 shadow-2xl transition-all hover:border-indigo-500/20 group">
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-xl font-black text-white tracking-tight uppercase">Describe your Doubt</h3>
+                  <div className="relative">
+                    <textarea
+                      placeholder="Type your question here or upload an image below..."
+                      className="w-full h-32 bg-zinc-950/50 border border-white/10 rounded-2xl p-4 text-sm text-white placeholder:text-zinc-600 focus:border-indigo-500/50 outline-none transition-all resize-none"
+                      value={textQuery}
+                      onChange={(e) => setTextQuery(e.target.value)}
+                    />
+                    <div className="absolute bottom-3 right-3">
+                      <Button 
+                        onClick={() => solveProblem()} 
+                        disabled={isProcessing || (!textQuery.trim() && !image)}
+                        className="bg-indigo-500 hover:bg-indigo-400 text-white font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all"
+                      >
+                        {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Solve Now'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative flex items-center gap-4">
+                  <div className="h-px flex-1 bg-white/5" />
+                  <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">OR ATTACH IMAGE</span>
+                  <div className="h-px flex-1 bg-white/5" />
+                </div>
+
                 {!image ? (
                   <>
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] pointer-events-none" />
                     <motion.div
                       layout
                       onClick={() => fileInputRef.current?.click()}
-                      className="relative z-10 w-full h-full min-h-[350px] border-2 border-dashed border-indigo-500/20 rounded-[2.5rem] flex flex-col items-center justify-center p-10 text-center hover:bg-indigo-500/[0.03] hover:border-indigo-500/40 transition-all cursor-pointer group/upload"
+                      className="relative z-10 w-full min-h-[250px] border-2 border-dashed border-indigo-500/20 rounded-[2.5rem] flex flex-col items-center justify-center p-6 text-center hover:bg-indigo-500/[0.03] hover:border-indigo-500/40 transition-all cursor-pointer group/upload"
                     >
-                      <div className="w-24 h-24 rounded-[2rem] bg-zinc-950 border border-white/5 flex items-center justify-center mb-8 group-hover/upload:scale-110 group-hover/upload:rotate-6 transition-all duration-500 shadow-2xl relative">
-                        <div className="absolute inset-0 bg-indigo-500/10 blur-xl opacity-0 group-hover/upload:opacity-100 transition-opacity" />
-                        <ImageIcon className="w-12 h-12 text-indigo-400 relative z-10" />
+                      <div className="w-16 h-16 rounded-2xl bg-zinc-950 border border-white/5 flex items-center justify-center mb-4 group-hover/upload:scale-110 transition-all duration-500 shadow-2xl relative">
+                        <ImageIcon className="w-8 h-8 text-indigo-400 relative z-10" />
                       </div>
-                      <h3 className="text-2xl font-black text-white mb-3 tracking-tight">DROP PROBLEM IMAGE</h3>
-                      <p className="text-sm text-zinc-500 mb-10 max-w-xs font-medium leading-relaxed">
-                        Precision-scan math equations, physics diagrams, or chemistry structures for instant synthesis.
+                      <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                        Precision-scan math equations, physics diagrams, or chemistry structures.
                       </p>
                       <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
-                      <Button className="bg-indigo-500 hover:bg-indigo-400 text-white font-black px-10 py-7 rounded-2xl shadow-xl shadow-indigo-500/20 uppercase tracking-widest text-xs transition-all hover:translate-y-[-2px]">
-                        <Upload className="w-5 h-5 mr-3" /> Scan
-                      </Button>
                     </motion.div>
                   </>
                 ) : (
-                  <div className="relative w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-500">
-                    <div className="relative w-full flex-1 rounded-[2.5rem] overflow-hidden border border-white/10 bg-zinc-950/50 shadow-inner group/img">
+                  <div className="relative w-full flex flex-col animate-in fade-in zoom-in-95 duration-500">
+                    <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border border-white/10 bg-zinc-950/50 shadow-inner group/img">
                       <img src={image} alt="Problem" className="w-full h-full object-contain p-4" />
-
-                      {/* Scanning Overlay */}
                       {isProcessing && (
                         <div className="absolute inset-0 z-20">
                           <div className="absolute inset-0 bg-indigo-500/10 backdrop-blur-[2px]" />
@@ -211,24 +224,15 @@ Return ONLY a valid JSON object with this exact structure:
                             animate={{ top: ['0%', '100%', '0%'] }}
                             transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
                           />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                              className="px-6 py-3 bg-zinc-950/80 backdrop-blur-xl border border-indigo-500/40 rounded-2xl"
-                            >
-                              <span className="text-indigo-400 font-black text-[10px] uppercase tracking-[0.3em] animate-pulse">OCR Active</span>
-                            </motion.div>
-                          </div>
                         </div>
                       )}
                     </div>
                     <Button
                       variant="ghost"
-                      onClick={() => { setImage(null); setSolution(null); }}
-                      className="mt-4 h-14 rounded-2xl border border-white/5 text-zinc-500 hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-all font-black uppercase tracking-widest text-[10px]"
+                      onClick={() => { setImage(null); setSolution(null); setSelectedFile(null); }}
+                      className="mt-4 h-10 rounded-xl border border-white/5 text-zinc-500 hover:text-red-400 transition-all font-black uppercase tracking-widest text-[9px]"
                     >
-                      <X className="w-4 h-4 mr-2" /> Discard Scan
+                      <X className="w-3 h-3 mr-2" /> Discard Scan
                     </Button>
                   </div>
                 )}

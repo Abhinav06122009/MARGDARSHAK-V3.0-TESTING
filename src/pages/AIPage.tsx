@@ -267,43 +267,47 @@ const SmartTutorPage = () => {
         </ScrollArea>
 
         {/* Input Bar */}
-        {subscriptionTier !== 'free' && (
-          <div className="sticky bottom-8 w-full max-w-4xl mx-auto px-4 z-50">
-            <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-3 flex items-center gap-3 shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)] group">
-              <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-              {preview && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  className="absolute -top-32 left-8 p-3 bg-[#0a0a0a] border border-white/10 rounded-[2rem] flex items-center gap-4 shadow-2xl"
-                >
-                  <img src={preview} className="h-20 w-20 object-cover rounded-2xl" alt="Preview" />
-                  <button onClick={() => { setSelectedImage(null); setPreview(null); }} className="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all"><X size={14} /></button>
-                </motion.div>
-              )}
-              <label className="p-4 text-zinc-500 hover:text-emerald-400 cursor-pointer transition-all hover:scale-110">
-                <Camera size={20} />
-                <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) { setSelectedImage(file); setPreview(URL.createObjectURL(file)); }
-                }} />
-              </label>
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask Saarthi anything..."
-                className="flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide"
-              />
-              <Button 
-                onClick={handleSend} 
-                disabled={loading || (!input.trim() && !selectedImage)} 
-                className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
+        <div className="sticky bottom-8 w-full max-w-4xl mx-auto px-4 z-50">
+          <div className="relative bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-3 flex items-center gap-3 shadow-[0_60px_100px_-30px_rgba(0,0,0,0.9)] group">
+            <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+            {preview && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="absolute -top-32 left-8 p-3 bg-[#0a0a0a] border border-white/10 rounded-[2rem] flex items-center gap-4 shadow-2xl"
               >
-                {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
-              </Button>
-            </div>
+                <img src={preview} className="h-20 w-20 object-cover rounded-2xl" alt="Preview" />
+                <button onClick={() => { setSelectedImage(null); setPreview(null); }} className="p-2 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all"><X size={14} /></button>
+              </motion.div>
+            )}
+            <label className="p-4 text-zinc-500 hover:text-emerald-400 cursor-pointer transition-all hover:scale-110">
+              <Camera size={20} />
+              <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) { setSelectedImage(file); setPreview(URL.createObjectURL(file)); }
+              }} />
+            </label>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder={subscriptionTier === 'free' ? "Upgrade to use Saarthi..." : "Ask Saarthi anything..."}
+              className="flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide"
+            />
+            <Button 
+              onClick={() => {
+                if (subscriptionTier === 'free') {
+                  setShowUpgradeModal(true);
+                  return;
+                }
+                handleSend();
+              }} 
+              disabled={loading || (subscriptionTier !== 'free' && !input.trim() && !selectedImage)} 
+              className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
+            >
+              {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

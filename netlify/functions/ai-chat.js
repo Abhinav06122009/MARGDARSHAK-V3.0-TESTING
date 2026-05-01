@@ -162,13 +162,36 @@ exports.handler = async (event) => {
       const googleModel = modelToUse.replace('google/', '');
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
       
-      // Convert messages to Google format
+      // Convert messages to Google format (with Vision support)
       const contents = messages
         .filter(m => m.role !== 'system')
-        .map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
-        }));
+        .map(m => {
+          const role = m.role === 'assistant' ? 'model' : 'user';
+          const parts = [];
+          
+          if (Array.isArray(m.content)) {
+            // Handle Multi-modal content (Vision)
+            for (const part of m.content) {
+              if (part.type === 'text') {
+                parts.push({ text: part.text });
+              } else if (part.type === 'image_url' && part.image_url?.url) {
+                const b64Data = part.image_url.url.split(',')[1] || part.image_url.url;
+                const mimeType = part.image_url.url.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+                parts.push({
+                  inline_data: {
+                    mime_type: mimeType,
+                    data: b64Data
+                  }
+                });
+              }
+            }
+          } else {
+            // Handle plain text
+            parts.push({ text: m.content });
+          }
+          
+          return { role, parts };
+        });
         
       const systemInstruction = messages.find(m => m.role === 'system')?.content;
 

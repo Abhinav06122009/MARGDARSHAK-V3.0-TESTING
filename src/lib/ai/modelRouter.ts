@@ -82,79 +82,58 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
 const callGateway = async (messages: any[], options: RouterOptions): Promise<string> => {
   const hasImage = options.imageFile instanceof File;
 
-  // Vision requests are also strictly proxied through the backend.
-
-  // Text-only requests use our own secure backend endpoint that calls
-  // OpenRouter (NVIDIA Nemotron 3) using the server-side OPENAI_API_KEY.
+  // Text-only AND Image requests are now strictly proxied through the Netlify backend.
+  // This provides a unified, secure path for all AI tasks.
   if (!hasImage) {
     return callBackendChat(messages, options);
   }
 
-  if (!AI_GATEWAY_URL) {
-    throw new Error(AI_GATEWAY_NOT_CONFIGURED_MESSAGE);
-  }
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    throw new Error('Please sign in to use AI features.');
-  }
-
-  const payload = options.systemPrompt
-    ? [{ role: 'system', content: options.systemPrompt }, ...messages]
-    : messages;
-
+  // IMAGE HANDLING (Vision)
+  const { authedFetch, readErrorMessage } = await import('@/lib/ai/authedFetch');
+  
   const mode = options.mode || (options.task === 'research' ? 'deepresearch' : 'chat');
   const isDoubtOrVision = options.task === 'research' || mode === 'deepresearch' || hasImage;
   const model = options.model || (isDoubtOrVision ? DOUBT_IMAGE_MODEL : DEFAULT_TEXT_MODEL);
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${session.access_token}`,
-  };
 
-  // Automatically inject BYOK if available in localStorage and not explicitly provided
-  const effectiveApiKey = options.userApiKey?.trim() || localStorage.getItem('openrouter_api_key')?.trim();
-  
-  if (effectiveApiKey) {
-    headers['X-User-API-Key'] = effectiveApiKey;
+  // Convert File to Base64 for the proxy
+  const reader = new FileReader();
+  const base64Promise = new Promise<string>((resolve) => {
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(options.imageFile as File);
+  });
+  const base64 = await base64Promise;
+
+  const visionMessages = [
+    ...messages,
+    {
+      role: 'user',
+      content: [
+        { type: "text", text: messages[messages.length - 1]?.content || "Analyze this image." },
+        { type: "image_url", image_url: { url: base64 } }
+      ]
+    }
+  ];
+
+  // Remove the last plain text message if we just combined it with the image
+  if (messages[messages.length - 1]?.role === 'user' && typeof messages[messages.length - 1]?.content === 'string') {
+    visionMessages.splice(visionMessages.length - 2, 1);
   }
 
-  let res: Response;
-
-  if (hasImage) {
-    const formData = new FormData();
-    formData.append('mode', mode);
-    formData.append('model', model);
-    formData.append('messages', JSON.stringify(payload));
-    formData.append('image', options.imageFile as File);
-    res = await fetch(AI_GATEWAY_URL, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-  } else {
-    res = await fetch(AI_GATEWAY_URL, {
-      method: 'POST',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode,
-        model,
-        messages: payload,
-      }),
-    });
-  }
+  const res = await authedFetch('/api/ai-chat', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      messages: visionMessages,
+      model: model,
+      task: options.task
+    }),
+  });
 
   if (!res.ok) {
-    throw new Error(`AI service request failed (${res.status}).`);
+    throw new Error(await readErrorMessage(res));
   }
 
   const data = await res.json();
-  const response = data?.response;
-  const knownError = mapResponseCodeToError(response);
-  if (knownError) {
-    throw new Error(knownError);
-  }
-
-  if (typeof response === 'string') return response;
-  return JSON.stringify(data ?? {});
+  return typeof data?.response === 'string' ? data.response : JSON.stringify(data);
 };
 
 export const modelRouter = {
