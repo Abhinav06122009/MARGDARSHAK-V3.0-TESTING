@@ -24,6 +24,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from "@/components/logo/logo.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUser } from '@clerk/react';
+import { authedFetch } from '@/lib/ai/authedFetch';
 
 // src/components/timetable/Timetable.tsx
 
@@ -112,7 +113,7 @@ const Timetable: React.FC = () => {
 
       // --- CLERK SUBSCRIPTION RESOLUTION ---
       // Read exclusively from Clerk publicMetadata
-      const PREMIUM_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'premium'];
+      const PREMIUM_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite'];
       const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
 
       let clerkPremium = false;
@@ -352,7 +353,7 @@ const Timetable: React.FC = () => {
     setIsSheetOpen(true);
   };
 
-  const handleSuggestTime = () => {
+  const handleSuggestTime = async () => {
     if (!hasPremiumAccess) {
       toast({
         title: "Premium Feature",
@@ -362,36 +363,64 @@ const Timetable: React.FC = () => {
       return;
     }
 
-    const tempEvent = {
-      ...formData,
-      start_time: '09:00',
-      end_time: '10:00', // Assume 1-hour duration for suggestion
-    };
-    const suggestion = smartScheduler.findNextAvailableSlot(events, tempEvent, new Date().getDay());
-    if (suggestion) {
-      setFormData(prev => ({
-        ...prev,
-        day: suggestion.day,
-        start_time: suggestion.start_time,
-        end_time: suggestion.end_time,
-      }));
-      toast({
-        title: (
-          <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
-            AI Time Suggested!
-          </span>
-        ),
-        description: `We found an open slot for you on ${timetableHelpers.getDayNames()[suggestion.day]} at ${timetableHelpers.formatTime(suggestion.start_time)}.`,
-        className: "bg-black border border-blue-500/50 shadow-xl", // Info: Blue
-        icon: <Zap className="text-blue-400" />,
+    toast({
+      title: "🧠 Saarthi is thinking...",
+      description: "Analyzing your schedule with AI to find the best slot.",
+      className: "bg-black border border-blue-500/50 shadow-xl",
+    });
+
+    try {
+      const eventSummary = events.map(e =>
+        `${e.title} | Day ${e.day} | ${e.start_time}-${e.end_time} | Category: ${e.category}`
+      ).join('\n');
+
+      const prompt = `You are a smart academic scheduler. Given this weekly timetable:\n${eventSummary}\n\nSuggest the best available time slot for a new event of type "${formData.category}" titled "${formData.title || 'New Event'}". Return ONLY a JSON object: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time": "HH:MM", "reason": "brief reason"}`;
+
+      const res = await authedFetch('/.netlify/functions/neuro-engine', {
+        method: 'POST',
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'qwen-coder',
+          jsonMode: true,
+          task: 'research'
+        }),
       });
-    } else {
-      toast({
-        title: "No Obvious Slots",
-        description: "Your schedule is looking full! We couldn't find an easy opening.",
-        className: "bg-black border border-amber-500/50 shadow-xl", // Warning: Amber
-        icon: <AlertCircle className="text-amber-400" />,
-      });
+
+      if (!res.ok) throw new Error('AI request failed');
+      const data = await res.json();
+      const suggestion = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+
+      if (suggestion?.day !== undefined && suggestion?.start_time) {
+        setFormData(prev => ({
+          ...prev,
+          day: suggestion.day,
+          start_time: suggestion.start_time,
+          end_time: suggestion.end_time,
+        }));
+        toast({
+          title: (
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
+              ✨ AI Time Suggested!
+            </span>
+          ),
+          description: suggestion.reason || `Best slot found on ${timetableHelpers.getDayNames()[suggestion.day]} at ${suggestion.start_time}.`,
+          className: "bg-black border border-blue-500/50 shadow-xl",
+          icon: <Zap className="text-blue-400" />,
+        });
+      } else {
+        throw new Error('Invalid AI response structure');
+      }
+    } catch (err: any) {
+      console.error('[AI Suggest] Failed:', err);
+      // Graceful fallback to local algorithm
+      const tempEvent = { ...formData, start_time: '09:00', end_time: '10:00' };
+      const suggestion = smartScheduler.findNextAvailableSlot(events, tempEvent, new Date().getDay());
+      if (suggestion) {
+        setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
+        toast({ title: "Slot Found (Local)", description: `Suggested: Day ${suggestion.day}, ${suggestion.start_time}.`, className: "bg-black border border-amber-500/50" });
+      } else {
+        toast({ title: "No Slots Found", description: "Your schedule looks full!", className: "bg-black border border-red-500/50" });
+      }
     }
   };
 
@@ -494,7 +523,7 @@ const Timetable: React.FC = () => {
     return timetableHelpers.getCurrentWeekDates(currentDate);
   };
 
-  const handleSmartAction = (action: 'balance' | 'breaks') => {
+  const handleSmartAction = async (action: 'balance' | 'breaks') => {
     if (!hasPremiumAccess) {
       toast({
         title: "Premium Feature",
@@ -505,20 +534,70 @@ const Timetable: React.FC = () => {
     }
 
     if (action === 'balance') {
-      const currentWorkload = smartScheduler.analyzeWorkload(events);
-      const suggestions = smartScheduler.balanceWorkload(events, currentWorkload);
-      if (suggestions && suggestions.length > 0) {
-        setWorkloadSuggestions(suggestions);
-      } else {
-        toast({
-          title: "Schedule is Already Balanced",
-          description: "Your workload seems to be well-distributed. No changes needed.",
-          icon: <CheckCircle className="text-green-400" />,
-          className: "bg-black border border-green-500/50 shadow-xl",
+      toast({
+        title: "🧠 Saarthi is analyzing...",
+        description: "AI is reviewing your weekly workload distribution.",
+        className: "bg-black border border-blue-500/50 shadow-xl",
+      });
+
+      try {
+        const workload = smartScheduler.analyzeWorkload(events);
+        const eventSummary = events.map(e =>
+          `${e.title} | Day ${e.day} | ${e.start_time}-${e.end_time} | Category: ${e.category}`
+        ).join('\n');
+        const workloadSummary = Object.entries(workload)
+          .map(([day, hours]) => `${timetableHelpers.getDayNames()[parseInt(day)]}: ${hours.toFixed(1)}h`)
+          .join(', ');
+
+        const prompt = `You are an academic schedule optimizer. Analyze this weekly timetable:\n${eventSummary}\n\nWorkload per day: ${workloadSummary}\n\nIdentify which day is overloaded and suggest moving ONE specific event to a lighter day. Return ONLY JSON: {"eventTitle": "exact title", "fromDay": <0-6>, "toDay": <0-6>, "newStartTime": "HH:MM", "newEndTime": "HH:MM", "reason": "brief explanation"}`;
+
+        const res = await authedFetch('/.netlify/functions/neuro-engine', {
+          method: 'POST',
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'qwen-coder',
+            jsonMode: true,
+            task: 'research'
+          }),
         });
+
+        if (!res.ok) throw new Error('AI request failed');
+        const data = await res.json();
+        const suggestion = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+
+        if (suggestion?.eventTitle) {
+          const matchedEvent = events.find(e => e.title.toLowerCase().includes(suggestion.eventTitle.toLowerCase()));
+          if (matchedEvent) {
+            const wkLoad = smartScheduler.analyzeWorkload(events);
+            setWorkloadSuggestions([{
+              eventToMove: matchedEvent,
+              newSlot: { day: suggestion.toDay, start_time: suggestion.newStartTime, end_time: suggestion.newEndTime },
+              fromDay: suggestion.fromDay,
+              toDay: suggestion.toDay,
+              workloadBefore: wkLoad[suggestion.fromDay] || 0,
+              workloadAfter: wkLoad[suggestion.toDay] || 0,
+            }]);
+            return;
+          }
+        }
+        throw new Error('AI could not identify a specific event to move');
+      } catch (err: any) {
+        console.error('[AI Balance] Failed, using local fallback:', err);
+        // Graceful local fallback
+        const currentWorkload = smartScheduler.analyzeWorkload(events);
+        const suggestions = smartScheduler.balanceWorkload(events, currentWorkload);
+        if (suggestions && suggestions.length > 0) {
+          setWorkloadSuggestions(suggestions);
+        } else {
+          toast({
+            title: "Schedule is Already Balanced",
+            description: "Your workload seems to be well-distributed. No changes needed.",
+            icon: <CheckCircle className="text-green-400" />,
+            className: "bg-black border border-green-500/50 shadow-xl",
+          });
+        }
       }
     } else {
-      // Placeholder for other smart actions like suggesting breaks
       console.log('Smart action:', action);
     }
   };

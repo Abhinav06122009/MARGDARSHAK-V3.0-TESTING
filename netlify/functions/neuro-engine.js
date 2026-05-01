@@ -122,7 +122,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
     const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
       const body = JSON.stringify({
-        model: "gemini-fast",
+        model: ['gemini-fast', 'qwen-coder', 'mistral', 'openai-large'].includes(payload.model) ? payload.model : 'gemini-fast',
         messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
         response_format: payload.jsonMode ? { type: "json_object" } : undefined
       });
