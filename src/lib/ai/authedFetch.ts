@@ -63,12 +63,14 @@ export async function authedFetch(
 
   let res = await attach(token);
   
+  console.log(`[NETWORK-LOG] ${input} | Status: ${res.status} ${res.statusText}`);
+
   if (res.status === 401) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error(`[authedFetch] 401 Unauthorized for ${input}. Code: ${errorData.code}, Message: ${errorData.error}`);
+    const errorData = await res.clone().json().catch(() => ({}));
+    console.error(`[AUTH-ERROR] 401 for ${input}. Code: ${errorData.code}, Message: ${errorData.error}`);
   } else if (!res.ok) {
     const errorMsg = await readErrorMessage(res);
-    console.error(`[authedFetch] Error ${res.status}: ${errorMsg}`);
+    console.error(`[FETCH-ERROR] ${res.status}: ${errorMsg}`);
   }
   
   return res;

@@ -174,6 +174,7 @@ export const modelRouter = {
   generateJSON: async <T = any>(prompt: string, options: RouterOptions = {}): Promise<T | null> => {
     const jsonPrompt = `${prompt}\n\nRespond with valid JSON only. No markdown fences, no commentary, no explanation outside the JSON.`;
     const raw = await modelRouter.complete(jsonPrompt, { ...options, jsonMode: true });
+    console.log(`[RAW-AI-OUTPUT] Snippet: ${raw.substring(0, 500)}`);
 
     // Strip code fences if the model wrapped output in ```json ... ```
     let text = raw.trim();

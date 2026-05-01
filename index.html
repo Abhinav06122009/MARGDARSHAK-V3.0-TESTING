@@ -75,6 +75,15 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      window.addEventListener('error', (e) => {
+        console.error('[FORENSIC-ERROR]', e.message, 'at', e.filename, ':', e.lineno);
+      });
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('[FORENSIC-PROMISE]', e.reason);
+      });
+      console.log('[MARGDARSHAK-LOG] Forensic Logger Initialized');
+    </script>
     <script type="module" src="/src/main.tsx?v=4"></script>
   </body>
 </html>
