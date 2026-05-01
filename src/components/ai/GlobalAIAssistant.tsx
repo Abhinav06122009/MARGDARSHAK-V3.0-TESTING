@@ -166,11 +166,10 @@ const GlobalAIAssistant: React.FC = () => {
                   className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                      m.role === 'user'
+                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${m.role === 'user'
                         ? 'bg-amber-500 text-black font-medium rounded-tr-sm'
                         : 'bg-white/5 text-zinc-200 border border-white/10 rounded-tl-sm'
-                    }`}
+                      }`}
                   >
                     {m.content}
                   </div>

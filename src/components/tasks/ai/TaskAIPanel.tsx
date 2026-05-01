@@ -72,8 +72,7 @@ Return ONLY valid JSON:
         cacheKey: `task_analysis_v2_${pendingTasks.length}_${overdueTasks.length}`,
         cacheTtl: 10 * 60 * 1000,
         tier: userTier, // Use the user's actual tier from Clerk metadata
-        model: 'qwen-safety', // Use the robust qwen-safety model as requested
-        task: 'tasks', // Ensure it routes to the correct API key
+        task: 'tasks', // Let the neuro-engine architecture handle optimal model selection
       });
 
       if (result) {

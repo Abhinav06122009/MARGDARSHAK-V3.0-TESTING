@@ -1448,7 +1448,6 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                                 const userTier = authUser?.profile?.subscription_tier || 'free';
                                 const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { 
                                   tier: userTier,
-                                  model: 'qwen-safety',
                                   task: 'tasks'
                                 });
                                 setFormData({ ...formData, description: desc });

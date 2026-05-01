@@ -87,7 +87,7 @@ const getGatewayAuthHeaders = async () => {
 };
 
 export const aiService = {
-  
+
   /**
    * RECALL CONTEXT (Memory)
    * Fetches the last 10 interactions so the AI remembers the conversation context.
@@ -102,7 +102,7 @@ export const aiService = {
         .limit(10);
 
       if (error) throw error;
-      
+
       // Reverse to chronological order (Oldest -> Newest)
       return (data || []).reverse();
 
@@ -160,7 +160,7 @@ export const aiService = {
         tier: 'premium',
       });
       await aiService.persistMessage(userId, prompt, aiResponse);
-      
+
       return aiResponse;
 
     } catch (error: any) {
@@ -176,14 +176,14 @@ export const aiService = {
   persistMessage: async (userId: string, userMsg: string, aiMsg: string) => {
     try {
       const records = [
-        { 
-          user_id: userId, 
-          role: "user", 
+        {
+          user_id: userId,
+          role: "user",
           content: userMsg
         },
-        { 
-          user_id: userId, 
-          role: "assistant", 
+        {
+          user_id: userId,
+          role: "assistant",
           content: aiMsg
         }
       ];
@@ -204,14 +204,14 @@ export const aiService = {
     userName: string,
     context?: BriefingContext // New optional parameter for rich context
   ): Promise<AIBriefing> => {
-    
+
     // Construct a rich prompt based on available data
     let contextStr = "";
     if (context) {
       const { tasks, grades, courses, schedule, stats } = context;
       const notes = context.notes || [];
       const sessions = context.sessions || [];
-      
+
       const pendingTasks = tasks?.filter(t => t.status !== 'completed').slice(0, 5).map(t => t.title).join(", ") || "None";
       const recentGrades = grades?.slice(0, 3).map(g => `${g.subject}: ${g.percentage}%`).join(", ") || "None";
       const activeCourses = courses?.map(c => c.name).join(", ") || "General Studies";
@@ -221,7 +221,7 @@ export const aiService = {
       }).join(", ") || "None";
       const recentNotes = notes?.slice(0, 4).map(n => n.title).join(", ") || "None";
       const recentSessions = sessions?.slice(0, 3).map(s => `${s.subject || "Study"} ${s.duration || 0}m`).join(", ") || "None";
-      
+
       contextStr = `
         CONTEXT DATA:
         - Pending Tasks: ${pendingTasks}
@@ -404,8 +404,8 @@ export const aiService = {
         {
           role: "user",
           content: [
-            { 
-              type: "text", 
+            {
+              type: "text",
               text: `You are an expert tutor. Analyze this image of a problem. Break down the solution step-by-step so I can understand the underlying concepts. Do not just give the final answer. ${extraContext ? `\nAdditional context: ${extraContext}` : ""}`
             },
             {
@@ -415,7 +415,7 @@ export const aiService = {
           ]
         }
       ];
-      
+
       // Use a vision-supported model configuration here
       return await modelRouter.chat(messages, { model: "meta-llama/llama-3.2-11b-vision-instruct" });
     } catch (e) {
