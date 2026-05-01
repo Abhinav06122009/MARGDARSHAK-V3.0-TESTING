@@ -64,7 +64,7 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
     (isElite ? ELITE_TEXT_MODEL : DEFAULT_TEXT_MODEL)
   );
 
-  const res = await authedFetch('/.netlify/functions/ai-chat', {
+  const res = await authedFetch('/.netlify/functions/neuro-engine', {
     method: 'POST',
     body: JSON.stringify({ 
       messages: payload,
@@ -122,7 +122,7 @@ const callGateway = async (messages: any[], options: RouterOptions): Promise<str
     visionMessages.splice(visionMessages.length - 2, 1);
   }
 
-  const res = await authedFetch('/.netlify/functions/ai-chat', {
+  const res = await authedFetch('/.netlify/functions/neuro-engine', {
     method: 'POST',
     body: JSON.stringify({ 
       messages: visionMessages,
