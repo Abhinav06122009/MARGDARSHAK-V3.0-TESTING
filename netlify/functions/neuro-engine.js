@@ -89,6 +89,34 @@ exports.handler = async (event) => {
       systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
     }
 
+    // DOUBT SOLVER INTERCEPT (Pollinations.ai gen.pollinations.ai API)
+    if (payload.task === 'research') {
+      try {
+        const pollUrl = `https://gen.pollinations.ai/openai/v1/chat/completions`;
+        const pollRes = await fetch(pollUrl, {
+          method: "POST",
+          headers: { 
+            "Authorization": "Bearer sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+             model: "gemini-fast", 
+             messages: [{ role: "system", content: systemPrompt }, ...messages],
+             response_format: payload.jsonMode ? { type: "json_object" } : undefined
+          })
+        });
+        
+        const pollData = await pollRes.json();
+        if (pollData.error) throw new Error(pollData.error.message || JSON.stringify(pollData.error));
+        
+        const text = pollData?.choices?.[0]?.message?.content || "";
+        return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
+      } catch (err) {
+        console.error("[NEURO-ENGINE] Pollinations API error:", err);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `Pollinations Error: ${err.message}` }) };
+      }
+    }
+
 
 
 
