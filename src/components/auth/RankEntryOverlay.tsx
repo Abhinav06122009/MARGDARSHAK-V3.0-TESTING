@@ -24,85 +24,90 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-15, 15]), { stiffness: 100, damping: 30 });
 
   useEffect(() => {
-    if (isLoaded && clerkUser) {
-      const metadata = clerkUser.publicMetadata || {};
-      const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
-      const normalizedRoles = roles.map((r: string) => r.toLowerCase());
+    const checkVerificationAndTrigger = () => {
+      if (isLoaded && clerkUser) {
+        // High Command Gating: Only show rank animation IF verified
+        const isVerified = sessionStorage.getItem('mg_dev_verified') === 'true';
+        if (!isVerified) return;
 
-      const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
-      const sovereignRoles = ['owner', 'superadmin', 'admin'];
+        const metadata = clerkUser.publicMetadata || {};
+        const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+        const normalizedRoles = roles.map((r: string) => r.toLowerCase());
 
-      // Count how many C-Suite roles the user has
-      const userCSuiteCount = normalizedRoles.filter(r => cSuiteRoles.includes(r)).length;
-      
-      let info: any = null;
+        const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
+        const sovereignRoles = ['owner', 'superadmin', 'admin'];
 
-      // A+ CLASS: RHODIUM ZENITH (Dual C-Suite)
-      if (userCSuiteCount >= 2) {
-        info = {
-          tier: 'A+',
-          title: 'ZENITH HIGH COMMAND',
-          icon: Crown,
-          style: {
-            gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
-            glow: 'rgba(255, 255, 255, 0.7)',
-            accent: '#FFFFFF',
-            particles: 'bg-white',
-            shimmer: 'from-white/30 via-transparent to-white/30',
-            border: 'border-white/60',
-            shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
-            theme: 'rhodium'
-          }
-        };
+        const userCSuiteCount = normalizedRoles.filter(r => cSuiteRoles.includes(r)).length;
+        
+        let info: any = null;
+
+        if (userCSuiteCount >= 2) {
+          info = {
+            tier: 'A+',
+            title: 'ZENITH HIGH COMMAND',
+            icon: Crown,
+            style: {
+              gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
+              glow: 'rgba(255, 255, 255, 0.7)',
+              accent: '#FFFFFF',
+              particles: 'bg-white',
+              shimmer: 'from-white/30 via-transparent to-white/30',
+              border: 'border-white/60',
+              shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
+              theme: 'rhodium'
+            }
+          };
+        }
+        else if (userCSuiteCount === 1) {
+          const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
+          info = {
+            tier: 'A',
+            title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
+            icon: Shield,
+            style: {
+              gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
+              glow: 'rgba(0, 245, 255, 0.5)',
+              accent: '#00F5FF',
+              particles: 'bg-[#E5E4E2]',
+              shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
+              border: 'border-cyan-500/50',
+              shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
+              theme: 'platinum'
+            }
+          };
+        }
+        else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
+          const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
+          info = {
+            tier: 'B-',
+            title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
+            icon: Zap,
+            style: {
+              gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
+              glow: 'rgba(255, 215, 0, 0.5)',
+              accent: '#FFD700',
+              particles: 'bg-[#FFD700]',
+              shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
+              border: 'border-yellow-500/50',
+              shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
+              theme: 'gold'
+            }
+          };
+        }
+
+        if (info && !show) {
+          setRankInfo(info);
+          setShow(true);
+        }
       }
-      // A CLASS: PLATINUM ASTRAL (Single C-Suite)
-      else if (userCSuiteCount === 1) {
-        const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
-        info = {
-          tier: 'A',
-          title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
-          icon: Shield,
-          style: {
-            gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
-            glow: 'rgba(0, 245, 255, 0.5)',
-            accent: '#00F5FF',
-            particles: 'bg-[#E5E4E2]',
-            shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
-            border: 'border-cyan-500/50',
-            shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
-            theme: 'platinum'
-          }
-        };
-      }
-      // B- CLASS: IMPERIAL GOLD (Sovereign)
-      else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
-        const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
-        info = {
-          tier: 'B-',
-          title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
-          icon: Zap,
-          style: {
-            gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
-            glow: 'rgba(255, 215, 0, 0.5)',
-            accent: '#FFD700',
-            particles: 'bg-[#FFD700]',
-            shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
-            border: 'border-yellow-500/50',
-            shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
-            theme: 'gold'
-          }
-        };
-      }
+    };
 
-      if (!info) return;
-
-      if (info) {
-        setRankInfo(info);
-        setShow(true);
-        // Timeout removed: Stays until officer clicks X
-      }
-    }
-  }, [isLoaded, clerkUser, onComplete]);
+    checkVerificationAndTrigger();
+    
+    // Periodically check if verification was successful to trigger animation
+    const interval = setInterval(checkVerificationAndTrigger, 1000);
+    return () => clearInterval(interval);
+  }, [isLoaded, clerkUser, show]);
 
   const handleClose = () => {
     setShow(false);
@@ -127,18 +132,17 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseMove={handleMouseMove}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden cursor-none"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden"
         >
           {/* Close Button (X) */}
           <motion.button
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 2 }}
+            transition={{ delay: 1 }}
             onClick={handleClose}
-            className="absolute top-12 right-12 z-[150] w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group hover:bg-white/10 transition-all cursor-pointer"
+            className="absolute top-8 right-8 z-[150] w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,0,0,0.5)]"
           >
-            <X size={24} className="text-white group-hover:rotate-90 transition-transform" />
-            <div className="absolute inset-0 rounded-full blur-[20px] group-hover:bg-white/10 transition-all" />
+            <X size={20} className="text-white group-hover:text-emerald-400 group-hover:rotate-90 transition-all" />
           </motion.button>
 
           {/* Advanced Geometric Crystal Layer */}
@@ -184,20 +188,19 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             style={{ rotateX, rotateY, perspective: 2500 }}
             className="relative flex flex-col items-center"
           >
-            {/* Rank Identifier Card */}
             <motion.div
               initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
-              animate={{ y: 0, opacity: 1, scale: 0.9, rotateX: 0 }} // Scaled to 0.9 to fit better
+              animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }} // Further scaled down
               transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
-              className={`relative p-12 rounded-[5rem] bg-black/60 border-2 ${rankInfo.style.border} backdrop-blur-[120px] ${rankInfo.style.shadow} group max-w-[90vw]`}
+              className={`relative p-8 rounded-[4rem] bg-black/60 border-2 ${rankInfo.style.border} backdrop-blur-[120px] ${rankInfo.style.shadow} group max-w-[80vw]`}
             >
               {/* Glass Refraction Texture */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden rounded-[5rem]">
+              <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden rounded-[4rem]">
                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-overlay" />
               </div>
 
               {/* Shimmer / Liquid Light */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-20 rounded-[5rem] overflow-hidden`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-20 rounded-[4rem] overflow-hidden`}>
                 <motion.div 
                   animate={{ x: ["-200%", "200%"], y: ["-100%", "100%"] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -224,31 +227,31 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2 }}
-                  className="mb-8 flex flex-col items-center gap-2"
+                  className="mb-6 flex flex-col items-center gap-2"
                 >
-                  <img src="/logo.png" alt="Margdarshak Logo" className="w-16 h-16 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[10px] font-black tracking-[0.8em] text-white/50 uppercase">MARGDARSHAK HIGH COMMAND</span>
+                  <img src="/logo.png" alt="Margdarshak Logo" className="w-12 h-12 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[8px] font-black tracking-[0.8em] text-white/50 uppercase">MARGDARSHAK HIGH COMMAND</span>
                 </motion.div>
 
                 <motion.div
                   initial={{ scale: 0, filter: 'blur(20px)' }}
                   animate={{ scale: 1, filter: 'blur(0px)' }}
                   transition={{ delay: 1, type: "spring", damping: 15 }}
-                  className="mb-6 relative"
+                  className="mb-4 relative"
                 >
-                   <div className="absolute inset-0 blur-[40px] opacity-60" style={{ backgroundColor: rankInfo.style.accent }} />
-                   <rankInfo.icon className="w-32 h-32 relative z-10" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 30px ${rankInfo.style.glow})` }} />
+                   <div className="absolute inset-0 blur-[30px] opacity-60" style={{ backgroundColor: rankInfo.style.accent }} />
+                   <rankInfo.icon className="w-24 h-24 relative z-10" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 20px ${rankInfo.style.glow})` }} />
                 </motion.div>
                 
                 <div className="flex flex-col items-center text-center">
-                   <div className="inline-flex items-center gap-4 mb-4 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
-                      <Fingerprint className="w-4 h-4 text-zinc-400" />
-                      <span className="text-[9px] font-black tracking-[0.8em] text-zinc-300 uppercase italic">
+                   <div className="inline-flex items-center gap-4 mb-4 px-5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
+                      <Fingerprint className="w-3.5 h-3.5 text-zinc-400" />
+                      <span className="text-[8px] font-black tracking-[0.8em] text-zinc-300 uppercase italic">
                          Verified Official Identity
                       </span>
                    </div>
 
-                   <h2 className={`text-7xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-12 mb-6`}>
+                   <h2 className={`text-5xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-8 mb-4`}>
                       <motion.span
                         initial={{ letterSpacing: "0.5em", opacity: 0 }}
                         animate={{ letterSpacing: "-0.05em", opacity: 1 }}
@@ -258,31 +261,31 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                       </motion.span>
                    </h2>
 
-                   <div className="relative h-10 overflow-hidden mb-8">
+                   <div className="relative h-8 overflow-hidden mb-6">
                      <motion.div
                        initial={{ y: 80, skewY: 10 }}
                        animate={{ y: 0, skewY: 0 }}
                        transition={{ delay: 2, duration: 1, ease: "backOut" }}
-                       className="text-2xl font-black text-white italic tracking-[0.3em] uppercase flex items-center gap-4"
+                       className="text-xl font-black text-white italic tracking-[0.3em] uppercase flex items-center gap-4"
                      >
-                       <Sparkles className="w-5 h-5" style={{ color: rankInfo.style.accent }} />
+                       <Sparkles className="w-4 h-4" style={{ color: rankInfo.style.accent }} />
                        {rankInfo.title}
-                       <Sparkles className="w-5 h-5" style={{ color: rankInfo.style.accent }} />
+                       <Sparkles className="w-4 h-4" style={{ color: rankInfo.style.accent }} />
                      </motion.div>
                    </div>
 
                    {/* Rank Achievement Badges */}
-                   <div className="flex gap-3">
+                   <div className="flex gap-2">
                       {[...Array(3)].map((_, i) => (
                         <motion.div
                           key={i}
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 2.5 + i * 0.2 }}
-                          className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2"
+                          className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2"
                         >
-                           <Star className="w-2.5 h-2.5 fill-white text-white" />
-                           <span className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Excellence_{i+1}</span>
+                           <Star className="w-2 h-2 fill-white text-white" />
+                           <span className="text-[6px] font-black text-zinc-400 uppercase tracking-widest">Excellence_{i+1}</span>
                         </motion.div>
                       ))}
                    </div>
@@ -290,9 +293,9 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               </div>
 
               {/* Corner High-Command Branding */}
-              <div className="absolute bottom-8 left-8 opacity-30 flex items-center gap-2">
-                 <Hexagon size={12} />
-                 <span className="text-[7px] font-black tracking-widest">ENCLAVE_NODE_SECURE</span>
+              <div className="absolute bottom-6 left-6 opacity-30 flex items-center gap-2">
+                 <Hexagon size={10} />
+                 <span className="text-[6px] font-black tracking-widest">ENCLAVE_NODE_SECURE</span>
               </div>
             </motion.div>
 
@@ -301,20 +304,20 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 3 }}
-              className="mt-12 flex flex-col items-center"
+              className="mt-8 flex flex-col items-center"
             >
-              <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-4">
+              <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-3">
                 Welcome, Commander {clerkUser?.firstName || clerkUser?.username}
               </h3>
               
-              <div className="flex items-center gap-8 text-[8px] font-black text-zinc-500 uppercase tracking-[0.5em]">
-                 <div className="flex items-center gap-3 group">
-                    <Activity className="w-4 h-4 text-emerald-500 group-hover:animate-pulse" />
+              <div className="flex items-center gap-6 text-[7px] font-black text-zinc-500 uppercase tracking-[0.5em]">
+                 <div className="flex items-center gap-2 group">
+                    <Activity className="w-3 h-3 text-emerald-500 group-hover:animate-pulse" />
                     <span>Neural Link: Synchronized</span>
                  </div>
                  <div className="w-1 h-1 rounded-full bg-zinc-800" />
-                 <div className="flex items-center gap-3 group">
-                    <Cpu className="w-4 h-4 text-blue-500 group-hover:rotate-90 transition-transform" />
+                 <div className="flex items-center gap-2 group">
+                    <Cpu className="w-3 h-3 text-blue-500 group-hover:rotate-90 transition-transform" />
                     <span>Margdarshak Core: Online</span>
                  </div>
               </div>
@@ -323,7 +326,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
           {/* Luxury Frame & Vignette */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
-          <div className="absolute inset-0 border-[40px] border-black z-[100] pointer-events-none" />
+          <div className="absolute inset-0 border-[20px] border-black z-[100] pointer-events-none" />
           
         </motion.div>
       )}

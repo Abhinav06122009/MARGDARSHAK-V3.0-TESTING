@@ -1,13 +1,56 @@
+import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
 import ThreatCard from '@/components/admin/ThreatCard';
 import { useAdmin } from '@/hooks/useAdmin';
-import { ShieldCheck, User, AlertTriangle, Ban, Loader2, DatabaseZap, LifeBuoy, BrainCircuit, Activity, Zap, Cpu } from 'lucide-react';
+import { ShieldCheck, User, AlertTriangle, Ban, Loader2, DatabaseZap, LifeBuoy, BrainCircuit, Activity, Zap, Cpu, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SentryTestButton } from '@/integrations/SentryDiagnostics';
 
 const AdminDashboard = () => {
   const { stats, threats, users, tickets, loading } = useAdmin();
+  const [isVerified, setIsVerified] = useState(sessionStorage.getItem('mg_dev_verified') === 'true');
+
+  useEffect(() => {
+    const checkVerification = () => {
+      const verified = sessionStorage.getItem('mg_dev_verified') === 'true';
+      setIsVerified(verified);
+      if (!verified) {
+        window.dispatchEvent(new CustomEvent('dev-verification-required'));
+      }
+    };
+
+    checkVerification();
+    // Listen for verification success
+    const handleSuccess = () => setIsVerified(true);
+    window.addEventListener('storage', checkVerification); // Catch cross-tab verification
+    const interval = setInterval(checkVerification, 2000); // Poll for session storage change
+    
+    return () => {
+      window.removeEventListener('storage', checkVerification);
+      clearInterval(interval);
+    };
+  }, []);
+
+  if (!isVerified) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-12">
+           <motion.div
+             initial={{ scale: 0.8, opacity: 0 }}
+             animate={{ scale: 1, opacity: 1 }}
+             className="p-10 rounded-[3rem] bg-zinc-950 border border-emerald-500/20 shadow-2xl"
+           >
+              <Lock className="w-20 h-20 text-emerald-500/50 mb-8 mx-auto animate-pulse" />
+              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">Verification <span className="text-emerald-500">Required</span></h2>
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] max-w-xs mx-auto leading-relaxed">
+                You are attempting to access a high-command security node. Please provide your 'Second-Strip' identity token in the overlay to proceed.
+              </p>
+           </motion.div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
