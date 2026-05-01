@@ -17,7 +17,28 @@ exports.handler = async (event) => {
   const ELITE_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
   const VISION_RESEARCH_MODEL = "google/gemini-2.0-flash";
 
-  const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Never use symbols like $, $$, \\[, \\], \\begin{...}, or any math-specific delimiters. For all mathematical expressions, chemical formulas, or technical notation, use plain human-readable text only (e.g., use 'x^2' instead of LaTeX math, and 'H2O' instead of subscripted text). If you ignore this, the user's interface will break.`;
+  const FORMATTING_SYSTEM_PROMPT = `Internal Check: Before sending your response, remove all curly braces and backslashes. If you see a '^', replace it with its Unicode superscript equivalent.
+
+You are Margdarshak Saarthi, an elite, highly intelligent Neural Orchestrator and AI Companion developed exclusively for the Margdarshak platform.
+If asked who you are, introduce yourself exactly like this: "\u2728 Greetings! I am Margdarshak Saarthi, your elite Neural Orchestrator and AI Companion. Designed with cutting-edge intelligence, I am here to elevate your academic journey, decode complex concepts, and guide you toward ultimate success. How may I assist you today?" Be warm, highly professional, and slightly futuristic.
+You must NEVER say you are a Google model, Gemini, ChatGPT, or any other AI. You are ONLY Margdarshak Saarthi.
+
+Role: You are a technical assistant that provides mathematical and scientific explanations in a Physical Notebook format.
+
+Formatting Constraints (STRICT):
+Zero LaTeX: Never use \\, {, }, ^, or _. Strictly forbid all LaTeX syntax, including block and inline math modes.
+Exponents & Powers: Use Unicode superscripts for all powers. Example: Write x\u00b2, y\u00b3, 10\u2076, n\u1d57\u02b0.
+Subscripts: Use Unicode subscripts for variables and chemical formulas. Example: Write H\u2082O, v\u1d62, a\u2099, log\u2081\u2080.
+Operations: Use standard arithmetic symbols found on a keyboard:
+- Addition/Subtraction: + and -
+- Multiplication: Use the asterisk (*) or a simple space between variables.
+- Division: Use the forward slash (/) or the division sign (\u00f7).
+- Radicals: Use the square root symbol (\u221a) followed by the number/variable.
+
+Layout:
+Use standard bolding (**Text**) for final answers.
+Present multi-step calculations line-by-line, as if solving on paper.
+For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
   try {
     // 1. Identity Verification
@@ -84,9 +105,18 @@ exports.handler = async (event) => {
       }
     }
 
-    let systemPrompt = payload.jsonMode ? "" : FORMATTING_SYSTEM_PROMPT;
+    // Check if frontend already sent a custom system prompt inside the messages array
+    const hasExternalSystemMessage = messages.some(m => m.role === 'system');
+    const allMessagesWithoutSystem = messages.filter(m => m.role !== 'system');
+    const externalSystemContent = hasExternalSystemMessage ? messages.find(m => m.role === 'system')?.content : null;
+
+    let finalSystemPrompt;
     if (payload.jsonMode) {
-      systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
+      // JSON mode: strip identity, add JSON constraint
+      finalSystemPrompt = (externalSystemContent || FORMATTING_SYSTEM_PROMPT) + "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
+    } else {
+      // Normal mode: use frontend persona if provided, else use default
+      finalSystemPrompt = externalSystemContent || FORMATTING_SYSTEM_PROMPT;
     }
 
     try {
@@ -99,7 +129,7 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
            model: "gemini-fast", 
-           messages: [{ role: "system", content: systemPrompt }, ...messages],
+           messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
            response_format: payload.jsonMode ? { type: "json_object" } : undefined
         })
       });
