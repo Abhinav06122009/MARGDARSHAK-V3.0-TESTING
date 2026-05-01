@@ -119,36 +119,37 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       finalSystemPrompt = externalSystemContent || FORMATTING_SYSTEM_PROMPT;
     }
 
-    try {
+    const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
-      const pollRes = await fetch(pollUrl, {
-        method: "POST",
-        headers: { 
-          "Authorization": "Bearer sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-           model: "gemini-fast", 
-           messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
-           response_format: payload.jsonMode ? { type: "json_object" } : undefined
-        })
+      const body = JSON.stringify({
+        model: "gemini-fast",
+        messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
+        response_format: payload.jsonMode ? { type: "json_object" } : undefined
       });
-      
-      const rawText = await pollRes.text();
+      const pollHeaders = {
+        "Authorization": "Bearer sk_0W2tNyQPHpSYCVA9FPXjM06epAeGN2Sv",
+        "Content-Type": "application/json"
+      };
+      const res = await fetch(pollUrl, { method: "POST", headers: pollHeaders, body });
+      const rawText = await res.text();
+      let data;
+      try { data = JSON.parse(rawText); } catch(e) {
+        throw new Error(`Non-JSON from provider (${res.status}): ${rawText.substring(0, 150)}`);
+      }
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      return data;
+    };
+
+    try {
       let pollData;
       try {
-        pollData = JSON.parse(rawText);
-      } catch (e) {
-        console.error("[NEURO-ENGINE] Pollinations returned non-JSON:", rawText.substring(0, 200));
-        return { statusCode: 502, headers, body: JSON.stringify({ error: `Provider error: ${pollRes.status} ${pollRes.statusText}` }) };
+        pollData = await callPollinations();
+      } catch (firstErr) {
+        console.warn("[NEURO-ENGINE] First attempt failed, retrying in 1.5s:", firstErr.message);
+        await new Promise(r => setTimeout(r, 1500));
+        pollData = await callPollinations(); // retry once
       }
 
-      if (pollData.error) {
-        // If the specific model failed with json_object, fallback to normal text
-        console.error("[NEURO-ENGINE] Pollinations error:", pollData.error);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: pollData.error.message || JSON.stringify(pollData.error) }) };
-      }
-      
       const text = pollData?.choices?.[0]?.message?.content || "";
       if (!text) {
         return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
@@ -156,8 +157,8 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
       return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: "pollinations/gemini-fast" }) };
     } catch (err) {
-      console.error("[NEURO-ENGINE] Inner Fatal Error:", err);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: `Internal API Error: ${err.message}` }) };
+      console.error("[NEURO-ENGINE] Both attempts failed:", err.message);
+      return { statusCode: 502, headers, body: JSON.stringify({ error: `AI provider temporarily unavailable. Please try again in a moment.` }) };
     }
   } catch (globalErr) {
     console.error("[NEURO-ENGINE] Global Fatal Error:", globalErr);
