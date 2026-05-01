@@ -58,6 +58,31 @@ exports.handler = async (event) => {
     const payload = JSON.parse(event.body || "{}");
     const messages = Array.isArray(payload.messages) ? payload.messages : [];
     if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
+    
+    // IMAGE GENERATION INTERCEPT (Pollinations.ai / FLUX)
+    if (payload.mode === 'imagegen') {
+      try {
+        const lastMsg = messages[messages.length - 1];
+        const promptText = typeof lastMsg.content === 'string' ? lastMsg.content : lastMsg.content[0]?.text || "A beautiful artwork";
+        const pollUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=flux&width=1024&height=1024&nologo=true`;
+        
+        const pollRes = await fetch(pollUrl, {
+          method: "GET",
+          headers: { "Authorization": "Bearer pk_zsdrdBr8qAO7Cbbp" }
+        });
+        
+        if (!pollRes.ok) throw new Error("Pollinations API rejected the request.");
+        
+        const buffer = await pollRes.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        const markdownImage = `![Generated Image](data:image/jpeg;base64,${base64})`;
+        
+        return { statusCode: 200, headers, body: JSON.stringify({ response: markdownImage, model: "pollinations/flux" }) };
+      } catch (err) {
+        console.error("[NEURO-ENGINE] Image generation error:", err);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: `Image generation failed: ${err.message}` }) };
+      }
+    }
 
     let systemPrompt = payload.jsonMode ? "" : FORMATTING_SYSTEM_PROMPT;
     if (payload.jsonMode) {

@@ -70,7 +70,8 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
       messages: payload,
       model: modelToUse,
       task: options.task,
-      jsonMode: options.jsonMode
+      jsonMode: options.jsonMode,
+      mode: options.mode
     }),
   });
   if (!res.ok) {
