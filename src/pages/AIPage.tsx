@@ -250,26 +250,26 @@ const SmartTutorPage = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                  if (subscriptionTier === 'free' && !byokKey) setShowUpgradeModal(true);
                   else handleSend();
                 }
               }}
               onClick={() => {
-                if (subscriptionTier === 'free') setShowUpgradeModal(true);
+                if (subscriptionTier === 'free' && !byokKey) setShowUpgradeModal(true);
               }}
-              readOnly={subscriptionTier === 'free'}
-              placeholder={subscriptionTier === 'free' ? "Upgrade to use Saarthi..." : "Ask Saarthi anything..."}
-              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${subscriptionTier === 'free' ? 'cursor-pointer' : ''}`}
+              readOnly={subscriptionTier === 'free' && !byokKey}
+              placeholder={subscriptionTier === 'free' && !byokKey ? "Upgrade to use Saarthi..." : "Ask Saarthi anything..."}
+              className={`flex-1 bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-zinc-700 font-medium tracking-wide ${(subscriptionTier === 'free' && !byokKey) ? 'cursor-pointer' : ''}`}
             />
             <Button 
               onClick={() => {
-                if (subscriptionTier === 'free') {
+                if (subscriptionTier === 'free' && !byokKey) {
                   setShowUpgradeModal(true);
                   return;
                 }
                 handleSend();
               }} 
-              disabled={loading || (subscriptionTier !== 'free' && !input.trim() && !selectedImage)} 
+              disabled={loading || ((subscriptionTier === 'free' && !byokKey) || (!input.trim() && !selectedImage))} 
               className="rounded-full h-14 w-14 p-0 bg-white text-black hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/10 disabled:opacity-20"
             >
               {loading ? <Loader2 className="animate-spin" /> : <Send size={20} />}
