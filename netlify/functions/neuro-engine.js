@@ -1,80 +1,80 @@
-const {
-  corsHeaders,
-  isOriginAllowed,
-  rateLimit,
-  getClientIp,
-  verifyClerkUser,
-  MAX_BODY_BYTES,
-} = require("./_shared/security");
-const { createClient } = require('@supabase/supabase-js');
-
-const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-const ELITE_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
-const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-3-super-120b-a12b";
-const VISION_RESEARCH_MODEL = "google/gemini-2.0-flash-001";
-
-const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Under no circumstances should you output math delimiters like \\(, \\), \\[, \\], or $$, nor should you use backslash commands like \\frac, \\theta, \\sqrt, \\times, or \\cdot. For all mathematics, physics, equations, and scientific notation, you MUST use plain text, standard Markdown, and Unicode characters. Your output must be 100% human-readable on platforms that do not have any math rendering capabilities. Prioritize extreme clarity in plain text.`;
+const fetch = globalThis.fetch;
 
 exports.handler = async (event) => {
-  const origin = event.headers?.origin || event.headers?.Origin || "";
-  const headers = { ...corsHeaders(origin), "Content-Type": "application/json" };
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-User-API-Key",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json"
+  };
 
   if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
-  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
-  if (!isOriginAllowed(origin)) return { statusCode: 403, headers, body: JSON.stringify({ error: "Origin not allowed" }) };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Method Not Allowed" };
 
-  const ip = getClientIp(event);
-  const rl = rateLimit(`chat:${ip}`);
-  if (!rl.allowed) return { statusCode: 429, headers: { ...headers, "Retry-After": String(rl.retryAfter || 60) }, body: JSON.stringify({ error: "Too many requests" }) };
+  // CONSTANTS
+  const DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+  const PREMIUM_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
+  const ELITE_UPGRADE_MODEL = "nvidia/nemotron-4-340b-instruct";
+  const VISION_RESEARCH_MODEL = "google/gemini-1.5-flash";
 
-  const auth = await verifyClerkUser(event.headers?.authorization || event.headers?.Authorization);
-  if (!auth.ok) return { statusCode: 401, headers, body: JSON.stringify({ error: auth.message }) };
-  const user = auth.user;
-
-  // --- TIER CHECK ---
-  let userTier = 'free';
-  try {
-    const supaUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-    const supabase = createClient(supaUrl, supaKey);
-    const { data: profile } = await supabase.from('profiles').select('subscription_tier').eq('id', user.id).single();
-    userTier = (user.metadata?.subscription?.tier || user.metadata?.subscription_tier || profile?.subscription_tier || 'free').toLowerCase();
-    const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
-    if (MASTER_IDS.includes(user.id)) userTier = 'premium_elite';
-  } catch (e) {}
-
-  const userApiKey = event.headers?.["x-user-api-key"] || event.headers?.["X-User-API-Key"];
-  const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'elite'];
-  const isElite = ELITE_TIERS.includes(userTier);
-  const isPremium = userTier === 'premium' || isElite;
-
-  let apiKeyToUse = userApiKey;
-  if (isElite) apiKeyToUse = userApiKey || process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-
-  if (!isElite && !userApiKey) return { statusCode: 403, headers, body: JSON.stringify({ error: "API Key Required", code: "KEY_REQUIRED" }) };
-  if (!apiKeyToUse) return { statusCode: 500, headers, body: JSON.stringify({ error: "No API key" }) };
-
-  const payload = JSON.parse(event.body || "{}");
-  const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
-
-  let systemPrompt = FORMATTING_SYSTEM_PROMPT;
-  if (payload.jsonMode) {
-    systemPrompt += "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences (```), no preamble, no explanation. Just the raw JSON string.";
-  }
-
-  const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
-  let modelToUse = payload.model || DEFAULT_FREE_MODEL;
-  if (payload.task === 'research' || hasImages) modelToUse = VISION_RESEARCH_MODEL;
-  else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
-    if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
-    else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
-  }
-
-  console.log(`[NEURO-ENGINE] ${user.id} | ${userTier} | ${modelToUse} | JSON: ${!!payload.jsonMode}`);
+  const FORMATTING_SYSTEM_PROMPT = `CRITICAL FORMATTING INSTRUCTION: You must never use LaTeX, TeX, or MathJax formatting in your responses. Never use symbols like $, $$, \\[, \\], \\begin{...}, or any math-specific delimiters. For all mathematical expressions, chemical formulas, or technical notation, use plain human-readable text only (e.g., use 'x^2' instead of LaTeX math, and 'H2O' instead of subscripted text). If you ignore this, the user's interface will break.`;
 
   try {
+    // 1. Identity Verification
+    const authHeader = event.headers.authorization || "";
+    const userApiKey = event.headers["x-user-api-key"] || "";
+    const token = authHeader.replace("Bearer ", "");
+    
+    if (!token) return { statusCode: 401, headers, body: JSON.stringify({ error: "Authentication required" }) };
+
+    // Robust token parse
+    let user;
+    try {
+      user = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+    } catch (e) {
+      return { statusCode: 401, headers, body: JSON.stringify({ error: "Invalid identity token" }) };
+    }
+
+    // 2. Fetch User Tier
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    let userTier = "free";
+    try {
+      const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.sub}&select=subscription_tier`, {
+        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+      });
+      const profiles = await profileRes.json();
+      userTier = profiles?.[0]?.subscription_tier || "free";
+    } catch (e) { console.error("[NEURO-ENGINE] Profile fetch failed:", e.message); }
+
+    const isElite = ["premium_elite", "extra_plus", "premium_plus"].includes(userTier);
+    const isPremium = userTier === "premium" || isElite;
+    const apiKeyToUse = isElite ? process.env.OPENAI_API_KEY : (userApiKey || process.env.OPENAI_API_KEY);
+
+    // 3. Request Parsing
+    const payload = JSON.parse(event.body || "{}");
+    const messages = Array.isArray(payload.messages) ? payload.messages : [];
+    if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
+
+    let systemPrompt = FORMATTING_SYSTEM_PROMPT;
+    if (payload.jsonMode) {
+      systemPrompt += "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
+    }
+
+    const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));
+    let modelToUse = payload.model || DEFAULT_FREE_MODEL;
+    if (payload.task === 'research' || hasImages || payload.jsonMode) modelToUse = VISION_RESEARCH_MODEL;
+    else if (modelToUse === DEFAULT_FREE_MODEL || modelToUse.endsWith(':free')) {
+      if (isElite) modelToUse = ELITE_UPGRADE_MODEL;
+      else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
+    }
+
+    console.log(`[NEURO-ENGINE] ${user.sub} | ${userTier} | ${modelToUse} | JSON: ${!!payload.jsonMode}`);
+
+    // 4. Provider Execution
     const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
+    
     if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
       const googleModel = modelToUse.replace('google/', '');
       const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
@@ -88,9 +88,8 @@ exports.handler = async (event) => {
         return { role: m.role === 'assistant' ? 'model' : 'user', parts };
       });
 
-      let res;
       try {
-        res = await fetch(googleUrl, {
+        const gRes = await fetch(googleUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
@@ -105,32 +104,24 @@ exports.handler = async (event) => {
             ]
           })
         });
-        const data = await res.json();
-        const candidate = data?.candidates?.[0];
-        if (candidate?.content?.parts?.[0]?.text) {
-          return { statusCode: 200, headers, body: JSON.stringify({ response: candidate.content.parts[0].text, model: modelToUse }) };
-        }
-        console.warn("[NEURO-ENGINE] Gemini failed, falling back to OpenRouter. Reason:", candidate?.finishReason || data.error?.message);
-      } catch (err) {
-        console.error("[NEURO-ENGINE] Gemini crash, falling back to OpenRouter:", err.message);
-      }
-      
-      // FALLBACK TO OPENROUTER
-      const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
-        body: JSON.stringify({ model: ELITE_UPGRADE_MODEL, messages: [{ role: "system", content: systemPrompt }, ...messages] })
-      });
-      const fallbackData = await fallbackRes.json();
-      return { statusCode: 200, headers, body: JSON.stringify({ response: fallbackData?.choices?.[0]?.message?.content || "", model: "fallback-nemotron" }) };
-    } else {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
-        body: JSON.stringify({ model: modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
-      });
-      const data = await res.json();
-      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.choices?.[0]?.message?.content || "", model: modelToUse }) };
+        const gData = await gRes.json();
+        const text = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
+      } catch (err) { console.error("[NEURO-ENGINE] Gemini attempt failed:", err.message); }
     }
-  } catch (err) { return { statusCode: 502, headers, body: JSON.stringify({ error: err.message }) }; }
+
+    // Fallback/Default: OpenRouter
+    const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKeyToUse}`, "Content-Type": "application/json", "HTTP-Referer": "https://margdarshan.tech" },
+      body: JSON.stringify({ model: modelToUse.includes('gemini') ? ELITE_UPGRADE_MODEL : modelToUse, messages: [{ role: "system", content: systemPrompt }, ...messages] })
+    });
+    const orData = await orRes.json();
+    const orText = orData?.choices?.[0]?.message?.content || "";
+    return { statusCode: 200, headers, body: JSON.stringify({ response: orText, model: modelToUse }) };
+
+  } catch (err) {
+    console.error("[NEURO-ENGINE] Fatal Error:", err);
+    return { statusCode: 502, headers, body: JSON.stringify({ error: err.message, stack: err.stack }) };
+  }
 };
