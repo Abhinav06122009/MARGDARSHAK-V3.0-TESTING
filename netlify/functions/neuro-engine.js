@@ -59,9 +59,9 @@ exports.handler = async (event) => {
     const messages = Array.isArray(payload.messages) ? payload.messages : [];
     if (messages.length === 0) return { statusCode: 400, headers, body: JSON.stringify({ error: "No messages" }) };
 
-    let systemPrompt = FORMATTING_SYSTEM_PROMPT;
+    let systemPrompt = payload.jsonMode ? "" : FORMATTING_SYSTEM_PROMPT;
     if (payload.jsonMode) {
-      systemPrompt += "\n\nCRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
+      systemPrompt += "CRITICAL: Respond with VALID JSON ONLY. No markdown fences, no preamble, no explanation. Just the raw JSON string.";
     }
 
     const hasImages = messages.some(m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url'));

@@ -186,7 +186,12 @@ export const modelRouter = {
 
     // 1) Direct parse
     const direct = tryParse(text);
-    if (direct !== null) return direct;
+    if (direct !== null) {
+      if (typeof direct === 'object' && direct !== null && 'error' in direct) {
+        throw new Error(`AI Error: ${direct.error}`);
+      }
+      return direct;
+    }
 
     // 2) Choose the outermost JSON value (array or object), whichever starts first.
     const objStart = text.indexOf('{');
