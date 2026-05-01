@@ -48,7 +48,7 @@ interface QuizConfig {
   topic: string;
   difficulty: 'easy' | 'medium' | 'hard';
   count: number;
-  type: 'mcq' | 'truefalse';
+  type: 'mcq' | 'truefalse' | 'numerical';
   timeLimit: number; // in minutes, 0 means no limit
   syllabusId?: string;
 }
@@ -127,7 +127,30 @@ const QuizGenerator: React.FC = () => {
       }
     }
 
-    const prompt = `${syllabusContext}Generate ${config.count} ${config.type === 'truefalse' ? 'True/False' : 'multiple choice'} quiz questions about "${config.topic}" at ${config.difficulty} difficulty level for a student.
+    const prompt = config.type === 'numerical'
+      ? `${syllabusContext}Generate ${config.count} numerical problem MCQ questions about "${config.topic}" at ${config.difficulty} difficulty level for a PCMB student.
+
+Each question must:
+- Present a real solvable numerical problem with given values in the QUESTION field.
+- Have 4 options showing different calculated answers (only one is correct).
+- The explanation must show the COMPLETE step-by-step working.
+
+Return ONLY valid JSON array:
+[
+  {
+    "question": "Numerical problem with given values here",
+    "options": ["Value A with unit", "Value B with unit", "Value C with unit", "Value D with unit"],
+    "correct": 0,
+    "explanation": "Step 1: ...\nStep 2: ...\nFinal Answer: **value unit**"
+  }
+]
+
+Formatting Constraints (STRICT):
+Use Unicode superscripts: x\u00b2, 10\u00b3, m\u00b2, s\u207b\u00b2
+Use Unicode subscripts: H\u2082O, v\u1d62, a\u2099
+Use \u221a for roots, \u00f7 for division. Show line-by-line working. Bold final answer with **value**.
+NEVER use LaTeX, backslashes, or curly braces.`
+      : `${syllabusContext}Generate ${config.count} ${config.type === 'truefalse' ? 'True/False' : 'multiple choice'} quiz questions about "${config.topic}" at ${config.difficulty} difficulty level for a student.
 
 Return ONLY valid JSON array with this exact structure:
 [
@@ -145,13 +168,13 @@ Make questions academically accurate and educational.
 
 Formatting Constraints (STRICT):
 Zero LaTeX: Never use \\, {, }, ^, or _. Strictly forbid all LaTeX syntax, including block and inline math modes.
-Exponents & Powers: Use Unicode superscripts for all powers. Example: Write x², y³, 10⁶, nᵗʰ.
-Subscripts: Use Unicode subscripts for variables and chemical formulas. Example: Write H₂O, vᵢ, aₙ, log₁₀.
+Exponents & Powers: Use Unicode superscripts for all powers. Example: Write x\u00b2, y\u00b3, 10\u2076, n\u1d57\u02b0.
+Subscripts: Use Unicode subscripts for variables and chemical formulas. Example: Write H\u2082O, v\u1d62, a\u2099, log\u2081\u2080.
 Operations: Use standard arithmetic symbols found on a keyboard:
 - Addition/Subtraction: + and -
 - Multiplication: Use the asterisk (*) or a simple space between variables.
-- Division: Use the forward slash (/) or the division sign (÷).
-- Radicals: Use the square root symbol (√) followed by the number/variable.
+- Division: Use the forward slash (/) or the division sign (\u00f7).
+- Radicals: Use the square root symbol (\u221a) followed by the number/variable.
 
 Internal Check: Before generating JSON, ensure absolutely no LaTeX or backslashes exist in the strings.`;
 
@@ -348,13 +371,19 @@ Internal Check: Before generating JSON, ensure absolutely no LaTeX or backslashe
                             onClick={() => setConfig(c => ({ ...c, type: 'mcq' }))}
                             className={`flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${config.type === 'mcq' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-500 hover:text-white'}`}
                           >
-                            MCQ Core
+                            MCQ
                           </button>
                           <button
                             onClick={() => setConfig(c => ({ ...c, type: 'truefalse' }))}
                             className={`flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${config.type === 'truefalse' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-500 hover:text-white'}`}
                           >
-                            True/False
+                            T / F
+                          </button>
+                          <button
+                            onClick={() => setConfig(c => ({ ...c, type: 'numerical' }))}
+                            className={`flex-1 h-12 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${config.type === 'numerical' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-zinc-500 hover:text-white'}`}
+                          >
+                            🔢 Num
                           </button>
                         </div>
                       </div>
