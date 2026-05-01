@@ -57,7 +57,7 @@ const callBackendChat = async (messages: any[], options: RouterOptions): Promise
   // ROUTING LOGIC:
   // 1. Doubt Solver (research) and vision tasks ALWAYS use Google Gemini
   // 2. All other tasks use Nemotron (Nemotron 4 for elite, Nemotron 3 for others)
-  const isDoubtOrVision = options.task === 'research' || options.mode === 'deepresearch' || options.imageFile instanceof File;
+  const isDoubtOrVision = options.task === 'research' || options.mode === 'deepresearch' || options.imageFile instanceof File || options.jsonMode === true;
   
   const modelToUse = options.model || (
     isDoubtOrVision ? DOUBT_IMAGE_MODEL : 

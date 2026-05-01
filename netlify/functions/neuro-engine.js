@@ -71,23 +71,35 @@ exports.handler = async (event) => {
     else if (isPremium) modelToUse = PREMIUM_UPGRADE_MODEL;
   }
 
+  console.log(`[NEURO-ENGINE] ${user.id} | ${userTier} | ${modelToUse} | JSON: ${!!payload.jsonMode}`);
+
   try {
     const isGoogle = modelToUse.startsWith('google/') || modelToUse.includes('gemini');
     if (isGoogle && process.env.GOOGLE_AI_STUDIO_KEY) {
-      // Google Logic...
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelToUse.replace('google/', '')}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`, {
+      const googleModel = modelToUse.replace('google/', '');
+      const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModel}:generateContent?key=${process.env.GOOGLE_AI_STUDIO_KEY}`;
+      
+      const contents = messages.filter(m => m.role !== 'system').map(m => {
+        const parts = Array.isArray(m.content) ? m.content.map(p => {
+          if (p.type === 'text') return { text: p.text };
+          if (p.type === 'image_url') return { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } };
+          return null;
+        }).filter(Boolean) : [{ text: m.content }];
+        return { role: m.role === 'assistant' ? 'model' : 'user', parts };
+      });
+
+      const res = await fetch(googleUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          contents: messages.filter(m => m.role !== 'system').map(m => ({ 
-            role: m.role === 'assistant' ? 'model' : 'user', 
-            parts: Array.isArray(m.content) ? m.content.map(p => (p.type === 'text' ? { text: p.text } : { inline_data: { mime_type: "image/jpeg", data: p.image_url.url.split(',')[1] || p.image_url.url } })) : [{ text: m.content }] 
-          })), 
-          system_instruction: { parts: [{ text: systemPrompt }] } 
+          contents, 
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: payload.jsonMode ? { response_mime_type: "application/json" } : {}
         })
       });
       const data = await res.json();
-      return { statusCode: 200, headers, body: JSON.stringify({ response: data?.candidates?.[0]?.content?.parts?.[0]?.text || "", model: modelToUse }) };
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: modelToUse }) };
     } else {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
