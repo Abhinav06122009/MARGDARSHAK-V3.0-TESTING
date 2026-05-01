@@ -23,12 +23,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Link, useNavigate } from 'react-router-dom';
 import logo from "@/components/logo/logo.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUser } from '@clerk/react';
 
 // src/components/timetable/Timetable.tsx
 
 
 const Timetable: React.FC = () => {
   const navigate = useNavigate();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
   const [events, setEvents] = useState<TimetableEvent[]>([]);
   const [timetableStats, setTimetableStats] = useState<TimetableStats | null>(null);
@@ -108,9 +110,27 @@ const Timetable: React.FC = () => {
       setCurrentUser(user);
       setSecurityVerified(true);
 
-      const premiumRoles = ['premium', 'admin', 'superadmin', 'bdo'];
-      const userRole = user.profile?.role || 'user';
-      setHasPremiumAccess(premiumRoles.includes(userRole));
+      // --- CLERK SUBSCRIPTION RESOLUTION ---
+      // Read exclusively from Clerk publicMetadata
+      const PREMIUM_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+elite', 'premium'];
+      const MASTER_IDS = ['user_3CwM4tADcqKhELg4ZX9r2xIRC4L', 'user_3CylWpMJnNbVpgJcpk9eSIf73gS'];
+
+      let clerkPremium = false;
+      if (clerkUser) {
+        const metadata = clerkUser.publicMetadata || {};
+        const subscription = (metadata.subscription as any) || {};
+        const rawTier = subscription.tier || (metadata as any).subscription_tier || (metadata as any).tier || 'free';
+        const tier = (Array.isArray(rawTier) ? String(rawTier[0]) : String(rawTier)).toLowerCase();
+
+        const rawRoles = (metadata as any).role || [];
+        const roles: string[] = Array.isArray(rawRoles) ? rawRoles.map((r: any) => String(r).toLowerCase()) : [String(rawRoles).toLowerCase()];
+        const isCEO = roles.some(r => ['ceo', 'cto', 'cfo', 'admin', 'superadmin'].includes(r));
+        const isMaster = MASTER_IDS.includes(clerkUser.id);
+
+        clerkPremium = isMaster || isCEO || PREMIUM_TIERS.includes(tier);
+      }
+
+      setHasPremiumAccess(clerkPremium);
 
       const userTimetable = await timetableHelpers.fetchUserTimetable(user.id);
 
