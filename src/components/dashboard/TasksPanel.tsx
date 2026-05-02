@@ -4,6 +4,7 @@ import { CheckSquare, Plus, Search, ChevronDown, AlertCircle, Trash2, Download, 
 import TaskItem from './TaskItem';
 import type { RealTask } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import NeumorphicButton from '@/lib/NeumorphicButton';
 import { Button } from '@/components/ui/button';
 
@@ -88,7 +89,7 @@ export const TasksPanel: React.FC<TasksPanelProps> = ({
       className={cn("bg-zinc-950/40 backdrop-blur-3xl p-6 md:p-10 rounded-[3rem] border border-white/10 relative overflow-hidden group shadow-[0_30px_80px_rgba(0,0,0,0.5)]", className)}
     >
       {/* Background Decor */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('/noise.svg')]" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 space-y-8">

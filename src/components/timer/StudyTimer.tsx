@@ -239,7 +239,7 @@ export default function StudyTimer({ initial, size = 320 }: { initial?: Partial<
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[150px]"
           style={{ backgroundColor: modeConfig.color }}
         />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 brightness-50 mix-blend-overlay" />
       </div>
 
       {/* Nav */}

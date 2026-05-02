@@ -215,7 +215,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             >
               {/* Grain Texture */}
               <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-60 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-60 mix-blend-overlay" />
               </div>
 
               {/* Metallic Inner Edge Highlight */}
