@@ -315,7 +315,7 @@ export const GlobalWellnessBar: React.FC = () => {
               >
                 {/* Section: Built-in */}
                 <div className="px-3 pt-3 pb-1">
-                  <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-2 px-1">Built-in Stations</p>
+                  <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-2 px-1">NEXUS Stations</p>
                   <div className="grid grid-cols-3 gap-1.5">
                     {BUILT_IN_STATIONS.map(s => {
                       const SI = s.Icon;
