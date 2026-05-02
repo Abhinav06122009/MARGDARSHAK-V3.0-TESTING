@@ -34,10 +34,12 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
   const fetchBriefing = useCallback(async (force = false) => {
     if (!user?.id) return;
     if (hasFetchedRef.current && !force) return;
+    
     setIsLoading(true);
     hasFetchedRef.current = true;
+    
     try {
-      const userName = user.user_metadata?.full_name || user.profile?.full_name || "Student";
+      const userName = user.user_metadata?.full_name || user.profile?.full_name || "Scholar";
 
       // Prepare rich context for the AI
       const briefingContext = {
@@ -53,12 +55,30 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
       };
 
       const data = await aiService.generateDailyBriefing(user.id, userName, briefingContext);
-      setBriefing(data);
-    } catch (error) { console.warn("Briefing error", error); }
-    finally { setIsLoading(false); }
+      if (data) {
+        setBriefing(data);
+      } else {
+        throw new Error("AI returned null briefing");
+      }
+    } catch (error) { 
+      console.error("[Briefing-Widget] Critical failure:", error);
+      // Set high-quality fallback so UI doesn't look broken
+      setBriefing({
+        greeting: `Welcome back, ${user.user_metadata?.full_name?.split(' ')[0] || 'Scholar'}`,
+        focus_area: "Daily Overview",
+        message: "I'm analyzing your schedule. Let's start by focusing on your top priority tasks for today.",
+        color: "text-indigo-400"
+      });
+    } finally { 
+      setIsLoading(false); 
+    }
   }, [user, tasks, notes, courses, grades, timetable, sessions, analytics, stats]);
 
-  useEffect(() => { if (user?.id) fetchBriefing(); }, [user?.id, fetchBriefing]);
+  useEffect(() => { 
+    if (user?.id && !hasFetchedRef.current) {
+      fetchBriefing();
+    }
+  }, [user?.id, fetchBriefing]);
 
   return (
     <motion.div

@@ -208,19 +208,19 @@ export const aiService = {
     // Construct a rich prompt based on available data
     let contextStr = "";
     if (context) {
-      const { tasks, grades, courses, schedule, stats } = context;
+      const { tasks = [], grades = [], courses = [], schedule = [], stats = {} } = context as any;
       const notes = context.notes || [];
       const sessions = context.sessions || [];
 
-      const pendingTasks = tasks?.filter(t => t.status !== 'completed').slice(0, 5).map(t => t.title).join(", ") || "None";
-      const recentGrades = grades?.slice(0, 3).map(g => `${g.subject}: ${g.percentage}%`).join(", ") || "None";
-      const activeCourses = courses?.map(c => c.name).join(", ") || "General Studies";
-      const todaySchedule = schedule?.slice(0, 4).map((entry) => {
-        const title = entry.class_name || entry.title || entry.subject || "Class";
-        return `${title} (${entry.start_time || "time TBD"})`;
+      const pendingTasks = tasks?.filter((t: any) => t && t.status !== 'completed').slice(0, 5).map((t: any) => t.title).join(", ") || "None";
+      const recentGrades = grades?.slice(0, 3).map((g: any) => `${g.subject || 'Subject'}: ${g.percentage || 0}%`).join(", ") || "None";
+      const activeCourses = courses?.map((c: any) => c.name || 'Course').join(", ") || "General Studies";
+      const todaySchedule = schedule?.slice(0, 4).map((entry: any) => {
+        const title = entry?.class_name || entry?.title || entry?.subject || "Class";
+        return `${title} (${entry?.start_time || "time TBD"})`;
       }).join(", ") || "None";
-      const recentNotes = notes?.slice(0, 4).map(n => n.title).join(", ") || "None";
-      const recentSessions = sessions?.slice(0, 3).map(s => `${s.subject || "Study"} ${s.duration || 0}m`).join(", ") || "None";
+      const recentNotes = notes?.slice(0, 4).map((n: any) => n.title).join(", ") || "None";
+      const recentSessions = sessions?.slice(0, 3).map((s: any) => `${s.subject || "Study"} ${s.duration || 0}m`).join(", ") || "None";
 
       contextStr = `
         CONTEXT DATA:
@@ -230,8 +230,8 @@ export const aiService = {
         - Today's Timetable: ${todaySchedule}
         - Recent Notes: ${recentNotes}
         - Recent Study Sessions: ${recentSessions}
-        - Study Streak: ${stats.studyStreak} days
-        - Hours Studied: ${stats.hoursStudied}
+        - Study Streak: ${stats?.studyStreak || 0} days
+        - Hours Studied: ${stats?.hoursStudied || 0}
       `;
     }
 
@@ -259,11 +259,12 @@ export const aiService = {
       return briefing;
 
     } catch (e) {
+      console.error("[aiService] Briefing Gen Failure, using fallback:", e);
       // Graceful fallback so the dashboard doesn't break
       return {
-        greeting: `Welcome back, ${userName}`,
-        focus_area: "General Review",
-        message: "I'm ready to help you organize your studies today.",
+        greeting: `Welcome back, ${userName.split(' ')[0]}`,
+        focus_area: "Daily Overview",
+        message: "I'm ready to help you organize your studies today. Let's start with your most important tasks.",
         color: "text-indigo-400"
       };
     }
