@@ -84,6 +84,14 @@ export const initSecurityHardening = () => {
         userId = await translateClerkIdToUUID((window as any).Clerk.user.id);
       }
 
+      // CRITICAL: Skip DB logging if no authenticated session is present to avoid 401 errors
+      // Front-end protection (cooldowns, strikes in localStorage) still functions.
+      if (!userId) {
+        console.log('🛡️ Security violation noted locally (Anonymous user).');
+        window.dispatchEvent(new CustomEvent('security-warning', { detail: { type, ip: currentIP } }));
+        return;
+      }
+
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
       const { data: dbThreats } = await supabase
