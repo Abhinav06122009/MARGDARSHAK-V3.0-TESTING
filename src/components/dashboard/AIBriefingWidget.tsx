@@ -109,7 +109,10 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
            style={{ backgroundImage: 'repeating-linear-gradient(0deg, #fff 0px, transparent 1px, transparent 3px)', backgroundSize: '100% 4px' }} />
 
-      <div className="relative p-8 md:p-10 flex flex-col h-full z-10">
+      {/* Grain Texture - Fixed 404 */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')] opacity-[0.04] mix-blend-overlay pointer-events-none" />
+
+      <div className="relative p-5 sm:p-8 md:p-10 flex flex-col h-full z-10">
         
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">

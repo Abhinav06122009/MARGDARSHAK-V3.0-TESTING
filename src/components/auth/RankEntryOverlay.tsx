@@ -208,14 +208,14 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           >
             <motion.div
               initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
-              animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }}
+              animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
               transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
-              className={`relative p-8 rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group max-w-[80vw]`}
-              style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.75) 0%, ${rankInfo.style.accent}08 50%, rgba(0,0,0,0.85) 100%)` }}
+              className={`relative p-6 sm:p-8 md:p-12 rounded-[2.5rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group w-[92vw] sm:w-[85vw] md:w-[650px] max-h-[90vh] overflow-y-auto sm:overflow-visible`}
+              style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.85) 0%, ${rankInfo.style.accent}10 50%, rgba(0,0,0,0.9) 100%)` }}
             >
-              {/* Grain Texture */}
-              <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-60 mix-blend-overlay" />
+              {/* Grain Texture - Fixed 404 by using reliable noise pattern */}
+              <div className="absolute inset-0 opacity-[0.08] pointer-events-none overflow-hidden rounded-[2.5rem] sm:rounded-[4rem]">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')] opacity-60 mix-blend-overlay" />
               </div>
 
               {/* Metallic Inner Edge Highlight */}
@@ -244,10 +244,10 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2 }}
-                  className="mb-6 flex flex-col items-center gap-2"
+                  className="mb-4 sm:mb-6 flex flex-col items-center gap-2"
                 >
-                  <img src="/logo.png" alt="Margdarshak Logo" className="w-12 h-12 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[8px] font-black tracking-[0.8em] text-white/50 uppercase">VSAV GYANTAPA HIGH COMMAND</span>
+                  <img src="/logo.png" alt="Margdarshak Logo" className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[7px] sm:text-[8px] font-black tracking-[0.4em] sm:tracking-[0.8em] text-white/50 uppercase text-center">VSAV GYANTAPA HIGH COMMAND</span>
                 </motion.div>
 
                 <motion.div
@@ -257,7 +257,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   className="mb-4 relative"
                 >
                    <div className="absolute inset-0 blur-[30px] opacity-60" style={{ backgroundColor: rankInfo.style.accent }} />
-                   <rankInfo.icon className="w-24 h-24 relative z-10" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 20px ${rankInfo.style.glow})` }} />
+                   <rankInfo.icon className="w-20 h-20 sm:w-24 sm:h-24 relative z-10" style={{ color: rankInfo.style.accent, filter: `drop-shadow(0 0 20px ${rankInfo.style.glow})` }} />
                 </motion.div>
                 
                 <div className="flex flex-col items-center text-center">
@@ -268,8 +268,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                       </span>
                    </div>
 
-                   <h2 className={`text-5xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-8 mb-4`}
-                     style={{ filter: `drop-shadow(0 0 30px ${rankInfo.style.glow})` }}>
+                   <h2 className="text-4xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter bg-gradient-to-b bg-clip-text text-transparent px-2 sm:px-8 mb-4"
+                     style={{ 
+                       backgroundImage: `linear-gradient(to bottom, ${rankInfo.style.gradient.replace('from-', '').split(' via-')[0]}, ${rankInfo.style.accent})`,
+                       filter: `drop-shadow(0 0 30px ${rankInfo.style.glow})` 
+                     }}>
                        <motion.span
                          initial={{ letterSpacing: "0.5em", opacity: 0 }}
                          animate={{ letterSpacing: "-0.05em", opacity: 1 }}
@@ -293,7 +296,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                    </div>
 
                    {/* Rank Achievement Badges */}
-                   <div className="flex gap-2">
+                   <div className="flex flex-wrap justify-center gap-2">
                       {[rankInfo.style.theme === 'rhodium' ? 'RHODIUM' : rankInfo.style.theme === 'platinum' ? 'PLATINUM' : 'IMPERIAL',
                         'VERIFIED', 'ELITE'].map((label, i) => (
                         <motion.div
@@ -301,11 +304,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 2.5 + i * 0.2 }}
-                          className="px-4 py-1.5 rounded-lg border flex items-center gap-2"
+                          className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg border flex items-center gap-2"
                           style={{ background: `${rankInfo.style.accent}10`, borderColor: `${rankInfo.style.accent}30` }}
                         >
                            <Star className="w-2 h-2" style={{ color: rankInfo.style.accent, fill: rankInfo.style.accent }} />
-                           <span className="text-[6px] font-black uppercase tracking-widest" style={{ color: rankInfo.style.accent }}>{label}</span>
+                           <span className="text-[5px] sm:text-[6px] font-black uppercase tracking-widest" style={{ color: rankInfo.style.accent }}>{label}</span>
                         </motion.div>
                       ))}
                    </div>
@@ -318,24 +321,22 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                  <span className="text-[6px] font-black tracking-widest">HIGH RANKED OFFICIAL</span>
               </div>
             </motion.div>
-
-            {/* Greeting Sub-Section */}
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 3 }}
-              className="mt-8 flex flex-col items-center"
+              className="mt-6 sm:mt-8 flex flex-col items-center px-4"
             >
-              <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-3">
+              <h3 className="text-xl sm:text-2xl font-black text-white italic uppercase tracking-tighter mb-3 text-center">
                 Welcome, Commander {clerkUser?.firstName || clerkUser?.username}
               </h3>
               
-              <div className="flex items-center gap-6 text-[7px] font-black text-zinc-500 uppercase tracking-[0.5em]">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-[6px] sm:text-[7px] font-black text-zinc-500 uppercase tracking-[0.3em] sm:tracking-[0.5em] text-center">
                  <div className="flex items-center gap-2 group">
                     <Activity className="w-3 h-3 text-emerald-500 group-hover:animate-pulse" />
                     <span>VSAV GYANTA STATUS: Synchronized</span>
                  </div>
-                 <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                 <div className="hidden sm:block w-1 h-1 rounded-full bg-zinc-800" />
                  <div className="flex items-center gap-2 group">
                     <Cpu className="w-3 h-3 text-blue-500 group-hover:rotate-90 transition-transform" />
                     <span>Margdarshak Core: Online</span>

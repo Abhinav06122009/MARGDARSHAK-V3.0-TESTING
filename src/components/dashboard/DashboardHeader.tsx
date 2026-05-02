@@ -133,13 +133,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </motion.div>
 
         {/* Brand name - Hidden on small mobile */}
-        <div className="hidden xs:block md:block">
-          <p className="text-white font-black text-xs md:text-base tracking-tight leading-none">MARGDARSHAK</p>
-          <p className="text-zinc-500 text-[8px] md:text-[10px] font-semibold tracking-widest uppercase mt-0.5">AI Academic Platform</p>
+        <div className="hidden sm:block">
+          <p className="text-white font-black text-xs md:text-sm tracking-tight leading-none">MARGDARSHAK</p>
+          <p className="text-zinc-500 text-[8px] md:text-[9px] font-semibold tracking-widest uppercase mt-0.5">Neural Core</p>
         </div>
 
         {/* Divider - Hidden on mobile */}
-        <div className="hidden md:block h-8 w-px bg-white/10 mx-1" />
+        <div className="hidden sm:block h-6 w-px bg-white/10 mx-1" />
 
         {/* Online pill - Simplified on mobile */}
         <motion.div
@@ -187,10 +187,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <motion.button
               onClick={() => { setShowExportMenu(v => !v); setShowUserMenu(false); }}
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-300 text-xs font-semibold"
+              className="flex items-center gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-300 text-xs font-semibold"
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Export</span>
+              <span className="hidden md:inline">Export</span>
               <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
             </motion.button>
             <AnimatePresence>
@@ -245,26 +245,26 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               onClick={() => { setShowUserMenu(v => !v); setShowExportMenu(false); }}
               whileHover={{ scale: 1.03, y: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer group"
             >
               <div className="relative">
-                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${roleColor} flex items-center justify-center shadow-lg text-white text-sm font-black`}>
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br ${roleColor} flex items-center justify-center shadow-lg text-white text-xs sm:text-sm font-black`}>
                   {initials}
                 </div>
                 <motion.div
-                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-zinc-900"
-                  animate={{ scale: [1, 1.3, 1], boxShadow: ['0 0 0px 0px rgba(52,211,153,0)', '0 0 6px 2px rgba(52,211,153,0.7)', '0 0 0px 0px rgba(52,211,153,0)'] }}
+                  className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-zinc-900 bg-emerald-400"
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </div>
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden md:block">
                 <p className="text-white font-bold text-sm leading-none">{nameToUse.split(' ')[0]}</p>
-                <p className={`text-xs font-bold mt-0.5 flex items-center gap-1 bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
+                <p className={`text-[10px] font-bold mt-1 flex items-center gap-1 bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
                   <Shield className="w-2.5 h-2.5 text-emerald-400" />
                   {displayRole}
                 </p>
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
             </motion.button>
 
             {/* User dropdown */}

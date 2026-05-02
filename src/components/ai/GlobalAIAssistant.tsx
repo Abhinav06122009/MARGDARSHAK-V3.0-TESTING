@@ -119,7 +119,7 @@ const GlobalAIAssistant: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[500px] flex flex-col bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[360px] max-h-[500px] flex flex-col bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gradient-to-r from-amber-500/10 to-transparent">
               <div className="flex items-center gap-2">

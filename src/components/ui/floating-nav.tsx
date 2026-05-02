@@ -122,7 +122,7 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onNavigate, currentPag
         >
           <div className="floating-nav-container rounded-[2rem] p-2.5 shadow-2xl overflow-hidden relative">
             {/* Background Grain/Noise */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\"/%3E%3C/svg%3E')]" />
             
             <div className="flex items-center space-x-1.5 overflow-x-auto max-w-screen-lg scrollbar-hide relative z-10">
               {navigationItems.map((item, index) => {
