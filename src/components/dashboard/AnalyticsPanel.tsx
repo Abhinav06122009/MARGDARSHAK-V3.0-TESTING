@@ -178,5 +178,3 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ analytics, tasks, taskP
 };
 
 export default AnalyticsPanel;
-
-export default AnalyticsPanel;

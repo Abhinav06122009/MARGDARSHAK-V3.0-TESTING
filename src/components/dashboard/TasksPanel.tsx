@@ -223,5 +223,3 @@ export const TasksPanel: React.FC<TasksPanelProps> = ({
 };
 
 export default TasksPanel;
-
-export default TasksPanel;

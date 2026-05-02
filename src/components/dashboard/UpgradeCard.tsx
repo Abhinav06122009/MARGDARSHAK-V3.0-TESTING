@@ -99,5 +99,3 @@ const UpgradeCard = () => {
 };
 
 export default UpgradeCard;
-
-export default UpgradeCard;

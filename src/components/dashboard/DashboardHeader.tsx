@@ -241,5 +241,3 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 };
 
 export default DashboardHeader;
-
-export default DashboardHeader;
