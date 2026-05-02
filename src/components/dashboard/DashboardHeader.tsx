@@ -86,8 +86,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 18 }}
       className="relative flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"
     >
-      <div className="absolute inset-0 rounded-2xl bg-zinc-900/40 backdrop-blur-xl border border-white/10" />
-        {/* Animated gradient border */}
+      <div className="absolute inset-0 rounded-2xl bg-zinc-900/40 backdrop-blur-xl border border-white/10 overflow-hidden">
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-60"
           animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}

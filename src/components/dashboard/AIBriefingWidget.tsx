@@ -131,7 +131,6 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
               </div>
               <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-0.5">Margdarshak Neural Core V3.0</p>
             </div>
-          </div>
 
           <div className="flex items-center gap-3">
             <motion.button 
