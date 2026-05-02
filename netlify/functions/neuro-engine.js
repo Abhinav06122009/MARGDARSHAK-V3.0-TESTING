@@ -145,28 +145,32 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
-      // Support both qwen-code and qwen-coder aliases
-      let requestedModel = payload.model === 'qwen-code' ? 'qwen-coder' : payload.model;
-      let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large', 'openai'].includes(requestedModel) ? requestedModel : 'gemini-fast';
+      
+      // POLLINATIONS MODEL MAPPING
+      let selectedModel = 'gemini-fast'; // Most stable default
+      if (payload.model === 'qwen-code' || payload.model === 'qwen-coder') {
+        selectedModel = 'qwen-coder';
+      } else if (['mistral', 'openai', 'openai-large'].includes(payload.model)) {
+        selectedModel = payload.model;
+      }
 
-      // Default to qwen-coder for JSON tasks if not specified, as requested by user
+      // Default to qwen-coder for JSON tasks for better stability
       if (payload.jsonMode && selectedModel === 'gemini-fast') {
         selectedModel = 'qwen-coder';
       }
 
-      const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || selectedModel === 'openai' || payload.task === 'notes' || payload.task === 'tasks')
-        ? (process.env.POLLINATIONS_NOTES_KEY || process.env.POLLINATIONS_TIMETABLE_KEY || process.env.POLLINATIONS_API_KEY)
-        : (process.env.POLLINATIONS_API_KEY);
+      const apiKey = process.env.POLLINATIONS_API_KEY || process.env.POLLINATIONS_NOTES_KEY;
 
       if (!apiKey) {
-        throw new Error(`Missing API key for model: ${selectedModel}`);
+        throw new Error("POLLINATIONS_API_KEY is missing in Netlify environment variables.");
       }
 
       const body = JSON.stringify({
         model: selectedModel,
         messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
-        jsonMode: payload.jsonMode === true,
-        seed: Math.floor(Math.random() * 1000000) // Force fresh response
+        // Pollinations doesn't always support the jsonMode flag in the body, 
+        // we rely on our strict system prompt instead for better compatibility.
+        seed: Math.floor(Math.random() * 1000000)
       });
 
       const pollHeaders = {

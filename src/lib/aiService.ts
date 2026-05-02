@@ -252,7 +252,7 @@ export const aiService = {
     try {
       const briefing = await modelRouter.generateJSON(systemPrompt, {
         tier: 'premium',
-        model: 'qwen-code'
+        model: 'qwen-coder'
       });
 
       if (!briefing || !briefing.greeting) throw new Error("Invalid or empty JSON from AI");
@@ -478,7 +478,7 @@ export const aiService = {
       `;
       const result = await modelRouter.generateJSON(systemPrompt, { 
         tier: 'premium',
-        model: 'qwen-code'
+        model: 'qwen-coder'
       });
       return result || null;
     } catch (e) {
