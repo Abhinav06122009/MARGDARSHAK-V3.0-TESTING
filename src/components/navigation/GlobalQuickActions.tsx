@@ -23,60 +23,54 @@ interface Action {
 }
 
 // ─── Master Action Registry ───────────────────────────────────────────────────
+// ─── Master Action Registry ───────────────────────────────────────────────────
 const ALL_ACTIONS: Action[] = [
-  // --- CORE HUB ---
-  { icon: Command, title: 'Nexus Dashboard', subtitle: 'Main command center', color: 'from-blue-600 to-indigo-700', path: '/dashboard', category: 'Core', keywords: ['dash','dashboard','home','main'] },
-  { icon: Zap, title: 'Landing Matrix', subtitle: 'Platform overview & entry', color: 'from-zinc-700 to-zinc-900', path: '/', category: 'Core', keywords: ['landing','home','start'] },
+  // --- IDENTITY & ACCESS ---
+  { icon: Command, title: 'Neural Dashboard', subtitle: 'Main command center and framework overview', color: 'from-blue-600 to-indigo-700', path: '/dashboard', category: 'Identity & Access', keywords: ['dash','dashboard','home','main'] },
+  { icon: User, title: 'Profile Node', subtitle: 'Manage your universal holographic ID', color: 'from-zinc-400 to-zinc-600', path: '/profile', category: 'Identity & Access', keywords: ['profile','identity','user','account','bio'] },
+  { icon: Sparkles, title: 'Premium Upgrade', subtitle: 'Ascend to Elite or Multi-core tiers', color: 'from-yellow-400 to-amber-600', path: '/upgrade', category: 'Identity & Access', keywords: ['premium','upgrade','elite','tier'] },
+  { icon: Settings, title: 'System Settings', subtitle: 'Configure neural core and aesthetic parameters', color: 'from-zinc-500 to-zinc-700', path: '/settings', category: 'Identity & Access', keywords: ['settings','preference','config','account'] },
+  { icon: Zap, title: 'Identity Hub', subtitle: 'Authentication and session management enclave', color: 'from-zinc-700 to-zinc-900', path: '/auth', category: 'Identity & Access', keywords: ['login','auth','identity'] },
 
-  // --- AI HUB ---
-  { icon: BrainCircuit, title: 'AI Tutor (SAARTHI)', subtitle: 'Ask any academic question 24/7', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'AI Hub', keywords: ['ai','tutor','question','assistant','chat','saarthi'] },
-  { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition for mastery', color: 'from-lime-400 to-emerald-500', path: '/flashcards', category: 'AI Hub', keywords: ['flash','card','memory','spaced','repeat'] },
-  { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Test your knowledge with AI', color: 'from-purple-500 to-violet-600', path: '/quiz', category: 'AI Hub', keywords: ['quiz','test','exam','mcq','generate'] },
-  { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance & drafts', color: 'from-sky-400 to-blue-500', path: '/essay-helper', category: 'AI Hub', keywords: ['essay','write','writing','draft','help'] },
-  { icon: Sparkles, title: 'Study Planner', subtitle: 'AI-generated personalized schedules', color: 'from-emerald-400 to-teal-500', path: '/study-planner', category: 'AI Hub', keywords: ['plan','schedule','study','planner','time'] },
-  { icon: BarChart3, title: 'AI Analytics', subtitle: 'Deep performance insights', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics', category: 'AI Hub', keywords: ['analytics','insight','performance','stats','data'] },
-  { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve complex problems', color: 'from-pink-500 to-rose-500', path: '/doubt-solver', category: 'AI Hub', keywords: ['doubt','solve','photo','image','snap'] },
-  { icon: Sparkles, title: 'Smart Notes', subtitle: 'AI-powered note enhancement', color: 'from-violet-500 to-fuchsia-600', path: '/smart-notes', category: 'AI Hub', keywords: ['note','smart','ai','enhance'] },
+  // --- COGNITIVE SUITE ---
+  { icon: BrainCircuit, title: 'AI Assistant', subtitle: 'Direct uplink to Margdarshak Neural Core', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'Cognitive Suite', keywords: ['ai','tutor','question','assistant','chat','saarthi'] },
+  { icon: Sparkles, title: 'Study Planner', subtitle: 'Algorithmic academic orchestration', color: 'from-emerald-400 to-teal-500', path: '/study-planner', category: 'Cognitive Suite', keywords: ['plan','schedule','study','planner','time'] },
+  { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Neural knowledge assessment engine', color: 'from-purple-500 to-violet-600', path: '/quiz', category: 'Cognitive Suite', keywords: ['quiz','test','exam','mcq','generate'] },
+  { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance and drafting module', color: 'from-sky-400 to-blue-500', path: '/essay-helper', category: 'Cognitive Suite', keywords: ['essay','write','writing','draft','help'] },
+  { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition for mastery', color: 'from-lime-400 to-emerald-500', path: '/flashcards', category: 'Cognitive Suite', keywords: ['flash','card','memory','spaced','repeat'] },
+  { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve complex problems', color: 'from-pink-500 to-rose-500', path: '/doubt-solver', category: 'Cognitive Suite', keywords: ['doubt','solve','photo','image','snap'] },
+  { icon: Sparkles, title: 'Smart Notes', subtitle: 'AI-powered note enhancement', color: 'from-violet-500 to-fuchsia-600', path: '/smart-notes', category: 'Cognitive Suite', keywords: ['note','smart','ai','enhance'] },
 
-  // --- STUDY SUITE ---
-  { icon: Timer, title: 'Study Timer', subtitle: 'Pomodoro focus sessions', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Study Suite', keywords: ['timer','pomodoro','focus','session','countdown'] },
-  { icon: MousePointer2, title: 'Calculator', subtitle: 'Scientific calculation engine', color: 'from-slate-400 to-slate-600', path: '/calculator', category: 'Study Suite', keywords: ['calc','math','calculator','formula'] },
-  { icon: Briefcase, title: 'Tasks & To-Dos', subtitle: 'Manage your daily workload', color: 'from-blue-400 to-indigo-600', path: '/tasks', category: 'Study Suite', keywords: ['task','todo','to-do','manage','list'] },
-  { icon: Book, title: 'Digital Notes', subtitle: 'Smart note-taking system', color: 'from-orange-400 to-amber-600', path: '/notes', category: 'Study Suite', keywords: ['note','notes','write','text','jot'] },
-  { icon: Trophy, title: 'Achievements', subtitle: 'Your badges & leaderboard rank', color: 'from-amber-400 to-yellow-500', path: '/achievements', category: 'Study Suite', keywords: ['trophy','achieve','badge','leader','rank'] },
-  { icon: BarChart3, title: 'Grade Tracker', subtitle: 'Monitor GPA & academic results', color: 'from-emerald-500 to-teal-600', path: '/grades', category: 'Study Suite', keywords: ['grade','gpa','result','score','marks'] },
+  // --- PERFORMANCE & TRACKING ---
+  { icon: BarChart3, title: 'Progress Tracer', subtitle: 'Real-time academic telemetry for Elite users', color: 'from-indigo-400 to-blue-600', path: '/progress', category: 'Performance & Tracking', keywords: ['progress','track','graph','chart','improve','tracer'] },
+  { icon: BarChart3, title: 'Grade Management', subtitle: 'Monitor academic performance metrics', color: 'from-emerald-500 to-teal-600', path: '/grades', category: 'Performance & Tracking', keywords: ['grade','gpa','result','score','marks'] },
+  { icon: GraduationCap, title: 'Course Management', subtitle: 'Universal syllabus and curriculum hub', color: 'from-violet-400 to-purple-600', path: '/courses', category: 'Performance & Tracking', keywords: ['course','subject','class','lecture','study'] },
+  { icon: Calendar, title: 'Timetable Hub', subtitle: 'Temporal schedule management', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Performance & Tracking', keywords: ['calendar','timetable','schedule','event','class'] },
+  { icon: Calendar, title: 'Academic Calendar', subtitle: 'Synchronized events and deadline matrix', color: 'from-blue-500 to-indigo-600', path: '/calendar', category: 'Performance & Tracking', keywords: ['calendar','events','dates'] },
+  { icon: Book, title: 'Notes Database', subtitle: 'Structured knowledge storage', color: 'from-orange-400 to-amber-600', path: '/notes', category: 'Performance & Tracking', keywords: ['note','notes','write','text','jot'] },
+  { icon: Briefcase, title: 'Tasks & To-Dos', subtitle: 'Operational workload management', color: 'from-blue-400 to-indigo-600', path: '/tasks', category: 'Performance & Tracking', keywords: ['task','todo','to-do','manage','list'] },
+  { icon: BarChart3, title: 'AI Analytics', subtitle: 'Deep performance growth insights', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics', category: 'Performance & Tracking', keywords: ['analytics','insight','performance','stats','data'] },
+  { icon: Trophy, title: 'Achievements', subtitle: 'Neural badges and leaderboard rank', color: 'from-amber-400 to-yellow-500', path: '/achievements', category: 'Performance & Tracking', keywords: ['trophy','achieve','badge','leader','rank'] },
+  { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Real-time academic resume generator', color: 'from-indigo-500 to-violet-600', path: '/portfolio', category: 'Performance & Tracking', keywords: ['portfolio','resume','career','cv','job'] },
+  { icon: Clock, title: 'Exam Deadlines', subtitle: 'Global academic deadline tracking', color: 'from-amber-500 to-orange-600', path: '/deadlines', category: 'Performance & Tracking', keywords: ['exam','deadline','jee','neet','sat','date'] },
+  { icon: Book, title: 'Syllabus Tracker', subtitle: 'Neural curriculum completion status', color: 'from-emerald-400 to-green-600', path: '/syllabus', category: 'Performance & Tracking', keywords: ['syllabus','curriculum','topic','chapter'] },
+  { icon: Headphones, title: 'Wellness Sanctuary', subtitle: 'Mental and physical health optimization', color: 'from-teal-400 to-cyan-600', path: '/wellness', category: 'Performance & Tracking', keywords: ['wellness','mental','health','relax','mood'] },
 
-  // --- CAMPUS MATRIX ---
-  { icon: Calendar, title: 'Timetable', subtitle: 'Automated class schedules', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Campus', keywords: ['calendar','timetable','schedule','event','class'] },
-  { icon: Calendar, title: 'Academic Calendar', subtitle: 'Events & deadline overview', color: 'from-blue-500 to-indigo-600', path: '/calendar', category: 'Campus', keywords: ['calendar','events','dates'] },
-  { icon: GraduationCap, title: 'My Courses', subtitle: 'Enrollment & course content', color: 'from-violet-400 to-purple-600', path: '/courses', category: 'Campus', keywords: ['course','subject','class','lecture','study'] },
-  { icon: BarChart3, title: 'Overall Progress', subtitle: 'Academic growth trajectory', color: 'from-indigo-400 to-blue-600', path: '/progress', category: 'Campus', keywords: ['progress','track','graph','chart','improve'] },
-  { icon: Book, title: 'Syllabus Tracker', subtitle: 'Curriculum completion status', color: 'from-emerald-400 to-green-600', path: '/syllabus', category: 'Campus', keywords: ['syllabus','curriculum','topic','chapter'] },
-  { icon: Headphones, title: 'Wellness Center', subtitle: 'Mental & Physical health tools', color: 'from-teal-400 to-cyan-600', path: '/wellness', category: 'Campus', keywords: ['wellness','mental','health','relax','mood'] },
-
-  // --- PROFESSIONAL ---
-  { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Real-time academic resume generator', color: 'from-indigo-500 to-violet-600', path: '/portfolio', category: 'Professional', keywords: ['portfolio','resume','career','cv','job'] },
-  { icon: Clock, title: 'Exam Deadlines', subtitle: 'JEE · NEET · SAT · Global Exams', color: 'from-amber-500 to-orange-600', path: '/deadlines', category: 'Professional', keywords: ['exam','deadline','jee','neet','sat','date'] },
-
-  // --- IDENTITY & ACCOUNT ---
-  { icon: User, title: 'Identity Hub', subtitle: 'Universal holographic ID & bio', color: 'from-zinc-400 to-zinc-600', path: '/profile', category: 'Account', keywords: ['profile','identity','user','account','bio'] },
-  { icon: Settings, title: 'Nexus Settings', subtitle: 'System preferences & security', color: 'from-zinc-500 to-zinc-700', path: '/settings', category: 'Account', keywords: ['settings','preference','config','account'] },
-  { icon: Sparkles, title: 'Upgrade to Elite', subtitle: 'Unlock the full power of Nexus AI', color: 'from-yellow-400 to-amber-600', path: '/upgrade', category: 'Account', keywords: ['premium','upgrade','elite','tier'] },
-
-  // --- RESOURCES & SUPPORT ---
-  { icon: Library, title: 'Documentation', subtitle: 'Platform guides & academic docs', color: 'from-slate-500 to-slate-700', path: '/docs', category: 'Resources', keywords: ['docs','help','guide','manual'] },
-  { icon: FileText, title: 'Nexus Blog', subtitle: 'Latest updates & study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Resources', keywords: ['blog','news','tips','update'] },
-  { icon: Headphones, title: 'Help Center', subtitle: 'Contact support & FAQ', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Resources', keywords: ['help','support','faq','contact'] },
-  { icon: User, title: 'About Us', subtitle: 'The mission behind MARGDARSHAK', color: 'from-blue-500 to-indigo-600', path: '/about', category: 'Resources', keywords: ['about','mission','team'] },
-  { icon: Headphones, title: 'Contact Us', subtitle: 'Direct line to our support team', color: 'from-cyan-500 to-blue-600', path: '/contact', category: 'Resources', keywords: ['contact','email','support'] },
-  { icon: ArrowUp, title: 'System Status', subtitle: 'Real-time matrix health', color: 'from-emerald-400 to-green-500', path: '/status', category: 'System', keywords: ['status','health','uptime','server'] },
-  { icon: Hash, title: 'Sitemap', subtitle: 'Navigational matrix overview', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'System', keywords: ['sitemap','map','navigation'] },
-
-  // --- LEGAL & POLICIES ---
-  { icon: Star, title: 'Privacy Policy', subtitle: 'Data protection standards', color: 'from-zinc-400 to-zinc-600', path: '/privacy', category: 'Legal', keywords: ['privacy','legal','data'] },
-  { icon: Star, title: 'Terms of Service', subtitle: 'Platform usage agreement', color: 'from-zinc-400 to-zinc-600', path: '/terms', category: 'Legal', keywords: ['terms','legal','tos'] },
-  { icon: Star, title: 'Cookie Policy', subtitle: 'Tracking & cookie usage', color: 'from-zinc-400 to-zinc-600', path: '/cookies', category: 'Legal', keywords: ['cookies','legal'] },
-  { icon: Star, title: 'GDPR Compliance', subtitle: 'Global data regulations', color: 'from-zinc-400 to-zinc-600', path: '/gdpr', category: 'Legal', keywords: ['gdpr','legal','europe'] },
+  // --- LEGAL & OPERATIONAL ---
+  { icon: ArrowUp, title: 'System Status', subtitle: 'Real-time matrix health and feedback loop', color: 'from-emerald-400 to-green-500', path: '/status', category: 'Legal & Operational', keywords: ['status','health','uptime','server'] },
+  { icon: Star, title: 'Privacy Protocol', subtitle: 'Data encryption and security standards', color: 'from-zinc-400 to-zinc-600', path: '/privacy', category: 'Legal & Operational', keywords: ['privacy','legal','data'] },
+  { icon: Star, title: 'Terms of Accord', subtitle: 'Operational guidelines and legal framework', color: 'from-zinc-400 to-zinc-600', path: '/terms', category: 'Legal & Operational', keywords: ['terms','legal','tos'] },
+  { icon: Hash, title: 'Sitemap Index', subtitle: 'This navigational matrix', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'Legal & Operational', keywords: ['sitemap','map','navigation'] },
+  { icon: Library, title: 'Protocol Docs', subtitle: 'Platform technical knowledge base', color: 'from-slate-500 to-slate-700', path: '/docs', category: 'Legal & Operational', keywords: ['docs','help','guide','manual'] },
+  { icon: FileText, title: 'Intelligence Blog', subtitle: 'Latest updates and neural study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Legal & Operational', keywords: ['blog','news','tips','update'] },
+  { icon: Headphones, title: 'Help Center', subtitle: 'Margdarshak direct support uplink', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Legal & Operational', keywords: ['help','support','faq','contact'] },
+  { icon: User, title: 'Mission Overview', subtitle: 'The vision behind the MARGDARSHAK mission', color: 'from-blue-500 to-indigo-600', path: '/about', category: 'Legal & Operational', keywords: ['about','mission','team'] },
+  { icon: Headphones, title: 'Direct Uplink', subtitle: 'Direct line to our core support team', color: 'from-cyan-500 to-blue-600', path: '/contact', category: 'Legal & Operational', keywords: ['contact','email','support'] },
+  { icon: Star, title: 'Cookie Policy', subtitle: 'Operational tracking and cookie standards', color: 'from-zinc-400 to-zinc-600', path: '/cookies', category: 'Legal & Operational', keywords: ['cookies','legal'] },
+  { icon: Star, title: 'GDPR Compliance', subtitle: 'Global data protection regulations', color: 'from-zinc-400 to-zinc-600', path: '/gdpr', category: 'Legal & Operational', keywords: ['gdpr','legal','europe'] },
+  { icon: MousePointer2, title: 'Neural Calculator', subtitle: 'Scientific calculation engine module', color: 'from-slate-400 to-slate-600', path: '/calculator', category: 'Legal & Operational', keywords: ['calc','math','calculator','formula'] },
+  { icon: Timer, title: 'Focus Timer', subtitle: 'Temporal study orchestration', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Legal & Operational', keywords: ['timer','pomodoro','focus','session','countdown'] },
+  { icon: Zap, title: 'Landing Matrix', subtitle: 'Global platform entry and overview', color: 'from-zinc-700 to-zinc-900', path: '/', category: 'Legal & Operational', keywords: ['landing','home','start'] },
 ];
 
 
