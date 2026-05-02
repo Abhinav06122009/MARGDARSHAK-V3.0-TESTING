@@ -15,6 +15,11 @@ import type {
 } from '@/lib/dashboard';
 
 export const dashboardService = {
+  // VERSION MARKER FOR CACHE VERIFICATION
+  _init: (() => {
+    console.log('%c🛡️ MARGDARSHAK_SYNC_V4: ACTIVE', 'color: #10b981; font-weight: bold; font-size: 14px;');
+  })(),
+
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
       const clerkUser = await supabaseHelpers.getCurrentUser();
