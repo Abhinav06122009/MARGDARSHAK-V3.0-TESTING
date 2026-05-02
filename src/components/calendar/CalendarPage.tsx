@@ -121,10 +121,10 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
       if (isEditing) {
         await dashboardService.updateCalendarEvent(isEditing, eventData, user.id);
-        toast({ title: "Event Synchronized", description: "Event updated in memory banks." });
+        toast({ title: "Event Sync", description: "Event updated in memory banks." });
       } else {
         await dashboardService.createCalendarEvent(eventData, user.id);
-        toast({ title: "Add Event", description: "New event synchronized Added." });
+        toast({ title: "Add Event", description: "New event Added." });
       }
       
       setIsAddDialogOpen(false);
@@ -394,7 +394,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     </div>
                     <DialogFooter>
                       <Button onClick={handleSaveEvent} className="w-full h-16 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-500 transition-all">
-                        {isEditing ? 'Re-Synchronize_Event' : 'Synchronize_to_Supabase'}
+                        {isEditing ? 'Update Event' : 'Add_Event'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
