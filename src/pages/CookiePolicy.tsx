@@ -136,7 +136,7 @@ const sections: Section[] = [
   },
 ];
 
-const CookiePolicy: React.FC = () => {
+const CookiePolicy: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden relative">
       {/* Background Aesthetics */}
@@ -181,11 +181,13 @@ const CookiePolicy: React.FC = () => {
               Margdarshak Ecosystem // Local Storage Nodes & Telemetry
             </p>
             <div className="flex items-center gap-6">
-                <Link to="/">
-                    <Button variant="ghost" className="text-zinc-600 hover:text-white uppercase font-black text-[10px] tracking-widest gap-2">
-                        <ArrowLeft size={14} /> Protocol Hub
-                    </Button>
-                </Link>
+                <Button 
+                    variant="ghost" 
+                    onClick={onBack || (() => window.history.back())}
+                    className="text-zinc-600 hover:text-white uppercase font-black text-[10px] tracking-widest gap-2"
+                >
+                    <ArrowLeft size={14} /> Protocol Hub
+                </Button>
                 <div className="w-px h-4 bg-white/10" />
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Effective: July 2025</p>
             </div>

@@ -25,7 +25,8 @@ const SitemapPage = () => {
       items: [
         { name: "AI Saarthi Analyst", path: "/ai" },
         { name: "Performance Metrics", path: "/analytics" },
-        { name: "Neural Calculator", path: "/calculator" }
+        { name: "Neural Calculator", path: "/calculator" },
+        { name: "System Status", path: "/status" }
       ]
     },
     {
@@ -33,8 +34,7 @@ const SitemapPage = () => {
       icon: BookOpen,
       items: [
         { name: "Margdarshak Hub", path: "/community" },
-        { name: "Intelligence Blog", path: "/blog" },
-        { name: "Protocol Docs", path: "/docs" }
+        { name: "Intelligence Blog", path: "/blog" }
       ]
     },
     {

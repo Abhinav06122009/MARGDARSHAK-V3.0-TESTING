@@ -12,7 +12,7 @@ const techLogos = [
   { name: 'Clerk', logo: clerkLogo },
   { name: 'Framer Motion', logo: framerLogo },
   { name: 'Vite', logo: viteLogo },
-  { name: 'React', logo: reactLogo },
+  { name: 'Supabase Official', logo: supabaseLogo },
   { name: 'Tailwind', logo: 'https://seeklogo.com/images/T/tailwind-css-logo-5AD4175897-seeklogo.com.png' }
 ];
 

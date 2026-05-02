@@ -9,7 +9,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { dashboardService } from '@/lib/dashboardService';
 import { holidayService, Holiday } from '@/lib/holidayService';
-import { RealTask } from '@/lib/dashboard';
+import { RealCalendarEvent, RealTask } from '@/lib/dashboard';
 import { 
   Dialog, 
   DialogContent, 
@@ -37,7 +37,8 @@ interface CalendarProps {
 
 const EnhancedCalendar = ({ onBack }: CalendarProps) => {
   const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState<RealTask[]>([]);
+  const [events, setEvents] = useState<RealCalendarEvent[]>([]);
+  const [tasks, setTasks] = useState<RealTask[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
@@ -45,12 +46,13 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // New Task Form State
-  const [newTask, setNewTask] = useState({
+  // New Event Form State
+  const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
+    category: 'personal' as 'personal' | 'academic' | 'exam' | 'holiday',
     priority: 'medium' as 'low' | 'medium' | 'high',
-    status: 'pending' as 'pending' | 'in_progress' | 'completed'
+    is_all_day: true
   });
 
   const { toast } = useToast();
@@ -85,7 +87,8 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
       if (!user) return;
 
       const userData = await dashboardService.fetchAllUserData(user.id);
-      setEvents(userData.tasks || []);
+      setEvents(userData.calendarEvents || []);
+      setTasks(userData.tasks || []);
 
       const holidayData = await holidayService.fetchHolidays(year);
       setHolidays(holidayData);
@@ -101,52 +104,58 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
   }, [loadData]);
 
   const handleSaveEvent = async () => {
-    if (!selectedDay || !newTask.title) return;
+    if (!selectedDay || !newEvent.title) return;
     
     try {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
 
-      const taskData: Partial<RealTask> = {
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        status: newTask.status,
-        due_date: selectedDay.toISOString()
+      const eventData: Partial<RealCalendarEvent> = {
+        title: newEvent.title,
+        description: newEvent.description,
+        category: newEvent.category,
+        priority: newEvent.priority,
+        is_all_day: newEvent.is_all_day,
+        event_date: selectedDay.toISOString()
       };
 
       if (isEditing) {
-        await dashboardService.updateTask(isEditing, taskData, user.id);
-        toast({ title: "Event Re-Synchronized", description: "Memory banks updated successfully." });
+        await dashboardService.updateCalendarEvent(isEditing, eventData, user.id);
+        toast({ title: "Event Synchronized", description: "Temporal node updated in memory banks." });
       } else {
-        await dashboardService.createTask(taskData, user.id);
-        toast({ title: "Event Synchronized", description: "Successfully added to your neural schedule." });
+        await dashboardService.createCalendarEvent(eventData, user.id);
+        toast({ title: "Node Initialized", description: "New event synchronized with Supabase." });
       }
       
       setIsAddDialogOpen(false);
       setIsEditing(null);
-      setNewTask({ title: '', description: '', priority: 'medium', status: 'pending' });
+      setNewEvent({ title: '', description: '', category: 'personal', priority: 'medium', is_all_day: true });
       loadData();
     } catch (error) {
-      toast({ title: "Operation Failed", variant: "destructive" });
+      toast({ title: "Synchronization Failed", variant: "destructive" });
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
     try {
       const user = await dashboardService.getCurrentUser();
       if (!user) return;
-      await dashboardService.deleteTask(taskId, user.id);
-      setEvents(prev => prev.filter(e => e.id !== taskId));
-      toast({ title: "Event Redacted", description: "Removed from memory banks." });
+      await dashboardService.deleteCalendarEvent(eventId, user.id);
+      setEvents(prev => prev.filter(e => e.id !== eventId));
+      toast({ title: "Node Redacted", description: "Removed from temporal sequence." });
     } catch (error) {
-      toast({ title: "Deletion Failed", variant: "destructive" });
+      toast({ title: "Redaction Failed", variant: "destructive" });
     }
   };
 
   const filteredDaysEvents = events.filter(e => {
-    if (!selectedDay || !e.due_date) return false;
-    return isSameDay(new Date(e.due_date), selectedDay);
+    if (!selectedDay || !e.event_date) return false;
+    return isSameDay(new Date(e.event_date), selectedDay);
+  });
+
+  const filteredDaysTasks = tasks.filter(t => {
+    if (!selectedDay || !t.due_date) return false;
+    return isSameDay(new Date(t.due_date), selectedDay);
   });
 
   const dayHolidays = holidays.filter(h => {
@@ -225,7 +234,8 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
                   const isToday = isSameDay(day, today);
                   const isSelected = selectedDay && isSameDay(day, selectedDay);
-                  const hasTasks = events.some(e => e.due_date && isSameDay(new Date(e.due_date), day));
+                  const hasEvents = events.some(e => e.event_date && isSameDay(new Date(e.event_date), day));
+                  const hasTasks = tasks.some(t => t.due_date && isSameDay(new Date(t.due_date), day));
                   const hasHolidays = holidays.some(h => isSameDay(new Date(h.date), day));
                   
                   return (
@@ -248,8 +258,11 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                         {hasHolidays && (
                           <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-black' : 'bg-amber-400 animate-pulse'}`} />
                         )}
-                        {hasTasks && (
+                        {hasEvents && (
                           <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-black' : 'bg-emerald-400'}`} />
+                        )}
+                        {hasTasks && (
+                          <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-black' : 'bg-blue-400'}`} />
                         )}
                       </div>
 
@@ -269,7 +282,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total_Events</p>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Active_Nodes</p>
                     <p className="text-2xl font-black text-white">{events.length}</p>
                   </div>
                </div>
@@ -278,7 +291,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     <PartyPopper size={24} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Holidays_Cycle</p>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Global_Holidays</p>
                     <p className="text-2xl font-black text-white">{holidays.length}</p>
                   </div>
                </div>
@@ -287,8 +300,8 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     <Clock size={24} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Upcoming_Milestones</p>
-                    <p className="text-2xl font-black text-white">{events.filter(e => e.status !== 'completed').length}</p>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Upcoming_Deadlines</p>
+                    <p className="text-2xl font-black text-white">{tasks.filter(t => t.status !== 'completed').length}</p>
                   </div>
                </div>
             </div>
@@ -310,7 +323,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                   setIsAddDialogOpen(open);
                   if (!open) {
                     setIsEditing(null);
-                    setNewTask({ title: '', description: '', priority: 'medium', status: 'pending' });
+                    setNewEvent({ title: '', description: '', category: 'personal', priority: 'medium', is_all_day: true });
                   }
                 }}>
                   <DialogTrigger asChild>
@@ -329,50 +342,51 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                         <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Event_Title</label>
                         <Input 
                           placeholder="e.g., Final Exam Preparation" 
-                          className="bg-white/5 border-white/10 rounded-xl h-14 text-white"
-                          value={newTask.title}
-                          onChange={e => setNewTask({...newTask, title: e.target.value})}
+                          className="bg-white/5 border-white/10 rounded-xl h-14 text-white focus:border-emerald-500/50 transition-all"
+                          value={newEvent.title}
+                          onChange={e => setNewEvent({...newEvent, title: e.target.value})}
                         />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Details</label>
                         <Textarea 
                           placeholder="Event metadata..." 
-                          className="bg-white/5 border-white/10 rounded-xl min-h-[100px] text-white"
-                          value={newTask.description}
-                          onChange={e => setNewTask({...newTask, description: e.target.value})}
+                          className="bg-white/5 border-white/10 rounded-xl min-h-[100px] text-white focus:border-emerald-500/50 transition-all"
+                          value={newEvent.description}
+                          onChange={e => setNewEvent({...newEvent, description: e.target.value})}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
+                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Category</label>
+                          <Select 
+                            value={newEvent.category} 
+                            onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}
+                          >
+                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-white/10">
+                              <SelectItem value="personal">Personal</SelectItem>
+                              <SelectItem value="academic">Academic</SelectItem>
+                              <SelectItem value="exam">Exam</SelectItem>
+                              <SelectItem value="holiday">Holiday</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
                           <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Priority</label>
                           <Select 
-                            value={newTask.priority} 
-                            onValueChange={(val: any) => setNewTask({...newTask, priority: val})}
+                            value={newEvent.priority} 
+                            onValueChange={(val: any) => setNewEvent({...newEvent, priority: val})}
                           >
                             <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               <SelectItem value="low">Low_Tier</SelectItem>
-                              <SelectItem value="medium">Standard_Tier</SelectItem>
-                              <SelectItem value="high">Critical_Tier</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Status</label>
-                          <Select 
-                            value={newTask.status} 
-                            onValueChange={(val: any) => setNewTask({...newTask, status: val})}
-                          >
-                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-white/10">
-                              <SelectItem value="pending">Initialized</SelectItem>
-                              <SelectItem value="in_progress">Active_Process</SelectItem>
-                              <SelectItem value="completed">Finalized</SelectItem>
+                              <SelectItem value="medium">Standard</SelectItem>
+                              <SelectItem value="high">Critical</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -380,7 +394,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     </div>
                     <DialogFooter>
                       <Button onClick={handleSaveEvent} className="w-full h-16 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-500 transition-all">
-                        {isEditing ? 'Re-Synchronize_Event' : 'Synchronize_Event'}
+                        {isEditing ? 'Re-Synchronize_Event' : 'Synchronize_to_Supabase'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -401,81 +415,99 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                           <PartyPopper className="w-8 h-8 text-amber-400" />
                         </div>
                         <div className="flex items-center gap-3 mb-2">
-                           <Badge className="bg-amber-500/20 text-amber-400 border-none text-[8px] uppercase tracking-widest">Holiday</Badge>
+                           <Badge className="bg-amber-500/20 text-amber-400 border-none text-[8px] uppercase tracking-widest">Global_Holiday</Badge>
                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">System_Event</span>
                         </div>
                         <h4 className="text-lg font-black text-amber-100 uppercase tracking-tighter italic">{h.localName}</h4>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Global: {h.name}</p>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Ref: {h.name}</p>
                       </motion.div>
                     ))}
 
                     {/* User Events */}
-                    {filteredDaysEvents.length === 0 && dayHolidays.length === 0 ? (
+                    {filteredDaysEvents.map((event) => (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        key={event.id}
+                        className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-emerald-500/30 transition-all group relative"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-1.5 h-1.5 rounded-full ${
+                                event.priority === 'high' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' :
+                                event.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`} />
+                              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{event.category} | {event.priority}</span>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => {
+                                  setIsEditing(event.id);
+                                  setNewEvent({
+                                    title: event.title,
+                                    description: event.description || '',
+                                    category: event.category,
+                                    priority: event.priority,
+                                    is_all_day: event.is_all_day
+                                  });
+                                  setIsAddDialogOpen(true);
+                                }} 
+                                className="p-2 hover:text-blue-400 transition-colors"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <button onClick={() => handleDeleteEvent(event.id)} className="p-2 hover:text-red-400 transition-colors">
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                        </div>
+                        
+                        <h4 className="text-xl font-black text-white tracking-tighter uppercase mb-2 italic group-hover:text-emerald-400 transition-colors">
+                          {event.title}
+                        </h4>
+                        
+                        {event.description && (
+                          <p className="text-[11px] text-zinc-500 font-medium leading-relaxed mb-4">
+                            {event.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">
+                            Synchronized
+                          </span>
+                          <div className="flex items-center gap-2 text-zinc-700">
+                              <Clock size={12} />
+                              <span className="text-[9px] font-black uppercase tracking-widest">Temporal_Node</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+
+                    {/* User Tasks (Deadlines) */}
+                    {filteredDaysTasks.map((task) => (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        key={`task-${task.id}`}
+                        className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl group relative"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                           <Badge className="bg-blue-500/20 text-blue-400 border-none text-[8px] uppercase tracking-widest">Deadline</Badge>
+                           <span className={`text-[8px] font-black uppercase tracking-widest ${task.status === 'completed' ? 'text-emerald-500' : 'text-zinc-600'}`}>
+                             {task.status}
+                           </span>
+                        </div>
+                        <h4 className="text-lg font-black text-blue-100 uppercase tracking-tighter italic">{task.title}</h4>
+                        {task.description && <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1 truncate">{task.description}</p>}
+                      </motion.div>
+                    ))}
+
+                    {filteredDaysEvents.length === 0 && dayHolidays.length === 0 && filteredDaysTasks.length === 0 && (
                       <div className="py-20 flex flex-col items-center justify-center text-center">
                         <CalendarIcon className="w-12 h-12 text-zinc-800 mb-4" />
-                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">No_Neural_Events_Scheduled</p>
+                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">No_Temporal_Nodes_Detected</p>
                       </div>
-                    ) : (
-                      filteredDaysEvents.map((event) => (
-                        <motion.div
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          key={event.id}
-                          className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-emerald-500/30 transition-all group relative"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                             <div className="flex items-center gap-2">
-                               <div className={`w-1.5 h-1.5 rounded-full ${
-                                 event.priority === 'high' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' :
-                                 event.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
-                               }`} />
-                               <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{event.priority}_Priority</span>
-                             </div>
-                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                               <button 
-                                 onClick={() => {
-                                   setIsEditing(event.id);
-                                   setNewTask({
-                                     title: event.title,
-                                     description: event.description || '',
-                                     priority: event.priority,
-                                     status: event.status
-                                   });
-                                   setIsAddDialogOpen(true);
-                                 }} 
-                                 className="p-2 hover:text-blue-400 transition-colors"
-                               >
-                                 <Edit3 size={14} />
-                               </button>
-                               <button onClick={() => handleDeleteTask(event.id)} className="p-2 hover:text-red-400 transition-colors">
-                                 <Trash2 size={14} />
-                               </button>
-                             </div>
-                          </div>
-                          
-                          <h4 className="text-xl font-black text-white tracking-tighter uppercase mb-2 italic group-hover:text-emerald-400 transition-colors">
-                            {event.title}
-                          </h4>
-                          
-                          {event.description && (
-                            <p className="text-[11px] text-zinc-500 font-medium leading-relaxed mb-4">
-                              {event.description}
-                            </p>
-                          )}
-
-                          <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${
-                              event.status === 'completed' ? 'text-emerald-500' : 'text-zinc-600'
-                            }`}>
-                              {event.status === 'completed' ? 'Finalized' : 'In_Process'}
-                            </span>
-                            <div className="flex items-center gap-2 text-zinc-700">
-                               <Clock size={12} />
-                               <span className="text-[9px] font-black uppercase tracking-widest">Temporal_Node</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))
                     )}
                   </div>
                 </ScrollArea>

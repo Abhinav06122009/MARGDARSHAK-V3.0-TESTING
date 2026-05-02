@@ -191,12 +191,20 @@ const GlobalFooter = () => {
               <span className="w-1 h-1 rounded-full bg-zinc-800" />
             </p>
             {/* Subtle Asset Attribution */}
-            <div className="opacity-[0.02] hover:opacity-100 transition-opacity duration-1000 text-[8px] font-mono flex gap-3 grayscale">
-              <a href="https://iconscout.com/icons/clerk" target="_blank" rel="noopener noreferrer">Clerk by Icon Mafia</a>
-              <a href="https://iconscout.com/icons/supabase" target="_blank" rel="noopener noreferrer">Supabase by Icon Mafia</a>
-              <a href="https://iconscout.com/icons/framer" target="_blank" rel="noopener noreferrer">Framer by Icon 54</a>
-              <a href="https://iconscout.com/icons/vitejs" target="_blank" rel="noopener noreferrer">Vitejs by Icon Mafia</a>
-              <a href="https://iconscout.com/icons/logo" target="_blank" rel="noopener noreferrer">React by Unicons</a>
+            {/* Subtle Asset Attribution */}
+            <div className="opacity-[0.01] hover:opacity-100 transition-opacity duration-[3000ms] text-[7px] font-mono flex flex-wrap gap-4 grayscale max-w-xl justify-center lg:justify-end">
+              <span>
+                <a href="https://iconscout.com/icons/clerk" className="hover:underline" target="_blank">Clerk</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline">Icon Mafia</a> on <a href="https://iconscout.com" className="hover:underline">IconScout</a>
+              </span>
+              <span>
+                2.<a href="https://iconscout.com/icons/supabase" className="hover:underline" target="_blank">Supabase</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
+              </span>
+              <span>
+                3.<a href="https://iconscout.com/icons/framer" className="hover:underline" target="_blank">Framer</a> by <a href="https://iconscout.com/contributors/icon-54" className="hover:underline" target="_blank">Icon 54</a>
+              </span>
+              <span>
+                4.<a href="https://iconscout.com/icons/vitejs" className="hover:underline" target="_blank">Vite</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
+              </span>
             </div>
           </div>
         </div>

@@ -164,3 +164,34 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
   if (loading) return null;
   return session && isAdmin ? <>{children}</> : null;
 };
+
+/**
+ * Ensures user has at least B-Class (Officer) status or higher.
+ * Maps to CEO, CTO, Admin, SuperAdmin, etc.
+ */
+export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [isOfficer, setIsOfficer] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+
+    const role = (user.profile?.role || 'student').toLowerCase();
+    const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
+    const sovereignRoles = ['owner', 'superadmin', 'admin', 'moderator'];
+
+    if (cSuiteRoles.includes(role) || sovereignRoles.includes(role)) {
+      setIsOfficer(true);
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || isOfficer === null) return <PageLoader />;
+  return isOfficer ? <>{children}</> : null;
+};

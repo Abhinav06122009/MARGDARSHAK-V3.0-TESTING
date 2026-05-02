@@ -11,7 +11,8 @@ import type {
   RealTimetableEntry,
   RealDashboardStats,
   RealAnalytics,
-} from '@/types/dashboard';
+  RealCalendarEvent,
+} from '@/lib/dashboard';
 
 export const dashboardService = {
   getCurrentUser: async (): Promise<SecureUser | null> => {
@@ -87,6 +88,7 @@ export const dashboardService = {
         supabase.from('notes').select('*').eq('user_id', translatedId),
         supabase.from('courses').select('*').eq('user_id', translatedId),
         supabase.from('timetable_events').select('*').eq('user_id', translatedId),
+        supabase.from('calendar_events').select('*').eq('user_id', translatedId),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
 
@@ -97,6 +99,7 @@ export const dashboardService = {
         notes: notesResult.data || [],
         courses: coursesResult.data || [],
         timetable: timetableResult.data || [],
+        calendarEvents: calendarEventsResult.data || [],
         profile: profileResult.data || null,
         errors: [
           tasksResult.error,
@@ -105,6 +108,7 @@ export const dashboardService = {
           notesResult.error,
           coursesResult.error,
           timetableResult.error,
+          calendarEventsResult.error,
           profileResult.error
         ].filter(Boolean)
       };
@@ -222,6 +226,66 @@ export const dashboardService = {
       throw error;
     }
   },
+
+
+  // --- CALENDAR EVENTS CRUD ---
+  createCalendarEvent: async (eventData: Partial<RealCalendarEvent>, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    try {
+      const newEvent = {
+        ...eventData,
+        id: crypto.randomUUID(),
+        user_id: translatedId,
+        created_at: new Date().toISOString()
+      };
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .insert(newEvent)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating calendar event in Supabase:', error);
+      throw error;
+    }
+  },
+
+  updateCalendarEvent: async (eventId: string, eventData: Partial<RealCalendarEvent>, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    try {
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .update({ ...eventData, updated_at: new Date().toISOString() })
+        .match({ id: eventId, user_id: translatedId })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating calendar event in Supabase:', error);
+      throw error;
+    }
+  },
+
+  deleteCalendarEvent: async (eventId: string, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .match({ id: eventId, user_id: translatedId });
+        
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting calendar event from Supabase:', error);
+      throw error;
+    }
+  },
+
 
   calculateSecureStats: (data: any): RealDashboardStats => {
     const { tasks, studySessions, grades, notes, courses, timetable } = data;

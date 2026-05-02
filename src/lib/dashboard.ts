@@ -155,3 +155,19 @@ export interface RealAnalytics {
   topGrades: { subject: string; percentage: number; assignment_name: string }[];
   totalClasses: number;
 }
+
+export interface RealCalendarEvent {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  end_date?: string;
+  category: 'personal' | 'academic' | 'exam' | 'holiday';
+  priority: 'low' | 'medium' | 'high';
+  color?: string;
+  is_all_day: boolean;
+  metadata?: any;
+  created_at: string;
+  updated_at?: string;
+}

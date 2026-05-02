@@ -90,7 +90,7 @@ const SEO = ({ title, description }: { title: string, description: string }) => 
 );
 
 
-import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, PageLoader } from '@/components/auth/RouteGuards';
+import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, OfficerRoute, PageLoader } from '@/components/auth/RouteGuards';
 import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
 import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay';
 import { trackActivity } from '@/lib/security/activityTracker';
@@ -98,6 +98,7 @@ import { trackActivity } from '@/lib/security/activityTracker';
 import SSOCallback from '@/components/auth/SSOCallback';
 import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
 import DevVerificationGuard from './components/security/DevVerificationGuard';
+import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -233,7 +234,7 @@ const AppContent = () => {
                         <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/identity-node" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/status" element={<PremiumRoute><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></PremiumRoute>} />
+                        <Route path="/status" element={<OfficerRoute><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></OfficerRoute>} />
                         <Route path="/sitemap" element={<><SEO title="Sitemap Index | MARGDARSHAK" description="Architectural matrix of the ecosystem." /><Sitemap onBack={() => window.history.back()} /></>} />
                         <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
@@ -327,6 +328,18 @@ const AppContent = () => {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AnimatePresence>
+                    
+                    {/* Global Ambient Station - Left Side */}
+                    <div className="fixed left-6 bottom-32 z-[100] hidden xl:block w-72">
+                      <motion.div
+                        initial={{ x: -100, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 2, type: 'spring', damping: 20 }}
+                      >
+                        <AmbientSoundPlayer />
+                      </motion.div>
+                    </div>
+
                     <AIWidgetWrapper />
                     <RankEntryOverlay />
                     <DevVerificationGuard />
