@@ -23,29 +23,56 @@ interface Action {
 }
 
 // ─── Master Action Registry ───────────────────────────────────────────────────
+// ─── Master Action Registry ───────────────────────────────────────────────────
 const ALL_ACTIONS: Action[] = [
-  { icon: BrainCircuit, title: 'AI Tutor',        subtitle: 'Ask any academic question',       color: 'from-amber-400 to-orange-500',   path: '/ai-assistant',  category: 'AI Tools',   keywords: ['ai','tutor','question','assistant','chat'] },
-  { icon: Library,     title: 'Flashcards',        subtitle: 'AI spaced repetition',            color: 'from-lime-400 to-emerald-500',   path: '/flashcards',    category: 'AI Tools',   keywords: ['flash','card','memory','spaced','repeat'] },
-  { icon: GraduationCap, title: 'Quiz Generator',  subtitle: 'Test your knowledge with AI',    color: 'from-purple-500 to-violet-600',  path: '/quiz',          category: 'AI Tools',   keywords: ['quiz','test','exam','mcq','generate'] },
-  { icon: FileText,    title: 'Essay Helper',       subtitle: 'AI writing assistance',           color: 'from-sky-400 to-blue-500',       path: '/essay-helper',  category: 'AI Tools',   keywords: ['essay','write','writing','draft','help'] },
-  { icon: Sparkles,    title: 'Study Planner',      subtitle: 'AI-generated schedules',         color: 'from-emerald-400 to-teal-500',   path: '/study-planner', category: 'AI Tools',   keywords: ['plan','schedule','study','planner','time'] },
-  { icon: BarChart3,   title: 'AI Analytics',       subtitle: 'Performance insights',           color: 'from-indigo-400 to-purple-500',  path: '/ai-analytics',  category: 'AI Tools',   keywords: ['analytics','insight','performance','stats','data'] },
-  { icon: ImageIcon,   title: 'Doubt Solver',       subtitle: 'Snap to solve problems',         color: 'from-pink-500 to-rose-500',      path: '/doubt-solver',  category: 'AI Tools',   keywords: ['doubt','solve','photo','image','snap'] },
-  { icon: Timer,       title: 'Study Timer',        subtitle: 'Pomodoro focus sessions',        color: 'from-rose-400 to-red-500',       path: '/timer',         category: 'Productivity', keywords: ['timer','pomodoro','focus','session','countdown'] },
-  { icon: MousePointer2, title: 'Calculator',       subtitle: 'Scientific calculator',          color: 'from-slate-400 to-slate-600',    path: '/calculator',    category: 'Productivity', keywords: ['calc','math','calculator','formula'] },
-  { icon: Briefcase,   title: 'Tasks',              subtitle: 'Manage your to-dos',             color: 'from-blue-400 to-indigo-600',    path: '/tasks',         category: 'Productivity', keywords: ['task','todo','to-do','manage','list'] },
-  { icon: Book,        title: 'Notes',              subtitle: 'Smart note-taking',              color: 'from-orange-400 to-amber-600',   path: '/notes',         category: 'Productivity', keywords: ['note','notes','write','text','jot'] },
-  { icon: Trophy,      title: 'Achievements',       subtitle: 'Badges & Leaderboard',           color: 'from-amber-400 to-yellow-500',   path: '/achievements',  category: 'Campus',     keywords: ['trophy','achieve','badge','leader','rank'] },
-  { icon: Calendar,    title: 'Timetable',          subtitle: 'Schedule & events',              color: 'from-cyan-400 to-blue-600',      path: '/timetable',     category: 'Campus',     keywords: ['calendar','timetable','schedule','event','class'] },
-  { icon: GraduationCap, title: 'Courses',          subtitle: 'Manage your courses',            color: 'from-violet-400 to-purple-600',  path: '/courses',       category: 'Campus',     keywords: ['course','subject','class','lecture','study'] },
-  { icon: BarChart3,   title: 'Progress',           subtitle: 'Track your progress',            color: 'from-indigo-400 to-blue-600',    path: '/progress',      category: 'Campus',     keywords: ['progress','track','graph','chart','improve'] },
-  { icon: Book,        title: 'Syllabus',           subtitle: 'Curriculum overview',            color: 'from-emerald-400 to-green-600',  path: '/syllabus',      category: 'Campus',     keywords: ['syllabus','curriculum','topic','chapter'] },
-  { icon: Headphones,  title: 'Wellness',           subtitle: 'Mental & Physical health',       color: 'from-teal-400 to-cyan-600',      path: '/wellness',      category: 'Campus',     keywords: ['wellness','mental','health','relax','mood'] },
-  { icon: Briefcase,   title: 'Portfolio Builder',  subtitle: 'Auto-generate resume from data', color: 'from-indigo-500 to-violet-600',  path: '/portfolio',     category: 'Career',     keywords: ['portfolio','resume','career','cv','job'] },
-  { icon: Timer,       title: 'Exam Deadlines',     subtitle: 'JEE · NEET · SAT · University', color: 'from-amber-500 to-orange-600',   path: '/deadlines',     category: 'Career',     keywords: ['exam','deadline','jee','neet','sat','date'] },
-  { icon: User,        title: 'Identity Hub',       subtitle: 'Profile & biometrics',           color: 'from-zinc-400 to-zinc-600',      path: '/profile',       category: 'Account',    keywords: ['profile','identity','user','account','bio'] },
-  { icon: Settings,    title: 'Settings',           subtitle: 'Account & preferences',          color: 'from-zinc-500 to-zinc-700',      path: '/settings',      category: 'Account',    keywords: ['settings','preference','config','account'] },
+  // --- AI HUB ---
+  { icon: BrainCircuit, title: 'AI Tutor (SAARTHI)', subtitle: 'Ask any academic question 24/7', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'AI Hub', keywords: ['ai','tutor','question','assistant','chat','saarthi'] },
+  { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition for mastery', color: 'from-lime-400 to-emerald-500', path: '/flashcards', category: 'AI Hub', keywords: ['flash','card','memory','spaced','repeat'] },
+  { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Test your knowledge with AI', color: 'from-purple-500 to-violet-600', path: '/quiz', category: 'AI Hub', keywords: ['quiz','test','exam','mcq','generate'] },
+  { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance & drafts', color: 'from-sky-400 to-blue-500', path: '/essay-helper', category: 'AI Hub', keywords: ['essay','write','writing','draft','help'] },
+  { icon: Sparkles, title: 'Study Planner', subtitle: 'AI-generated personalized schedules', color: 'from-emerald-400 to-teal-500', path: '/study-planner', category: 'AI Hub', keywords: ['plan','schedule','study','planner','time'] },
+  { icon: BarChart3, title: 'AI Analytics', subtitle: 'Deep performance insights', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics', category: 'AI Hub', keywords: ['analytics','insight','performance','stats','data'] },
+  { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve complex problems', color: 'from-pink-500 to-rose-500', path: '/doubt-solver', category: 'AI Hub', keywords: ['doubt','solve','photo','image','snap'] },
+  { icon: Sparkles, title: 'Smart Notes', subtitle: 'AI-powered note enhancement', color: 'from-violet-500 to-fuchsia-600', path: '/smart-notes', category: 'AI Hub', keywords: ['note','smart','ai','enhance'] },
+
+  // --- STUDY SUITE ---
+  { icon: Timer, title: 'Study Timer', subtitle: 'Pomodoro focus sessions', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Study Suite', keywords: ['timer','pomodoro','focus','session','countdown'] },
+  { icon: MousePointer2, title: 'Calculator', subtitle: 'Scientific calculation engine', color: 'from-slate-400 to-slate-600', path: '/calculator', category: 'Study Suite', keywords: ['calc','math','calculator','formula'] },
+  { icon: Briefcase, title: 'Tasks & To-Dos', subtitle: 'Manage your daily workload', color: 'from-blue-400 to-indigo-600', path: '/tasks', category: 'Study Suite', keywords: ['task','todo','to-do','manage','list'] },
+  { icon: Book, title: 'Digital Notes', subtitle: 'Smart note-taking system', color: 'from-orange-400 to-amber-600', path: '/notes', category: 'Study Suite', keywords: ['note','notes','write','text','jot'] },
+  { icon: Trophy, title: 'Achievements', subtitle: 'Your badges & leaderboard rank', color: 'from-amber-400 to-yellow-500', path: '/achievements', category: 'Study Suite', keywords: ['trophy','achieve','badge','leader','rank'] },
+  { icon: BarChart3, title: 'Grade Tracker', subtitle: 'Monitor GPA & academic results', color: 'from-emerald-500 to-teal-600', path: '/grades', category: 'Study Suite', keywords: ['grade','gpa','result','score','marks'] },
+
+  // --- CAMPUS MATRIX ---
+  { icon: Calendar, title: 'Timetable', subtitle: 'Automated class schedules', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Campus', keywords: ['calendar','timetable','schedule','event','class'] },
+  { icon: Calendar, title: 'Academic Calendar', subtitle: 'Events & deadline overview', color: 'from-blue-500 to-indigo-600', path: '/calendar', category: 'Campus', keywords: ['calendar','events','dates'] },
+  { icon: GraduationCap, title: 'My Courses', subtitle: 'Enrollment & course content', color: 'from-violet-400 to-purple-600', path: '/courses', category: 'Campus', keywords: ['course','subject','class','lecture','study'] },
+  { icon: BarChart3, title: 'Overall Progress', subtitle: 'Academic growth trajectory', color: 'from-indigo-400 to-blue-600', path: '/progress', category: 'Campus', keywords: ['progress','track','graph','chart','improve'] },
+  { icon: Book, title: 'Syllabus Tracker', subtitle: 'Curriculum completion status', color: 'from-emerald-400 to-green-600', path: '/syllabus', category: 'Campus', keywords: ['syllabus','curriculum','topic','chapter'] },
+  { icon: Headphones, title: 'Wellness Center', subtitle: 'Mental & Physical health tools', color: 'from-teal-400 to-cyan-600', path: '/wellness', category: 'Campus', keywords: ['wellness','mental','health','relax','mood'] },
+
+  // --- PROFESSIONAL ---
+  { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Real-time academic resume generator', color: 'from-indigo-500 to-violet-600', path: '/portfolio', category: 'Professional', keywords: ['portfolio','resume','career','cv','job'] },
+  { icon: Clock, title: 'Exam Deadlines', subtitle: 'JEE · NEET · SAT · Global Exams', color: 'from-amber-500 to-orange-600', path: '/deadlines', category: 'Professional', keywords: ['exam','deadline','jee','neet','sat','date'] },
+
+  // --- IDENTITY & ACCOUNT ---
+  { icon: User, title: 'Identity Hub', subtitle: 'Universal holographic ID & bio', color: 'from-zinc-400 to-zinc-600', path: '/profile', category: 'Account', keywords: ['profile','identity','user','account','bio'] },
+  { icon: Settings, title: 'Nexus Settings', subtitle: 'System preferences & security', color: 'from-zinc-500 to-zinc-700', path: '/settings', category: 'Account', keywords: ['settings','preference','config','account'] },
+  { icon: Sparkles, title: 'Upgrade to Elite', subtitle: 'Unlock the full power of Nexus AI', color: 'from-yellow-400 to-amber-600', path: '/upgrade', category: 'Account', keywords: ['premium','upgrade','elite','tier'] },
+
+  // --- RESOURCES & SUPPORT ---
+  { icon: Library, title: 'Documentation', subtitle: 'Platform guides & academic docs', color: 'from-slate-500 to-slate-700', path: '/docs', category: 'Resources', keywords: ['docs','help','guide','manual'] },
+  { icon: FileText, title: 'Nexus Blog', subtitle: 'Latest updates & study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Resources', keywords: ['blog','news','tips','update'] },
+  { icon: Headphones, title: 'Help Center', subtitle: 'Contact support & FAQ', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Resources', keywords: ['help','support','faq','contact'] },
+  { icon: ArrowUp, title: 'System Status', subtitle: 'Real-time matrix health', color: 'from-emerald-400 to-green-500', path: '/status', category: 'System', keywords: ['status','health','uptime','server'] },
+  { icon: Hash, title: 'Sitemap', subtitle: 'Navigational matrix overview', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'System', keywords: ['sitemap','map','navigation'] },
+
+  // --- ADMIN COMMAND ---
+  { icon: Settings, title: 'Admin Terminal', subtitle: 'Master control dashboard', color: 'from-red-600 to-rose-700', path: '/admin', category: 'Admin', keywords: ['admin','master','control','terminal'] },
+  { icon: User, title: 'User Management', subtitle: 'Database user oversight', color: 'from-rose-500 to-pink-600', path: '/admin/users', category: 'Admin', keywords: ['users','manage','admin'] },
+  { icon: Command, title: 'Security Command', subtitle: 'Zero-Trust shield controls', color: 'from-zinc-800 to-black', path: '/admin/security', category: 'Admin', keywords: ['security','admin','shield'] },
 ];
+
 
 const RECENT_KEY = 'mgs_recent_actions';
 
@@ -58,7 +85,7 @@ const GlobalQuickActions: React.FC = () => {
     try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
   });
   const navigate = useNavigate();
-  const { session } = useContext(AuthContext);
+  const { session, user } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -82,9 +109,18 @@ const GlobalQuickActions: React.FC = () => {
     if (isOpen) { setQuery(''); setSelected(0); setTimeout(() => inputRef.current?.focus(), 80); }
   }, [isOpen]);
 
+  // Filter actions by user role
+  const allowedActions = ALL_ACTIONS.filter(a => {
+    if (a.category === 'Admin') {
+      const role = user?.profile?.role || user?.publicMetadata?.role;
+      return ['admin', 'superadmin', 'ceo'].includes(String(role).toLowerCase());
+    }
+    return true;
+  });
+
   // Filtered results
   const filteredActions = query.trim()
-    ? ALL_ACTIONS.filter(a => {
+    ? allowedActions.filter(a => {
         const q = query.toLowerCase();
         return (
           a.title.toLowerCase().includes(q) ||
@@ -93,14 +129,15 @@ const GlobalQuickActions: React.FC = () => {
           a.keywords.some(k => k.includes(q))
         );
       })
-    : ALL_ACTIONS;
+    : allowedActions;
 
-  // Recent actions (shown when no query)
+  // Recent actions
   const recentActions = recentPaths
-    .map(p => ALL_ACTIONS.find(a => a.path === p))
+    .map(p => allowedActions.find(a => a.path === p))
     .filter(Boolean) as Action[];
 
-  const displayList = query.trim() ? filteredActions : (recentActions.length ? recentActions : ALL_ACTIONS.slice(0, 8));
+  const displayList = query.trim() ? filteredActions : (recentActions.length ? recentActions : allowedActions.slice(0, 8));
+
 
   // Group by category when no query
   const grouped = query.trim()
@@ -182,31 +219,21 @@ const GlobalQuickActions: React.FC = () => {
               className="fixed inset-0 bg-black/70 backdrop-blur-md z-[1000]"
             />
 
-            {/* Panel */}
-            <motion.div
-              initial={{ 
-                opacity: 0, 
-                scale: 0.8, 
-                x: position.x, 
-                y: position.y 
-              }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1, 
-                x: Math.max(10, Math.min(position.x - 250, window.innerWidth - 550)),
-                y: position.y > window.innerHeight / 2 
-                   ? Math.max(10, position.y - 500) 
-                   : Math.min(window.innerHeight - 500, position.y + 60)
-              }}
-              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-              className="fixed z-[1001] left-0 top-0 w-[540px] max-w-[95vw] max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden"
-              style={{
-                background: 'linear-gradient(145deg, rgba(10,10,15,0.98) 0%, rgba(15,15,25,0.96) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 60px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.06)'
-              }}
-            >
+            {/* Panel Container */}
+            <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                className="w-full max-w-[540px] max-h-[80vh] flex flex-col rounded-[2.5rem] overflow-hidden pointer-events-auto"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(10,10,15,0.98) 0%, rgba(15,15,25,0.96) 100%)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  boxShadow: '0 60px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.06)'
+                }}
+              >
+
               {/* ── Search Header ── */}
               <div className="p-5 border-b border-white/[0.06]">
                 <div className="relative flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.04] border border-white/[0.06] focus-within:border-indigo-500/40 focus-within:bg-indigo-500/[0.04] transition-all">
