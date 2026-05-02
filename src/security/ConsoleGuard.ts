@@ -89,7 +89,7 @@ export const initConsoleGuard = () => {
   };
 
   // Run immediately
-  blockConsole();
+  // blockConsole(); // DEACTIVATED FOR SYNC DEBUGGING
 
   const showWarning = () => {
     if (isDebug) {
