@@ -103,7 +103,7 @@ export const dashboardService = {
         notes: notesResult.data || [],
         courses: coursesResult.data || [],
         timetable: timetableResult.data || [],
-        calendarEvents: calendarEventsResult.data || [],
+        calendarEvents: calendarEventsData,
         profile: profileResult.data || null,
         errors: [
           tasksResult.error,
