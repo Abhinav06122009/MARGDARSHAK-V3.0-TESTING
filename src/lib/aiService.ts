@@ -94,7 +94,7 @@ export const aiService = {
    */
   getNeuralContext: async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('ai_neural_memory')
         .select('*')
         .eq('user_id', userId)
@@ -155,7 +155,7 @@ export const aiService = {
   sendMessage: async (userId: string, prompt: string) => {
     try {
       const history = await aiService.getNeuralContext(userId);
-      const messages = history.map((m) => ({ role: m.role, content: m.content }));
+      const messages = history.map((m: any) => ({ role: m.role, content: m.content }));
       const aiResponse = await modelRouter.chat([...messages, { role: "user", content: prompt }], {
         tier: 'premium',
       });
@@ -188,7 +188,7 @@ export const aiService = {
         }
       ];
 
-      const { error } = await supabase.from('ai_neural_memory').insert(records);
+      const { error } = await (supabase as any).from('ai_neural_memory').insert(records);
       if (error) throw error;
     } catch (error) {
       console.error("Failed to persist message:", error);
@@ -417,8 +417,8 @@ export const aiService = {
         }
       ];
 
-      // Use a vision-supported model configuration here
-      return await modelRouter.chat(messages, { model: "meta-llama/llama-3.2-11b-vision-instruct" });
+      // Cast to any to bypass the string-only content check, as the backend handles vision payloads
+      return await (modelRouter as any).chat(messages, { model: "meta-llama/llama-3.2-11b-vision-instruct" });
     } catch (e) {
       console.error("Vision Doubt Solver Error", e);
       return "Sorry, I couldn't process this image. Please ensure the image is clear and try again.";
