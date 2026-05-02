@@ -13,8 +13,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logo from "@/components/logo/logo.png";
-import { NOISE_TEXTURE_DATA_URI } from "@/lib/noiseTexture";
-
 
 // --- Social Icons ---
 const LinkedinLogo = () => (
@@ -241,9 +239,7 @@ export default function StudyTimer({ initial, size = 320 }: { initial?: Partial<
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[150px]"
           style={{ backgroundColor: modeConfig.color }}
         />
-        <div className="absolute inset-0 opacity-20 brightness-50 mix-blend-overlay" 
-          style={{ backgroundImage: `url("${NOISE_TEXTURE_DATA_URI}")` }} />
-
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 mix-blend-overlay" />
       </div>
 
       {/* Nav */}

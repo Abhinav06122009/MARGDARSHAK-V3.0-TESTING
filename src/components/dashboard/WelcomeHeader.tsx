@@ -2,7 +2,6 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Cloud, Sparkles, Star, Zap, Target, BookOpen } from 'lucide-react';
 import { quotes } from '@/lib/quotes';
-import { useRankTheme } from '@/context/ThemeContext';
 
 interface WelcomeHeaderProps {
   fullName?: string;
@@ -59,6 +58,7 @@ const StatPill = ({ icon, label, value, color, delay }: { icon: string; label: s
       whileHover={{ scale: 1.07, y: -3 }}
       className="relative group flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] hover:border-white/[0.15] cursor-default transition-colors overflow-hidden"
     >
+      {/* Hover glow */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
         style={{ background: `radial-gradient(circle at 50% 100%, ${color}20, transparent 70%)` }} />
       <span className="text-lg">{icon}</span>
@@ -74,15 +74,13 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
   const greeting = getGreeting();
   const GIcon = greeting.Icon;
   const quote = useMemo(() => quotes[Math.floor(Math.random() * quotes.length)], []);
-  const { theme } = useRankTheme();
-  const RankIcon = theme.icons.rank;
 
   const particles = useMemo(() =>
     Array.from({ length: 14 }, (_, i) => ({
       id: i, delay: i * 0.4,
       x: 5 + (i / 14) * 90,
-      color: theme.colors.primary
-    })), [theme]);
+      color: ['#818cf8', '#a78bfa', '#ec4899', '#10b981', '#f59e0b', '#60a5fa'][i % 6]
+    })), []);
 
   return (
     <motion.div
@@ -92,13 +90,12 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
       className="relative overflow-hidden rounded-[2.5rem]"
     >
       {/* ── Layered Backgrounds ─────────────────────────────────────────── */}
-      <div className="absolute inset-0 backdrop-blur-2xl rounded-[2.5rem]" 
-        style={{ background: theme.colors.bg }} />
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-black/90 backdrop-blur-2xl rounded-[2.5rem]" />
 
       {/* Aurora animated border */}
       <div className="absolute inset-0 rounded-[2.5rem] p-[1px]"
-        style={{ background: theme.gradients.main }}>
-        <div className="w-full h-full rounded-[calc(2.5rem-1px)] bg-zinc-950/80" />
+        style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.6), rgba(139,92,246,0.4), rgba(16,185,129,0.4), rgba(99,102,241,0.2))' }}>
+        <div className="w-full h-full rounded-[calc(2.5rem-1px)] bg-zinc-950/60" />
       </div>
 
       {/* Animated horizontal highlight */}
@@ -106,68 +103,100 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
         className="absolute inset-x-0 top-0 h-px"
         animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-        style={{ background: theme.gradients.shimmer, backgroundSize: '200% 100%' }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.8), rgba(16,185,129,0.6), rgba(139,92,246,0.8), transparent)', backgroundSize: '200% 100%' }}
       />
 
       {/* Floating orbs */}
-      <motion.div animate={{ y: [0, -20, 0], opacity: [0.1, 0.2, 0.1] }} transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut' }}
-        className="absolute w-[600px] h-[600px] -top-64 -left-40 rounded-full blur-[140px]"
-        style={{ background: `radial-gradient(circle, ${theme.colors.glow}, transparent 70%)` }} />
-      <motion.div animate={{ y: [0, 16, 0], opacity: [0.05, 0.15, 0.05] }} transition={{ repeat: Infinity, duration: 9, delay: 1, ease: 'easeInOut' }}
-        className="absolute w-[500px] h-[500px] -bottom-40 right-20 rounded-full blur-[120px]"
-        style={{ background: `radial-gradient(circle, ${theme.colors.accent}, transparent 70%)` }} />
+      <motion.div animate={{ y: [0, -20, 0], opacity: [0.3, 0.5, 0.3] }} transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut' }}
+        className="absolute w-[400px] h-[400px] -top-32 -left-20 rounded-full blur-[120px]"
+        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%)' }} />
+      <motion.div animate={{ y: [0, 16, 0], opacity: [0.2, 0.35, 0.2] }} transition={{ repeat: Infinity, duration: 9, delay: 1, ease: 'easeInOut' }}
+        className="absolute w-[300px] h-[300px] -bottom-20 right-10 rounded-full blur-[100px]"
+        style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%)' }} />
 
-      {/* Content */}
+      {/* Grid lines */}
+      <div className="absolute inset-0 opacity-[0.025]"
+        style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.8) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.8) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map(p => <Particle key={p.id} delay={p.delay} x={p.x} color={p.color} />)}
+      </div>
+
+      {/* ── Content ────────────────────────────────────────────────────────── */}
       <div className="relative z-10 p-8 md:p-12">
-        <motion.div className="flex items-center gap-3 mb-6" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+
+        {/* Top status bar */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
+        >
+          {/* Greeting icon */}
           <motion.div
             animate={{ rotate: [0, 15, -8, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 4 }}
-            className="p-2.5 rounded-2xl shadow-lg border"
-            style={{ background: theme.gradients.main, borderColor: theme.colors.border, boxShadow: theme.effects.glowIntensity }}
+            transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+            className={`p-2.5 rounded-2xl bg-gradient-to-br ${greeting.gradient} shadow-lg`}
+            style={{ boxShadow: `0 10px 30px ${greeting.glow}` }}
           >
-            <RankIcon className="w-5 h-5 text-white" />
+            <GIcon className="w-5 h-5 text-white" />
           </motion.div>
 
-          <span className="text-zinc-400 font-bold tracking-widest text-xs uppercase">{theme.name} Protocol</span>
+          <span className="text-zinc-400 font-semibold tracking-wide text-sm">{greeting.text}</span>
+
           <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+
+          {/* Live clock */}
           <LiveClock />
+
+          {/* Live badge */}
+          <motion.div
+            animate={{ scale: [1, 1.08, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full"
+          >
+            <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
+              className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-xs font-black text-emerald-400 uppercase tracking-wider">Live</span>
+          </motion.div>
         </motion.div>
 
+        {/* Hero headline */}
         <motion.div className="mb-6" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-none">
-            <span style={{ backgroundImage: theme.gradients.text, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} className="bg-clip-text drop-shadow-2xl">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none">
+            <span className="bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent drop-shadow-2xl">
               Hey, {fullName?.split(' ')[0] || 'Scholar'}
             </span>
-            <motion.div
-              animate={{ y: [0, -5, 0], rotate: [0, 5, -5, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-              className="inline-block ml-6"
-            >
-              <RankIcon className="w-12 h-12 md:w-20 md:h-20" style={{ color: theme.colors.primary, filter: `drop-shadow(0 0 10px ${theme.colors.glow})` }} />
-            </motion.div>
+            <motion.span
+              animate={{ rotate: [0, 20, -5, 15, 0], scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', delay: 1 }}
+              className="inline-block ml-4 select-none drop-shadow-lg"
+            >👋</motion.span>
           </h1>
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mt-4">
-            <span className="text-gradient-animated bg-gradient-to-r from-white via-zinc-400 to-white bg-clip-text text-transparent opacity-80">Operational Dominance</span>
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mt-3">
+            <span className="text-gradient-animated bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Ready to dominate?</span>
           </h2>
         </motion.div>
 
-        <motion.div className="mb-8 flex items-start gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-          <Sparkles className="w-4 h-4 text-white/50 mt-1 animate-pulse" />
-          <p className="text-zinc-500 text-sm italic leading-relaxed max-w-lg">"{quote}"</p>
+        {/* Quote */}
+        <motion.div className="mb-7 flex items-start gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <Sparkles className="w-4 h-4 text-indigo-400 mt-1 flex-shrink-0 animate-pulse" />
+          <p className="text-zinc-400 text-sm italic leading-relaxed max-w-lg">"{quote}"</p>
         </motion.div>
 
-        <div className="flex flex-wrap gap-4">
-          <StatPill icon="📋" label="Objectives" value={totalTasks} color={theme.colors.primary} delay={0.45} />
-          <StatPill icon="📚" label="Knowledge" value={totalCourses} color={theme.colors.secondary} delay={0.55} />
-          <StatPill icon="⚡" label="Velocity" value={totalStudySessions} color={theme.colors.accent} delay={0.65} />
+        {/* Stat pills row */}
+        <div className="flex flex-wrap gap-3">
+          <StatPill icon="📋" label="Tasks"    value={totalTasks}          color="#818cf8" delay={0.45} />
+          <StatPill icon="📚" label="Courses"  value={totalCourses}        color="#a78bfa" delay={0.55} />
+          <StatPill icon="⚡" label="Sessions" value={totalStudySessions}  color="#34d399" delay={0.65} />
 
+          {/* CTA */}
           <motion.a href="/ai-assistant"
-            whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2.5 px-6 py-4 rounded-2xl font-black text-xs text-white uppercase tracking-widest shadow-2xl transition-all duration-300"
-            style={{ background: theme.gradients.main, boxShadow: theme.effects.glowIntensity }}
+            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.75 }}
+            whileHover={{ scale: 1.06, y: -3 }} whileTap={{ scale: 0.97 }}
+            className="star-burst flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-sm text-white uppercase tracking-wider shadow-xl relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 20px 50px rgba(99,102,241,0.4)' }}
           >
-            <Zap className="w-4 h-4 fill-white" /> Neural Interface
+            <Zap className="w-4 h-4" /> AI Tutor
           </motion.a>
         </div>
       </div>

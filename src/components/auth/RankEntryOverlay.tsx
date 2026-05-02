@@ -2,10 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useUser } from '@clerk/react';
 import { Crown, Shield, Zap, Sparkles, Star, Cpu, Award, Hexagon, Fingerprint, Activity, X } from 'lucide-react';
-import { NOISE_TEXTURE_DATA_URI } from '@/lib/noiseTexture';
 
 interface RankEntryOverlayProps {
-
   onComplete?: () => void;
 }
 
@@ -217,10 +215,8 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             >
               {/* Grain Texture */}
               <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
-                <div className="absolute inset-0 opacity-60 mix-blend-overlay" 
-                  style={{ backgroundImage: `url("${NOISE_TEXTURE_DATA_URI}")` }} />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-60 mix-blend-overlay" />
               </div>
-
 
               {/* Metallic Inner Edge Highlight */}
               <div className="absolute inset-0 rounded-[4rem] pointer-events-none" style={{ boxShadow: `inset 0 1px 0 ${rankInfo.style.accent}40, inset 0 -1px 0 ${rankInfo.style.accentAlt}20` }} />
