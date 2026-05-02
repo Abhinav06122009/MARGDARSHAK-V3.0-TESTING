@@ -41,7 +41,7 @@ const BlogList = () => {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px]" />
-        
+
         {/* Neural Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
@@ -87,13 +87,13 @@ const BlogList = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8">
             <Sparkles size={12} className="text-emerald-400" />
-            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Knowledge Protocol Activated</span>
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Margdarshak Saarthi Activated</span>
           </div>
           <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] uppercase italic">
             <span className="bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">Margdarshak Insights</span>
           </h1>
           <p className="text-zinc-500 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed mb-12 uppercase tracking-widest">
-            ENGINEERING ACADEMIC EXCELLENCE THROUGH <span className="text-white italic">COGNITIVE ARCHITECTURE</span>
+            ENGINEERING ACADEMIC EXCELLENCE THROUGH <span className="text-white italic">MARGDARSHAK INSIGHTS</span>
           </p>
         </motion.div>
       </div>

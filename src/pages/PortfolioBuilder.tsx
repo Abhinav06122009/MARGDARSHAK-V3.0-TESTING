@@ -63,7 +63,7 @@ const PortfolioBuilder = () => {
       ]);
 
       if (gradesRes.data) {
-        setAllGrades(gradesRes.data.sort((a: any, b: any) => 
+        setAllGrades(gradesRes.data.sort((a: any, b: any) =>
           new Date(b.date_recorded).getTime() - new Date(a.date_recorded).getTime()
         ));
       }
@@ -104,7 +104,7 @@ const PortfolioBuilder = () => {
         <div className="w-20 h-20 bg-emerald-500/10 rounded-[2rem] border border-emerald-500/20 flex items-center justify-center shadow-2xl">
           <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
         </div>
-        <p className="animate-pulse uppercase tracking-[0.5em] font-black text-[10px] italic">Synchronizing Neural Portfolio...</p>
+        <p className="animate-pulse uppercase tracking-[0.5em] font-black text-[10px] italic">Synchronizing Portfolio...</p>
       </div>
     );
   }
@@ -122,16 +122,16 @@ const PortfolioBuilder = () => {
             className="flex flex-col md:flex-row md:items-center justify-between gap-8 print:hidden bg-white/[0.01] backdrop-blur-3xl border border-white/5 p-10 rounded-[3.5rem] shadow-2xl relative overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.02] to-transparent pointer-events-none" />
-            
+
             <div className="flex items-center gap-8 relative z-10">
-              <button 
-                onClick={() => navigate('/dashboard')} 
+              <button
+                onClick={() => navigate('/dashboard')}
                 className="p-4 bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] rounded-2xl transition-all shadow-2xl group/back active:scale-95"
               >
                 <ArrowLeft className="w-6 h-6 text-zinc-400 group-hover/back:text-emerald-500 transition-colors" />
               </button>
               <div>
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                   className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-3"
                 >
@@ -139,19 +139,19 @@ const PortfolioBuilder = () => {
                   <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest italic">Live Architecture Generation</span>
                 </motion.div>
                 <h1 className="text-3xl md:text-5xl font-black flex items-center gap-6 tracking-tighter uppercase italic text-white leading-none">
-                  Neural <span className="text-emerald-500">Portfolio</span>
+                  Portfolio<span className="text-emerald-500">Generator</span>
                 </h1>
                 <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em] font-black mt-3 italic opacity-60">
                   Autonomous academic resume synthesis for global career navigation.
                 </p>
               </div>
             </div>
-            
+
             <button
               onClick={handlePrint}
               className="flex items-center gap-4 px-10 py-5 bg-emerald-500 text-black rounded-[2rem] hover:shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-all font-black text-xs uppercase tracking-[0.2em] italic active:scale-95 relative z-10 group/btn"
             >
-              <Printer className="w-5 h-5 group-hover/btn:scale-125 transition-transform" /> 
+              <Printer className="w-5 h-5 group-hover/btn:scale-125 transition-transform" />
               Generate Artifact
             </button>
           </motion.div>
@@ -167,13 +167,13 @@ const PortfolioBuilder = () => {
               { label: 'Active Sectors', value: courses.length, icon: <BookOpen className="w-6 h-6 text-blue-500" />, color: 'border-blue-500/20 bg-blue-500/5' },
               { label: 'Mission Success', value: completedTasks.length, icon: <Trophy className="w-6 h-6 text-indigo-500" />, color: 'border-indigo-500/20 bg-indigo-500/5' },
             ].map((s, i) => (
-              <motion.div 
-                whileHover={{ y: -8, scale: 1.02 }} 
-                key={s.label} 
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02 }}
+                key={s.label}
                 className={`bg-white/[0.01] backdrop-blur-3xl border border-white/5 rounded-[3rem] p-8 flex items-center gap-6 shadow-2xl transition-all duration-700 group ${s.color.replace('border', 'hover:border')}`}
               >
                 <div className="p-4 bg-white/[0.02] rounded-2xl border border-white/5 group-hover:scale-110 transition-transform shadow-inner">
-                   {s.icon}
+                  {s.icon}
                 </div>
                 <div>
                   <p className="text-4xl font-black text-white tracking-tighter italic leading-none">{s.value}</p>
@@ -240,7 +240,7 @@ const PortfolioBuilder = () => {
                       </div>
                       {Object.entries(gradeLetterDistribution).length > 0 && (
                         <div className="mt-8">
-                          <p className="text-[9px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-4 italic">Neural Distribution</p>
+                          <p className="text-[9px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-4 italic">Distribution</p>
                           <div className="flex gap-3 flex-wrap">
                             {Object.entries(gradeLetterDistribution).sort().map(([letter, count]) => (
                               <div key={letter} className="text-center">
@@ -327,7 +327,7 @@ const PortfolioBuilder = () => {
                             <div key={g.id} className="flex items-center justify-between py-4 border-b border-zinc-50 last:border-0 group">
                               <div className="flex gap-4 items-center">
                                 <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:text-emerald-500 group-hover:bg-emerald-50 transition-all">
-                                   <Zap className="w-4 h-4" />
+                                  <Zap className="w-4 h-4" />
                                 </div>
                                 <div>
                                   <p className="font-black text-zinc-800 text-[11px] uppercase italic tracking-widest">{g.assignment_name}</p>
@@ -355,7 +355,7 @@ const PortfolioBuilder = () => {
                         {completedTasks.slice(0, 6).map(task => (
                           <div key={task.id} className="p-5 bg-zinc-50/50 rounded-[1.5rem] border border-zinc-100 group hover:border-emerald-500/20 transition-all flex items-start gap-4">
                             <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500 group-hover:scale-110 transition-transform">
-                               <Shield className="w-3.5 h-3.5" />
+                              <Shield className="w-3.5 h-3.5" />
                             </div>
                             <div>
                               <p className="font-black text-zinc-800 text-[10px] uppercase italic tracking-widest leading-relaxed line-clamp-2">{task.title}</p>
@@ -370,8 +370,8 @@ const PortfolioBuilder = () => {
                   {/* Footer note */}
                   <div className="mt-20 pt-10 border-t-[3px] border-zinc-100 text-[9px] text-zinc-300 flex justify-between items-center font-black uppercase tracking-[0.5em] italic">
                     <span className="flex items-center gap-4">
-                       <Sparkles className="w-4 h-4 text-emerald-500" />
-                       MARGDARSHAK_GENERATIVE_ARTIFACT
+                      <Sparkles className="w-4 h-4 text-emerald-500" />
+                      MARGDARSHAK_GENERATIVE_ARTIFACT
                     </span>
                     <span>{new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>

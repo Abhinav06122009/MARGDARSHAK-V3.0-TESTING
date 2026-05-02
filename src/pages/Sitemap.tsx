@@ -16,28 +16,28 @@ const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
       title: 'Identity & Access',
       icon: <Shield size={20} className="text-emerald-500" />,
       links: [
-        { name: 'Identity Hub', path: '/auth', description: 'Authentication and session management enclave.' },
-        { name: 'Profile Node', path: '/profile', description: 'Manage your universal holographic ID.' },
+        { name: 'Authentication Portal', path: '/auth', description: 'Authentication and session management enclave.' },
+        { name: 'Profile', path: '/profile', description: 'Manage your universal holographic ID.' },
         { name: 'Premium Upgrade', path: '/upgrade', description: 'Ascend to Elite or Multi-core tiers.' },
-        { name: 'System Settings', path: '/settings', description: 'Configure neural core and aesthetic parameters.' }
+        { name: 'System Settings', path: '/settings', description: 'Configure Your Margdarshak parameters.' }
       ]
     },
     {
-      title: 'Cognitive Suite',
+      title: 'Academic Suite',
       icon: <Cpu size={20} className="text-blue-500" />,
       links: [
-        { name: 'AI Assistant', path: '/ai-assistant', description: 'Direct uplink to Margdarshak Neural Core.' },
-        { name: 'Study Planner', path: '/study-planner', description: 'Algorithmic academic orchestration.' },
-        { name: 'Timetable Hub', path: '/timetable', description: 'Temporal schedule management.' },
-        { name: 'Notes Database', path: '/notes', description: 'Structured knowledge storage.' }
+        { name: 'Margdarshak Saarthi', path: '/ai-assistant', description: 'Direct Chat with Margdarshak Saarthi.' },
+        { name: 'Study Planner', path: '/study-planner', description: 'Ai academic Study-Planner.' },
+        { name: 'Timetable Hub', path: '/timetable', description: 'schedule management.' },
+        { name: 'Notes Database', path: '/notes', description: 'Manage Your Notes.' }
       ]
     },
     {
       title: 'Performance & Tracking',
       icon: <Zap size={20} className="text-amber-500" />,
       links: [
-        { name: 'Progress Tracer', path: '/tracer', description: 'Real-time academic telemetry for Elite users.' },
-        { name: 'Grade Management', path: '/grades', description: 'Monitor academic performance metrics.' },
+        { name: 'Progress Tracer', path: '/tracer', description: 'Real-time academic Tracker.' },
+        { name: 'Grade Management', path: '/grades', description: 'Monitor academic performance.' },
         { name: 'Course Management', path: '/courses', description: 'Universal syllabus and curriculum hub.' }
       ]
     },
@@ -45,8 +45,8 @@ const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
       title: 'Legal & Operational',
       icon: <Terminal size={20} className="text-zinc-500" />,
       links: [
-        { name: 'System Status', path: '/status', description: 'Real-time matrix health and feedback loop.' },
-        { name: 'Privacy Protocol', path: '/privacy', description: 'Data encryption and security standards.' },
+        { name: 'System Status', path: '/status', description: 'Real-time matrix health and feedback loop (Only for Admins).' },
+        { name: 'Privacy', path: '/privacy', description: 'Data encryption and security standards.' },
         { name: 'Terms of Accord', path: '/terms', description: 'Operational guidelines and legal framework.' },
         { name: 'Sitemap Index', path: '/sitemap', description: 'This navigational matrix.' }
       ]
@@ -127,7 +127,7 @@ const SitemapPage = ({ onBack }: { onBack?: () => void }) => {
                     <div className="relative z-10 flex items-start justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                           <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest">PROTOCOL_{idx}_{lIdx}</span>
+                           <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest">Feature_{idx}_{lIdx}</span>
                            <div className="w-1 h-1 rounded-full bg-emerald-500/30" />
                         </div>
                         <h3 className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors uppercase italic">{link.name}</h3>

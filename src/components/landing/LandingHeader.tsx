@@ -25,7 +25,7 @@ export const LandingHeader: React.FC = () => {
   const navItems = [
     { name: 'home', label: 'Home' },
     { name: 'features', label: 'Features' },
-    { name: 'margdarshak-ai', label: 'AI Assistant' },
+    { name: 'margdarshak-Saarthi', label: 'margdarshak-Saarthi' },
     { name: 'testimonials', label: 'Success' },
     { name: 'about', label: 'Mission' },
     { name: 'blog', label: 'Blog', path: '/blog' },
@@ -73,7 +73,7 @@ export const LandingHeader: React.FC = () => {
             <span className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
               MARGDARSHAK
             </span>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered</span>
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered Educational Suite</span>
           </div>
         </div>
 

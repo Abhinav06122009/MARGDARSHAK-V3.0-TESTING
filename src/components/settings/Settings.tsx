@@ -125,7 +125,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               {/* Calligraphy Username & Role */}
               <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 mt-4 ml-2">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-1">Identity_Persona</span>
+                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-1">Identity_Profile</span>
                   <span className="text-5xl lg:text-7xl font-signature text-white italic drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                     {fullName || user.profile?.full_name || 'Anonymous'}
                   </span>
@@ -153,7 +153,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           <div className="flex items-center gap-4 p-3 bg-zinc-950/40 border border-white/5 rounded-full backdrop-blur-3xl shadow-2xl">
             <div className="flex items-center gap-6 px-10 py-3 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
               <Cpu size={20} className="text-emerald-400" />
-              <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">Nexus_Active</span>
+              <span className="text-[11px] font-black text-white/60 tracking-widest uppercase leading-none">Margdarshak_Active</span>
             </div>
           </div>
         </motion.header>

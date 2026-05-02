@@ -75,7 +75,7 @@ const DoubtSolver = lazy(() => import('@/pages/DoubtSolver'));
 const SmartNotes = lazy(() => import('@/pages/SmartNotes'));
 const PortfolioBuilder = lazy(() => import('@/pages/PortfolioBuilder'));
 const DeadlineTracker = lazy(() => import('@/pages/DeadlineTracker'));
-const Docs = lazy(() => import('@/pages/Docs'));
+
 const Community = lazy(() => import('@/pages/Community'));
 
 const queryClient = new QueryClient({
@@ -233,7 +233,7 @@ const AppContent = () => {
                         <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/identity-node" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/status" element={<><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></>} />
+                        <Route path="/status" element={<PremiumRoute><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></PremiumRoute>} />
                         <Route path="/sitemap" element={<><SEO title="Sitemap Index | MARGDARSHAK" description="Architectural matrix of the ecosystem." /><Sitemap onBack={() => window.history.back()} /></>} />
                         <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
@@ -322,14 +322,7 @@ const AppContent = () => {
                             </Suspense>
                           </PremiumRoute>
                         } />
-                        <Route path="/docs" element={
-                          <ProtectedRoute>
-                            <SEO title="Documentation | MARGDARSHAK" description="Official academic and technical knowledge base." />
-                            <Suspense fallback={<PageLoader />}>
-                              <Docs />
-                            </Suspense>
-                          </ProtectedRoute>
-                        } />
+
 
                         <Route path="*" element={<NotFound />} />
                       </Routes>

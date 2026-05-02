@@ -50,7 +50,7 @@ const GlobalFooter = () => {
     ],
     support: [
       { name: 'Help Center', path: '/help' },
-      { name: 'Contact Command', path: '/contact' },
+      { name: 'Contact-Us', path: '/contact' },
       { name: 'Sitemap Index', path: '/sitemap' },
     ]
   };
@@ -185,11 +185,19 @@ const GlobalFooter = () => {
               © 2026 MARGDARSHAK. POWERED BY <span className="text-white font-black italic">VSAV GYANTAPA</span>.
             </p>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-6">
             <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
               DESIGNED BY <span className="text-emerald-500 font-black">ABHINAV JHA</span>
               <span className="w-1 h-1 rounded-full bg-zinc-800" />
             </p>
+            {/* Subtle Asset Attribution */}
+            <div className="opacity-[0.02] hover:opacity-100 transition-opacity duration-1000 text-[8px] font-mono flex gap-3 grayscale">
+              <a href="https://iconscout.com/icons/clerk" target="_blank" rel="noopener noreferrer">Clerk by Icon Mafia</a>
+              <a href="https://iconscout.com/icons/supabase" target="_blank" rel="noopener noreferrer">Supabase by Icon Mafia</a>
+              <a href="https://iconscout.com/icons/framer" target="_blank" rel="noopener noreferrer">Framer by Icon 54</a>
+              <a href="https://iconscout.com/icons/vitejs" target="_blank" rel="noopener noreferrer">Vitejs by Icon Mafia</a>
+              <a href="https://iconscout.com/icons/logo" target="_blank" rel="noopener noreferrer">React by Unicons</a>
+            </div>
           </div>
         </div>
       </div>

@@ -1,12 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import supabaseLogo from '@/components/logo/landingpage/supabase.svg';
+import clerkLogo from '@/components/logo/landingpage/clerk.svg';
+import framerLogo from '@/components/logo/landingpage/framer.svg';
+import viteLogo from '@/components/logo/landingpage/vitejs.svg';
+import reactLogo from '@/components/logo/landingpage/react.svg';
+
 const techLogos = [
-  { name: 'Supabase', logo: 'https://seeklogo.com/images/S/supabase-logo-DCC416773F-seeklogo.com.png' },
-  { name: 'Clerk', logo: 'https://seeklogo.com/images/C/clerk-logo-7B3D6B5A1A-seeklogo.com.png' },
-  { name: 'Framer Motion', logo: 'https://seeklogo.com/images/F/framer-motion-logo-DA1E2E7E4B-seeklogo.com.png' },
-  { name: 'Vite', logo: 'https://seeklogo.com/images/V/vite-logo-7B3D6B5A1A-seeklogo.com.png' },
-  { name: 'React', logo: 'https://seeklogo.com/images/R/react-logo-7B3D6B5A1A-seeklogo.com.png' },
+  { name: 'Supabase', logo: supabaseLogo },
+  { name: 'Clerk', logo: clerkLogo },
+  { name: 'Framer Motion', logo: framerLogo },
+  { name: 'Vite', logo: viteLogo },
+  { name: 'React', logo: reactLogo },
   { name: 'Tailwind', logo: 'https://seeklogo.com/images/T/tailwind-css-logo-5AD4175897-seeklogo.com.png' }
 ];
 

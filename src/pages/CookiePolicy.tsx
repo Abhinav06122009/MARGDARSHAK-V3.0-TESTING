@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Shield, Lock, Eye, Globe, Zap, Cpu, Command, ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import logo from "@/components/logo/logo.png";
 
 type Section = { id: number; slug: string; title: string; content: React.ReactNode };

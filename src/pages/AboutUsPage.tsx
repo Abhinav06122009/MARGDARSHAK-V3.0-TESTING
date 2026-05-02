@@ -1,17 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Users, 
-  Target, 
-  Heart, 
-  Sparkles, 
-  ArrowLeft, 
-  Zap, 
-  Shield, 
-  BookOpen, 
-  Clock, 
-  MapPin, 
-  Calendar, 
+import {
+  Users,
+  Target,
+  Heart,
+  Sparkles,
+  ArrowLeft,
+  Zap,
+  Shield,
+  BookOpen,
+  Clock,
+  MapPin,
+  Calendar,
   Mail,
   Globe,
   Database,
@@ -31,14 +31,14 @@ const AboutUsPage = () => {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-        
+
         {/* Animated Orbs */}
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1] }}
           transition={{ repeat: Infinity, duration: 12, ease: 'easeInOut' }}
           className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.3, 1] }}
           transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut', delay: 3 }}
           className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"
@@ -50,7 +50,7 @@ const AboutUsPage = () => {
 
       <ScrollArea className="h-screen w-full relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-20">
-          
+
           {/* Hero Section */}
           <section className="relative pt-20 pb-32 px-6 text-center">
             <motion.div
@@ -66,24 +66,24 @@ const AboutUsPage = () => {
                 <Sparkles size={12} className="animate-pulse" />
                 Evolution of Academic Intelligence
               </motion.div>
-              
+
               <h1 className="text-6xl md:text-9xl font-black mb-10 tracking-tighter leading-none italic uppercase">
                 Our <span className="text-emerald-500 underline decoration-emerald-500/30 underline-offset-8">Mission</span>
               </h1>
-              
+
               <p className="text-xl md:text-3xl text-zinc-400 max-w-4xl mx-auto leading-relaxed font-medium mb-16 italic">
-                Harmonizing <span className="text-white font-bold">Artificial Intelligence</span> with human potential to engineer the definitive cognitive ecosystem for the modern scholar.
+                Connecting <span className="text-white font-bold">Students</span> with Margdarshak Intelligence To Help Scholars
               </p>
 
               <div className="flex flex-wrap justify-center gap-6">
                 <Link to="/auth">
                   <Button className="h-16 px-10 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-zinc-200 transition-all active:scale-95">
-                    Initialize Protocol
+                    Get Started
                   </Button>
                 </Link>
                 <Link to="/contact">
                   <Button variant="outline" className="h-16 px-10 border-white/10 bg-white/5 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-white/10 transition-all active:scale-95">
-                    Connect Command
+                    Contact Us Now
                   </Button>
                 </Link>
               </div>
@@ -141,14 +141,14 @@ const AboutUsPage = () => {
                     </p>
                   </div>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   className="relative flex justify-center"
                 >
-                   <div className="relative group">
+                  <div className="relative group">
                     <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full group-hover:bg-emerald-500/40 transition-all duration-1000 scale-110" />
                     <div className="p-10 rounded-[4rem] bg-white border border-white/20 relative z-10 shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-2">
                       <img src={logo} alt="Margdarshak Official Logo" className="w-48 h-48 object-contain" />
@@ -188,8 +188,8 @@ const AboutUsPage = () => {
                   bg: "bg-blue-500/10"
                 },
                 {
-                  name: "Vacant",
-                  role: "Strategic Growth",
+                  name: "Shlok Tomar",
+                  role: "Chief Technical Officer",
                   desc: "Scaling our mission to reach every ambitious scholar globally with uncompromising excellence.",
                   icon: Database,
                   color: "text-amber-400",
@@ -222,15 +222,15 @@ const AboutUsPage = () => {
           {/* Terminal Action */}
           <section className="py-32 text-center">
             <div className="inline-flex items-center gap-4 p-4 px-8 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] mb-12 animate-pulse">
-               <Shield size={16} className="text-emerald-400" />
-               <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest italic">Join the Elite Resistance against Academic Noise</span>
+              <Shield size={16} className="text-emerald-400" />
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest italic">Join the Elite Resistance against Academic Noise</span>
             </div>
             <h2 className="text-5xl md:text-7xl font-black mb-16 tracking-tighter uppercase leading-[0.9]">
               Are You Ready to <br /> <span className="text-white italic underline decoration-white/20">Master Your Future?</span>
             </h2>
             <Link to="/auth">
-               <Button className="h-24 px-20 bg-emerald-500 text-black font-black uppercase text-xs tracking-[0.5em] rounded-[2.5rem] hover:bg-emerald-400 transition-all hover:scale-105 shadow-2xl shadow-emerald-500/20">
-                Establish Identity Hub
+              <Button className="h-24 px-20 bg-emerald-500 text-black font-black uppercase text-xs tracking-[0.5em] rounded-[2.5rem] hover:bg-emerald-400 transition-all hover:scale-105 shadow-2xl shadow-emerald-500/20">
+                Get Started Now
               </Button>
             </Link>
           </section>

@@ -140,6 +140,24 @@ export const dashboardService = {
     }
   },
 
+  updateTask: async (taskId: string, taskData: Partial<RealTask>, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ ...taskData, updated_at: new Date().toISOString() })
+        .match({ id: taskId, user_id: translatedId })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating task in Supabase:', error);
+      throw error;
+    }
+  },
+
   deleteTask: async (taskId: string, userId: string) => {
     const translatedId = await translateClerkIdToUUID(userId);
     try {
@@ -178,6 +196,29 @@ export const dashboardService = {
       return data;
     } catch (error) {
       console.error('Error creating quick task in Supabase:', error);
+      throw error;
+    }
+  },
+
+  createTask: async (taskData: Partial<RealTask>, userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
+    try {
+      const newTask = {
+        ...taskData,
+        id: crypto.randomUUID(),
+        user_id: translatedId,
+        created_at: new Date().toISOString()
+      };
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(newTask)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating task in Supabase:', error);
       throw error;
     }
   },

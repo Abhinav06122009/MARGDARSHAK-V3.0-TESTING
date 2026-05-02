@@ -88,14 +88,14 @@ const Upgrade = () => {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-        
+
         {/* Animated Orbs */}
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1] }}
           transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
           className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.3, 1] }}
           transition={{ repeat: Infinity, duration: 20, ease: 'easeInOut', delay: 2 }}
           className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"
@@ -107,11 +107,11 @@ const Upgrade = () => {
 
       <ScrollArea className="h-screen w-full relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-16">
-          
+
           {/* Nav Identity */}
           <nav className="flex items-center justify-between mb-24 px-4 py-3 bg-white/[0.02] border border-white/5 rounded-3xl backdrop-blur-3xl shadow-2xl">
             <Link to="/" className="flex items-center gap-4 group">
-              <motion.div 
+              <motion.div
                 whileHover={{ rotate: 10, scale: 1.1 }}
                 className="p-3 bg-white rounded-2xl shadow-xl shadow-emerald-500/10"
               >
@@ -121,7 +121,7 @@ const Upgrade = () => {
             </Link>
             <Link to="/dashboard">
               <Button variant="ghost" className="text-zinc-500 hover:text-white font-black text-[10px] tracking-widest uppercase gap-3 hover:bg-white/5 rounded-2xl transition-all">
-                <ArrowLeft size={14} /> Hub Return
+                <ArrowLeft size={14} /> Return To Home
               </Button>
             </Link>
           </nav>
@@ -132,37 +132,37 @@ const Upgrade = () => {
             className="text-center space-y-8 max-w-4xl mx-auto mb-32"
           >
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-[0.3em] mb-4 italic">
-              <Crown size={14} className="animate-pulse" /> Cognitive Evolution Module
+              <Crown size={14} className="animate-pulse" /> UPGRADATION PAGE
             </div>
             <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.85] italic uppercase">
               Unlock Your <br />
               <span className="text-emerald-500 underline decoration-emerald-500/20 underline-offset-8">Elite Potential</span>
             </h1>
-            
+
             {/* Current Status Badge */}
             <div className="flex justify-center mt-6">
               <div className="px-6 py-4 bg-white/[0.03] border border-white/10 rounded-2xl backdrop-blur-xl flex items-center gap-6 shadow-2xl">
                 <div className="flex flex-col items-start">
-                  <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Active Deployment</span>
+                  <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Active Subscription</span>
                   <span className="text-sm font-black text-white uppercase tracking-tighter italic">
-                    {currentTier === 'free' ? 'Starter Suite (Free)' : 
-                     currentTier === 'premium' ? 'Premium Protocol' : 
-                     ['premium_elite', 'extra_plus', 'premium_plus'].includes(currentTier || '') ? 'Elite Cognitive Core' : 
-                     (currentTier || 'Starter Suite').toUpperCase()}
+                    {currentTier === 'free' ? 'Starter Suite (Free)' :
+                      currentTier === 'premium' ? 'Premium Suite' :
+                        ['premium_elite', 'extra_plus', 'premium_plus'].includes(currentTier || '') ? 'Elite Suite' :
+                          (currentTier || 'Starter Suite').toUpperCase()}
                   </span>
                 </div>
                 <div className="w-px h-8 bg-white/10" />
                 <div className="flex flex-col items-start">
-                   <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Security Identity</span>
-                   <span className="text-xs font-bold text-emerald-500/80 truncate max-w-[120px]">
-                      {clerkUser?.username || clerkUser?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Unknown'}
-                   </span>
+                  <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Security Identity</span>
+                  <span className="text-xs font-bold text-emerald-500/80 truncate max-w-[120px]">
+                    {clerkUser?.username || clerkUser?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'Unknown'}
+                  </span>
                 </div>
               </div>
             </div>
 
             <p className="text-xl text-zinc-500 font-medium leading-relaxed max-w-2xl mx-auto mb-12 italic border-l-2 border-emerald-500/20 pl-8">
-              Engineer your academic trajectory with the most powerful <span className="text-white font-bold">Neural Core</span> available. Unlimited research, high-fidelity analytics, and priority support.
+              Engineer your academic success with the full power of <span className="text-white font-bold">Margdarshak</span> available. Unlimited research, high-fidelity analytics, and priority support.
             </p>
 
             <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2.5rem] p-10 text-left max-w-3xl mx-auto flex flex-col md:flex-row gap-8 items-center shadow-2xl relative overflow-hidden group">
@@ -173,7 +173,7 @@ const Upgrade = () => {
               <div>
                 <h3 className="text-emerald-500 font-black text-xs mb-3 tracking-[0.4em] uppercase italic">Deployment Notice</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed font-medium">
-                  <strong className="text-white">VSAV GYANTAPA</strong> maintains manual verification for elite tier deployments. Activate below and our tactical team will finalize your account re-encryption within 24-48 hrs.
+                  <strong className="text-white">VSAV GYANTAPA</strong> maintains manual verification for elite tier deployments. Activate below and our Technical team will finalize your account re-encryption within 24-48 hrs.
                 </p>
               </div>
             </div>
@@ -235,17 +235,17 @@ const Upgrade = () => {
               variants={itemVariants}
               className="relative p-12 rounded-[4rem] bg-white/[0.02] border border-blue-500/20 backdrop-blur-3xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] overflow-hidden group hover:border-blue-500/40 transition-all duration-700"
             >
-               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] to-transparent pointer-events-none" />
               <h3 className="text-xs font-black text-blue-500 mb-6 flex items-center gap-3 tracking-[0.3em] uppercase italic">
                 <Sparkles size={14} className="animate-pulse" /> Premium Tier
               </h3>
 
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-6xl font-black text-white italic tracking-tighter">₹750</span>
-                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">/ Lifetime</span>
+                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">/ Two Month</span>
               </div>
 
-              <p className="text-sm text-zinc-400 mb-10 h-10 font-medium italic leading-relaxed">Enhanced power for serious students with tactical priority support.</p>
+              <p className="text-sm text-zinc-400 mb-10 h-10 font-medium italic leading-relaxed">Enhanced power for serious students with technical priority support.</p>
 
               {currentTier === 'premium' ? (
                 <div className="w-full py-6 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-black text-[10px] tracking-[0.3em] uppercase text-center italic cursor-default">
@@ -270,7 +270,8 @@ const Upgrade = () => {
                   'BULK ARCHIVAL OPERATIONS',
                   'ADVANCED TIME ANALYTICS',
                   'WHATSAPP STATUS REPORTS',
-                  'PRIORITY COMMAND SUPPORT'
+                  'PRIORITY COMMAND SUPPORT',
+                  'AND MUCH MORE'
                 ].map((feature, i) => (
                   <div key={i} className="flex items-center gap-4 text-xs group-hover:translate-x-1 transition-transform">
                     <div className="p-1 rounded-lg bg-blue-500/20 text-blue-400">
@@ -279,11 +280,11 @@ const Upgrade = () => {
                     <span className="text-zinc-300 font-bold uppercase tracking-widest text-[9px]">{feature}</span>
                   </div>
                 ))}
-                 <div className="h-px bg-white/5" />
-                 <div className="flex items-center gap-4 text-xs text-zinc-700 italic font-medium">
-                    <X size={14} className="text-zinc-800" />
-                    ELITE_MODEL_UNRESTRICTED
-                 </div>
+                <div className="h-px bg-white/5" />
+                <div className="flex items-center gap-4 text-xs text-zinc-700 italic font-medium">
+                  <X size={14} className="text-zinc-800" />
+                  ELITE_MODEL_UNRESTRICTED
+                </div>
               </div>
             </motion.div>
 
@@ -303,10 +304,10 @@ const Upgrade = () => {
 
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-6xl font-black text-white italic tracking-tighter">₹1200</span>
-                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">/ Lifetime</span>
+                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">/ TWO MONTHS</span>
               </div>
 
-              <p className="text-sm text-zinc-400 mb-10 h-10 font-medium italic leading-relaxed">The definitive cognitive arsenal. All systems unrestricted.</p>
+              <p className="text-sm text-zinc-400 mb-10 h-10 font-medium italic leading-relaxed">The extra-ordinary Subscription Gives Full potential Of margdarshak. All systems unrestricted.</p>
 
               {['premium_elite', 'extra_plus', 'premium_plus'].includes(currentTier || '') ? (
                 <div className="w-full py-6 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-black text-[10px] tracking-[0.3em] uppercase text-center italic cursor-default">
@@ -339,7 +340,8 @@ const Upgrade = () => {
                   '500 GB CLOUD REPOSITORY',
                   'PREDICTIVE GRADE SYNTHESIS',
                   'NEURAL TIMETABLE GENERATOR',
-                  'DEDICATED 24/7 SMART TUTOR'
+                  'DEDICATED 24/7 SMART TUTOR',
+                  'AND MUCH MORE'
                 ].map((feature, i) => (
                   <div key={i} className="flex items-center gap-4 text-xs group-hover:translate-x-1 transition-transform">
                     <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
@@ -356,15 +358,15 @@ const Upgrade = () => {
           {/* FAQ Architecture */}
           <div className="mt-40 max-w-4xl mx-auto">
             <div className="text-center mb-16">
-                <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-4">Tactical <span className="text-emerald-500">FAQ</span></h2>
-                <div className="h-1 w-24 bg-emerald-500/30 mx-auto rounded-full" />
+              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-4">Technical <span className="text-emerald-500">FAQ</span></h2>
+              <div className="h-1 w-24 bg-emerald-500/30 mx-auto rounded-full" />
             </div>
             <div className="grid grid-cols-1 gap-6">
               {[
-                  { q: "ONE-TIME ENCRYPTION FEE?", a: "Affirmative. Both Premium and Elite tiers are lifetime access deployments. Zero recurring overhead." },
-                  { q: "ELITE CORE FUNCTIONALITY?", a: "The Elite System utilizes our internal high-performance neural engine. You do not require external API keys; access is managed and unrestricted." },
-                  { q: "UPGRADE TRAJECTORY?", a: "Incremental upgrades from Premium to Elite are supported at any time. Contact the tactical support team for re-adjustment." },
-                  { q: "DATA SOVEREIGNTY?", a: "Absolute. We employ end-to-end encryption. Your academic intelligence remains your property, strictly segregated from external entities." }
+                { q: "ONE-TIME ENCRYPTION FEE?", a: "No. Both Premium and Elite tiers are valid only for Two months. recurring should be after Two months only." },
+                { q: "ELITE CORE FUNCTIONALITY?", a: "The Elite System utilizes our internal high-performance engine. You do not require external API keys; access is managed and unrestricted." },
+                { q: "UPGRADE SUBSCRIPTION?", a: "Incremental upgrades from Premium to Elite are supported at any time. Contact the technical support team for re-adjustment." },
+                { q: "DATA SECURITY?", a: "Absolute. We employ end-to-end encryption. Your academic intelligence remains your property, strictly segregated from external entities." }
               ].map((item, idx) => (
                 <FaqItem key={idx} q={item.q} a={item.a} />
               ))}
@@ -374,20 +376,15 @@ const Upgrade = () => {
           {/* Footer Terminal Actions */}
           <div className="mt-40 pt-16 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
             <div className="flex flex-col gap-2">
-               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.5em] italic">Architectural Integrity</p>
-               <p className="text-sm font-bold text-white uppercase tracking-tighter">ZENITH_SUBSCRIPTION_CORE_V3.0.1</p>
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.5em] italic">MARGDARSHAK VERSION</p>
+              <p className="text-sm font-bold text-white uppercase tracking-tighter">V3.0</p>
             </div>
             <div className="flex items-center gap-6">
-                <Link to="/contact">
-                   <Button variant="outline" className="h-14 px-8 border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all">
-                      Support Uplink
-                   </Button>
-                </Link>
-                <Link to="/docs">
-                   <Button className="h-14 px-8 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-200 transition-all">
-                      Docs <ArrowUpRight size={14} className="ml-2" />
-                   </Button>
-                </Link>
+              <Link to="/contact">
+                <Button variant="outline" className="h-14 px-8 border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all">
+                  Support Uplink
+                </Button>
+              </Link>
             </div>
           </div>
 

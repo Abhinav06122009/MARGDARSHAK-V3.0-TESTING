@@ -97,7 +97,7 @@ const HelpPage = () => {
               transition={{ duration: 1, ease: "easeOut" }}
             >
               <div className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black tracking-[0.3em] text-emerald-400 mb-12 uppercase italic">
-                <Sparkles size={12} className="animate-pulse" /> Global Assistance Uplink
+                <Sparkles size={12} className="animate-pulse" /> VSAV-GYANTA TECHNICAL ASSISTANCE
               </div>
               <h1 className="text-7xl md:text-9xl font-black mb-12 tracking-tighter leading-[0.85] italic uppercase">
                 System <br />
@@ -210,18 +210,18 @@ const HelpPage = () => {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.05),transparent)]" />
               <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
                 <div className="flex-1 text-center lg:text-left">
-                  <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.85] italic">Direct <br /> <span className="text-emerald-500">Uplink</span></h2>
-                  <p className="text-zinc-500 font-medium text-xl max-w-xl italic leading-relaxed">Our elite technical operations team maintains a <span className="text-white font-black italic">24/7 Strategic Watch</span>. Initialize a direct communication payload now.</p>
+                  <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.85] italic">Direct <br /> <span className="text-emerald-500">CoNTACT</span></h2>
+                  <p className="text-zinc-500 font-medium text-xl max-w-xl italic leading-relaxed">Our technical operations team maintains a <span className="text-white font-black italic">24/7 Support Link</span>. Through a direct communication.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-8 w-full lg:w-auto">
                   <Link to="/contact">
                     <Button className="h-24 px-16 bg-white text-black font-black uppercase text-xs tracking-[0.4em] rounded-[2.5rem] hover:bg-zinc-200 transition-all shadow-2xl w-full">
-                      <Mail className="w-6 h-6 mr-4" /> Start Transmission
+                      <Mail className="w-6 h-6 mr-4" /> Get Help
                     </Button>
                   </Link>
-                  <a href="mailto:support@margdarshak.tech">
+                  <a href="mailto:support@margdarshan.tech">
                     <Button variant="outline" className="h-24 px-16 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-xs tracking-[0.4em] rounded-[2.5rem] w-full">
-                      <MessageCircle className="w-6 h-6 mr-4" /> External Mail
+                      <MessageCircle className="w-6 h-6 mr-4" /> Direct Mail
                     </Button>
                   </a>
                 </div>

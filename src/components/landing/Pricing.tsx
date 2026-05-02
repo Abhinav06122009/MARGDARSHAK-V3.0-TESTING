@@ -34,6 +34,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
         'Portfolio Builder',
         'Exam Deadlines',
         'Smart Notes (TTS)',
+        'AND MUCH MORE'
       ],
       popular: false,
     },
@@ -48,6 +49,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
         'Predictive Grade Analytics',
         'Automatic Timetable Gen',
         'Dedicated 24/7 Smart Tutor',
+        'AND MUCH MORE'
       ],
       popular: true,
     }
@@ -64,11 +66,10 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
           {plans.map((plan, index) => (
             <TiltCard
               key={index}
-              className={`p-8 rounded-3xl border ${
-                plan.popular 
-                  ? 'bg-gray-900 border-blue-500 shadow-2xl shadow-blue-500/30' 
-                  : 'bg-gray-900/60 border-blue-600/30'
-              } relative overflow-hidden backdrop-blur-sm`}
+              className={`p-8 rounded-3xl border ${plan.popular
+                ? 'bg-gray-900 border-blue-500 shadow-2xl shadow-blue-500/30'
+                : 'bg-gray-900/60 border-blue-600/30'
+                } relative overflow-hidden backdrop-blur-sm`}
             >
               {plan.popular && (
                 <div className="absolute top-0 -right-1/4 w-1/2 text-center py-1.5 bg-blue-500 text-white font-semibold text-sm transform rotate-45 translate-y-6">
@@ -79,7 +80,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
               <p className="text-4xl font-extrabold text-white mb-4">
                 {plan.price}
                 <span className="text-base font-medium text-gray-400">
-                  {plan.price !== '$0' && ' / mo'}
+                  {plan.price !== '$0' && ' / Two Months'}
                 </span>
               </p>
               <p className="text-gray-400 mb-6 h-10">{plan.desc}</p>
@@ -95,11 +96,10 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
                 <a
                   href="/auth"
                   onClick={() => onPlanClick?.(plan.name)}
-                  className={`w-full inline-block text-center font-bold py-3 px-8 rounded-xl text-lg transition-all duration-300 ${
-                    plan.popular 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-blue-600/20 hover:bg-blue-600/40 text-blue-300'
-                  }`}
+                  className={`w-full inline-block text-center font-bold py-3 px-8 rounded-xl text-lg transition-all duration-300 ${plan.popular
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-600/20 hover:bg-blue-600/40 text-blue-300'
+                    }`}
                 >
                   Get Started
                 </a>
@@ -126,17 +126,17 @@ export const CTA: React.FC = () => (
       </p>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
         <MagneticButton>
-          <a 
-            href="/auth" 
+          <a
+            href="/auth"
             className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl shadow-blue-500/40 transition-all duration-300 group"
           >
-            Get Started for Free 
+            Get Started for Free
             <Rocket className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
           </a>
         </MagneticButton>
         <MagneticButton>
-          <a 
-            href="/blog" 
+          <a
+            href="/blog"
             className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-4 px-12 rounded-full text-lg transition-all duration-300"
           >
             Read Our Blog

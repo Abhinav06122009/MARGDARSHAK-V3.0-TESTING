@@ -20,9 +20,9 @@ const ELITE_TIERS = ['premium_elite', 'extra_plus', 'premium_plus', 'premium+eli
 const GATEWAY_RESPONSE = { AUTH_REQUIRED: 'AUTH_REQUIRED', UPGRADE_TO_EXTRA: 'UPGRADE_TO_EXTRA', KEY_REQUIRED: 'KEY_REQUIRED' } as const;
 const REQUEST_MODE = { CHAT: 'deepresearch', IMAGE: 'imagegen' } as const;
 const AI_GATEWAY_URL = getConfiguredAIGatewayUrl();
-const TEXT_MODEL_LABEL = "MARGDARSHAK SAARTHI TEXT";
+const TEXT_MODEL_LABEL = "MARGDARSHAK SAARTHI";
 const VISION_MODEL_LABEL = "MARGDARSHAK SAARTHI";
-const IMAGE_GEN_LABEL = "MARGDARSHAK SAARTHI VISION";
+const IMAGE_GEN_LABEL = "MARGDARSHAK SAARTHI";
 const BYOK_STORAGE_KEY = 'margdarshak_openrouter_key';
 
 const SmartTutorPage = () => {
@@ -214,7 +214,7 @@ Internal Check: Before sending your response, remove all curly braces and backsl
               <h1 className="text-2xl font-black italic text-white tracking-tighter uppercase leading-none">
                 Margdarshak <span className="text-emerald-500 not-italic font-light">Saarthi</span>
               </h1>
-              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-60">Neural Orchestrator v3.0.5</p>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1.5 opacity-60">Margdarshak Saarthi V3.0</p>
             </div>
           </div>
 
@@ -310,7 +310,7 @@ const EmptyState = ({ label }: { label: string }) => (
         <Sparkles size={64} className="text-emerald-500" />
       </div>
     </div>
-    <p className="font-black tracking-[0.5em] text-[10px] uppercase text-zinc-500 italic">Saarthi Protocol Active</p>
+    <p className="font-black tracking-[0.5em] text-[10px] uppercase text-zinc-500 italic">Saarthi Active</p>
     <p className="text-[10px] text-emerald-500 mt-4 font-black uppercase tracking-widest">{label}</p>
   </div>
 );
@@ -321,7 +321,7 @@ const LockState = () => (
       <div className="absolute inset-0 bg-emerald-500/5 blur-xl" />
       <Lock className="w-10 h-10 text-zinc-700 relative z-10" />
     </div>
-    <h2 className="text-4xl font-black text-white mb-4 uppercase italic tracking-tighter">Protocol Locked</h2>
+    <h2 className="text-4xl font-black text-white mb-4 uppercase italic tracking-tighter">Saarthi Locked</h2>
     <p className="text-zinc-600 text-[10px] max-w-xs mb-10 font-black uppercase tracking-widest leading-relaxed">Upgrade to the Elite or Premium suite to activate your neural study companion and cognitive orchestrator.</p>
     <Link to="/upgrade">
       <Button className="h-16 px-12 bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] rounded-2xl hover:bg-emerald-500 hover:text-black transition-all shadow-2xl shadow-white/5 active:scale-95">Initialize Upgrade</Button>

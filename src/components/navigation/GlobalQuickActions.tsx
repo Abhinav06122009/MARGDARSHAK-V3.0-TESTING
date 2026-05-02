@@ -61,7 +61,7 @@ const ALL_ACTIONS: Action[] = [
   { icon: Star, title: 'Privacy Protocol', subtitle: 'Data encryption and security standards', color: 'from-zinc-400 to-zinc-600', path: '/privacy', category: 'Legal & Operational', keywords: ['privacy','legal','data'] },
   { icon: Star, title: 'Terms of Accord', subtitle: 'Operational guidelines and legal framework', color: 'from-zinc-400 to-zinc-600', path: '/terms', category: 'Legal & Operational', keywords: ['terms','legal','tos'] },
   { icon: Hash, title: 'Sitemap Index', subtitle: 'This navigational matrix', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'Legal & Operational', keywords: ['sitemap','map','navigation'] },
-  { icon: Library, title: 'Protocol Docs', subtitle: 'Platform technical knowledge base', color: 'from-slate-500 to-slate-700', path: '/docs', category: 'Legal & Operational', keywords: ['docs','help','guide','manual'] },
+
   { icon: FileText, title: 'Intelligence Blog', subtitle: 'Latest updates and neural study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Legal & Operational', keywords: ['blog','news','tips','update'] },
   { icon: Headphones, title: 'Help Center', subtitle: 'Margdarshak direct support uplink', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Legal & Operational', keywords: ['help','support','faq','contact'] },
   { icon: User, title: 'Mission Overview', subtitle: 'The vision behind the MARGDARSHAK mission', color: 'from-blue-500 to-indigo-600', path: '/about', category: 'Legal & Operational', keywords: ['about','mission','team'] },

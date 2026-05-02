@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Shield, User, Mail, Calendar, 
+import {
+  ArrowLeft, Shield, User, Mail, Calendar,
   MapPin, Phone, Briefcase, Award, Zap,
   Cpu, Command, Sparkles, Fingerprint, Camera,
   Edit3, Save, X, Github, Twitter, Linkedin
@@ -16,9 +16,9 @@ import { jsPDF } from 'jspdf';
 import logo from "@/components/logo/logo.png";
 
 const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
-  const { 
+  const {
     user, loading, fullName, setFullName, studentId, setStudentId,
-    handleProfileUpdate, refreshUser 
+    handleProfileUpdate, refreshUser
   } = useSettings();
   const { user: clerkUser } = useUser();
   const { openUserProfile } = useClerk();
@@ -37,8 +37,8 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
   const openSecuritySettings = () => {
     if (!clerkUser) return;
     openUserProfile({ label: 'security' });
-    toast({ 
-      title: 'OPENING SECURITY HUB', 
+    toast({
+      title: 'OPENING SECURITY HUB',
       description: 'Please manage your Passkeys in the official Clerk security panel.',
       className: "bg-zinc-900 border-blue-500/50 text-blue-400"
     });
@@ -63,7 +63,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
     doc.setDrawColor(16, 185, 129); // Emerald-500
     doc.setLineWidth(2);
     doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'D');
-    
+
     // Double Thin Inner Borders
     doc.setDrawColor(99, 102, 241); // Indigo-500
     doc.setLineWidth(0.3);
@@ -108,11 +108,11 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(28);
       doc.text('MARGDARSHAK', pageWidth / 2, 45, { align: 'center', charSpace: 2 });
-      
+
       // Aesthetic Line
       doc.setDrawColor(16, 185, 129, 0.5);
       doc.setLineWidth(0.5);
-      doc.line(pageWidth/2 - 40, 52, pageWidth/2 + 40, 52);
+      doc.line(pageWidth / 2 - 40, 52, pageWidth / 2 + 40, 52);
 
       // 4. MAIN CONTENT
       doc.setTextColor(200, 200, 200);
@@ -137,7 +137,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       doc.setFontSize(14);
       doc.setTextColor(180, 180, 180);
       doc.text('for their exceptional integration and performance within', pageWidth / 2, 130, { align: 'center' });
-      
+
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(16, 185, 129);
       doc.setFontSize(18);
@@ -168,7 +168,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       doc.setLineWidth(0.5);
       doc.line(40, 195, 110, 195);
       doc.line(pageWidth - 110, 195, pageWidth - 40, 195);
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
@@ -183,7 +183,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
 
       doc.save(`${fullName || 'Student'}_Margdarshak_Certificate.pdf`);
     };
-    
+
     // Fallback if image fails to load
     img.onerror = () => {
       // (Repeat content without image or just save anyway)
@@ -194,10 +194,10 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
 
   if (loading) return (
     <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center gap-8">
-      <motion.div 
-        animate={{ rotate: 360 }} 
+      <motion.div
+        animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-        className="w-16 h-16 border-t-2 border-emerald-500 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.2)]" 
+        className="w-16 h-16 border-t-2 border-emerald-500 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.2)]"
       />
       <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[1.5em] animate-pulse">SYNCHRONIZING_BIOMETRICS</span>
     </div>
@@ -208,7 +208,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
   return (
     <div className="min-h-screen bg-[#020202] text-zinc-300 selection:bg-emerald-500/30 overflow-x-hidden">
       <ParallaxBackground />
-      
+
       {/* AMBIENT GLOW SYSTEM */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div
@@ -220,7 +220,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24">
-        
+
         {/* TOP NAVIGATION / STATUS BAR */}
         <nav className="flex items-center justify-between mb-24">
           <button
@@ -228,7 +228,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
             className="group flex items-center gap-4 px-6 py-3 bg-zinc-950/50 border border-white/5 rounded-2xl hover:border-emerald-500/30 transition-all backdrop-blur-xl"
           >
             <ArrowLeft size={18} className="text-zinc-500 group-hover:text-emerald-400 group-hover:-translate-x-1 transition-all" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Return_to_Nexus</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Return_to_Dashboard</span>
           </button>
 
           <div className="flex items-center gap-8">
@@ -243,7 +243,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
-          
+
           {/* LEFT COLUMN: THE ID CARD (PHYSICAL IDENTITY) */}
           <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-12 lg:sticky lg:top-12">
             <div className="space-y-4">
@@ -262,34 +262,34 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
               onRefresh={refreshUser}
             />
 
-             {/* QUICK ACTIONS */}
+            {/* QUICK ACTIONS */}
             <div className="grid grid-cols-2 gap-4">
-               <button 
-                 onClick={openSecuritySettings}
-                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group"
-               >
-                 <Fingerprint className="w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400" />
-                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">
-                   Security_Key
-                 </span>
-               </button>
-               <button 
-                 onClick={generateCertificate}
-                 className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-blue-500/20 hover:bg-blue-500/[0.02] transition-all group"
-               >
-                 <Award className="w-6 h-6 text-blue-500/40 mb-3 group-hover:text-blue-400" />
-                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Get Certificate</span>
-               </button>
+              <button
+                onClick={openSecuritySettings}
+                className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-emerald-500/20 hover:bg-emerald-500/[0.02] transition-all group"
+              >
+                <Fingerprint className="w-6 h-6 text-emerald-500/40 mb-3 group-hover:text-emerald-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">
+                  Security_Key
+                </span>
+              </button>
+              <button
+                onClick={generateCertificate}
+                className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 border border-white/5 rounded-3xl hover:border-blue-500/20 hover:bg-blue-500/[0.02] transition-all group"
+              >
+                <Award className="w-6 h-6 text-blue-500/40 mb-3 group-hover:text-blue-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white">Get Certificate</span>
+              </button>
             </div>
 
           </div>
 
           {/* RIGHT COLUMN: METADATA & MANAGEMENT */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-16">
-            
+
             {/* CALLIGRAPHY WELCOME HEADER */}
             <div className="flex flex-col">
-              <span className="text-[11px] font-black text-zinc-600 uppercase tracking-[0.5em] mb-4">AESTHETIC_RECOGNITION</span>
+              <span className="text-[11px] font-black text-zinc-600 uppercase tracking-[0.5em] mb-4">PROFILE</span>
               <h1 className="text-6xl lg:text-8xl font-signature text-white italic leading-tight drop-shadow-2xl">
                 {fullName || user.profile?.full_name || 'Scholar'}
               </h1>
@@ -298,75 +298,75 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
                   {user.profile?.user_type || 'ELITE_MEMBER'}
                 </div>
                 <div className="px-6 py-2 bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-full backdrop-blur-md">
-                  V3.0_PROTOCOL
+                  SECURED BY VSAV GYANTAPA
                 </div>
               </div>
             </div>
 
             {/* MANAGEMENT MODULES */}
             <div className="grid gap-8">
-              
+
               {/* BIO-NODE SECTION */}
               <div className="p-10 bg-zinc-950/40 border border-white/5 rounded-[3rem] backdrop-blur-3xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 transition-opacity">
-                   <Cpu className="w-32 h-32 text-emerald-500" />
+                  <Cpu className="w-32 h-32 text-emerald-500" />
                 </div>
-                
+
                 <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.6em] mb-10 flex items-center gap-4">
                   <span className="w-10 h-px bg-emerald-500/30" />
-                  BIO_SYNCHRONIZATION
+                  PROFILE DATA
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                   <div className="space-y-3">
-                     <div className="flex items-center gap-3 mb-2">
-                       <Mail size={14} className="text-zinc-600" />
-                       <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Protocol_Email</span>
-                     </div>
-                     <p className="text-xl font-bold text-white tracking-tight">{user.email}</p>
-                     <div className="h-px w-full bg-white/5" />
-                   </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Mail size={14} className="text-zinc-600" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Email</span>
+                    </div>
+                    <p className="text-xl font-bold text-white tracking-tight">{user.email}</p>
+                    <div className="h-px w-full bg-white/5" />
+                  </div>
 
-                   <div className="space-y-3">
-                     <div className="flex items-center gap-3 mb-2">
-                       <Calendar size={14} className="text-zinc-600" />
-                       <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Commission_Date</span>
-                     </div>
-                     <p className="text-xl font-bold text-white tracking-tight">
-                       {new Date(user.created_at || '').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                     </p>
-                     <div className="h-px w-full bg-white/5" />
-                   </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar size={14} className="text-zinc-600" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Joining_Date</span>
+                    </div>
+                    <p className="text-xl font-bold text-white tracking-tight">
+                      {new Date(user.created_at || '').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <div className="h-px w-full bg-white/5" />
+                  </div>
 
-                   <div className="space-y-3">
-                     <div className="flex items-center gap-3 mb-2">
-                       <MapPin size={14} className="text-zinc-600" />
-                       <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Neural_Location</span>
-                     </div>
-                     <p className="text-xl font-bold text-white tracking-tight">Mumbai_Central_Node</p>
-                     <div className="h-px w-full bg-white/5" />
-                   </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <MapPin size={14} className="text-zinc-600" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Server_Location</span>
+                    </div>
+                    <p className="text-xl font-bold text-white tracking-tight">Mumbai_Central_Node</p>
+                    <div className="h-px w-full bg-white/5" />
+                  </div>
 
-                   <div className="space-y-3">
-                     <div className="flex items-center gap-3 mb-2">
-                       <Shield size={14} className="text-zinc-600" />
-                       <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Subscription_Tier</span>
-                     </div>
-                     <div className="flex items-center gap-3">
-                       <p className="text-xl font-black text-white uppercase tracking-tighter italic">Premium_Elite</p>
-                       <Zap size={16} className="text-amber-400 fill-amber-400" />
-                     </div>
-                     <div className="h-px w-full bg-white/5" />
-                   </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Shield size={14} className="text-zinc-600" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Subscription_Tier</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-xl font-black text-white uppercase tracking-tighter italic">Premium_Elite</p>
+                      <Zap size={16} className="text-amber-400 fill-amber-400" />
+                    </div>
+                    <div className="h-px w-full bg-white/5" />
+                  </div>
                 </div>
 
                 <div className="mt-16 flex justify-end">
-                   <button 
-                     onClick={handleProfileUpdate}
-                     className="px-12 py-5 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
-                   >
-                     COMMIT_CHANGES
-                   </button>
+                  <button
+                    onClick={handleProfileUpdate}
+                    className="px-12 py-5 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                  >
+                    MAKE_CHANGES
+                  </button>
                 </div>
               </div>
 
