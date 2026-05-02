@@ -37,25 +37,30 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       
       let info: any = null;
 
-      // A+ CLASS: RHODIUM ZENITH (Dual C-Suite)
+      // A+ CLASS: RHODIUM ZENITH — Pure Chrome Crystalline (Dual C-Suite)
       if (userCSuiteCount >= 2) {
         info = {
           tier: 'A+',
           title: 'ZENITH HIGH COMMAND',
           icon: Crown,
           style: {
-            gradient: 'from-[#FFFFFF] via-[#E5E4E2] to-[#71706E]',
-            glow: 'rgba(255, 255, 255, 0.7)',
-            accent: '#FFFFFF',
+            gradient: 'from-[#FFFFFF] via-[#C8C8C8] to-[#8A8A8A]',
+            glow: 'rgba(255,255,255,0.9)',
+            accent: '#F0F0F0',
+            accentAlt: '#AAAAAA',
             particles: 'bg-white',
-            shimmer: 'from-white/30 via-transparent to-white/30',
-            border: 'border-white/60',
-            shadow: 'shadow-[0_0_150px_rgba(255,255,255,0.4)]',
+            shimmer: 'from-white/60 via-white/10 to-white/60',
+            border: 'border-white/80',
+            shadow: 'shadow-[0_0_200px_60px_rgba(255,255,255,0.35),0_0_80px_rgba(255,255,255,0.6)]',
+            orb: 'rgba(220,220,220,0.25)',
+            scanline: 'rgba(255,255,255,0.04)',
+            badge: 'from-[#ffffff] via-[#d4d4d4] to-[#8e8e8e]',
+            ribbonBg: 'linear-gradient(135deg,#ffffff,#b0b0b0,#6e6e6e)',
             theme: 'rhodium'
           }
         };
       }
-      // A CLASS: PLATINUM ASTRAL (Single C-Suite)
+      // A CLASS: PLATINUM ASTRAL — Cold Silver-Blue Metallic (Single C-Suite)
       else if (userCSuiteCount === 1) {
         const activeRole = normalizedRoles.find(r => cSuiteRoles.includes(r));
         info = {
@@ -63,32 +68,42 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           title: `CHIEF ${activeRole?.toUpperCase()} OFFICER`,
           icon: Shield,
           style: {
-            gradient: 'from-[#E5E4E2] via-[#00F5FF] to-[#00A3FF]',
-            glow: 'rgba(0, 245, 255, 0.5)',
-            accent: '#00F5FF',
-            particles: 'bg-[#E5E4E2]',
-            shimmer: 'from-blue-400/30 via-transparent to-cyan-600/30',
-            border: 'border-cyan-500/50',
-            shadow: 'shadow-[0_0_120px_rgba(0,245,255,0.3)]',
+            gradient: 'from-[#E8E8FF] via-[#A0C8FF] to-[#4488DD]',
+            glow: 'rgba(160,200,255,0.85)',
+            accent: '#B0D8FF',
+            accentAlt: '#5599EE',
+            particles: 'bg-[#B0D8FF]',
+            shimmer: 'from-blue-200/40 via-white/10 to-cyan-400/40',
+            border: 'border-blue-300/70',
+            shadow: 'shadow-[0_0_160px_50px_rgba(100,180,255,0.3),0_0_60px_rgba(160,200,255,0.5)]',
+            orb: 'rgba(120,180,255,0.2)',
+            scanline: 'rgba(160,210,255,0.04)',
+            badge: 'from-[#e8f0ff] via-[#90b8f8] to-[#3366cc]',
+            ribbonBg: 'linear-gradient(135deg,#c8deff,#7aaad4,#3366aa)',
             theme: 'platinum'
           }
         };
       }
-      // B- CLASS: IMPERIAL GOLD (Sovereign)
+      // B CLASS: IMPERIAL GOLD — Deep Warm Amber Fire (Sovereign)
       else if (normalizedRoles.some(r => sovereignRoles.includes(r))) {
         const activeRole = normalizedRoles.find(r => sovereignRoles.includes(r));
         info = {
-          tier: 'B-',
+          tier: 'B',
           title: activeRole === 'owner' ? 'SYSTEM OWNER' : (activeRole === 'superadmin' ? 'SUPER ADMINISTRATOR' : 'SYSTEM ADMINISTRATOR'),
           icon: Zap,
           style: {
-            gradient: 'from-[#FFD700] via-[#FDB931] to-[#9E7E38]',
-            glow: 'rgba(255, 215, 0, 0.5)',
+            gradient: 'from-[#FFE566] via-[#FFAA00] to-[#7A4E00]',
+            glow: 'rgba(255,180,0,0.9)',
             accent: '#FFD700',
+            accentAlt: '#FF9900',
             particles: 'bg-[#FFD700]',
-            shimmer: 'from-yellow-400/30 via-transparent to-yellow-600/30',
-            border: 'border-yellow-500/50',
-            shadow: 'shadow-[0_0_100px_rgba(255,215,0,0.25)]',
+            shimmer: 'from-yellow-300/50 via-amber-200/10 to-orange-500/40',
+            border: 'border-yellow-400/80',
+            shadow: 'shadow-[0_0_180px_50px_rgba(255,180,0,0.3),0_0_60px_rgba(255,215,0,0.6)]',
+            orb: 'rgba(255,160,0,0.2)',
+            scanline: 'rgba(255,200,0,0.04)',
+            badge: 'from-[#ffe566] via-[#ffaa00] to-[#7a4e00]',
+            ribbonBg: 'linear-gradient(135deg,#ffe566,#fdb931,#9e7e38)',
             theme: 'gold'
           }
         };
@@ -129,40 +144,59 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden"
         >
-          {/* Advanced Geometric Crystal Layer */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-             {[...Array(6)].map((_, i) => (
-               <motion.div
-                 key={i}
-                 initial={{ opacity: 0, scale: 0 }}
-                 animate={{ 
-                    opacity: [0, 0.1, 0], 
-                    scale: [0.5, 1.2, 0.5],
-                    rotate: [0, 180, 360],
-                    x: (Math.random() - 0.5) * 1000,
-                    y: (Math.random() - 0.5) * 1000
-                 }}
-                 transition={{ duration: 10 + i * 2, repeat: Infinity, ease: "easeInOut" }}
-                 className="absolute top-1/2 left-1/2 w-[400px] h-[400px] border border-white/5 rotate-45 backdrop-blur-3xl"
-                 style={{ 
-                   background: `linear-gradient(135deg, ${rankInfo.style.accent}05, transparent)`,
-                   clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' 
-                 }}
-               />
-             ))}
+          {/* === TIER BG: SCANLINES === */}
+          <div className="absolute inset-0 pointer-events-none z-[1]" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${rankInfo.style.scanline} 0px, transparent 1px, transparent 3px)` }} />
+
+          {/* === TIER BG: GEOMETRIC CRYSTALS === */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.12, 0],
+                  scale: [0.4, 1.4, 0.4],
+                  rotate: [0, 180, 360],
+                  x: [(i % 2 === 0 ? 1 : -1) * (100 + i * 80), (i % 2 === 0 ? -1 : 1) * (100 + i * 80)],
+                  y: [(i % 3 === 0 ? 1 : -1) * (60 + i * 50), (i % 3 === 0 ? -1 : 1) * (60 + i * 50)]
+                }}
+                transition={{ duration: 8 + i * 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.4 }}
+                className="absolute top-1/2 left-1/2 w-[350px] h-[350px]"
+                style={{
+                  background: `linear-gradient(135deg, ${rankInfo.style.accent}08, ${rankInfo.style.accentAlt}04, transparent)`,
+                  clipPath: i % 2 === 0 ? 'polygon(50% 0%,100% 50%,50% 100%,0% 50%)' : 'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)',
+                  border: `1px solid ${rankInfo.style.accent}10`
+                }}
+              />
+            ))}
           </div>
 
-          {/* Liquid Refraction Orb */}
-          <div className="absolute inset-0 pointer-events-none">
+          {/* === TIER BG: FLOATING PARTICLES === */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[3]">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: '100vh', x: `${(i / 20) * 100}vw` }}
+                animate={{ opacity: [0, 0.8, 0], y: '-20vh', x: [`${(i / 20) * 100}vw`, `${((i / 20) * 100) + (i % 2 === 0 ? 3 : -3)}vw`] }}
+                transition={{ duration: 4 + (i % 5), repeat: Infinity, delay: i * 0.3, ease: 'easeOut' }}
+                className={`absolute bottom-0 rounded-full ${rankInfo.style.particles}`}
+                style={{ width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.6, filter: `blur(${i % 2}px)` }}
+              />
+            ))}
+          </div>
+
+          {/* === TIER BG: DUAL ORB GLOW === */}
+          <div className="absolute inset-0 pointer-events-none z-[2]">
             <motion.div
-              animate={{ 
-                x: [0, 50, -50, 0],
-                y: [0, -30, 30, 0],
-                opacity: [0.15, 0.25, 0.15],
-                scale: [1, 1.2, 1]
-              }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[180px]"
+              animate={{ x: [0, 60, -60, 0], y: [0, -40, 40, 0], opacity: [0.18, 0.30, 0.18], scale: [1, 1.25, 1] }}
+              transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[200px]"
+              style={{ backgroundColor: rankInfo.style.orb }}
+            />
+            <motion.div
+              animate={{ x: [0, -40, 40, 0], y: [0, 30, -30, 0], opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1] }}
+              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[120px]"
               style={{ backgroundColor: rankInfo.style.accent }}
             />
           </div>
@@ -174,35 +208,34 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           >
             <motion.div
               initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
-              animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }} // Further scaled down
+              animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }}
               transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
-              className={`relative p-8 rounded-[4rem] bg-black/60 border-2 ${rankInfo.style.border} backdrop-blur-[120px] ${rankInfo.style.shadow} group max-w-[80vw]`}
+              className={`relative p-8 rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group max-w-[80vw]`}
+              style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.75) 0%, ${rankInfo.style.accent}08 50%, rgba(0,0,0,0.85) 100%)` }}
             >
-              {/* Glass Refraction Texture */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden rounded-[4rem]">
-                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-overlay" />
+              {/* Grain Texture */}
+              <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-60 mix-blend-overlay" />
               </div>
 
-              {/* Shimmer / Liquid Light */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-20 rounded-[4rem] overflow-hidden`}>
-                <motion.div 
-                  animate={{ x: ["-200%", "200%"], y: ["-100%", "100%"] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-35deg]"
+              {/* Metallic Inner Edge Highlight */}
+              <div className="absolute inset-0 rounded-[4rem] pointer-events-none" style={{ boxShadow: `inset 0 1px 0 ${rankInfo.style.accent}40, inset 0 -1px 0 ${rankInfo.style.accentAlt}20` }} />
+
+              {/* Shimmer Sweep */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-25 rounded-[4rem] overflow-hidden`}>
+                <motion.div
+                  animate={{ x: ['-200%', '200%'], y: ['-100%', '100%'] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+                  className="w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-35deg]"
                 />
               </div>
 
-              {/* Energy Arcs (High Fidelity) */}
+              {/* Dual Energy Arcs */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
-                <motion.circle
-                  cx="50%" cy="50%" r="52%"
-                  fill="none"
-                  stroke={rankInfo.style.accent}
-                  strokeWidth="0.5"
-                  strokeDasharray="5 15"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                />
+                <motion.circle cx="50%" cy="50%" r="52%" fill="none" stroke={rankInfo.style.accent} strokeWidth="0.6" strokeDasharray="6 18"
+                  animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }} />
+                <motion.circle cx="50%" cy="50%" r="48%" fill="none" stroke={rankInfo.style.accentAlt} strokeWidth="0.3" strokeDasharray="3 12"
+                  animate={{ rotate: -360 }} transition={{ duration: 35, repeat: Infinity, ease: 'linear' }} />
               </svg>
 
               <div className="relative z-10 flex flex-col items-center">
@@ -235,15 +268,16 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                       </span>
                    </div>
 
-                   <h2 className={`text-5xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-8 mb-4`}>
-                      <motion.span
-                        initial={{ letterSpacing: "0.5em", opacity: 0 }}
-                        animate={{ letterSpacing: "-0.05em", opacity: 1 }}
-                        transition={{ delay: 1.5, duration: 1.2, ease: "circOut" }}
-                      >
-                        {rankInfo.tier} Class
-                      </motion.span>
-                   </h2>
+                   <h2 className={`text-5xl font-black italic uppercase tracking-tighter bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-8 mb-4`}
+                     style={{ filter: `drop-shadow(0 0 30px ${rankInfo.style.glow})` }}>
+                       <motion.span
+                         initial={{ letterSpacing: "0.5em", opacity: 0 }}
+                         animate={{ letterSpacing: "-0.05em", opacity: 1 }}
+                         transition={{ delay: 1.5, duration: 1.2, ease: "circOut" }}
+                       >
+                         {rankInfo.tier} Class
+                       </motion.span>
+                    </h2>
 
                    <div className="relative h-8 overflow-hidden mb-6">
                      <motion.div
@@ -260,16 +294,18 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
                    {/* Rank Achievement Badges */}
                    <div className="flex gap-2">
-                      {[...Array(3)].map((_, i) => (
+                      {[rankInfo.style.theme === 'rhodium' ? 'RHODIUM' : rankInfo.style.theme === 'platinum' ? 'PLATINUM' : 'IMPERIAL',
+                        'VERIFIED', 'ELITE'].map((label, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 2.5 + i * 0.2 }}
-                          className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2"
+                          className="px-4 py-1.5 rounded-lg border flex items-center gap-2"
+                          style={{ background: `${rankInfo.style.accent}10`, borderColor: `${rankInfo.style.accent}30` }}
                         >
-                           <Star className="w-2 h-2 fill-white text-white" />
-                           <span className="text-[6px] font-black text-zinc-400 uppercase tracking-widest">Excellence_{i+1}</span>
+                           <Star className="w-2 h-2" style={{ color: rankInfo.style.accent, fill: rankInfo.style.accent }} />
+                           <span className="text-[6px] font-black uppercase tracking-widest" style={{ color: rankInfo.style.accent }}>{label}</span>
                         </motion.div>
                       ))}
                    </div>

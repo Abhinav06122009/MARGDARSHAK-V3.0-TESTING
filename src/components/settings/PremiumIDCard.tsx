@@ -68,40 +68,43 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
     const roles = Array.isArray(role) ? role : [role || 'student'];
     const normalizedRoles = roles.map(r => String(r).toLowerCase().replace(/_/g, ''));
     
-    // Multi-role A+ Class: The Hyper-Chromatic Protocol
+    // A+ CLASS — RHODIUM: Pure Chrome Crystalline (multi-role)
     if (normalizedRoles.length >= 2) {
       return {
         class: 'A+ CLASS',
-        title: 'MULTICORE_ELITE',
-        color: 'bg-gradient-to-r from-[#ff0080] via-[#7928ca] to-[#00dfd8]',
+        title: 'RHODIUM_ZENITH',
+        colorStyle: 'linear-gradient(135deg,#ffffff,#c8c8c8,#8a8a8a)',
+        color: '',
         text: 'text-white',
-        glow: 'shadow-[0_0_40px_rgba(121,40,202,0.5)]',
-        accent: 'text-cyan-400'
+        glow: 'shadow-[0_0_60px_rgba(255,255,255,0.4),0_0_20px_rgba(255,255,255,0.6)]',
+        accent: 'text-white',
+        accentHex: '#F0F0F0',
+        codeColor: '#F0F0F0'
       };
     }
 
     const cleanRole = normalizedRoles[0];
 
-    // A-Class: C-Suite Chromatics
+    // A-CLASS — PLATINUM: Cold Silver-Blue Metallic (single C-Suite)
     const cSuite: Record<string, any> = {
-      ceo: { title: 'CHIEF_EXECUTIVE', color: 'bg-[#8B5CF6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(139,92,246,0.5)]', accent: 'text-purple-400' },
-      cto: { title: 'CHIEF_TECHNOLOGY', color: 'bg-[#1E40AF]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(30,64,175,0.5)]', accent: 'text-blue-400' },
-      cfo: { title: 'CHIEF_FINANCIAL', color: 'bg-[#FBBF24]', text: 'text-black', glow: 'shadow-[0_0_25px_rgba(251,191,36,0.5)]', accent: 'text-amber-400' },
-      coo: { title: 'CHIEF_OPERATIONS', color: 'bg-[#F97316]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(249,115,22,0.5)]', accent: 'text-orange-400' },
-      cmo: { title: 'CHIEF_MARKETING', color: 'bg-[#EC4899]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(236,72,153,0.5)]', accent: 'text-pink-400' },
-      cio: { title: 'CHIEF_INFORMATION', color: 'bg-[#06B6D4]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(6,182,212,0.5)]', accent: 'text-cyan-400' }
+      ceo: { title: 'CHIEF_EXECUTIVE', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
+      cto: { title: 'CHIEF_TECHNOLOGY', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
+      cfo: { title: 'CHIEF_FINANCIAL',  colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
+      coo: { title: 'CHIEF_OPERATIONS', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
+      cmo: { title: 'CHIEF_MARKETING',  colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
+      cio: { title: 'CHIEF_INFORMATION',colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' }
     };
 
-    if (cSuite[cleanRole]) return { ...cSuite[cleanRole], class: 'A-CLASS' };
+    if (cSuite[cleanRole]) return { ...cSuite[cleanRole], color: '', class: 'A-CLASS' };
 
-    // B-Class: Sovereignty Chromatics
+    // B-CLASS — IMPERIAL GOLD: Deep Warm Amber Fire (sovereign)
     const bClass: Record<string, any> = {
-      owner: { title: 'SYSTEM_OWNER', color: 'bg-[#EF4444]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(239,68,68,0.5)]', accent: 'text-red-400' },
-      superadmin: { title: 'SUPER_ADMIN', color: 'bg-[#6366F1]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(99,102,241,0.5)]', accent: 'text-indigo-400' },
-      admin: { title: 'SYSTEM_ADMIN', color: 'bg-[#3B82F6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(59,130,246,0.5)]', accent: 'text-blue-400' }
+      owner:      { title: 'SYSTEM_OWNER', colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' },
+      superadmin: { title: 'SUPER_ADMIN',  colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' },
+      admin:      { title: 'SYSTEM_ADMIN', colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' }
     };
 
-    if (bClass[cleanRole]) return { ...bClass[cleanRole], class: 'B-CLASS' };
+    if (bClass[cleanRole]) return { ...bClass[cleanRole], color: '', class: 'B-CLASS' };
 
     // C-Class: Oversight Chromatics
     const cClass: Record<string, any> = {
@@ -174,9 +177,12 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
         {/* ROLE RIBBON: Perfectly Anchored */}
         <div className="absolute top-10 left-0 z-40">
-          <div className={`${roleData.color} ${roleData.glow} px-6 py-2.5 rounded-r-full flex flex-col border-y border-r border-white/10`}>
+          <div
+            className={`${roleData.glow} px-6 py-2.5 rounded-r-full flex flex-col border-y border-r border-white/10`}
+            style={{ background: roleData.colorStyle || undefined, backgroundColor: roleData.colorStyle ? undefined : (roleData.color?.replace('bg-','') || '#1a1a1a') }}
+          >
             <div className="flex items-center gap-2">
-              <Sparkles size={10} className={roleData.text} />
+              <Sparkles size={10} style={{ color: roleData.accentHex || '#fff' }} />
               <span className={`text-[8px] font-black ${roleData.text} uppercase tracking-[0.3em]`}>{roleData.class}</span>
             </div>
             <span className={`text-[11px] font-black ${roleData.text} uppercase tracking-widest italic leading-tight`}>{roleData.title}</span>
@@ -198,7 +204,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
             </div>
             <div className="text-right">
               <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">REG_CODE</div>
-              <div className={`text-[11px] font-mono ${roleData.class === 'A+ CLASS' ? 'text-rose-400' : roleData.class === 'A-CLASS' ? 'text-amber-400' : roleData.class === 'B-CLASS' ? 'text-cyan-400' : 'text-fuchsia-400'} font-bold tracking-widest`}>{studentId || 'ID_0000'}</div>
+              <div className="text-[11px] font-mono font-bold tracking-widest" style={{ color: roleData.codeColor || (roleData.class === 'C-CLASS' ? '#a855f7' : '#52525b') }}>{studentId || 'ID_0000'}</div>
             </div>
           </div>
 
