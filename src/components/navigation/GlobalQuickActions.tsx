@@ -186,23 +186,21 @@ const GlobalQuickActions: React.FC = () => {
             <motion.div
               initial={{ 
                 opacity: 0, 
-                scale: 0.4, 
-                x: position.x - 20, 
-                y: position.y - 20,
-                originX: 0,
-                originY: 0
+                scale: 0.8, 
+                x: position.x, 
+                y: position.y 
               }}
               animate={{ 
                 opacity: 1, 
                 scale: 1, 
-                x: Math.min(Math.max(20, position.x - 250), window.innerWidth - 560),
+                x: Math.max(10, Math.min(position.x - 250, window.innerWidth - 550)),
                 y: position.y > window.innerHeight / 2 
-                   ? Math.max(20, position.y - 600) 
-                   : Math.min(window.innerHeight - 620, position.y + 70)
+                   ? Math.max(10, position.y - 500) 
+                   : Math.min(window.innerHeight - 500, position.y + 60)
               }}
-              exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.2 } }}
-              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-              className="fixed z-[1001] w-[540px] max-w-[95vw] max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden"
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+              className="fixed z-[1001] left-0 top-0 w-[540px] max-w-[95vw] max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden"
               style={{
                 background: 'linear-gradient(145deg, rgba(10,10,15,0.98) 0%, rgba(15,15,25,0.96) 100%)',
                 border: '1px solid rgba(255,255,255,0.08)',
