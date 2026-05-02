@@ -89,9 +89,12 @@ export const dashboardService = {
         supabase.from('notes').select('*').eq('user_id', translatedId),
         supabase.from('courses').select('*').eq('user_id', translatedId),
         supabase.from('timetable_events').select('*').eq('user_id', translatedId),
-        supabase.from('user_calendar_events').select('*').eq('user_id', translatedId),
+        supabase.rpc('get_my_calendar_events'),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
+
+      // Map RPC result to the expected format
+      const calendarEventsData = (calendarEventsResult as any).data || [];
 
       return {
         tasks: tasksResult.data || [],
