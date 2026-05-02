@@ -211,15 +211,31 @@ const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
   if (clerkId.includes('-') && clerkId.length >= 32) return clerkId;
 
-  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
-  
-  return [
-    hash.slice(0, 8),
-    hash.slice(8, 12),
-    '4' + hash.slice(13, 16),
-    '8' + hash.slice(17, 20),
-    hash.slice(20, 32)
-  ].join('-');
+  try {
+    // UUID v5 Implementation (SHA-1 based)
+    // Namespace: 00000000-0000-0000-0000-000000000000 (uuid_nil)
+    const namespace = Buffer.alloc(16, 0);
+    const name = Buffer.from(clerkId, 'utf8');
+    const data = Buffer.concat([namespace, name]);
+
+    const hash = crypto.createHash('sha1').update(data).digest();
+    
+    // Set version (5) and variant (8, 9, a, or b)
+    hash[6] = (hash[6] & 0x0f) | 0x50;
+    hash[8] = (hash[8] & 0x3f) | 0x80;
+
+    const hex = hash.toString('hex');
+    return [
+      hex.slice(0, 8),
+      hex.slice(8, 12),
+      hex.slice(12, 16),
+      hex.slice(16, 20),
+      hex.slice(20, 32)
+    ].join('-');
+  } catch (err) {
+    console.error('[translateClerkIdToUUID] Error:', err);
+    return clerkId;
+  }
 };
 
 const MAX_BODY_BYTES = 128 * 1024;

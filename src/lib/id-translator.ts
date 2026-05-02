@@ -11,44 +11,36 @@
  */
 export const translateClerkIdToUUID = async (clerkId: string): Promise<string> => {
   if (!clerkId) return '';
-  
-  // If it's already a UUID (contains hyphens and is 36 chars), return as is
-  if (clerkId.includes('-') && clerkId.length === 36) {
-    return clerkId;
-  }
+  if (clerkId.includes('-') && clerkId.length >= 32) return clerkId;
 
   try {
-    // 1. Encode as UTF-8 (Matching backend 00009 logic: no salt)
-    const msgBuffer = new TextEncoder().encode(clerkId);
-    
-    // 2. Generate SHA-256 hash
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    
-    // 3. Convert buffer to hex string
+    // UUID v5 Implementation (Standard Deterministic UUID)
+    // Namespace: 00000000-0000-0000-0000-000000000000 (uuid_nil)
+    const namespace = new Uint8Array(16).fill(0);
+    const name = new TextEncoder().encode(clerkId);
+    const data = new Uint8Array(namespace.length + name.length);
+    data.set(namespace);
+    data.set(name, namespace.length);
+
+    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     
-    // 4. Format as UUID (8-4-4-4-12)
-    // Matches public.translate_clerk_id_to_uuid() in 00009_id_translation_stabilization.sql
-    const uuid = [
+    // Format hash to UUID v5
+    // Set version (5) and variant (8, 9, a, or b)
+    hashArray[6] = (hashArray[6] & 0x0f) | 0x50;
+    hashArray[8] = (hashArray[8] & 0x3f) | 0x80;
+
+    const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return [
       hex.slice(0, 8),
       hex.slice(8, 12),
-      '4' + hex.slice(13, 16), // Version 4
-      '8' + hex.slice(17, 20), // Variant 10xx
+      hex.slice(12, 16),
+      hex.slice(16, 20),
       hex.slice(20, 32)
     ].join('-');
-    
-    return uuid;
   } catch (err) {
-    console.error('[ID-Translator] Error translating ID:', err);
-    // Fallback: A very basic deterministic mapping if crypto fails
-    let hash = 0;
-    for (let i = 0; i < clerkId.length; i++) {
-      hash = ((hash << 5) - hash) + clerkId.charCodeAt(i);
-      hash = hash & hash;
-    }
-    const fallbackHex = Math.abs(hash).toString(16).padStart(8, '0');
-    return `${fallbackHex}-0000-4000-8000-${fallbackHex.split('').reverse().join('').padStart(12, '0')}`;
+    console.error('[ID-Translator] Crypto error:', err);
+    return clerkId; // Absolute fallback
   }
 };
 

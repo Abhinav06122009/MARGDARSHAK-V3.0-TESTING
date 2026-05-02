@@ -98,7 +98,7 @@ export const initConsoleGuard = () => {
     }
     // We can't log the warning if we've blocked the console, 
     // so we use the original log one last time before blocking.
-    originalClear.call(console);
+    // originalClear.call(console);
     originalLog.call(console, `%c${warningTitle}`, titleStyle);
     originalLog.call(console, `%c${warningText}`, textStyle);
   };
