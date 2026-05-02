@@ -171,10 +171,8 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
           </motion.a>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
-
-export default WelcomeHeader;
 
 export default WelcomeHeader;
