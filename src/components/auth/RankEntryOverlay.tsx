@@ -109,9 +109,9 @@ const RankEntryOverlay = () => {
 
   const userTier = useMemo(() => {
     if (!clerkUser) return TIER_CONFIG.STANDARD;
-    const metadata = clerkUser.publicMetadata as any;
+    const metadata = (clerkUser.publicMetadata as any) || {};
     const role = metadata.role?.toLowerCase() || '';
-    const tier = metadata.subscription_tier?.toLowerCase() || '';
+    const tier = (metadata.subscription_tier || metadata.tier)?.toLowerCase() || '';
 
     if (role === 'superadmin' || role === 'owner') return TIER_CONFIG.SUPREME_ADMIN;
     if (role === 'admin') return TIER_CONFIG.ADMIN;
@@ -207,7 +207,10 @@ const RankEntryOverlay = () => {
                     className="relative z-10 w-32 h-32 flex items-center justify-center"
                   >
                     <Hexagon className="absolute inset-0 w-full h-full opacity-20 text-white" />
-                    <userTier.icon className="w-16 h-16" style={{ color: userTier.style.accent }} />
+                    {React.createElement(userTier.icon, { 
+                      className: "w-16 h-16", 
+                      style: { color: userTier.style.accent } 
+                    })}
                   </motion.div>
                 </div>
 

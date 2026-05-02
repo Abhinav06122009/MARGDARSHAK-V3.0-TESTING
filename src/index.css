@@ -824,10 +824,25 @@ img, svg {
 }
 
 /* Pulsing dot */
-@keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%       { transform: scale(1.6); opacity: 0.5; }
+@keyframes aurora-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
+
+.aurora-border {
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.2),
+    rgba(168, 85, 247, 0.2),
+    rgba(236, 72, 153, 0.2),
+    rgba(99, 102, 241, 0.2)
+  );
+  background-size: 300% 300%;
+  animation: aurora-border 6s ease infinite;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .animate-pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
 
 /* Spin-slow for icons */
