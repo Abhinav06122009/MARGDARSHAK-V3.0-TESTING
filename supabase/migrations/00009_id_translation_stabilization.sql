@@ -8,9 +8,15 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- 2. HELPER FUNCTION: Deterministic ID Translation
 CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
 RETURNS text
-LANGUAGE sql STABLE
+LANGUAGE plpgsql STABLE
 AS $$
-  SELECT (
+BEGIN
+  -- If it's already a UUID (contains hyphens and is 36 chars), return as is
+  IF p_clerk_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+    RETURN p_clerk_id;
+  END IF;
+
+  RETURN (
     WITH hash AS (
       SELECT encode(extensions.digest(p_clerk_id::text, 'sha256'::text), 'hex') as h
     )
@@ -22,6 +28,7 @@ AS $$
       substring(h, 21, 12)
     FROM hash
   );
+END;
 $$;
 
 -- 3. CASCADING IDENTITY NORMALIZATION

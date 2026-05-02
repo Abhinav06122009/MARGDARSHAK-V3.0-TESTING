@@ -104,9 +104,11 @@ BEGIN
             EXECUTE format('DROP POLICY IF EXISTS "Standard DELETE for %I" ON public.%I', v_table, v_table);
             EXECUTE format('CREATE POLICY "Standard DELETE for %I" ON public.%I FOR DELETE USING (%I::text = public.requesting_user_id()::text)', v_table, v_table, v_user_id_col);
             
-            -- Admin Master Override
-            EXECUTE format('DROP POLICY IF EXISTS "Admin Master Override for %I" ON public.%I', v_table, v_table);
-            EXECUTE format('CREATE POLICY "Admin Master Override for %I" ON public.%I FOR ALL USING (public.get_current_user_role()::text = ''admin'')', v_table, v_table);
+            -- 3. Create the Admin Master Override (ONLY for non-profiles tables to prevent recursion)
+            IF v_table != 'profiles' THEN
+                EXECUTE format('DROP POLICY IF EXISTS "Admin Master Override for %I" ON public.%I', v_table, v_table);
+                EXECUTE format('CREATE POLICY "Admin Master Override for %I" ON public.%I FOR ALL USING (public.get_current_user_role()::text = ''admin'')', v_table, v_table);
+            END IF;
         END IF;
     END LOOP;
 

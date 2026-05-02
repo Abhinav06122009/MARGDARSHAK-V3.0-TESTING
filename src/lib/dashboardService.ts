@@ -89,7 +89,7 @@ export const dashboardService = {
         supabase.from('notes').select('*').eq('user_id', translatedId),
         supabase.from('courses').select('*').eq('user_id', translatedId),
         supabase.from('timetable_events').select('*').eq('user_id', translatedId),
-        supabase.from('calendar_events').select('*').eq('user_id', translatedId),
+        supabase.from('user_calendar_events').select('*').eq('user_id', translatedId),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
 
@@ -242,7 +242,7 @@ export const dashboardService = {
         created_at: new Date().toISOString()
       };
       const { data, error } = await supabase
-        .from('calendar_events')
+        .from('user_calendar_events')
         .insert(newEvent)
         .select()
         .single();
@@ -259,7 +259,7 @@ export const dashboardService = {
     const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
-        .from('calendar_events')
+        .from('user_calendar_events')
         .update({ ...eventData, updated_at: new Date().toISOString() })
         .match({ id: eventId, user_id: translatedId })
         .select()
@@ -277,7 +277,7 @@ export const dashboardService = {
     const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { error } = await supabase
-        .from('calendar_events')
+        .from('user_calendar_events')
         .delete()
         .match({ id: eventId, user_id: translatedId });
         
