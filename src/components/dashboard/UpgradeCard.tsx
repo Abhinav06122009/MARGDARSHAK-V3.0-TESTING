@@ -28,8 +28,8 @@ const UpgradeCard = () => {
         {/* Content */}
         <div className="space-y-2 mb-6">
           <h3 className="text-2xl font-black text-white leading-tight">
-            Unlock Sovereign <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400">Intelligence</span>
+            Unlock Full Potential Of <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400">Margdarshak</span>
           </h3>
           <p className="text-xs text-gray-400 leading-relaxed font-medium">
             Get unlimited AI generation, access the full Knowledge Vault, and enable advanced visual learning tools.
@@ -65,7 +65,7 @@ const UpgradeCard = () => {
             <div className="absolute inset-0 bg-white/30 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 ease-in-out skew-x-12" />
           </Link>
           <p className="text-center text-[10px] text-gray-500 mt-3 font-medium">
-            30-day money-back guarantee
+            24-hour money-back guarantee
           </p>
         </div>
 

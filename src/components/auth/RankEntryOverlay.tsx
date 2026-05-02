@@ -41,7 +41,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       if (userCSuiteCount >= 2) {
         info = {
           tier: 'A+',
-          title: 'ZENITH HIGH COMMAND',
+          title: 'VSAV GYANTAPA HIGH COMMAND',
           icon: Crown,
           style: {
             gradient: 'from-[#FFFFFF] via-[#C8C8C8] to-[#8A8A8A]',
@@ -247,7 +247,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   className="mb-6 flex flex-col items-center gap-2"
                 >
                   <img src="/logo.png" alt="Margdarshak Logo" className="w-12 h-12 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[8px] font-black tracking-[0.8em] text-white/50 uppercase">MARGDARSHAK HIGH COMMAND</span>
+                  <span className="text-[8px] font-black tracking-[0.8em] text-white/50 uppercase">VSAV GYANTAPA HIGH COMMAND</span>
                 </motion.div>
 
                 <motion.div
@@ -315,7 +315,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               {/* Corner High-Command Branding */}
               <div className="absolute bottom-6 left-6 opacity-30 flex items-center gap-2">
                  <Hexagon size={10} />
-                 <span className="text-[6px] font-black tracking-widest">ENCLAVE_NODE_SECURE</span>
+                 <span className="text-[6px] font-black tracking-widest">HIGH RANKED OFFICIAL</span>
               </div>
             </motion.div>
 
@@ -333,7 +333,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               <div className="flex items-center gap-6 text-[7px] font-black text-zinc-500 uppercase tracking-[0.5em]">
                  <div className="flex items-center gap-2 group">
                     <Activity className="w-3 h-3 text-emerald-500 group-hover:animate-pulse" />
-                    <span>Neural Link: Synchronized</span>
+                    <span>VSAV GYANTA STATUS: Synchronized</span>
                  </div>
                  <div className="w-1 h-1 rounded-full bg-zinc-800" />
                  <div className="flex items-center gap-2 group">

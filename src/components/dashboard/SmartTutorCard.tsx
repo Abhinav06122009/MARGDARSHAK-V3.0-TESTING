@@ -26,7 +26,7 @@ export const SmartTutorCard = () => {
               </div>
               
               <h3 className="text-3xl md:text-4xl font-black text-white leading-tight">
-                MARGDARSHAK <span className="text-amber-500">AI Suite</span>
+                MARGDARSHAK <span className="text-amber-500">SAARTHI</span>
               </h3>
               
               <p className="text-zinc-400 text-base leading-relaxed">

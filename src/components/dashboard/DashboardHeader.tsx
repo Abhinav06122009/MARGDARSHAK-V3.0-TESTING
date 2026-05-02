@@ -5,7 +5,7 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-mo
 import { useToast } from '@/hooks/use-toast';
 import { 
   RefreshCw, Wifi, WifiOff, Download, User as UserIcon, 
-  Shield, LogOut, Sparkles, ChevronDown, Settings, Bell
+  Shield, LogOut, Sparkles, ChevronDown, Settings, Bell, Search
 } from 'lucide-react';
 import logo from "@/components/logo/logo.png";
 import type { SecureUser } from '@/types/dashboard';
@@ -71,8 +71,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     return nameToUse.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   }, [nameToUse]);
 
-  const roleColor = displayRole === 'ADMIN' ? 'from-red-500 to-orange-600'
-    : displayRole === 'PREMIUM' || displayRole === 'PREMIUM_ELITE' ? 'from-amber-500 to-yellow-600'
+  const roleColor = displayRole === 'ADMIN' || displayRole === 'SUPERADMIN' || displayRole === 'OWNER'
+    ? 'from-amber-400 to-yellow-500'
+    : displayRole === 'CEO' || displayRole === 'CTO' || displayRole === 'CFO' || displayRole === 'COO' || displayRole === 'CMO' || displayRole === 'CIO'
+    ? 'from-blue-300 to-cyan-400'
+    : displayRole === 'PREMIUM' || displayRole === 'PREMIUM_ELITE'
+    ? 'from-violet-400 to-purple-600'
     : 'from-emerald-500 to-teal-600';
 
   return (
@@ -82,11 +86,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 18 }}
       className="relative flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"
     >
-      {/* Glass background */}
-      <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-2xl rounded-2xl border border-white/[0.07]" />
-      {/* Top highlight line */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-      {/* Subtle left glow */}
+      {/* Premium glass background */}
+      <div className="absolute inset-0 rounded-2xl overflow-hidden">
+        <div className="absolute inset-0 bg-zinc-900/70 backdrop-blur-2xl" />
+        {/* Animated gradient border */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl opacity-60"
+          animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.2), rgba(16,185,129,0.15), rgba(139,92,246,0.2), transparent)', backgroundSize: '200% 100%' }}
+        />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+      </div>
+      {/* Ambient glow */}
       <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
 
       {/* ── LEFT: Logo + Status ── */}
@@ -154,140 +167,142 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </motion.button>
       </div>
 
-      {/* ── RIGHT: Actions + User ── */}
-      <div className="relative z-10 flex items-center gap-3">
-        {extraActions}
+        {/* ── RIGHT: Actions + User ── */}
+        <div className="relative z-10 flex items-center gap-2">
+          {extraActions}
 
-        {/* Export dropdown */}
-        <div className="relative">
+          {/* Quick Access hint pill */}
           <motion.button
-            onClick={() => { setShowExportMenu(v => !v); setShowUserMenu(false); }}
-            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-300 text-xs font-semibold"
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            onClick={() => { const e = new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }); window.dispatchEvent(e); }}
+            className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all text-zinc-500 hover:text-zinc-200 text-xs font-medium"
           >
-            <Download className="w-3.5 h-3.5" />
-            Export
-            <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+            <Search className="w-3.5 h-3.5" />
+            <span className="text-zinc-600">Quick Access</span>
+            <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-mono">⌘K</kbd>
           </motion.button>
-          <AnimatePresence>
-            {showExportMenu && (
-              <motion.div
-                key="export-menu"
-                initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-40 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
-              >
-                {['CSV', 'JSON'].map(type => (
-                  <button key={type}
-                    onClick={() => { onExport(type.toLowerCase() as any); setShowExportMenu(false); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/5 hover:text-white transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5 text-zinc-500" />
-                    Export as {type}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
-        {/* Settings */}
-        <motion.button
-          onClick={() => navigate('/settings')}
-          whileHover={{ scale: 1.08, rotate: 30 }}
-          whileTap={{ scale: 0.92 }}
-          className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-400"
-          title="Settings"
-        >
-          <Settings className="w-4 h-4" />
-        </motion.button>
+          {/* Export dropdown */}
+          <div className="relative">
+            <motion.button
+              onClick={() => { setShowExportMenu(v => !v); setShowUserMenu(false); }}
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-300 text-xs font-semibold"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Export</span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+            </motion.button>
+            <AnimatePresence>
+              {showExportMenu && (
+                <motion.div
+                  key="export-menu"
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-40 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                >
+                  {['CSV', 'JSON'].map(type => (
+                    <button key={type}
+                      onClick={() => { onExport(type.toLowerCase() as any); setShowExportMenu(false); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5 text-zinc-500" />
+                      Export as {type}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-        {/* Direct Logout Button */}
-        <motion.button
-          onClick={handleLogout}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all text-red-400 group"
-          title="Sign Out"
-        >
-          <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-        </motion.button>
-
-        {/* User pill */}
-        <div className="relative">
+          {/* Settings */}
           <motion.button
-            onClick={() => { setShowUserMenu(v => !v); setShowExportMenu(false); }}
-            whileHover={{ scale: 1.03, y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer group"
+            onClick={() => navigate('/settings')}
+            whileHover={{ scale: 1.08, rotate: 30 }}
+            whileTap={{ scale: 0.92 }}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-zinc-400"
+            title="Settings"
           >
-            {/* Avatar */}
-            <div className="relative">
-              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${roleColor} flex items-center justify-center shadow-lg text-white text-sm font-black`}>
-                {initials}
+            <Settings className="w-4 h-4" />
+          </motion.button>
+
+          {/* Logout */}
+          <motion.button
+            onClick={handleLogout}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all text-red-400 group"
+            title="Sign Out"
+          >
+            <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+          </motion.button>
+
+          {/* User pill */}
+          <div className="relative">
+            <motion.button
+              onClick={() => { setShowUserMenu(v => !v); setShowExportMenu(false); }}
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-3 px-4 py-2 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer group"
+            >
+              <div className="relative">
+                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${roleColor} flex items-center justify-center shadow-lg text-white text-sm font-black`}>
+                  {initials}
+                </div>
+                <motion.div
+                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-zinc-900"
+                  animate={{ scale: [1, 1.3, 1], boxShadow: ['0 0 0px 0px rgba(52,211,153,0)', '0 0 6px 2px rgba(52,211,153,0.7)', '0 0 0px 0px rgba(52,211,153,0)'] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
               </div>
-              {/* Online dot */}
-              <motion.div
-                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-zinc-900"
-                animate={{ scale: [1, 1.3, 1], boxShadow: ['0 0 0px 0px rgba(52,211,153,0)', '0 0 6px 2px rgba(52,211,153,0.7)', '0 0 0px 0px rgba(52,211,153,0)'] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </div>
-            <div className="text-left hidden sm:block">
-              <p className="text-white font-bold text-sm leading-none">{nameToUse.split(' ')[0]}</p>
-              <p className={`text-xs font-bold mt-0.5 flex items-center gap-1 bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
-                <Shield className="w-2.5 h-2.5 text-emerald-400" />
-                {displayRole}
-              </p>
-            </div>
-            <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-          </motion.button>
+              <div className="text-left hidden sm:block">
+                <p className="text-white font-bold text-sm leading-none">{nameToUse.split(' ')[0]}</p>
+                <p className={`text-xs font-bold mt-0.5 flex items-center gap-1 bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
+                  <Shield className="w-2.5 h-2.5 text-emerald-400" />
+                  {displayRole}
+                </p>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+            </motion.button>
 
-          {/* User dropdown */}
-          <AnimatePresence>
-            {showUserMenu && (
-              <motion.div
-                key="user-menu"
-                initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-52 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
-              >
-                {/* User info header */}
-                <div className="px-4 py-3 border-b border-white/5">
-                  <p className="text-white font-bold text-sm">{nameToUse}</p>
-                  <p className="text-zinc-500 text-xs truncate">{currentUser.email}</p>
-                </div>
-                <div className="p-1.5">
-                  <button
-                    onClick={() => { navigate('/settings'); setShowUserMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors font-medium"
-                  >
-                    <Settings className="w-4 h-4 text-zinc-500" /> Account Settings
-                  </button>
-                  <button
-                    onClick={() => { navigate('/upgrade'); setShowUserMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-amber-300 hover:bg-amber-500/10 transition-colors font-medium"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-400" /> Upgrade Plan
-                  </button>
-                </div>
-                <div className="p-1.5 border-t border-white/5">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-medium"
-                  >
-                    <LogOut className="w-4 h-4" /> Sign Out
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            {/* User dropdown */}
+            <AnimatePresence>
+              {showUserMenu && (
+                <motion.div
+                  key="user-menu"
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-52 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+                >
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <p className="text-white font-bold text-sm">{nameToUse}</p>
+                    <p className="text-zinc-500 text-xs truncate">{currentUser.email}</p>
+                  </div>
+                  <div className="p-1.5">
+                    <button onClick={() => { navigate('/settings'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors font-medium">
+                      <Settings className="w-4 h-4 text-zinc-500" /> Account Settings
+                    </button>
+                    <button onClick={() => { navigate('/upgrade'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-amber-300 hover:bg-amber-500/10 transition-colors font-medium">
+                      <Sparkles className="w-4 h-4 text-amber-400" /> Upgrade Plan
+                    </button>
+                  </div>
+                  <div className="p-1.5 border-t border-white/5">
+                    <button onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-medium">
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
     </motion.div>
   );
 };

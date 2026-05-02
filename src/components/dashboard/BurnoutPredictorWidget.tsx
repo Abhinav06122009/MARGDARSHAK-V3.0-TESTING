@@ -39,9 +39,9 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
 
       if (!stats) return;
       setLoading(true);
-      
+
       const prediction = await aiService.predictBurnout(stats);
-      
+
       if (!isMounted) return;
 
       if (prediction) {
@@ -89,15 +89,15 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
 
   if (isPremium === false) {
     return (
-      <div 
+      <div
         onClick={() => navigate('/upgrade')}
         className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl p-7 h-full flex flex-col items-center justify-center min-h-[280px] group cursor-pointer transition-all duration-500 hover:border-amber-500/30"
       >
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-amber-500/10 rounded-full blur-[80px] pointer-events-none group-hover:scale-150 transition-transform duration-700" />
-        
+
         <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
           <div className="relative">
-            <motion.div 
+            <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
               className="absolute -inset-4 border border-dashed border-amber-500/20 rounded-full"
@@ -106,12 +106,12 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
               <Lock className="w-7 h-7 text-amber-400 group-hover:scale-110 transition-transform" />
             </div>
           </div>
-          
+
           <div className="space-y-1">
             <h3 className="text-white font-black text-sm uppercase tracking-wider italic">Burnout Predictor</h3>
             <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-bold">A.I. Powered Analysis</p>
           </div>
-          
+
           <div className="px-4 py-1.5 rounded-full bg-amber-500 text-black text-[9px] font-black uppercase tracking-widest group-hover:bg-white transition-colors">
             Upgrade to Premium
           </div>
@@ -122,41 +122,40 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
 
   if (!analysis) return null;
 
-  const StatusIcon = analysis.status === 'critical' ? AlertCircle : 
-                     analysis.status === 'warning' ? Coffee : CheckCircle2;
+  const StatusIcon = analysis.status === 'critical' ? AlertCircle :
+    analysis.status === 'warning' ? Coffee : CheckCircle2;
 
-  const colorClasses = 
+  const colorClasses =
     analysis.status === 'critical' ? 'text-red-400 bg-red-500/10 border-red-500/30' :
-    analysis.status === 'warning' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
-    'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+      analysis.status === 'warning' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
+        'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
 
-  const gradientFill = 
+  const gradientFill =
     analysis.status === 'critical' ? 'from-red-500 to-orange-500' :
-    analysis.status === 'warning' ? 'from-amber-400 to-orange-400' :
-    'from-emerald-400 to-teal-400';
+      analysis.status === 'warning' ? 'from-amber-400 to-orange-400' :
+        'from-emerald-400 to-teal-400';
 
   return (
     <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl p-7 h-full flex flex-col group transition-all duration-500 hover:border-white/20">
       {/* Background Glow */}
-      <motion.div 
-        animate={{ 
+      <motion.div
+        animate={{
           scale: [1, 1.2, 1],
           opacity: [0.1, 0.2, 0.1]
         }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[100px] pointer-events-none ${
-          analysis.status === 'critical' ? 'bg-red-500' : analysis.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
-        }`} 
+        className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[100px] pointer-events-none ${analysis.status === 'critical' ? 'bg-red-500' : analysis.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
+          }`}
       />
-      
+
       <div className="flex items-center justify-between mb-6 relative z-10">
         <div className="space-y-0.5">
           <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-tight italic">
-            <Brain className="w-4 h-4 text-indigo-400" /> Neural Predictor
+            <Brain className="w-4 h-4 text-indigo-400" />Burnout Predictor
           </h3>
           <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Cognitive Load Analysis</p>
         </div>
-        <motion.span 
+        <motion.span
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border backdrop-blur-md shadow-lg ${colorClasses}`}
@@ -169,12 +168,12 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
         <div className="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
           <svg className="w-full h-full transform -rotate-90">
             <circle cx="40" cy="40" r="35" stroke="currentColor" strokeWidth="8" fill="none" className="text-white/5" />
-            <motion.circle 
-              cx="40" cy="40" r="35" 
-              stroke="url(#burnout-gradient)" 
-              strokeWidth="8" 
-              fill="none" 
-              strokeDasharray="219.91" 
+            <motion.circle
+              cx="40" cy="40" r="35"
+              stroke="url(#burnout-gradient)"
+              strokeWidth="8"
+              fill="none"
+              strokeDasharray="219.91"
               initial={{ strokeDashoffset: 219.91 }}
               animate={{ strokeDashoffset: 219.91 - (219.91 * analysis.score) / 100 }}
               transition={{ duration: 2, type: 'spring', bounce: 0 }}
@@ -192,7 +191,7 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats 
             <span className="text-lg font-black text-white tracking-tighter">{analysis.score}<span className="text-[10px] text-zinc-500">%</span></span>
           </div>
         </div>
-        
+
         <div className="flex-1 space-y-2">
           <p className="text-[11px] text-zinc-300 leading-relaxed font-semibold italic">
             "{analysis.message}"

@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Zap, Target, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, Clock, Zap, Target, TrendingUp, ArrowUp, Flame } from 'lucide-react';
 
 interface DashboardStats {
   totalTasks: number;
@@ -12,156 +12,196 @@ interface DashboardStats {
   minutes_today?: number;
 }
 
-interface StatsGridProps {
-  stats: DashboardStats | null;
-}
+interface StatsGridProps { stats: DashboardStats | null; }
 
-// Animated ring for productivity score
-const RingProgress = ({ value, size = 60, stroke = 6, color }: { value: number; size?: number; stroke?: number; color: string }) => {
+// ── Animated SVG Ring (double-layer) ─────────────────────────────────────────
+const DualRing = ({ value, size = 64, color, trailColor }: { value: number; size?: number; color: string; trailColor: string }) => {
+  const stroke = 5;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (circ * Math.min(value, 100)) / 100;
   return (
     <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
+      {/* Trail */}
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={trailColor} strokeWidth={stroke} />
+      {/* Glow blur duplicate */}
       <motion.circle
-        cx={size / 2} cy={size / 2} r={r} fill="none"
+        cx={size/2} cy={size/2} r={r} fill="none"
+        stroke={color} strokeWidth={stroke + 3} strokeLinecap="round"
+        strokeDasharray={circ}
+        initial={{ strokeDashoffset: circ }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1.4, ease: 'easeOut', delay: 0.5 }}
+        opacity={0.2}
+        style={{ filter: `blur(4px)` }}
+      />
+      {/* Sharp ring */}
+      <motion.circle
+        cx={size/2} cy={size/2} r={r} fill="none"
         stroke={color} strokeWidth={stroke} strokeLinecap="round"
         strokeDasharray={circ}
         initial={{ strokeDashoffset: circ }}
         animate={{ strokeDashoffset: offset }}
-        transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
+        transition={{ duration: 1.4, ease: 'easeOut', delay: 0.5 }}
       />
     </svg>
   );
 };
 
-const CARD_CONFIGS = [
+// ── Animated counter ──────────────────────────────────────────────────────────
+const CountUp = ({ value }: { value: number }) => {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const step = Math.ceil(value / 30);
+    const id = setInterval(() => {
+      start += step;
+      if (start >= value) { setDisplay(value); clearInterval(id); }
+      else setDisplay(start);
+    }, 30);
+    return () => clearInterval(id);
+  }, [value]);
+  return <>{display}</>;
+};
+
+// ── Card definitions ──────────────────────────────────────────────────────────
+const CARDS = [
   {
-    key: 'tasks',
-    title: 'Tasks Done',
-    gradient: 'from-emerald-500/20 via-emerald-600/10 to-transparent',
-    border: 'border-emerald-500/20 hover:border-emerald-400/40',
-    iconBg: 'bg-emerald-500/15',
-    iconColor: 'text-emerald-400',
-    glow: 'bg-emerald-500',
-    ring: '#10b981',
-    Icon: CheckCircle2,
-    badge: 'Completion',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    key: 'tasks', title: 'Tasks Done',
+    gradient: 'from-emerald-500/[0.12] via-emerald-600/[0.06] to-transparent',
+    hoverGradient: 'from-emerald-500/20 via-emerald-600/10 to-transparent',
+    border: 'border-emerald-500/15', hoverBorder: 'border-emerald-400/50',
+    iconBg: 'from-emerald-500 to-teal-600',
+    glow: 'rgba(16,185,129,0.4)', ring: '#10b981', trail: 'rgba(16,185,129,0.08)',
+    Icon: CheckCircle2, badge: '✓ Completion', badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   },
   {
-    key: 'hours',
-    title: 'Study Time',
-    gradient: 'from-amber-500/20 via-amber-600/10 to-transparent',
-    border: 'border-amber-500/20 hover:border-amber-400/40',
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
-    glow: 'bg-amber-500',
-    ring: '#f59e0b',
-    Icon: Clock,
-    badge: 'Today',
-    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    key: 'hours', title: 'Study Time',
+    gradient: 'from-amber-500/[0.12] via-amber-600/[0.06] to-transparent',
+    hoverGradient: 'from-amber-500/20 via-amber-600/10 to-transparent',
+    border: 'border-amber-500/15', hoverBorder: 'border-amber-400/50',
+    iconBg: 'from-amber-500 to-orange-600',
+    glow: 'rgba(245,158,11,0.4)', ring: '#f59e0b', trail: 'rgba(245,158,11,0.08)',
+    Icon: Clock, badge: '⏱ Today', badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   },
   {
-    key: 'streak',
-    title: 'Day Streak',
-    gradient: 'from-rose-500/20 via-rose-600/10 to-transparent',
-    border: 'border-rose-500/20 hover:border-rose-400/40',
-    iconBg: 'bg-rose-500/15',
-    iconColor: 'text-rose-400',
-    glow: 'bg-rose-500',
-    ring: '#f43f5e',
-    Icon: Zap,
-    badge: '🔥 On Fire',
-    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    key: 'streak', title: 'Day Streak',
+    gradient: 'from-rose-500/[0.12] via-rose-600/[0.06] to-transparent',
+    hoverGradient: 'from-rose-500/20 via-rose-600/10 to-transparent',
+    border: 'border-rose-500/15', hoverBorder: 'border-rose-400/50',
+    iconBg: 'from-rose-500 to-pink-600',
+    glow: 'rgba(244,63,94,0.4)', ring: '#f43f5e', trail: 'rgba(244,63,94,0.08)',
+    Icon: Flame, badge: '🔥 On Fire', badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
   },
   {
-    key: 'score',
-    title: 'Productivity',
-    gradient: 'from-indigo-500/20 via-indigo-600/10 to-transparent',
-    border: 'border-indigo-500/20 hover:border-indigo-400/40',
-    iconBg: 'bg-indigo-500/15',
-    iconColor: 'text-indigo-400',
-    glow: 'bg-indigo-500',
-    ring: '#6366f1',
-    Icon: Target,
-    badge: 'Daily Goal',
-    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    key: 'score', title: 'Productivity',
+    gradient: 'from-indigo-500/[0.12] via-indigo-600/[0.06] to-transparent',
+    hoverGradient: 'from-indigo-500/20 via-indigo-600/10 to-transparent',
+    border: 'border-indigo-500/15', hoverBorder: 'border-indigo-400/50',
+    iconBg: 'from-indigo-500 to-violet-600',
+    glow: 'rgba(99,102,241,0.4)', ring: '#6366f1', trail: 'rgba(99,102,241,0.08)',
+    Icon: Target, badge: '⚡ Daily Goal', badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
   },
 ];
 
 const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
   if (!stats) return null;
 
-  const hoursStudied = stats.minutes_today ? Math.round(stats.minutes_today / 60 * 10) / 10 : 0;
-  const taskRate = stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0;
-  const score = Math.round(stats.productivityScore || 0);
+  const hoursStudied  = stats.minutes_today ? Math.round((stats.minutes_today / 60) * 10) / 10 : 0;
+  const taskRate      = stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0;
+  const score         = Math.round(stats.productivityScore || 0);
 
-  const values = [
-    { value: `${stats.completedTasks}/${stats.totalTasks}`, sub: `${taskRate}%`, ringVal: taskRate },
-    { value: `${hoursStudied}h`, sub: `${stats.minutes_today || 0}m`, ringVal: Math.min((hoursStudied / 8) * 100, 100) },
-    { value: `${stats.study_streak || 0}`, sub: 'days', ringVal: Math.min((stats.study_streak || 0) / 30 * 100, 100) },
-    { value: `${score}%`, sub: score >= 80 ? 'Excellent!' : score >= 50 ? 'Good' : 'Keep going', ringVal: score },
+  const VALUES = [
+    { primary: `${stats.completedTasks}/${stats.totalTasks}`, sub: `${taskRate}%`, ring: taskRate, numericMain: stats.completedTasks },
+    { primary: `${hoursStudied}h`,                            sub: `${stats.minutes_today || 0}m`, ring: Math.min((hoursStudied / 8) * 100, 100), numericMain: hoursStudied },
+    { primary: `${stats.study_streak || 0}`,                  sub: 'days', ring: Math.min((stats.study_streak || 0) / 30 * 100, 100), numericMain: stats.study_streak || 0 },
+    { primary: `${score}%`,                                   sub: score >= 80 ? 'Excellent!' : score >= 50 ? 'Good' : 'Keep going', ring: score, numericMain: score },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {CARD_CONFIGS.map((cfg, i) => {
-        const { value, sub, ringVal } = values[i];
+      {CARDS.map((cfg, i) => {
+        const { primary, sub, ring } = VALUES[i];
         const Icon = cfg.Icon;
         return (
           <motion.div
             key={cfg.key}
-            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, delay: i * 0.08, type: 'spring', stiffness: 120 }}
-            whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.2 } }}
-            className={`relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${cfg.gradient} backdrop-blur-xl border ${cfg.border} p-5 group cursor-default transition-all duration-300 shadow-lg`}
+            transition={{ duration: 0.6, delay: i * 0.1, type: 'spring', stiffness: 130, damping: 18 }}
+            whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.22, type: 'spring' } }}
+            className={`glare-card relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${cfg.gradient} backdrop-blur-xl border ${cfg.border} hover:${cfg.hoverBorder} p-5 group cursor-default transition-colors duration-300 shadow-lg`}
           >
-            {/* Corner glow */}
+            {/* Corner ambient glow */}
             <motion.div
-              className={`absolute -right-6 -top-6 w-28 h-28 rounded-full blur-2xl ${cfg.glow} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+              className="absolute -right-6 -top-6 w-36 h-36 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+              style={{ backgroundColor: cfg.glow }}
             />
-            {/* Shimmer */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-              style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%)' }}
+
+            {/* Gradient hover intensify */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${cfg.hoverGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-[1.75rem]`} />
+
+            {/* Animated border line at top */}
+            <div
+              className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              style={{ background: `linear-gradient(90deg, transparent, ${cfg.ring}, transparent)` }}
             />
 
             <div className="relative z-10">
-              {/* Top row */}
-              <div className="flex items-start justify-between mb-4">
+              {/* Top row: icon + badge */}
+              <div className="flex items-start justify-between mb-5">
                 <motion.div
-                  whileHover={{ rotate: 15, scale: 1.15 }}
-                  className={`p-2.5 rounded-xl ${cfg.iconBg} ${cfg.iconColor} border border-white/5`}
+                  whileHover={{ rotate: 18, scale: 1.2 }}
+                  transition={{ type: 'spring', stiffness: 400 }}
+                  className={`relative p-2.5 rounded-xl bg-gradient-to-br ${cfg.iconBg} shadow-lg`}
+                  style={{ boxShadow: `0 8px 24px ${cfg.glow}` }}
                 >
-                  <Icon size={20} />
+                  <Icon size={20} className="text-white relative z-10" />
+                  {/* Icon shimmer */}
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: 'linear-gradient(135deg,rgba(255,255,255,0.25) 0%,transparent 60%)' }} />
                 </motion.div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full border ${cfg.badgeColor}`}>
+
+                <motion.span
+                  initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                  className={`text-[9px] font-black px-2 py-1 rounded-full border ${cfg.badgeColor} backdrop-blur-sm`}
+                >
                   {cfg.badge}
-                </span>
+                </motion.span>
               </div>
 
               {/* Value + ring */}
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1">{cfg.title}</p>
+              <div className="flex items-end justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-zinc-500 text-[9px] font-black uppercase tracking-[0.2em] mb-1.5">{cfg.title}</p>
                   <motion.p
-                    className="text-2xl font-black text-white tracking-tight"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 + i * 0.08 }}
+                    className="text-2xl font-black text-white tracking-tight leading-none"
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + i * 0.08, type: 'spring' }}
                   >
-                    {value}
+                    {primary}
                   </motion.p>
-                  <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>
+                  <p className="text-[11px] text-zinc-500 mt-1 font-medium">{sub}</p>
                 </div>
-                <div className="relative">
-                  <RingProgress value={ringVal} size={52} stroke={5} color={cfg.ring} />
+
+                {/* Dual animated ring with center icon */}
+                <div className="relative flex-shrink-0">
+                  <DualRing value={ring} size={56} color={cfg.ring} trailColor={cfg.trail} />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <TrendingUp className={`w-3.5 h-3.5 ${cfg.iconColor}`} />
+                    <TrendingUp className="w-3.5 h-3.5" style={{ color: cfg.ring }} />
                   </div>
                 </div>
+              </div>
+
+              {/* Micro progress bar */}
+              <div className="mt-4 h-[2px] bg-white/5 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: `linear-gradient(90deg, ${cfg.ring}, ${cfg.glow})` }}
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${Math.min(ring, 100)}%` }}
+                  transition={{ duration: 1.2, ease: 'easeOut', delay: 0.6 + i * 0.1 }}
+                />
               </div>
             </div>
           </motion.div>

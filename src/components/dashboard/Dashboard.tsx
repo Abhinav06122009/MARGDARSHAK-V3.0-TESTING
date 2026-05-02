@@ -37,14 +37,20 @@ import { BurnoutPredictorWidget } from './BurnoutPredictorWidget';
 import { TrendChart } from '@/components/ai/QuantumGraph'; 
 // Unified Footer is handled by GlobalFooter in App.tsx
 
-const GlassContainer = ({ children, className = "", glow = false }: { children: React.ReactNode, className?: string, glow?: boolean }) => (
+const GlassContainer = ({ children, className = '', glow = false }: { children: React.ReactNode; className?: string; glow?: boolean }) => (
   <motion.div
-    whileHover={{ scale: 1.002 }}
+    whileHover={{ scale: 1.001 }}
     transition={{ duration: 0.2 }}
-    className={`relative overflow-hidden rounded-[2rem] bg-zinc-900/50 backdrop-blur-2xl border border-white/[0.06] shadow-xl hover:border-white/10 transition-all duration-300 ${glow ? 'shadow-indigo-500/5 hover:shadow-indigo-500/10' : ''} ${className}`}
+    className={`relative overflow-hidden rounded-[2rem] border border-white/[0.06] shadow-xl transition-all duration-500
+      bg-gradient-to-br from-zinc-900/60 via-zinc-900/40 to-zinc-950/70 backdrop-blur-2xl
+      hover:border-white/[0.1] data-stream
+      ${glow ? 'hover:shadow-indigo-500/10' : ''} ${className}`}
   >
+    {/* Top highlight line */}
+    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    {/* Gradient inner glow */}
     {glow && (
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-purple-500/[0.03] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.04] via-transparent to-purple-500/[0.04] pointer-events-none rounded-[2rem]" />
     )}
     {children}
   </motion.div>
@@ -54,36 +60,52 @@ const GlassContainer = ({ children, className = "", glow = false }: { children: 
 
 const LockedBriefingWidget = () => {
   const navigate = useNavigate();
-
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-900 shadow-2xl p-8 flex flex-col items-center justify-center text-center group h-[220px]">
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50" />
-      <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 pointer-events-none opacity-50" />
-      
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <div className="p-4 rounded-full bg-white/5 border border-white/10 shadow-inner-soft group-hover:scale-110 transition-transform duration-500">
-          <Lock className="w-6 h-6 text-zinc-400" />
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
-            Daily Briefing
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-wide">
-              Premium
-            </span>
-          </h3>
-          <p className="text-zinc-500 text-sm mt-2 max-w-sm mx-auto">
-            Unlock AI-powered daily study plans and personalized focus areas tailored to your schedule.
-          </p>
-        </div>
+    <div className="glare-card relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-zinc-900/80 backdrop-blur-xl shadow-2xl p-8 flex flex-col items-center justify-center text-center group h-[220px]">
+      {/* Animated bg orbs */}
+      <motion.div animate={{ scale: [1,1.3,1], opacity: [0.05,0.12,0.05] }} transition={{ repeat: Infinity, duration: 5 }}
+        className="absolute top-0 right-0 w-[280px] h-[280px] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"
+        style={{ background: 'radial-gradient(circle,#6366f1,transparent 70%)' }} />
+      <motion.div animate={{ scale: [1,1.2,1], opacity: [0.04,0.1,0.04] }} transition={{ repeat: Infinity, duration: 7, delay: 1 }}
+        className="absolute bottom-0 left-0 w-[200px] h-[200px] rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2"
+        style={{ background: 'radial-gradient(circle,#10b981,transparent 70%)' }} />
+      {/* Scanline */}
+      <div className="absolute inset-0 rounded-[2rem] overflow-hidden opacity-20 pointer-events-none"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg,rgba(255,255,255,0.03) 0px,transparent 1px,transparent 3px)' }} />
 
-        <button 
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        {/* Feature icon with lock badge */}
+        <div className="relative">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+            className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-600/10 border border-indigo-500/30 group-hover:border-indigo-400/50 shadow-lg group-hover:shadow-indigo-500/20 transition-all duration-400"
+            style={{ boxShadow: '0 8px 32px rgba(99,102,241,0.15)' }}
+          >
+            <BrainCircuit className="w-7 h-7 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+          </motion.div>
+          {/* Lock badge overlay */}
+          <motion.div
+            animate={{ rotate: [0, -8, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
+            className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center shadow-md group-hover:border-indigo-500/50 group-hover:bg-indigo-950 transition-all duration-300"
+          >
+            <Lock className="w-3 h-3 text-zinc-400 group-hover:text-indigo-400 transition-colors" />
+          </motion.div>
+        </div>
+        <div>
+          <h3 className="text-lg font-black text-white flex items-center justify-center gap-2">
+            Daily Briefing
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 uppercase tracking-widest">Premium</span>
+          </h3>
+          <p className="text-zinc-500 text-xs mt-2 max-w-xs mx-auto leading-relaxed">Unlock AI-powered daily study plans and personalized focus areas.</p>
+        </div>
+        <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/upgrade')}
-          className="mt-2 px-5 py-2 rounded-full bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 cursor-pointer"
-        >
-          <Sparkles className="w-3 h-3 text-indigo-600 fill-indigo-600" />
-          Upgrade to Unlock
-        </button>
+          className="star-burst relative mt-1 px-6 py-2.5 rounded-full text-xs font-black text-white flex items-center gap-2 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 12px 40px rgba(99,102,241,0.4)' }}>
+          <Sparkles className="w-3.5 h-3.5" /> Upgrade to Unlock
+        </motion.button>
       </div>
     </div>
   );
@@ -91,38 +113,48 @@ const LockedBriefingWidget = () => {
 
 const LockedTrendChart = () => {
   const navigate = useNavigate();
-
   return (
-    <div className="w-full h-full bg-zinc-900/50 rounded-xl border border-white/5 p-6 relative overflow-hidden flex flex-col items-center justify-center text-center group">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-         <svg className="w-full h-full" viewBox="0 0 500 250" preserveAspectRatio="none">
-             <path d="M0 200 C 150 200, 150 100, 250 150 C 350 200, 350 50, 500 50" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-500" />
-         </svg>
+    <div className="glare-card w-full h-full bg-zinc-900/60 rounded-xl border border-white/[0.06] p-6 relative overflow-hidden flex flex-col items-center justify-center text-center group">
+      {/* Ghost chart lines */}
+      <div className="absolute inset-0 opacity-[0.07] pointer-events-none">
+        <svg className="w-full h-full" viewBox="0 0 500 250" preserveAspectRatio="none">
+          <path d="M0 200 C 150 200, 150 100, 250 150 C 350 200, 350 50, 500 50" fill="none" stroke="#6366f1" strokeWidth="2" />
+          <path d="M0 220 C 100 150, 200 180, 300 120 C 400 60, 450 80, 500 30" fill="none" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 6" />
+        </svg>
       </div>
-      <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-[2px]" />
-
+      <div className="absolute inset-0 bg-zinc-900/70 backdrop-blur-[3px]" />
       <div className="relative z-10 flex flex-col items-center gap-3">
-         <div className="p-3 rounded-full bg-white/5 border border-white/10 shadow-inner-soft group-hover:scale-110 transition-transform duration-500">
-            <Lock className="w-5 h-5 text-zinc-400" />
-         </div>
-         <div>
-            <h3 className="text-base font-bold text-white flex items-center justify-center gap-2">
-              Performance Trends
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-wide">
-                Premium
-              </span>
-            </h3>
-            <p className="text-zinc-500 text-xs mt-1.5 max-w-xs mx-auto">
-              Visualize your learning velocity and task completion rates over time.
-            </p>
-         </div>
-         <button 
-           onClick={() => navigate('/upgrade')}
-           className="mt-1 px-4 py-1.5 rounded-full bg-white text-black text-[10px] font-bold hover:bg-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-         >
-            <TrendingUp className="w-3 h-3 text-indigo-600" />
-            Unlock Analytics
-         </button>
+        {/* Feature icon with lock badge */}
+        <div className="relative">
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+            className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-600/10 border border-indigo-500/30 group-hover:border-indigo-400/50 shadow-lg transition-all duration-400"
+            style={{ boxShadow: '0 6px 24px rgba(99,102,241,0.12)' }}
+          >
+            <BarChart3 className="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+          </motion.div>
+          <motion.div
+            animate={{ rotate: [0, -8, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
+            className="absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center shadow-md group-hover:border-indigo-500/50 group-hover:bg-indigo-950 transition-all duration-300"
+          >
+            <Lock className="w-2.5 h-2.5 text-zinc-400 group-hover:text-indigo-400 transition-colors" />
+          </motion.div>
+        </div>
+        <div>
+          <h3 className="text-base font-black text-white flex items-center justify-center gap-2">
+            Performance Trends
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 uppercase tracking-widest">Premium</span>
+          </h3>
+          <p className="text-zinc-500 text-xs mt-1.5 max-w-xs mx-auto">Visualize your learning velocity and task completion rates over time.</p>
+        </div>
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/upgrade')}
+          className="star-burst mt-1 px-5 py-2 rounded-full text-xs font-black text-white flex items-center gap-1.5 relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 10px 30px rgba(99,102,241,0.35)' }}>
+          <TrendingUp className="w-3 h-3" /> Unlock Analytics
+        </motion.button>
       </div>
     </div>
   );
@@ -130,35 +162,43 @@ const LockedTrendChart = () => {
 
 const LockedBurnoutWidget = () => {
   const navigate = useNavigate();
-
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-900 shadow-2xl p-8 flex flex-col items-center justify-center text-center group h-[220px]">
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-rose-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50" />
-      
+    <div className="glare-card relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-zinc-900/80 backdrop-blur-xl shadow-2xl p-8 flex flex-col items-center justify-center text-center group h-[220px]">
+      <motion.div animate={{ scale: [1,1.4,1], opacity: [0.05,0.14,0.05] }} transition={{ repeat: Infinity, duration: 5 }}
+        className="absolute top-0 right-0 w-[280px] h-[280px] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"
+        style={{ background: 'radial-gradient(circle,#f43f5e,transparent 70%)' }} />
       <div className="relative z-10 flex flex-col items-center gap-4">
-        <div className="p-4 rounded-full bg-white/5 border border-white/10 shadow-inner-soft group-hover:scale-110 transition-transform duration-500">
-          <BrainCircuit className="w-6 h-6 text-zinc-400" />
+        {/* Feature icon with lock badge */}
+        <div className="relative">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+            className="p-4 rounded-2xl bg-gradient-to-br from-rose-500/20 to-pink-600/10 border border-rose-500/30 group-hover:border-rose-400/50 shadow-lg group-hover:shadow-rose-500/20 transition-all duration-400"
+            style={{ boxShadow: '0 8px 32px rgba(244,63,94,0.12)' }}
+          >
+            <Activity className="w-7 h-7 text-rose-400 group-hover:text-rose-300 transition-colors" />
+          </motion.div>
+          <motion.div
+            animate={{ rotate: [0, -8, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
+            className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center shadow-md group-hover:border-rose-500/50 group-hover:bg-rose-950 transition-all duration-300"
+          >
+            <Lock className="w-3 h-3 text-zinc-400 group-hover:text-rose-400 transition-colors" />
+          </motion.div>
         </div>
-        
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
+          <h3 className="text-lg font-black text-white flex items-center justify-center gap-2">
             Burnout Predictor
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase tracking-wide">
-              Premium
-            </span>
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-500/15 text-rose-400 border border-rose-500/30 uppercase tracking-widest">Premium</span>
           </h3>
-          <p className="text-zinc-500 text-sm mt-2 max-w-sm mx-auto">
-            AI analysis of your study patterns to predict and prevent academic exhaustion.
-          </p>
+          <p className="text-zinc-500 text-xs mt-2 max-w-xs mx-auto leading-relaxed">AI analysis of your study patterns to predict and prevent academic exhaustion.</p>
         </div>
-
-        <button 
+        <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/upgrade')}
-          className="mt-2 px-5 py-2 rounded-full bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 cursor-pointer"
-        >
-          <Sparkles className="w-3 h-3 text-rose-600 fill-rose-600" />
-          Unlock Health AI
-        </button>
+          className="star-burst relative mt-1 px-6 py-2.5 rounded-full text-xs font-black text-white flex items-center gap-2 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg,#f43f5e,#ec4899)', boxShadow: '0 12px 40px rgba(244,63,94,0.4)' }}>
+          <Sparkles className="w-3.5 h-3.5" /> Unlock Health AI
+        </motion.button>
       </div>
     </div>
   );
@@ -384,21 +424,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <AmbientBackground />
           
           <AnimatePresence>
-            {showBackToTop && (
+          {showBackToTop && (
               <motion.button
                 key="back-to-top"
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-24 right-6 z-50 p-3.5 bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-2xl shadow-xl shadow-indigo-500/30 border border-white/10 group"
-            initial={{ opacity: 0, scale: 0.7, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.7, y: 20 }}
-            whileHover={{ scale: 1.1, rotate: -5 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <ArrowUp className="w-5 h-5 text-white" />
-            <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] text-white/60 font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-zinc-900 px-2 py-1 rounded-lg">Top</span>
-          </motion.button>
-        )}
+                className="fixed bottom-24 right-6 z-50 p-3.5 rounded-2xl border border-white/10 group overflow-hidden star-burst"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 20px 50px rgba(99,102,241,0.5)' }}
+                initial={{ opacity: 0, scale: 0.7, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.7, y: 20 }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <motion.div animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}>
+                  <ArrowUp className="w-5 h-5 text-white" />
+                </motion.div>
+                <span className="absolute -top-9 left-1/2 -translate-x-1/2 text-[9px] text-white/70 font-black opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-zinc-900/95 border border-white/10 px-2 py-1 rounded-lg uppercase tracking-widest">Top</span>
+              </motion.button>
+          )}
+
       </AnimatePresence>
 
       <div className="relative z-10 max-w-[1600px] 2xl:max-w-[2000px] 4xl:max-w-[3200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
