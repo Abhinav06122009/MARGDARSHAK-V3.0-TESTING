@@ -465,9 +465,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           />
         </header>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
-          <main className="xl:col-span-8 flex flex-col gap-8 min-w-0">
+          <main className="lg:col-span-8 flex flex-col gap-8 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -523,7 +523,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
           </main>
 
-          <aside className="xl:col-span-4 flex flex-col gap-6 h-full xl:sticky xl:top-6">
+          <aside className="lg:col-span-4 flex flex-col gap-6 h-full lg:sticky lg:top-6">
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }} className="w-full">
                <AmbientSoundPlayer />
             </motion.div>

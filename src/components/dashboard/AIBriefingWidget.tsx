@@ -98,8 +98,8 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
   return (
     <motion.div
       layout
-      className={`relative overflow-hidden rounded-[2.5rem] border border-white/[0.08] shadow-2xl transition-all duration-700 group glare-card
-        ${isExpanded ? 'bg-zinc-950 ring-1 ring-indigo-500/30' : 'bg-zinc-900/40 backdrop-blur-3xl'}`}
+      className={`relative overflow-hidden rounded-[2rem] border border-white/10 shadow-xl transition-all duration-500
+        ${isExpanded ? 'bg-zinc-900 shadow-2xl' : 'bg-zinc-900/40 backdrop-blur-xl'}`}
     >
       {/* ── Background Effects ── */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-indigo-500/15 transition-colors duration-700" />
@@ -116,15 +116,9 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
         
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <motion.div 
-              whileHover={{ rotate: 180 }}
-              transition={{ duration: 0.6 }}
-              className="relative p-3 bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700 rounded-2xl shadow-xl shadow-indigo-500/25"
-            >
-              <Sparkles className="w-5 h-5 text-white" />
-              <div className="absolute inset-0 bg-white/20 blur-md rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-            </motion.div>
+            <div className="p-2.5 bg-indigo-500/20 rounded-xl text-indigo-400">
+              <Sparkles className="w-5 h-5" />
+            </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-black text-white tracking-[0.1em] uppercase">Intelligence Briefing</h3>

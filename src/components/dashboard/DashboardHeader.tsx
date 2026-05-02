@@ -86,9 +86,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 18 }}
       className="relative flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"
     >
-      {/* Premium glass background */}
-      <div className="absolute inset-0 rounded-2xl overflow-hidden">
-        <div className="absolute inset-0 bg-zinc-900/70 backdrop-blur-2xl" />
+      <div className="absolute inset-0 rounded-2xl bg-zinc-900/40 backdrop-blur-xl border border-white/10" />
         {/* Animated gradient border */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-60"
@@ -112,10 +110,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           onMouseLeave={handleLogoMouseLeave}
         >
           <motion.div
-            style={{ rotateX: logoRotateX, rotateY: logoRotateY }}
-            className="relative p-2 md:p-2.5 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-2xl cursor-pointer overflow-hidden group-hover:border-blue-500/50 transition-colors"
-            whileHover={{ scale: 1.08 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="relative p-2 rounded-xl bg-white/5 border border-white/10 shadow-lg cursor-pointer"
+            whileHover={{ scale: 1.05 }}
           >
             {/* Animated background glow inside logo box */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
