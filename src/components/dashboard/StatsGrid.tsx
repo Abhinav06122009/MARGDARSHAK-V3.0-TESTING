@@ -85,8 +85,10 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`relative overflow-hidden rounded-2xl bg-zinc-900/40 backdrop-blur-xl border ${cfg.border} p-5 group transition-all hover:bg-zinc-900/60`}
+            className={`relative overflow-hidden rounded-[2rem] bg-zinc-900/40 backdrop-blur-xl border ${cfg.border} p-6 group transition-all hover:bg-zinc-900/60 hover:-translate-y-1 shadow-lg hover:shadow-2xl`}
           >
+            {/* Ambient Glow */}
+            <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 ${cfg.iconBg.split(' ')[0]}`} />
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex items-start justify-between mb-4">
                 <div className={`p-2 rounded-xl ${cfg.iconBg}`}>
