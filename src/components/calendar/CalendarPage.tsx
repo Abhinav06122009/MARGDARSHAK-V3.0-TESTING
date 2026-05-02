@@ -121,10 +121,10 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
       if (isEditing) {
         await dashboardService.updateCalendarEvent(isEditing, eventData, user.id);
-        toast({ title: "Event Synchronized", description: "Temporal node updated in memory banks." });
+        toast({ title: "Event Synchronized", description: "Event updated in memory banks." });
       } else {
         await dashboardService.createCalendarEvent(eventData, user.id);
-        toast({ title: "Node Initialized", description: "New event synchronized with Supabase." });
+        toast({ title: "Add Event", description: "New event synchronized Added." });
       }
       
       setIsAddDialogOpen(false);
@@ -142,7 +142,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
       if (!user) return;
       await dashboardService.deleteCalendarEvent(eventId, user.id);
       setEvents(prev => prev.filter(e => e.id !== eventId));
-      toast({ title: "Node Redacted", description: "Removed from temporal sequence." });
+      toast({ title: "Event Redacted", description: "Removed from Event sequence." });
     } catch (error) {
       toast({ title: "Redaction Failed", variant: "destructive" });
     }
@@ -187,12 +187,12 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
             className="group flex items-center gap-4 px-6 py-3 bg-zinc-950/50 border border-white/5 rounded-2xl hover:border-emerald-500/30 transition-all backdrop-blur-xl"
           >
             <ArrowLeft size={18} className="text-zinc-500 group-hover:text-emerald-400 group-hover:-translate-x-1 transition-all" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Back_to_Core</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Back_to_Dashbaord</span>
           </button>
 
           <div className="flex items-center gap-8">
             <div className="hidden md:flex flex-col items-end">
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Temporal_Node_Active</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Calendar_Active</span>
               <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">MARGDARSHAK V3.0</span>
             </div>
           </div>
@@ -207,7 +207,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                   <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
                     {monthLabel.split(' ')[0]} <span className="text-emerald-500 not-italic font-light">{monthLabel.split(' ')[1]}</span>
                   </h2>
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">Academic_Cycle_Synchronization</p>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">Academic_Cycle</p>
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -282,7 +282,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Active_Nodes</p>
+                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Active_Events</p>
                     <p className="text-2xl font-black text-white">{events.length}</p>
                   </div>
                </div>
@@ -328,13 +328,13 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                 }}>
                   <DialogTrigger asChild>
                     <button className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] flex items-center justify-center gap-3">
-                      <Plus size={16} /> Add_Temporal_Event
+                      <Plus size={16} /> Add_Event
                     </button>
                   </DialogTrigger>
                   <DialogContent className="bg-zinc-950 border-white/10 text-white backdrop-blur-2xl rounded-[2rem]">
                     <DialogHeader>
                       <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">
-                        {isEditing ? 'Modify_Temporal_Node' : 'Initialize_Event_Node'}
+                        {isEditing ? 'Modify_Event' : 'Add_Event'}
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 py-6">
@@ -474,11 +474,11 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
                           <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">
-                            Synchronized
+                            Synced
                           </span>
                           <div className="flex items-center gap-2 text-zinc-700">
                               <Clock size={12} />
-                              <span className="text-[9px] font-black uppercase tracking-widest">Temporal_Node</span>
+                              <span className="text-[9px] font-black uppercase tracking-widest">Calendar System</span>
                           </div>
                         </div>
                       </motion.div>
@@ -506,7 +506,7 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
                     {filteredDaysEvents.length === 0 && dayHolidays.length === 0 && filteredDaysTasks.length === 0 && (
                       <div className="py-20 flex flex-col items-center justify-center text-center">
                         <CalendarIcon className="w-12 h-12 text-zinc-800 mb-4" />
-                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">No_Temporal_Nodes_Detected</p>
+                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">No_Event_Detected</p>
                       </div>
                     )}
                   </div>
