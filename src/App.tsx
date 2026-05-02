@@ -105,6 +105,7 @@ const AIWidgetWrapper = () => {
   return <GlobalAIAssistant />;
 };
 
+import { GlobalAmbientPlayer } from '@/components/ui/GlobalAmbientPlayer';
 import GlobalFooter from '@/components/layout/GlobalFooter';
 
 const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
@@ -339,6 +340,7 @@ const AppContent = () => {
                     <GlobalQuickActions />
                     <MobileNavbar />
                     <ShortcutsOverlay />
+                    <GlobalAmbientPlayer />
                     <GlobalFooter />
                     <Toaster />
                     <Sonner />

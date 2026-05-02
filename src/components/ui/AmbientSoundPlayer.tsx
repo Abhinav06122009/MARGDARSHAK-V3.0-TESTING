@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Music, CloudRain, Coffee, Headphones } from 'lucide-react';
 
-const STATIONS = [
+export const STATIONS = [
   { id: 'lofi', name: 'Lofi Focus', icon: Music, url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3' },
   { id: 'rain', name: 'Heavy Rain', icon: CloudRain, url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_dc39bde808.mp3?filename=heavy-rain-nature-sounds-8186.mp3' },
   { id: 'cafe', name: 'Cafe Noise', icon: Coffee, url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c82bf0c0a9.mp3?filename=restaurant-ambience-44815.mp3' },
