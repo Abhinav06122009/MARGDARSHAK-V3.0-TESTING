@@ -145,13 +145,13 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     const callPollinations = async () => {
       const pollUrl = `https://gen.pollinations.ai/v1/chat/completions`;
-      let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large', 'openai'].includes(payload.model) ? payload.model : 'gemini-fast';
+      // Support both qwen-code and qwen-coder aliases
+      let requestedModel = payload.model === 'qwen-code' ? 'qwen-coder' : payload.model;
+      let selectedModel = ['gemini-fast', 'qwen-coder', 'qwen-safety', 'mistral', 'openai-large', 'openai'].includes(requestedModel) ? requestedModel : 'gemini-fast';
 
-      // Productivity tasks (JSON-heavy) benefit from structural models
-      // If no model is specified or gemini-fast is default, we use OpenAI for reliability
-      // But if qwen-coder is explicitly requested (as in Notes), we keep it.
-      if ((payload.task === 'tasks' || payload.task === 'notes') && selectedModel === 'gemini-fast') {
-        selectedModel = 'openai';
+      // Default to qwen-coder for JSON tasks if not specified, as requested by user
+      if (payload.jsonMode && selectedModel === 'gemini-fast') {
+        selectedModel = 'qwen-coder';
       }
 
       const apiKey = (selectedModel === 'qwen-safety' || selectedModel === 'qwen-coder' || selectedModel === 'openai' || payload.task === 'notes' || payload.task === 'tasks')
@@ -165,7 +165,8 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       const body = JSON.stringify({
         model: selectedModel,
         messages: [{ role: "system", content: finalSystemPrompt }, ...allMessagesWithoutSystem],
-        jsonMode: payload.jsonMode === true
+        jsonMode: payload.jsonMode === true,
+        seed: Math.floor(Math.random() * 1000000) // Force fresh response
       });
 
       const pollHeaders = {
@@ -174,7 +175,7 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 9000); // 9s limit (Netlify default is 10s)
+      const timeoutId = setTimeout(() => controller.abort(), 9000);
 
       try {
         const res = await fetch(pollUrl, {
@@ -192,7 +193,6 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
         }
 
         const data = await res.json();
-        if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
         return data;
       } catch (err) {
         clearTimeout(timeoutId);
@@ -202,37 +202,40 @@ For fractions, use parentheses for clarity, e.g., (x + 2) / 5.`;
 
     try {
       let pollData;
-
       try {
         pollData = await callPollinations();
       } catch (firstErr) {
-        console.warn("[NEURO-ENGINE] First attempt failed, retrying with gemini-fast fallback...");
-        // Fallback to gemini-fast which is the most stable Pollinations endpoint
+        console.warn("[NEURO-ENGINE] First attempt failed:", firstErr.message);
+        // Retry with fallback
         const originalModel = payload.model;
         payload.model = 'gemini-fast';
         pollData = await callPollinations();
-        payload.model = originalModel; // Restore for metadata
+        payload.model = originalModel;
       }
 
       let text = pollData?.choices?.[0]?.message?.content || "";
-      if (!text) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Provider returned an empty response." }) };
-      }
+      if (!text) throw new Error("Empty response from AI");
 
-      // --- ROBUST JSON EXTRACTION (Tag-First Strategy) ---
+      // --- ULTRA-STRICT JSON EXTRACTION ---
       if (payload.jsonMode) {
-        // Try [RESULT] tags first
+        // 1. Try [RESULT] tags
         const tagMatch = text.match(/\[RESULT\]([\s\S]*?)\[\/RESULT\]/i);
         if (tagMatch) {
           text = tagMatch[1].trim();
         } else {
-          // Fallback to outermost brace matching
-          const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-          if (jsonMatch) text = jsonMatch[0];
+          // 2. Try markdown blocks
+          const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+          if (fenceMatch) {
+            text = fenceMatch[1].trim();
+          } else {
+            // 3. Last resort: Find outermost braces
+            const braceMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+            if (braceMatch) text = braceMatch[0];
+          }
         }
       }
 
-      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: payload.model || "pollinations/gemini-fast" }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ response: text, model: payload.model }) };
     } catch (err) {
       console.error("[NEURO-ENGINE] Request processing failed:", err.message);
       const isTimeout = err.name === 'AbortError' || err.message.includes('timeout');

@@ -252,6 +252,7 @@ export const aiService = {
     try {
       const briefing = await modelRouter.generateJSON(systemPrompt, {
         tier: 'premium',
+        model: 'qwen-code'
       });
 
       if (!briefing || !briefing.greeting) throw new Error("Invalid or empty JSON from AI");
@@ -475,7 +476,10 @@ export const aiService = {
         - Overdue Tasks: ${stats.overdueTasks}
         - Completion Rate: ${stats.completionRate}%
       `;
-      const result = await modelRouter.generateJSON(systemPrompt, { tier: 'premium' });
+      const result = await modelRouter.generateJSON(systemPrompt, { 
+        tier: 'premium',
+        model: 'qwen-code'
+      });
       return result || null;
     } catch (e) {
       console.error("Burnout Predictor Error", e);
