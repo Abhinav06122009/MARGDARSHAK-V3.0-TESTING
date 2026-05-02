@@ -127,19 +127,28 @@ const GlobalQuickActions: React.FC = () => {
     .map(p => ALL_ACTIONS.find(a => a.path === p))
     .filter(Boolean) as Action[];
 
-  const displayList = query.trim() ? filteredActions : (recentActions.length ? recentActions : ALL_ACTIONS.slice(0, 8));
-
-
+  const displayList = query.trim() ? filteredActions : ALL_ACTIONS;
 
   // Group by category when no query
   const grouped = query.trim()
     ? null
-    : displayList.reduce((acc: Record<string, Action[]>, a) => {
-        const cat = recentActions.length && recentPaths.includes(a.path) ? 'Recent' : a.category;
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(a);
-        return acc;
-      }, {});
+    : (() => {
+        const groups: Record<string, Action[]> = {};
+        
+        // Add Recents first if they exist
+        if (recentActions.length > 0) {
+          groups['Recent'] = recentActions.slice(0, 4);
+        }
+
+        // Add all other categories
+        ALL_ACTIONS.forEach(a => {
+          if (!groups[a.category]) groups[a.category] = [];
+          groups[a.category].push(a);
+        });
+        
+        return groups;
+      })();
+
 
   // Keyboard nav
   useEffect(() => {
@@ -174,8 +183,15 @@ const GlobalQuickActions: React.FC = () => {
   // Flat list for keyboard indexing
   const flatList = query.trim()
     ? filteredActions
-    : (recentActions.length ? recentActions : ALL_ACTIONS.slice(0, 8));
+    : (() => {
+        const list = [...recentActions.slice(0, 4)];
+        ALL_ACTIONS.forEach(a => {
+          if (!list.some(r => r.path === a.path)) list.push(a);
+        });
+        return list;
+      })();
   let flatIdx = 0;
+
 
   return (
     <>
@@ -271,14 +287,8 @@ const GlobalQuickActions: React.FC = () => {
                         />
                       );
                     })
-                  : Object.entries(
-                      (recentActions.length ? recentActions : ALL_ACTIONS.slice(0, 8)).reduce((acc: Record<string, Action[]>, a) => {
-                        const cat = recentActions.length ? 'Recent' : a.category;
-                        if (!acc[cat]) acc[cat] = [];
-                        acc[cat].push(a);
-                        return acc;
-                      }, {})
-                    ).map(([cat, actions]) => (
+                  : Object.entries(grouped!).map(([cat, actions]) => (
+
                       <div key={cat}>
                         <div className="flex items-center gap-2 px-3 py-1.5">
                           {cat === 'Recent' ? <Clock className="w-3 h-3 text-zinc-600" /> : <Hash className="w-3 h-3 text-zinc-700" />}
