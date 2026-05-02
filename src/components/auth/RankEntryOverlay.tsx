@@ -145,11 +145,12 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden"
         >
           {/* === TIER BG: SCANLINES === */}
-          <div className="absolute inset-0 pointer-events-none z-[1]" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${rankInfo.style.scanline} 0px, transparent 1px, transparent 3px)` }} />
+
+          <div className="absolute inset-0 pointer-events-none z-[1] opacity-40" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${rankInfo.style.scanline} 0px, transparent 1px, transparent 3px)` }} />
 
           {/* === TIER BG: GEOMETRIC CRYSTALS === */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0 }}
@@ -158,14 +159,16 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   scale: [0.4, 1.4, 0.4],
                   rotate: [0, 180, 360],
                   x: [(i % 2 === 0 ? 1 : -1) * (100 + i * 80), (i % 2 === 0 ? -1 : 1) * (100 + i * 80)],
-                  y: [(i % 3 === 0 ? 1 : -1) * (60 + i * 50), (i % 3 === 0 ? -1 : 1) * (60 + i * 50)]
+                  y: [(i % 3 === 0 ? 1 : -1) * (60 + i * 50), (i % 3 === 0 ? -1 : 1) * (60 + i * 50)],
+                  z: 0
                 }}
-                transition={{ duration: 8 + i * 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.4 }}
-                className="absolute top-1/2 left-1/2 w-[350px] h-[350px]"
+                transition={{ duration: 10 + i * 2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.5 }}
+                className="absolute top-1/2 left-1/2 w-[350px] h-[350px] will-change-transform"
                 style={{
                   background: `linear-gradient(135deg, ${rankInfo.style.accent}08, ${rankInfo.style.accentAlt}04, transparent)`,
                   clipPath: i % 2 === 0 ? 'polygon(50% 0%,100% 50%,50% 100%,0% 50%)' : 'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)',
-                  border: `1px solid ${rankInfo.style.accent}10`
+                  border: `1px solid ${rankInfo.style.accent}10`,
+                  transform: 'translateZ(0)'
                 }}
               />
             ))}
@@ -173,14 +176,19 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
           {/* === TIER BG: FLOATING PARTICLES === */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-[3]">
-            {[...Array(20)].map((_, i) => (
+            {[...Array(15)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: '100vh', x: `${(i / 20) * 100}vw` }}
-                animate={{ opacity: [0, 0.8, 0], y: '-20vh', x: [`${(i / 20) * 100}vw`, `${((i / 20) * 100) + (i % 2 === 0 ? 3 : -3)}vw`] }}
-                transition={{ duration: 4 + (i % 5), repeat: Infinity, delay: i * 0.3, ease: 'easeOut' }}
-                className={`absolute bottom-0 rounded-full ${rankInfo.style.particles}`}
-                style={{ width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.6, filter: `blur(${i % 2}px)` }}
+                initial={{ opacity: 0, y: '100vh', x: `${(i / 15) * 100}vw` }}
+                animate={{ 
+                  opacity: [0, 0.8, 0], 
+                  y: '-20vh', 
+                  x: [`${(i / 15) * 100}vw`, `${((i / 15) * 100) + (i % 2 === 0 ? 3 : -3)}vw`],
+                  z: 0 
+                }}
+                transition={{ duration: 5 + (i % 5), repeat: Infinity, delay: i * 0.4, ease: 'linear' }}
+                className={`absolute bottom-0 rounded-full ${rankInfo.style.particles} will-change-transform`}
+                style={{ width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.6, filter: `blur(${i % 2}px)`, transform: 'translateZ(0)' }}
               />
             ))}
           </div>
@@ -188,30 +196,32 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           {/* === TIER BG: DUAL ORB GLOW === */}
           <div className="absolute inset-0 pointer-events-none z-[2]">
             <motion.div
-              animate={{ x: [0, 60, -60, 0], y: [0, -40, 40, 0], opacity: [0.18, 0.30, 0.18], scale: [1, 1.25, 1] }}
-              transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[200px]"
-              style={{ backgroundColor: rankInfo.style.orb }}
+              animate={{ x: [0, 60, -60, 0], y: [0, -40, 40, 0], opacity: [0.18, 0.30, 0.18], scale: [1, 1.25, 1], z: 0 }}
+              transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[150px] will-change-transform"
+              style={{ backgroundColor: rankInfo.style.orb, transform: 'translateZ(0)' }}
             />
             <motion.div
-              animate={{ x: [0, -40, 40, 0], y: [0, 30, -30, 0], opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1] }}
-              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[120px]"
-              style={{ backgroundColor: rankInfo.style.accent }}
+              animate={{ x: [0, -40, 40, 0], y: [0, 30, -30, 0], opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1], z: 0 }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute top-1/3 left-1/3 w-[500px] h-[500px] rounded-full blur-[100px] will-change-transform"
+              style={{ backgroundColor: rankInfo.style.accent, transform: 'translateZ(0)' }}
             />
           </div>
 
+
           {/* 3D Container */}
           <motion.div
-            style={{ rotateX, rotateY, perspective: 2500 }}
+            style={{ rotateX, rotateY, perspective: 2500, transformStyle: 'preserve-3d' }}
+
             className="relative flex flex-col items-center"
           >
             <motion.div
               initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
               animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }}
               transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
-              className={`relative p-8 rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group max-w-[80vw]`}
-              style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.75) 0%, ${rankInfo.style.accent}08 50%, rgba(0,0,0,0.85) 100%)` }}
+              className={`relative p-8 rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[64px] ${rankInfo.style.shadow} group max-w-[80vw] will-change-transform`}
+              style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.8) 0%, ${rankInfo.style.accent}08 50%, rgba(0,0,0,0.9) 100%)`, transform: 'translateZ(0)' }}
             >
               {/* Grain Texture */}
               <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
@@ -221,21 +231,20 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               {/* Metallic Inner Edge Highlight */}
               <div className="absolute inset-0 rounded-[4rem] pointer-events-none" style={{ boxShadow: `inset 0 1px 0 ${rankInfo.style.accent}40, inset 0 -1px 0 ${rankInfo.style.accentAlt}20` }} />
 
-              {/* Shimmer Sweep */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-25 rounded-[4rem] overflow-hidden`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${rankInfo.style.shimmer} opacity-20 rounded-[4rem] overflow-hidden`}>
                 <motion.div
-                  animate={{ x: ['-200%', '200%'], y: ['-100%', '100%'] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
-                  className="w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-35deg]"
+                  animate={{ x: ['-200%', '200%'], y: ['-100%', '100%'], z: 0 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+                  className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-35deg] will-change-transform"
                 />
               </div>
 
               {/* Dual Energy Arcs */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
                 <motion.circle cx="50%" cy="50%" r="52%" fill="none" stroke={rankInfo.style.accent} strokeWidth="0.6" strokeDasharray="6 18"
-                  animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }} />
+                  animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }} />
                 <motion.circle cx="50%" cy="50%" r="48%" fill="none" stroke={rankInfo.style.accentAlt} strokeWidth="0.3" strokeDasharray="3 12"
-                  animate={{ rotate: -360 }} transition={{ duration: 35, repeat: Infinity, ease: 'linear' }} />
+                  animate={{ rotate: -360 }} transition={{ duration: 40, repeat: Infinity, ease: 'linear' }} />
               </svg>
 
               <div className="relative z-10 flex flex-col items-center">
