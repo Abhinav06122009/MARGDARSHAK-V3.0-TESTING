@@ -36,7 +36,7 @@ const ContactUsPage = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('contact_messages').insert({
+      const { error } = await (supabase.from('contact_messages' as any) as any).insert({
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
@@ -45,7 +45,7 @@ const ContactUsPage = () => {
       });
 
       if (error) throw error;
-      toast.success("Message Transmitted", { description: "Our tactical support team will reach out shortly." });
+      toast.success("Message Sent", { description: "Our Technocal support team will reach out shortly." });
       setFormData({ firstName: '', lastName: '', email: '', message: '' });
     } catch (error: any) {
       console.error('Error:', error);
@@ -63,14 +63,14 @@ const ContactUsPage = () => {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-        
+
         {/* Animated Orbs */}
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.2, 1] }}
           transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
           className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.3, 1] }}
           transition={{ repeat: Infinity, duration: 20, ease: 'easeInOut', delay: 2 }}
           className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"
@@ -82,11 +82,11 @@ const ContactUsPage = () => {
 
       <ScrollArea className="h-screen w-full relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-24">
-          
+
           {/* Nav Identity */}
           <nav className="flex items-center justify-between mb-24 px-4 py-3 bg-white/[0.02] border border-white/5 rounded-3xl backdrop-blur-3xl shadow-2xl">
             <Link to="/" className="flex items-center gap-4 group">
-              <motion.div 
+              <motion.div
                 whileHover={{ rotate: 10, scale: 1.1 }}
                 className="p-3 bg-white rounded-2xl shadow-xl shadow-emerald-500/10"
               >
@@ -153,35 +153,35 @@ const ContactUsPage = () => {
               <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full opacity-30 -z-10" />
               <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/5 p-12 rounded-[3.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent pointer-events-none" />
-                
+
                 <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
                   <div className="grid sm:grid-cols-2 gap-8">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">IDENT_FIRST_NAME</label>
+                      <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">FIRST_NAME</label>
                       <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
                         className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 text-white text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500/30 transition-all placeholder:text-zinc-800"
-                        placeholder="COGNITIVE_ID"
+                        placeholder="John"
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">IDENT_LAST_NAME</label>
+                      <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">LAST_NAME</label>
                       <input
                         type="text"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
                         className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 text-white text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500/30 transition-all placeholder:text-zinc-800"
-                        placeholder="SURNAME_NODE"
+                        placeholder="Charles"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">SECURE_CHANNEL_EMAIL</label>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">EMAIL</label>
                     <input
                       type="email"
                       name="email"
@@ -189,12 +189,12 @@ const ContactUsPage = () => {
                       onChange={handleChange}
                       required
                       className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 text-white text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-emerald-500/30 transition-all placeholder:text-zinc-800"
-                      placeholder="AUTH_ADDRESS"
+                      placeholder="abc@margdarshan.tech"
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">TRANSMISSION_PAYLOAD</label>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">MESSAGE</label>
                     <textarea
                       rows={5}
                       name="message"
@@ -217,7 +217,7 @@ const ContactUsPage = () => {
                           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                           className="flex items-center gap-4"
                         >
-                          <Loader2 className="w-5 h-5 animate-spin" /> Transmitting...
+                          <Loader2 className="w-5 h-5 animate-spin" /> Sending...
                         </motion.span>
                       ) : (
                         <motion.span
@@ -225,7 +225,7 @@ const ContactUsPage = () => {
                           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                           className="flex items-center gap-4 group-hover:scale-110 transition-transform"
                         >
-                          Initialize Uplink <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                          Send Now <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </motion.span>
                       )}
                     </AnimatePresence>

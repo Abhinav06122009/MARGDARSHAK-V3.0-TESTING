@@ -382,7 +382,7 @@ const Upgrade = () => {
             <div className="flex items-center gap-6">
               <Link to="/contact">
                 <Button variant="outline" className="h-14 px-8 border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all">
-                  Support Uplink
+                  Support
                 </Button>
               </Link>
             </div>

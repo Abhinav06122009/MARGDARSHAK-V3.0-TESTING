@@ -11,32 +11,28 @@
  */
 export const translateClerkIdToUUID = async (clerkId: string): Promise<string> => {
   if (!clerkId) return '';
-  if (clerkId.includes('-') && clerkId.length >= 32) return clerkId;
+  const cleanId = clerkId.trim();
+  if (cleanId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) return cleanId;
 
   try {
-    // UUID v5 Implementation (Standard Deterministic UUID)
-    // Namespace: 00000000-0000-0000-0000-000000000000 (uuid_nil)
-    const namespace = new Uint8Array(16).fill(0);
-    const name = new TextEncoder().encode(clerkId);
-    const data = new Uint8Array(namespace.length + name.length);
-    data.set(namespace);
-    data.set(name, namespace.length);
-
-    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    // ZENITH SYNC: Must match 99999_final_rls_stabilization.sql exactly
+    // Salt used in production: b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa
+    const salt = import.meta.env.VITE_ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+    const combined = cleanId + salt.trim();
     
-    // Format hash to UUID v5
-    // Set version (5) and variant (8, 9, a, or b)
-    hashArray[6] = (hashArray[6] & 0x0f) | 0x50;
-    hashArray[8] = (hashArray[8] & 0x3f) | 0x80;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(combined);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Construct UUID (8-4-4-4-12) with version 4 and variant 8 markers to match SQL
     return [
-      hex.slice(0, 8),
-      hex.slice(8, 12),
-      hex.slice(12, 16),
-      hex.slice(16, 20),
-      hex.slice(20, 32)
+      hash.slice(0, 8),
+      hash.slice(8, 12),
+      '4' + hash.slice(13, 16),
+      '8' + hash.slice(17, 20),
+      hash.slice(20, 32)
     ].join('-');
   } catch (err) {
     console.error('[ID-Translator] Crypto error:', err);

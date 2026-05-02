@@ -209,28 +209,22 @@ const verifyClerkUser = async (authHeader) => {
  */
 const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
-  if (clerkId.includes('-') && clerkId.length >= 32) return clerkId;
+  const cleanId = String(clerkId).trim();
+  if (cleanId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) return cleanId;
 
   try {
-    // UUID v5 Implementation (SHA-1 based)
-    // Namespace: 00000000-0000-0000-0000-000000000000 (uuid_nil)
-    const namespace = Buffer.alloc(16, 0);
-    const name = Buffer.from(clerkId, 'utf8');
-    const data = Buffer.concat([namespace, name]);
+    // ZENITH SYNC: Must match 99999_final_rls_stabilization.sql exactly
+    const salt = process.env.ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+    const combined = cleanId + salt.trim();
+    const hash = crypto.createHash('sha256').update(combined).digest('hex');
 
-    const hash = crypto.createHash('sha1').update(data).digest();
-    
-    // Set version (5) and variant (8, 9, a, or b)
-    hash[6] = (hash[6] & 0x0f) | 0x50;
-    hash[8] = (hash[8] & 0x3f) | 0x80;
-
-    const hex = hash.toString('hex');
+    // 8-4-4-4-12 format with version 4 and variant 8 markers
     return [
-      hex.slice(0, 8),
-      hex.slice(8, 12),
-      hex.slice(12, 16),
-      hex.slice(16, 20),
-      hex.slice(20, 32)
+      hash.slice(0, 8),
+      hash.slice(8, 12),
+      '4' + hash.slice(13, 16),
+      '8' + hash.slice(17, 20),
+      hash.slice(20, 32)
     ].join('-');
   } catch (err) {
     console.error('[translateClerkIdToUUID] Error:', err);
