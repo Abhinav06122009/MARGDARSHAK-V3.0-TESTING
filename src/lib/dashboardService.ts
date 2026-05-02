@@ -80,6 +80,7 @@ export const dashboardService = {
         notesResult,
         coursesResult,
         timetableResult,
+        calendarEventsResult,
         profileResult
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', translatedId),
@@ -121,6 +122,8 @@ export const dashboardService = {
         notes: [],
         courses: [],
         timetable: [],
+        calendarEvents: [],
+        profile: null,
         errors: [error]
       };
     }
