@@ -36,109 +36,104 @@ export const VirtualPet: React.FC<VirtualPetProps> = ({ stats, tasks }) => {
   const petState = PET_STATES[mood as keyof typeof PET_STATES];
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/80 backdrop-blur-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] p-8 flex flex-col items-center justify-center group h-full transition-all duration-700 hover:border-indigo-500/40">
-      {/* ── Holographic Auras ── */}
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl p-7 flex flex-col items-center justify-center group h-full transition-all duration-500 hover:border-white/20">
+      {/* Dynamic Background Glow */}
       <motion.div 
-        animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.3, 0.1], rotate: [0, 90, 180, 270, 360] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-        className={`absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none ${petState.glow}`} 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full blur-[100px] pointer-events-none ${petState.glow}`} 
       />
-      <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] rounded-full blur-[100px] bg-indigo-500/10 pointer-events-none" />
-
-      <div className="w-full flex justify-between items-start mb-8 relative z-10">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-3">
-            <h3 className="text-base font-black text-white uppercase tracking-[0.2em] italic drop-shadow-lg">
-              Aether_Core
+      
+      <div className="w-full flex justify-between items-start mb-6 relative z-10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider italic">
+              Aether Buddy
             </h3>
-            <div className="flex gap-1">
+            <div className="flex gap-0.5">
               {[1, 2, 3].map(i => (
                 <motion.div 
                   key={i}
-                  animate={{ scale: [1, 2, 1], opacity: [0.2, 1, 0.2] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                  className={`w-1.5 h-1.5 rounded-full ${petState.color.replace('text-', 'bg-')}`}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                  className={`w-1 h-1 rounded-full ${petState.color.replace('text-', 'bg-')}`}
                 />
               ))}
             </div>
           </div>
-          <p className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.25em] leading-tight">{petState.message}</p>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-tight">{petState.message}</p>
         </div>
         
         <div className="text-right">
           <motion.div 
-            whileHover={{ scale: 1.15, rotate: 5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-xs font-black text-amber-400 uppercase tracking-widest shadow-2xl"
+            whileHover={{ scale: 1.1 }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-400 uppercase tracking-tighter"
           >
-            <Star size={12} className="fill-amber-400" /> LEVEL {level}
+            <Star size={10} className="fill-amber-400 animate-pulse" /> LEVEL {level}
           </motion.div>
         </div>
       </div>
 
-      <div className="relative my-8 group-hover:scale-110 transition-transform duration-700">
-        {/* Orbital Ring */}
+      <div className="relative my-4">
+        {/* Halo Effect */}
         <motion.div 
           animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-12 border border-dashed border-white/10 rounded-full pointer-events-none opacity-40"
-        />
-        <motion.div 
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-16 border border-dotted border-white/5 rounded-full pointer-events-none opacity-20"
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute -inset-8 border border-dashed border-white/5 rounded-full pointer-events-none"
         />
         
         <motion.div 
           layoutId="pet-emoji"
           animate={{ 
-            y: [0, -20, 0],
-            rotate: mood === 'excited' ? [-8, 8, -8] : mood === 'galaxy' ? [0, 360] : 0,
-            scale: [1, 1.15, 1],
-            filter: ["drop-shadow(0 0 20px rgba(255,255,255,0.1))", "drop-shadow(0 0 40px rgba(255,255,255,0.4))", "drop-shadow(0 0 20px rgba(255,255,255,0.1))"]
+            y: [0, -15, 0],
+            rotate: mood === 'excited' ? [-5, 5, -5] : mood === 'galaxy' ? [0, 360, 0] : 0,
+            scale: [1, 1.1, 1]
           }}
           transition={{ 
-            y: { repeat: Infinity, duration: mood === 'excited' || mood === 'galaxy' ? 1.2 : 4, ease: "easeInOut" },
-            rotate: { repeat: Infinity, duration: mood === 'excited' ? 0.4 : 12, ease: "linear" },
-            scale: { repeat: Infinity, duration: 3, ease: "easeInOut" },
-            filter: { repeat: Infinity, duration: 2, ease: "easeInOut" }
+            y: { repeat: Infinity, duration: mood === 'excited' || mood === 'galaxy' ? 1.5 : 3, ease: "easeInOut" },
+            rotate: { repeat: Infinity, duration: mood === 'excited' ? 0.5 : 8, ease: "linear" },
+            scale: { repeat: Infinity, duration: 4, ease: "easeInOut" }
           }}
-          className="text-9xl relative z-10 cursor-pointer select-none"
+          className="text-7xl relative z-10 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] cursor-pointer select-none"
         >
           {petState.emoji}
         </motion.div>
       </div>
 
-      <div className="w-full relative z-10 mt-auto space-y-4">
-        <div className="flex justify-between items-end px-1">
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] block">Ascension_Progress</span>
-            <div className="flex items-center gap-2">
-              <Zap size={14} className="text-indigo-400 fill-indigo-400/20" />
-              <span className="text-sm font-black text-white tracking-widest">{xp} <span className="text-zinc-700">XP</span></span>
+      <div className="w-full relative z-10 mt-auto space-y-3">
+        <div className="flex justify-between items-end">
+          <div className="space-y-1">
+            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] block">Essence Progress</span>
+            <div className="flex items-center gap-1.5">
+              <Zap size={12} className="text-blue-400 fill-blue-400/20" />
+              <span className="text-xs font-black text-white tracking-tighter">{xp} <span className="text-zinc-600">XP</span></span>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] block">Next_Node</span>
-            <span className="text-sm font-black text-zinc-400 tracking-widest">{Math.round(progress)}%</span>
+            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] block">Next Tier</span>
+            <span className="text-xs font-black text-zinc-400 tracking-tighter">{Math.round(progress)}%</span>
           </div>
         </div>
 
-        <div className="h-4 w-full bg-white/[0.03] rounded-full p-1 border border-white/5 relative overflow-hidden">
+        <div className="h-2.5 w-full bg-white/5 rounded-full p-0.5 border border-white/10 relative overflow-hidden group/bar">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 2, type: 'spring', bounce: 0.1 }}
+            transition={{ duration: 1.5, type: 'spring', bounce: 0.2 }}
             className={`h-full rounded-full relative ${
-              mood === 'galaxy' ? 'bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500' : 
-              mood === 'excited' ? 'bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400' : 
-              'bg-gradient-to-r from-blue-600 via-emerald-500 to-cyan-400'
+              mood === 'galaxy' ? 'bg-gradient-to-r from-purple-600 via-fuchsia-500 to-indigo-500' : 
+              mood === 'excited' ? 'bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-400' : 
+              'bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400'
             }`}
           >
-            {/* High-speed shimmer */}
+            {/* Shimmer effect */}
             <motion.div 
-              animate={{ x: ['-200%', '300%'] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
             />
           </motion.div>
         </div>

@@ -107,33 +107,29 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {/* 3D Logo */}
         <motion.div
           className="relative group"
-          style={{ perspective: 1000 }}
+          style={{ perspective: 600 }}
           onMouseMove={handleLogoMouseMove}
           onMouseLeave={handleLogoMouseLeave}
         >
           <motion.div
             style={{ rotateX: logoRotateX, rotateY: logoRotateY }}
-            className="relative p-2 md:p-3 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] cursor-pointer overflow-hidden group-hover:border-indigo-500/50 transition-all duration-500"
-            whileHover={{ scale: 1.1, rotateZ: 2 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="relative p-2 md:p-2.5 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-2xl cursor-pointer overflow-hidden group-hover:border-blue-500/50 transition-colors"
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            {/* Neural Shimmer */}
-            <motion.div 
-              animate={{ translateX: ['-100%', '200%'] }}
-              transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none" 
-            />
+            {/* Animated background glow inside logo box */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             
             <img 
               src={logo} 
               alt="MARGDARSHAK" 
-              className="h-9 md:h-11 w-auto object-contain relative z-10 brightness-125 contrast-125 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
+              className="h-8 md:h-10 w-auto object-contain relative z-10 brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" 
               draggable={false} 
             />
           </motion.div>
           
-          {/* Enhanced Aura under logo */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full h-4 bg-indigo-500/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          {/* Enhanced Glow under logo */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-3 bg-blue-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.div>
 
         {/* Brand name - Hidden on small mobile */}

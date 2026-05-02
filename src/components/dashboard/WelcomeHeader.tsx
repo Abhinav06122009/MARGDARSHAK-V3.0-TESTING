@@ -161,19 +161,19 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
         </motion.div>
 
         {/* Hero headline */}
-        <motion.div className="mb-6" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none">
-            <span className="bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent drop-shadow-2xl">
+        <motion.div className="mb-5" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-none">
+            <span className="bg-gradient-to-br from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
               Hey, {fullName?.split(' ')[0] || 'Scholar'}
             </span>
             <motion.span
-              animate={{ rotate: [0, 20, -5, 15, 0], scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', delay: 1 }}
-              className="inline-block ml-4 select-none drop-shadow-lg"
+              animate={{ rotate: [0, 20, -5, 15, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut', delay: 1 }}
+              className="inline-block ml-3 select-none"
             >👋</motion.span>
           </h1>
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mt-3">
-            <span className="text-gradient-animated bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">Ready to dominate?</span>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tighter mt-2">
+            <span className="text-gradient-animated">Ready to achieve?</span>
           </h2>
         </motion.div>
 

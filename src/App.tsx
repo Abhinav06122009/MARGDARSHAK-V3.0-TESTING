@@ -334,6 +334,7 @@ const AppContent = () => {
                       </Routes>
                     </AnimatePresence>
                     <AIWidgetWrapper />
+                    <RankEntryOverlay />
                     <DevVerificationGuard />
                     <GlobalQuickActions />
                     <MobileNavbar />

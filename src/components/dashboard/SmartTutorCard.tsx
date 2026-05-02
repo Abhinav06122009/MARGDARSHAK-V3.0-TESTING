@@ -44,13 +44,8 @@ export const SmartTutorCard = () => {
             </div>
             
             <div className="relative hidden md:block">
-              <div className="absolute inset-0 bg-amber-500 blur-[100px] opacity-20 animate-pulse" />
-              <motion.div
-                animate={{ rotate: [12, -8, 12], scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
-              >
-                <BrainCircuit className="relative w-40 h-40 text-amber-500/30 group-hover:text-amber-400 transition-all duration-700" />
-              </motion.div>
+              <div className="absolute inset-0 bg-amber-500 blur-[80px] opacity-10 animate-pulse" />
+              <BrainCircuit className="relative w-32 h-32 text-amber-500/20 group-hover:text-amber-400/30 transition-all duration-700 rotate-12 group-hover:rotate-0" />
             </div>
           </div>
 

@@ -28,22 +28,21 @@ interface ActionDef {
 const ActionCard = ({ icon: Icon, title, subtitle, color, glow, badge, badgeColor, isPremium, onClick }: ActionDef) => (
   <motion.button
     onClick={onClick}
-    whileHover={{ scale: 1.05, x: 8, rotateY: 5 }}
-    whileTap={{ scale: 0.95 }}
-    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-    className={`group relative flex items-center p-4 w-full rounded-2xl border border-white/[0.06] hover:border-indigo-500/30 bg-zinc-950/80 hover:bg-zinc-900 transition-all duration-500 text-left overflow-hidden shadow-2xl hover:shadow-indigo-500/10`}
-    style={{ transformStyle: 'preserve-3d' } as any}
+    whileHover={{ scale: 1.02, x: 4 }}
+    whileTap={{ scale: 0.97 }}
+    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+    className={`group relative flex items-center p-3.5 w-full rounded-2xl border border-white/[0.06] hover:border-white/15 bg-zinc-950/60 hover:bg-zinc-900/80 transition-all duration-200 text-left overflow-hidden shadow-lg hover:shadow-xl`}
+    style={{ '--glow': glow } as any}
   >
-    {/* Hover glow background */}
-    <div className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700`} />
-    
+    {/* Hover glow bar on left */}
+    <div className={`absolute left-0 top-0 bottom-0 w-0.5 rounded-full bg-gradient-to-b ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+
     {/* Icon */}
-    <div className={`relative flex-shrink-0 p-3 rounded-2xl bg-gradient-to-br ${color} mr-4 shadow-xl group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-500`}>
-      {isPremium ? <Lock className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-white" />}
-      <motion.div 
-        animate={{ opacity: [0, 0.4, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute inset-0 rounded-2xl bg-white" 
+    <div className={`relative flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${color} mr-3.5 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
+      {isPremium ? <Lock className="w-4 h-4 text-white" /> : <Icon className="w-4 h-4 text-white" />}
+      {/* Shimmer on icon */}
+      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)' }}
       />
     </div>
 

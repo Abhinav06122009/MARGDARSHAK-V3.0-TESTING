@@ -149,22 +149,23 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
           {/* === TIER BG: GEOMETRIC CRYSTALS === */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0 }}
                 animate={{
-                  opacity: [0, 0.1, 0],
-                  rotate: [0, 90, 180],
+                  opacity: [0, 0.12, 0],
+                  scale: [0.4, 1.4, 0.4],
+                  rotate: [0, 180, 360],
+                  x: [(i % 2 === 0 ? 1 : -1) * (100 + i * 80), (i % 2 === 0 ? -1 : 1) * (100 + i * 80)],
+                  y: [(i % 3 === 0 ? 1 : -1) * (60 + i * 50), (i % 3 === 0 ? -1 : 1) * (60 + i * 50)]
                 }}
-                transition={{ duration: 15 + i * 2, repeat: Infinity, ease: 'linear', delay: i * 1 }}
-                className="absolute top-1/2 left-1/2 w-[400px] h-[400px] will-change-transform"
+                transition={{ duration: 8 + i * 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.4 }}
+                className="absolute top-1/2 left-1/2 w-[350px] h-[350px]"
                 style={{
-                  x: (i % 2 === 0 ? 1 : -1) * (150 + i * 50),
-                  y: (i % 3 === 0 ? 1 : -1) * (100 + i * 30),
-                  background: `linear-gradient(135deg, ${rankInfo.style.accent}05, transparent)`,
-                  clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-                  border: `1px solid ${rankInfo.style.accent}05`
+                  background: `linear-gradient(135deg, ${rankInfo.style.accent}08, ${rankInfo.style.accentAlt}04, transparent)`,
+                  clipPath: i % 2 === 0 ? 'polygon(50% 0%,100% 50%,50% 100%,0% 50%)' : 'polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)',
+                  border: `1px solid ${rankInfo.style.accent}10`
                 }}
               />
             ))}
@@ -172,14 +173,14 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
           {/* === TIER BG: FLOATING PARTICLES === */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden z-[3]">
-            {[...Array(12)].map((_, i) => (
+            {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: '100vh', x: `${(i / 12) * 100}vw` }}
-                animate={{ opacity: [0, 0.6, 0], y: '-20vh' }}
-                transition={{ duration: 5 + (i % 3), repeat: Infinity, delay: i * 0.5, ease: 'linear' }}
-                className={`absolute bottom-0 rounded-full ${rankInfo.style.particles} will-change-transform`}
-                style={{ width: 3 + (i % 2), height: 3 + (i % 2), opacity: 0.4 }}
+                initial={{ opacity: 0, y: '100vh', x: `${(i / 20) * 100}vw` }}
+                animate={{ opacity: [0, 0.8, 0], y: '-20vh', x: [`${(i / 20) * 100}vw`, `${((i / 20) * 100) + (i % 2 === 0 ? 3 : -3)}vw`] }}
+                transition={{ duration: 4 + (i % 5), repeat: Infinity, delay: i * 0.3, ease: 'easeOut' }}
+                className={`absolute bottom-0 rounded-full ${rankInfo.style.particles}`}
+                style={{ width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.6, filter: `blur(${i % 2}px)` }}
               />
             ))}
           </div>
@@ -206,15 +207,15 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             className="relative flex flex-col items-center"
           >
             <motion.div
-              initial={{ y: 200, opacity: 0, scale: 0.5, rotateX: 45 }}
-              animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
-              transition={{ delay: 0.3, duration: 1, type: "spring", bounce: 0.2 }}
-              className={`relative p-10 md:p-14 rounded-[3.5rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group w-[90vw] max-w-[650px] will-change-transform`}
+              initial={{ y: 200, opacity: 0, scale: 0.2, rotateX: 45 }}
+              animate={{ y: 0, opacity: 1, scale: 0.75, rotateX: 0 }}
+              transition={{ delay: 0.3, duration: 1.5, type: "spring", bounce: 0.3 }}
+              className={`relative p-8 rounded-[4rem] border-2 ${rankInfo.style.border} backdrop-blur-[140px] ${rankInfo.style.shadow} group max-w-[80vw]`}
               style={{ background: `linear-gradient(145deg, rgba(0,0,0,0.75) 0%, ${rankInfo.style.accent}08 50%, rgba(0,0,0,0.85) 100%)` }}
             >
               {/* Grain Texture */}
               <div className="absolute inset-0 opacity-[0.06] pointer-events-none overflow-hidden rounded-[4rem]">
-                <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-60 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-60 mix-blend-overlay" />
               </div>
 
               {/* Metallic Inner Edge Highlight */}
@@ -243,10 +244,10 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2 }}
-                  className="mb-8 flex flex-col items-center gap-3"
+                  className="mb-6 flex flex-col items-center gap-2"
                 >
-                  <img src="/logo.png" alt="Margdarshak Logo" className="w-16 h-16 drop-shadow-[0_0_20px_rgba(16,185,129,0.6)]" />
-                  <span className="text-[10px] font-black tracking-[1em] text-white/60 uppercase">VSAV GYANTAPA HIGH COMMAND</span>
+                  <img src="/logo.png" alt="Margdarshak Logo" className="w-12 h-12 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[8px] font-black tracking-[0.8em] text-white/50 uppercase">VSAV GYANTAPA HIGH COMMAND</span>
                 </motion.div>
 
                 <motion.div
@@ -292,7 +293,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                    </div>
 
                    {/* Rank Achievement Badges */}
-                   <div className="flex gap-4">
+                   <div className="flex gap-2">
                       {[rankInfo.style.theme === 'rhodium' ? 'RHODIUM' : rankInfo.style.theme === 'platinum' ? 'PLATINUM' : 'IMPERIAL',
                         'VERIFIED', 'ELITE'].map((label, i) => (
                         <motion.div
@@ -300,11 +301,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 2.5 + i * 0.2 }}
-                          className="px-5 py-2 rounded-xl border flex items-center gap-3"
-                          style={{ background: `${rankInfo.style.accent}15`, borderColor: `${rankInfo.style.accent}40` }}
+                          className="px-4 py-1.5 rounded-lg border flex items-center gap-2"
+                          style={{ background: `${rankInfo.style.accent}10`, borderColor: `${rankInfo.style.accent}30` }}
                         >
-                           <Star className="w-3 h-3" style={{ color: rankInfo.style.accent, fill: rankInfo.style.accent }} />
-                           <span className="text-[8px] font-black uppercase tracking-widest text-white">{label}</span>
+                           <Star className="w-2 h-2" style={{ color: rankInfo.style.accent, fill: rankInfo.style.accent }} />
+                           <span className="text-[6px] font-black uppercase tracking-widest" style={{ color: rankInfo.style.accent }}>{label}</span>
                         </motion.div>
                       ))}
                    </div>
