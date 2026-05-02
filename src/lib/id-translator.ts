@@ -18,9 +18,8 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
   }
 
   try {
-    // 1. Combine with salt and encode as UTF-8
-    const salt = (import.meta.env.VITE_ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa').trim();
-    const msgBuffer = new TextEncoder().encode(clerkId + salt);
+    // 1. Encode as UTF-8 (Matching backend 00009 logic: no salt)
+    const msgBuffer = new TextEncoder().encode(clerkId);
     
     // 2. Generate SHA-256 hash
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -30,7 +29,7 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
     const hex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     
     // 4. Format as UUID (8-4-4-4-12)
-    // We insert '4' for version and '8' for variant to make it a "valid-looking" v4 UUID
+    // Matches public.translate_clerk_id_to_uuid() in 00009_id_translation_stabilization.sql
     const uuid = [
       hex.slice(0, 8),
       hex.slice(8, 12),
