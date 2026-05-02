@@ -329,16 +329,6 @@ const AppContent = () => {
                       </Routes>
                     </AnimatePresence>
                     
-                    {/* Global Ambient Station - Left Side */}
-                    <div className="fixed left-6 bottom-32 z-[100] hidden xl:block w-72">
-                      <motion.div
-                        initial={{ x: -100, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 2, type: 'spring', damping: 20 }}
-                      >
-                        <AmbientSoundPlayer />
-                      </motion.div>
-                    </div>
 
                     <AIWidgetWrapper />
                     <RankEntryOverlay />

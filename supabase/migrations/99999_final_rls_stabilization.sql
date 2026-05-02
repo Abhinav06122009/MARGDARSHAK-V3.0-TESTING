@@ -76,7 +76,7 @@ DECLARE
         'medications', 'symptoms', 'reports', 'timetable_events', 'study_plans', 
         'smart_notes', 'syllabi', 'deadlines', 'blocked_users', 'admin_reports', 
         'admin_users', 'security_threats', 'support_tickets', 'user_activity_logs', 
-        'security_logs', 'progress_goals', 'progress_entries'
+        'security_logs', 'progress_goals', 'progress_entries', 'calendar_events'
     ];
     v_user_id_col text;
 BEGIN
