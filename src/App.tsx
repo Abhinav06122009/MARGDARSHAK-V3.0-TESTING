@@ -184,6 +184,7 @@ const AppContent = () => {
               <AIProvider>
                 <div className="bg-[#050505] min-h-screen text-white">
                   <GlobalSecurityGuard>
+                    <RankEntryOverlay />
                     <NavigationTracker />
                     <SecurityWarningOverlay />
                     <AnimatePresence mode="wait">
