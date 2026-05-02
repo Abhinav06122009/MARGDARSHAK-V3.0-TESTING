@@ -321,7 +321,8 @@ const GlobalQuickActions: React.FC = () => {
                   <X size={12} className="text-zinc-600" />
                 </button>
               </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
