@@ -33,7 +33,7 @@ jobs:
         run: supabase link --project-ref $SUPABASE_PROJECT_ID
 
       - name: Push Database Migrations
-        run: supabase db push
+        run: supabase db push --include-all
 
       - name: Deploy Security Logger Edge Function
         run: supabase functions deploy security-logger
