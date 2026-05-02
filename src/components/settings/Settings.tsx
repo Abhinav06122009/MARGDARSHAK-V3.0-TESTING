@@ -185,22 +185,63 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             </div>
 
             <div className="grid gap-12">
-              {[
-                { Component: SecuritySection, props: { newPassword, setNewPassword, confirmPassword, setConfirmPassword, showPassword, setShowPassword, isSubmitting: isSubmittingPassword, onSubmit: handlePasswordUpdate, lastSignIn: user.last_sign_in_at } },
-                { Component: Passkeys, props: { userId: user.id, userEmail: user.email, fullName: user.profile?.full_name || '' } },
-                { Component: SecurityAdvisor, props: { userId: user.id, userEmail: user.email, passkeyCount: clerkPasskeyCount, hasFullName: !!(user.profile?.full_name && user.profile.full_name.trim()) } },
-                { Component: AccessibilitySection, props: { dyslexiaMode, setDyslexiaMode } }
-              ].map(({ Component, props }, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.05 }}
-                >
-                  <Component {...props} />
-                </motion.div>
-              ))}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0 * 0.05 }}
+              >
+                <SecuritySection 
+                  newPassword={newPassword} 
+                  setNewPassword={setNewPassword} 
+                  confirmPassword={confirmPassword} 
+                  setConfirmPassword={setConfirmPassword} 
+                  showPassword={showPassword} 
+                  setShowPassword={setShowPassword} 
+                  isSubmitting={isSubmittingPassword} 
+                  onSubmit={handlePasswordUpdate} 
+                  lastSignIn={user.last_sign_in_at} 
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 1 * 0.05 }}
+              >
+                <Passkeys 
+                  userId={user.id} 
+                  userEmail={user.email} 
+                  fullName={user.profile?.full_name || ''} 
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 2 * 0.05 }}
+              >
+                <SecurityAdvisor 
+                  userId={user.id} 
+                  userEmail={user.email} 
+                  passkeyCount={clerkPasskeyCount} 
+                  hasFullName={!!(user.profile?.full_name && user.profile.full_name.trim())} 
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 3 * 0.05 }}
+              >
+                <AccessibilitySection 
+                  dyslexiaMode={dyslexiaMode} 
+                  setDyslexiaMode={setDyslexiaMode} 
+                />
+              </motion.div>
             </div>
           </div>
         </div>

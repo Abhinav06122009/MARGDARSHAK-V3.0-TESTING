@@ -58,6 +58,7 @@ export interface TimetableEvent {
     toDay: number;
     workloadBefore: number;
     workloadAfter: number;
+    reason?: string;
   }
   
   export interface TimetableStats {
@@ -76,6 +77,7 @@ export interface TimetableEvent {
   export interface SecureUser {
     id: string;
     email: string;
+    created_at?: string;
     profile?: {
       full_name: string;
       user_type: string;
@@ -141,7 +143,7 @@ export interface TimetableEvent {
             user_type: profile?.user_type || 'student',
             student_id: user.id.substring(0, 8),
             department: profile?.department,
-            academic_year: profile?.academic_year || '2024-25',
+            academic_year: (profile as any)?.academic_year || '2024-25',
             role: role,
             subscription_tier: tier
           } as any
@@ -335,8 +337,8 @@ export interface TimetableEvent {
   
     searchTimetableEvents: async (query: string, userId: string, day?: number, category?: string) => {
       try {
-        let queryBuilder = supabase
-          .from('timetable_events')
+        let queryBuilder = (supabase
+          .from('timetable_events' as any) as any)
           .select('*')
           .eq('user_id', userId)
           .eq('status', 'active');

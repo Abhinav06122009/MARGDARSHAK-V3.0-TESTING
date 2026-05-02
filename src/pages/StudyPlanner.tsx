@@ -70,8 +70,8 @@ const StudyPlanner: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       if (!user) return;
       const translatedId = await translateClerkIdToUUID(user.id);
 
-      const { data } = await supabase
-        .from('study_plans')
+      const { data } = await (supabase
+        .from('study_plans' as any) as any)
         .select('*')
         .eq('user_id', translatedId)
         .order('created_at', { ascending: false })
@@ -135,7 +135,7 @@ Generate a 7-day schedule. Return ONLY valid JSON:
         const user = await dashboardService.getCurrentUser();
         if (user) {
           const translatedId = await translateClerkIdToUUID(user.id);
-          await supabase.from('study_plans').insert({
+          await (supabase.from('study_plans' as any) as any).insert({
             user_id: translatedId,
             plan: result as any,
             config: config as any,
@@ -165,15 +165,15 @@ Generate a 7-day schedule. Return ONLY valid JSON:
     const user = await dashboardService.getCurrentUser();
     if (user) {
       const translatedId = await translateClerkIdToUUID(user.id);
-      const { data: plans } = await supabase
-        .from('study_plans')
+      const { data: plans } = await (supabase
+        .from('study_plans' as any) as any)
         .select('id')
         .eq('user_id', translatedId)
         .order('created_at', { ascending: false })
         .limit(1);
 
       if (plans && plans.length > 0) {
-        await supabase.from('study_plans').update({
+        await (supabase.from('study_plans' as any) as any).update({
           completed_sessions: Array.from(nextSessions)
         }).eq('id', plans[0].id);
       }

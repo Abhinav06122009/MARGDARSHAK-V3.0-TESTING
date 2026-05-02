@@ -36,7 +36,7 @@ const Upgrade = () => {
     const fetchUserTier = async () => {
       try {
         // --- ZENITH SYNC: Prioritize Clerk Metadata ---
-        const clerkTier = clerkUser?.publicMetadata?.subscription?.tier;
+        const clerkTier = (clerkUser?.publicMetadata as any)?.subscription?.tier;
         if (clerkTier) {
           setCurrentTier(clerkTier as string);
           return;
@@ -77,7 +77,7 @@ const Upgrade = () => {
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 30, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
   };

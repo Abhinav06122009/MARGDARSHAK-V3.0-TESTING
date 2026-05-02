@@ -64,8 +64,8 @@ export const dashboardService = {
           user_type: userRole,
           role: userRole,
           subscription_tier: userTier,
-          subscription_status: subscription.status || profile?.subscription_status || 'inactive'
-        }
+          subscription_status: (subscription as any).status || (profile as any)?.subscription_status || 'inactive'
+        } as any
       } as SecureUser;
     } catch (error) {
       console.error('dashboardService: Critical error getting current user:', error);
@@ -93,8 +93,8 @@ export const dashboardService = {
         supabase.from('grades').select('*').eq('user_id', translatedId),
         supabase.from('notes').select('*').eq('user_id', translatedId),
         supabase.from('courses').select('*').eq('user_id', translatedId),
-        supabase.from('timetable_events').select('*').eq('user_id', translatedId),
-        supabase.rpc('get_my_calendar_events'),
+        (supabase.from('timetable_events' as any) as any).select('*').eq('user_id', translatedId),
+        (supabase.rpc('get_my_calendar_events' as any) as any),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
 
@@ -224,9 +224,9 @@ export const dashboardService = {
         user_id: translatedId,
         created_at: new Date().toISOString()
       };
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('tasks')
-        .insert(newTask)
+        .insert(newTask as any) as any)
         .select()
         .single();
 
@@ -249,8 +249,8 @@ export const dashboardService = {
         user_id: translatedId,
         created_at: new Date().toISOString()
       };
-      const { data, error } = await supabase
-        .from('user_calendar_events')
+      const { data, error } = await (supabase
+        .from('user_calendar_events' as any) as any)
         .insert(newEvent)
         .select()
         .single();
@@ -266,8 +266,8 @@ export const dashboardService = {
   updateCalendarEvent: async (eventId: string, eventData: Partial<RealCalendarEvent>, userId: string) => {
     const translatedId = await translateClerkIdToUUID(userId);
     try {
-      const { data, error } = await supabase
-        .from('user_calendar_events')
+      const { data, error } = await (supabase
+        .from('user_calendar_events' as any) as any)
         .update({ ...eventData, updated_at: new Date().toISOString() })
         .match({ id: eventId, user_id: translatedId })
         .select()
@@ -284,8 +284,8 @@ export const dashboardService = {
   deleteCalendarEvent: async (eventId: string, userId: string) => {
     const translatedId = await translateClerkIdToUUID(userId);
     try {
-      const { error } = await supabase
-        .from('user_calendar_events')
+      const { error } = await (supabase
+        .from('user_calendar_events' as any) as any)
         .delete()
         .match({ id: eventId, user_id: translatedId });
         

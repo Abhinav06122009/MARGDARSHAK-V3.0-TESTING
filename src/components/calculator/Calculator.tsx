@@ -175,7 +175,11 @@ const ParticleBackground = () => (
   </div>
 );
 
-const Calculator = () => {
+interface CalculatorProps {
+  onBack?: () => void;
+}
+
+const Calculator: React.FC<CalculatorProps> = ({ onBack }) => {
   const [state, dispatch] = useReducer(calcReducer, initialState);
   const [mode, setMode] = useState('scientific');
   const [activeTab, setActiveTab] = useState('core');
@@ -304,10 +308,17 @@ const Calculator = () => {
 
       <nav className="border-b border-white/5 bg-black/60 backdrop-blur-3xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <Button variant="ghost" size="icon" className="mr-2" onClick={onBack}>
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
+            <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="Logo" className="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)]" />
             <span className="font-black tracking-tighter text-xl text-white">MARGDARSHAK</span>
           </Link>
+          </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="rounded-xl bg-white/5" onClick={() => setUi(p => ({ ...p, showSettings: !p.showSettings }))}>
               <Settings className="w-4 h-4" />

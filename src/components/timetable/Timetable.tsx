@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,7 +29,11 @@ import { useAuth } from '@/contexts/AuthContext';
 // src/components/timetable/Timetable.tsx
 
 
-const Timetable: React.FC = () => {
+interface TimetableProps {
+  onBack?: () => void;
+}
+
+const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
   const navigate = useNavigate();
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
@@ -140,12 +143,12 @@ const Timetable: React.FC = () => {
           <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent font-bold">
             Timetable Ready!
           </span>
-        ),
+        ) as any,
         description: (
           <span className="text-white font-medium">
             Welcome Back <span className="text-emerald-400 font-semibold">{authUser.fullName || 'User'}</span>! Your schedule is synchronized.
           </span>
-        ),
+        ) as any,
         className: "bg-black border border-blue-400/50 shadow-xl",
         icon: <CalendarCheck className="text-emerald-400" />
       });
@@ -290,17 +293,16 @@ const Timetable: React.FC = () => {
           <span className="bg-gradient-to-r from-red-500 via-pink-600 to-rose-400 bg-clip-text text-transparent font-bold">
             Event Deleted Successfully
           </span>
-        ),
+        ) as any,
         description: (
           <span className="text-white font-medium">
             "<span className="text-rose-400 font-semibold">{title}</span>" has been removed from your timetable.
           </span>
-        ),
+        ) as any,
         className: "bg-black border border-red-500/50 shadow-2xl",
         icon: <Trash2 className="text-rose-400" />,
         duration: 5000,
-        isClosable: true,
-        position: "top-right"
+        isClosable: true
       });
 
 
@@ -404,7 +406,7 @@ Return ONLY this JSON: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time
       if (suggestion?.day !== undefined && suggestion?.start_time) {
         setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
         toast({
-          title: (<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">✨ AI Time Suggested!</span>),
+          title: (<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">✨ AI Time Suggested!</span>) as any,
           description: suggestion.reason || `Best slot: ${DAY_NAMES[suggestion.day]} at ${suggestion.start_time}.`,
           className: "bg-black border border-blue-500/50 shadow-xl",
           icon: <Zap className="text-blue-400" />,
@@ -413,7 +415,7 @@ Return ONLY this JSON: {"day": <0-6, 0=Sunday>, "start_time": "HH:MM", "end_time
 
     } catch (err: any) {
       console.error('[AI Suggest] Failed:', err);
-      const tempEvent = { ...formData, start_time: '09:00', end_time: '10:00' };
+      const tempEvent = { ...formData, start_time: '09:00', end_time: '10:00' } as any;
       const suggestion = smartScheduler.findNextAvailableSlot(events, tempEvent, new Date().getDay());
       if (suggestion) {
         setFormData(prev => ({ ...prev, day: suggestion.day, start_time: suggestion.start_time, end_time: suggestion.end_time }));
@@ -737,7 +739,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
       <div className="w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 z-10">
         {/* Enhanced Multi-Color Header */}
         <TimetableHeader
-          onBack={() => navigate('/dashboard')}
+          onBack={onBack || (() => navigate('/dashboard'))}
           currentDate={currentDate}
           onPreviousWeek={handlePreviousWeek}
           onNextWeek={handleNextWeek}
@@ -927,7 +929,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
             colorHelpers={timetableHelpers}
             onEventDrop={handleEventDrop}
             draggedEvent={draggedEvent}
-            setDraggedEvent={setDraggedEvent}
+            setDraggedEvent={(e: any) => setDraggedEvent(e)}
             selectedEvents={selectedEvents}
             hasPremiumAccess={hasPremiumAccess}
             onEventSelect={handleEventSelect}

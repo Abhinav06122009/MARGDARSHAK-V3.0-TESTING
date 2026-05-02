@@ -36,7 +36,7 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
 
   const openSecuritySettings = () => {
     if (!clerkUser) return;
-    openUserProfile({ label: 'security' });
+    openUserProfile();
     toast({
       title: 'OPENING SECURITY HUB',
       description: 'Please manage your Passkeys in the official Clerk security panel.',

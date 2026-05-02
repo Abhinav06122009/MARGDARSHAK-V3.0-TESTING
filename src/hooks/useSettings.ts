@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface SecureUser {
   id: string;
   email: string;
+  created_at?: string;
   profile?: {
     full_name: string;
     user_type: string;
@@ -68,6 +69,7 @@ export const useSettings = () => {
       const secureUser: SecureUser = {
         id: authUser.id,
         email: authUser.email || '',
+        created_at: authUser.created_at,
         last_sign_in_at: authUser.last_sign_in_at,
         profile: {
           full_name: profile?.full_name || authUser.user_metadata?.full_name || '',

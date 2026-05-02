@@ -130,6 +130,7 @@ export interface RealTimetableEntry {
 export interface SecureUser {
   id: string;
   email: string;
+  created_at?: string;
   user_metadata?: {
     full_name?: string;
     avatar_url?: string;

@@ -88,7 +88,10 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
       const userData = await dashboardService.fetchAllUserData(user.id);
       setEvents(userData.calendarEvents || []);
-      setTasks(userData.tasks || []);
+      setTasks((userData.tasks || []).map((t: any) => ({
+        ...t,
+        priority: t.priority || 'medium'
+      })));
 
       const holidayData = await holidayService.fetchHolidays(year);
       setHolidays(holidayData);
