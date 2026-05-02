@@ -98,6 +98,8 @@ import { trackActivity } from '@/lib/security/activityTracker';
 import SSOCallback from '@/components/auth/SSOCallback';
 import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
 import DevVerificationGuard from './components/security/DevVerificationGuard';
+import { ThemeProvider } from '@/context/ThemeContext';
+
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -162,6 +164,18 @@ const DashboardRouteWrapper = () => {
   );
 };
 
+const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useContext(AuthContext);
+  const role = user?.profile?.role || 'standard';
+  const tier = user?.profile?.subscription_tier || 'free';
+  return (
+    <ThemeProvider role={role} tier={tier}>
+      {children}
+    </ThemeProvider>
+  );
+};
+
+
 /**
  * AppContent handles the core UI logic and AnimatePresence synchronization.
  */
@@ -182,8 +196,10 @@ const AppContent = () => {
           <AdminProvider>
             <SecurityProvider>
               <AIProvider>
-                <div className="bg-[#050505] min-h-screen text-white">
-                  <GlobalSecurityGuard>
+                <ThemeWrapper>
+                  <div className="bg-[#050505] min-h-screen text-white">
+                    <GlobalSecurityGuard>
+
                     <RankEntryOverlay />
                     <NavigationTracker />
                     <SecurityWarningOverlay />
@@ -343,12 +359,14 @@ const AppContent = () => {
                     <Toaster />
                     <Sonner />
                     <CookieConsent />
-                  </GlobalSecurityGuard>
-                </div>
+                    </GlobalSecurityGuard>
+                  </div>
+                </ThemeWrapper>
               </AIProvider>
             </SecurityProvider>
           </AdminProvider>
         </AuthProvider>
+
       </TooltipProvider>
     </ClerkSupabaseBridge>
   );

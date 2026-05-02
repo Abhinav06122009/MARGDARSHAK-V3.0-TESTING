@@ -309,107 +309,106 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const categoryAnalytics = useMemo(() => [], []);
 
   return (
-    <ThemeProvider role={realRole || 'standard'} tier={realSubscriptionTier || 'free'}>
-      <AnimatePresence mode="wait">
-        {loading || !securityVerified || !dashboardStats || !currentUser ? (
-          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <DashboardSkeleton />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="dashboard-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="min-h-screen bg-zinc-950 text-zinc-100 font-sans"
-          >
-            <AmbientBackground />
-            
-            <AnimatePresence>
-              {showBackToTop && (
-                <motion.button
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="fixed bottom-24 right-6 z-50 p-3.5 rounded-2xl border border-white/10 star-burst"
-                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 20px 50px rgba(99,102,241,0.5)' }}
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                >
-                  <ArrowUp className="w-5 h-5 text-white" />
-                </motion.button>
-              )}
-            </AnimatePresence>
+    <AnimatePresence mode="wait">
+      {loading || !securityVerified || !dashboardStats || !currentUser ? (
+        <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <DashboardSkeleton />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="dashboard-content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="min-h-screen bg-zinc-950 text-zinc-100 font-sans"
+        >
+          <AmbientBackground />
+          
+          <AnimatePresence>
+            {showBackToTop && (
+              <motion.button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="fixed bottom-24 right-6 z-50 p-3.5 rounded-2xl border border-white/10 star-burst"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 20px 50px rgba(99,102,241,0.5)' }}
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+              >
+                <ArrowUp className="w-5 h-5 text-white" />
+              </motion.button>
+            )}
+          </AnimatePresence>
 
-            <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
-              <header className="flex flex-col gap-4">
-                <DashboardHeader
-                  currentUser={currentUser}
-                  realRole={realRole} 
-                  isOnline={isOnline}
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
-                  onExport={() => handleExportData(activeTasks, dashboardStats, realAnalytics)}
-                  onOpenFeatureSpotlight={() => {}}
-                />
-                <WelcomeHeader 
-                  fullName={realFullName} 
-                  totalTasks={dashboardStats.totalTasks} 
-                  totalCourses={dashboardStats.totalCourses} 
-                  totalStudySessions={dashboardStats.totalStudySessions} 
-                />
-              </header>
+          <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+            <header className="flex flex-col gap-4">
+              <DashboardHeader
+                currentUser={currentUser}
+                realRole={realRole} 
+                isOnline={isOnline}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                onExport={() => handleExportData(activeTasks, dashboardStats, realAnalytics)}
+                onOpenFeatureSpotlight={() => {}}
+              />
+              <WelcomeHeader 
+                fullName={realFullName} 
+                totalTasks={dashboardStats.totalTasks} 
+                totalCourses={dashboardStats.totalCourses} 
+                totalStudySessions={dashboardStats.totalStudySessions} 
+              />
+            </header>
 
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                <main className="xl:col-span-8 flex flex-col gap-8">
-                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                    {hasPremiumAccess ? <AIBriefingWidget user={currentUser} tasks={activeTasks} stats={{ studyStreak: stats?.study_streak || 0, tasksCompleted: dashboardStats.completedTasks, hoursStudied: 0 }} /> : <LockedBriefingWidget />}
-                  </motion.div>
-                  <StatsGrid stats={dashboardStats} />
-                  <div className="h-[320px]">
-                    {hasPremiumAccess ? <TrendChart data={trendChartData} /> : <LockedTrendChart />}
-                  </div>
-                  <SmartTutorCard />
-                  <div className="w-full">
-                    {hasPremiumAccess ? <BurnoutPredictorWidget stats={dashboardStats} /> : <LockedBurnoutWidget />}
-                  </div>
-                </main>
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+              <main className="xl:col-span-8 flex flex-col gap-8">
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+                  {hasPremiumAccess ? <AIBriefingWidget user={currentUser} tasks={activeTasks} stats={{ studyStreak: stats?.study_streak || 0, tasksCompleted: dashboardStats.completedTasks, hoursStudied: 0 }} /> : <LockedBriefingWidget />}
+                </motion.div>
+                <StatsGrid stats={dashboardStats} />
+                <div className="h-[320px]">
+                  {hasPremiumAccess ? <TrendChart data={trendChartData} /> : <LockedTrendChart />}
+                </div>
+                <SmartTutorCard />
+                <div className="w-full">
+                  {hasPremiumAccess ? <BurnoutPredictorWidget stats={dashboardStats} /> : <LockedBurnoutWidget />}
+                </div>
+              </main>
 
-                <aside className="xl:col-span-4 flex flex-col gap-6">
-                  <AmbientSoundPlayer />
-                  <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
-                  <VirtualPet stats={stats} tasks={activeTasks} />
-                  <GlassContainer glow className="p-1">
-                    <TasksPanel
-                      tasks={activeTasks}
-                      filteredTasks={filteredTasks}
-                      selectedTasks={selectedTasks}
-                      taskFilter={taskFilter}
-                      searchTerm={searchTerm}
-                      sortBy={sortBy}
-                      onTaskFilterChange={setTaskFilter}
-                      onSearchTermChange={setSearchTerm}
-                      onSortByChange={setSortBy}
-                      onSelectTask={(id) => setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]))}
-                      onStatusUpdate={handleTaskStatusUpdate}
-                      onDelete={handleDeleteTask}
-                      onCreateQuickTask={handleCreateQuickTask}
-                      onSelectAllTasks={() => setSelectedTasks(filteredTasks.map(t => t.id))}
-                      onClearSelection={() => setSelectedTasks([])}
-                      onBulkAction={async () => {}}
-                      onNavigateToTasks={() => navigate('/tasks')}
-                    />
-                  </GlassContainer>
-                  <AnalyticsPanel analytics={realAnalytics} tasks={activeTasks} taskPriorityAnalytics={taskPriorityAnalytics} taskCompletionTrend={taskCompletionTrend} categoryAnalytics={categoryAnalytics} />
-                  <LeaderboardWidget />
-                  <UpgradeCard />
-                </aside>
-              </div>
+              <aside className="xl:col-span-4 flex flex-col gap-6">
+                <AmbientSoundPlayer />
+                <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
+                <VirtualPet stats={stats} tasks={activeTasks} />
+                <GlassContainer glow className="p-1">
+                  <TasksPanel
+                    tasks={activeTasks}
+                    filteredTasks={filteredTasks}
+                    selectedTasks={selectedTasks}
+                    taskFilter={taskFilter}
+                    searchTerm={searchTerm}
+                    sortBy={sortBy}
+                    onTaskFilterChange={setTaskFilter}
+                    onSearchTermChange={setSearchTerm}
+                    onSortByChange={setSortBy}
+                    onSelectTask={(id) => setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]))}
+                    onStatusUpdate={handleTaskStatusUpdate}
+                    onDelete={handleDeleteTask}
+                    onCreateQuickTask={handleCreateQuickTask}
+                    onSelectAllTasks={() => setSelectedTasks(filteredTasks.map(t => t.id))}
+                    onClearSelection={() => setSelectedTasks([])}
+                    onBulkAction={async () => {}}
+                    onNavigateToTasks={() => navigate('/tasks')}
+                  />
+                </GlassContainer>
+                <AnalyticsPanel analytics={realAnalytics} tasks={activeTasks} taskPriorityAnalytics={taskPriorityAnalytics} taskCompletionTrend={taskCompletionTrend} categoryAnalytics={categoryAnalytics} />
+                <LeaderboardWidget />
+                <UpgradeCard />
+              </aside>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </ThemeProvider>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
+
 };
 
 export default Dashboard;

@@ -20,8 +20,9 @@ export const ThemeProvider: React.FC<{ role: string; tier: string; children: Rea
 export const useRankTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    // Fallback to standard theme if outside provider
-    return RANK_THEMES['standard'];
+    // Fallback to standard theme if outside provider to prevent crashes
+    return { theme: RANK_THEMES['standard'] };
   }
-  return context.theme;
+  return context;
 };
+
