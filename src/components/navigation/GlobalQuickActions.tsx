@@ -23,8 +23,11 @@ interface Action {
 }
 
 // ─── Master Action Registry ───────────────────────────────────────────────────
-// ─── Master Action Registry ───────────────────────────────────────────────────
 const ALL_ACTIONS: Action[] = [
+  // --- CORE HUB ---
+  { icon: Command, title: 'Nexus Dashboard', subtitle: 'Main command center', color: 'from-blue-600 to-indigo-700', path: '/dashboard', category: 'Core', keywords: ['dash','dashboard','home','main'] },
+  { icon: Zap, title: 'Landing Matrix', subtitle: 'Platform overview & entry', color: 'from-zinc-700 to-zinc-900', path: '/', category: 'Core', keywords: ['landing','home','start'] },
+
   // --- AI HUB ---
   { icon: BrainCircuit, title: 'AI Tutor (SAARTHI)', subtitle: 'Ask any academic question 24/7', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'AI Hub', keywords: ['ai','tutor','question','assistant','chat','saarthi'] },
   { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition for mastery', color: 'from-lime-400 to-emerald-500', path: '/flashcards', category: 'AI Hub', keywords: ['flash','card','memory','spaced','repeat'] },
@@ -64,13 +67,16 @@ const ALL_ACTIONS: Action[] = [
   { icon: Library, title: 'Documentation', subtitle: 'Platform guides & academic docs', color: 'from-slate-500 to-slate-700', path: '/docs', category: 'Resources', keywords: ['docs','help','guide','manual'] },
   { icon: FileText, title: 'Nexus Blog', subtitle: 'Latest updates & study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Resources', keywords: ['blog','news','tips','update'] },
   { icon: Headphones, title: 'Help Center', subtitle: 'Contact support & FAQ', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Resources', keywords: ['help','support','faq','contact'] },
+  { icon: User, title: 'About Us', subtitle: 'The mission behind MARGDARSHAK', color: 'from-blue-500 to-indigo-600', path: '/about', category: 'Resources', keywords: ['about','mission','team'] },
+  { icon: Headphones, title: 'Contact Us', subtitle: 'Direct line to our support team', color: 'from-cyan-500 to-blue-600', path: '/contact', category: 'Resources', keywords: ['contact','email','support'] },
   { icon: ArrowUp, title: 'System Status', subtitle: 'Real-time matrix health', color: 'from-emerald-400 to-green-500', path: '/status', category: 'System', keywords: ['status','health','uptime','server'] },
   { icon: Hash, title: 'Sitemap', subtitle: 'Navigational matrix overview', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'System', keywords: ['sitemap','map','navigation'] },
 
-  // --- ADMIN COMMAND ---
-  { icon: Settings, title: 'Admin Terminal', subtitle: 'Master control dashboard', color: 'from-red-600 to-rose-700', path: '/admin', category: 'Admin', keywords: ['admin','master','control','terminal'] },
-  { icon: User, title: 'User Management', subtitle: 'Database user oversight', color: 'from-rose-500 to-pink-600', path: '/admin/users', category: 'Admin', keywords: ['users','manage','admin'] },
-  { icon: Command, title: 'Security Command', subtitle: 'Zero-Trust shield controls', color: 'from-zinc-800 to-black', path: '/admin/security', category: 'Admin', keywords: ['security','admin','shield'] },
+  // --- LEGAL & POLICIES ---
+  { icon: Star, title: 'Privacy Policy', subtitle: 'Data protection standards', color: 'from-zinc-400 to-zinc-600', path: '/privacy', category: 'Legal', keywords: ['privacy','legal','data'] },
+  { icon: Star, title: 'Terms of Service', subtitle: 'Platform usage agreement', color: 'from-zinc-400 to-zinc-600', path: '/terms', category: 'Legal', keywords: ['terms','legal','tos'] },
+  { icon: Star, title: 'Cookie Policy', subtitle: 'Tracking & cookie usage', color: 'from-zinc-400 to-zinc-600', path: '/cookies', category: 'Legal', keywords: ['cookies','legal'] },
+  { icon: Star, title: 'GDPR Compliance', subtitle: 'Global data regulations', color: 'from-zinc-400 to-zinc-600', path: '/gdpr', category: 'Legal', keywords: ['gdpr','legal','europe'] },
 ];
 
 
@@ -109,18 +115,9 @@ const GlobalQuickActions: React.FC = () => {
     if (isOpen) { setQuery(''); setSelected(0); setTimeout(() => inputRef.current?.focus(), 80); }
   }, [isOpen]);
 
-  // Filter actions by user role
-  const allowedActions = ALL_ACTIONS.filter(a => {
-    if (a.category === 'Admin') {
-      const role = user?.profile?.role || user?.publicMetadata?.role;
-      return ['admin', 'superadmin', 'ceo'].includes(String(role).toLowerCase());
-    }
-    return true;
-  });
-
   // Filtered results
   const filteredActions = query.trim()
-    ? allowedActions.filter(a => {
+    ? ALL_ACTIONS.filter(a => {
         const q = query.toLowerCase();
         return (
           a.title.toLowerCase().includes(q) ||
@@ -129,14 +126,15 @@ const GlobalQuickActions: React.FC = () => {
           a.keywords.some(k => k.includes(q))
         );
       })
-    : allowedActions;
+    : ALL_ACTIONS;
 
   // Recent actions
   const recentActions = recentPaths
-    .map(p => allowedActions.find(a => a.path === p))
+    .map(p => ALL_ACTIONS.find(a => a.path === p))
     .filter(Boolean) as Action[];
 
-  const displayList = query.trim() ? filteredActions : (recentActions.length ? recentActions : allowedActions.slice(0, 8));
+  const displayList = query.trim() ? filteredActions : (recentActions.length ? recentActions : ALL_ACTIONS.slice(0, 8));
+
 
 
   // Group by category when no query
