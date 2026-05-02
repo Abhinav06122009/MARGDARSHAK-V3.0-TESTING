@@ -209,10 +209,9 @@ const verifyClerkUser = async (authHeader) => {
  */
 const translateClerkIdToUUID = (clerkId) => {
   if (!clerkId) return '';
-  if (clerkId.includes('-') && clerkId.length === 36) return clerkId;
+  if (clerkId.includes('-') && clerkId.length >= 32) return clerkId;
 
-  const salt = (process.env.ID_SALT || 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa').trim();
-  const hash = crypto.createHash('sha256').update(clerkId + salt).digest('hex');
+  const hash = crypto.createHash('sha256').update(clerkId).digest('hex');
   
   return [
     hash.slice(0, 8),
