@@ -2,6 +2,31 @@
 -- ZENITH STABILIZATION: FINAL ARCHITECTURAL SYNCHRONIZATION
 -- This migration ensures all critical tables and functions exist for the production environment.
 
+-- 0. Re-establish the deterministic identity function (Must match id-translator.ts and security.js)
+CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
+RETURNS uuid
+LANGUAGE plpgsql STABLE
+AS $$
+DECLARE
+    v_salt text;
+    v_combined text;
+    v_h text;
+    v_clean_clerk_id text;
+    v_uuid_str text;
+BEGIN
+    IF p_clerk_id IS NULL OR p_clerk_id = '' THEN RETURN NULL; END IF;
+    v_clean_clerk_id := trim(p_clerk_id);
+    IF v_clean_clerk_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+        RETURN v_clean_clerk_id::uuid;
+    END IF;
+    v_salt := 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
+    v_combined := v_clean_clerk_id || v_salt;
+    v_h := encode(extensions.digest(v_combined::text, 'sha256'::text), 'hex');
+    v_uuid_str := substring(v_h, 1, 8) || '-' || substring(v_h, 9, 4) || '-' || '4' || substring(v_h, 14, 3) || '-' || '8' || substring(v_h, 18, 3) || '-' || substring(v_h, 21, 12);
+    RETURN v_uuid_str::uuid;
+END;
+$$;
+
 -- 1. Ensure clerk_id exists in profiles
 DO $$ 
 BEGIN 
@@ -91,4 +116,4 @@ END $$;
 GRANT ALL ON public.progress_goals TO authenticated;
 GRANT ALL ON public.progress_entries TO authenticated;
 GRANT ALL ON public.progress_goals TO service_role;
-GRANT ALL ON public.progress_entries TO se
+GRANT ALL ON public.progress_entries TO service_role;
