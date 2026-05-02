@@ -39,7 +39,7 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
     hasFetchedRef.current = true;
     
     try {
-      const userName = user.user_metadata?.full_name || user.profile?.full_name || "Scholar";
+      const userName = user?.user_metadata?.full_name || user?.profile?.full_name || user?.username || "Scholar";
 
       // Prepare rich context for the AI
       const briefingContext = {
@@ -63,10 +63,11 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
     } catch (error) { 
       console.error("[Briefing-Widget] Critical failure:", error);
       // Set high-quality fallback so UI doesn't look broken
+      const fallbackName = (user?.user_metadata?.full_name || user?.profile?.full_name || "Scholar").split(' ')[0];
       setBriefing({
-        greeting: `Welcome back, ${user.user_metadata?.full_name?.split(' ')[0] || 'Scholar'}`,
+        greeting: `Welcome back, ${fallbackName}`,
         focus_area: "Daily Overview",
-        message: "I'm analyzing your schedule. Let's start by focusing on your top priority tasks for today.",
+        message: "I'm analyzing your latest academic data. Let's start by reviewing your top priority tasks and goals for today.",
         color: "text-indigo-400"
       });
     } finally { 
@@ -134,7 +135,7 @@ const AIBriefingWidget: React.FC<BriefingWidgetProps> = ({
               className="flex-1"
             >
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
-                {briefing?.greeting || "Ready to start?"}
+                {briefing?.greeting || "Operational Briefing"}
               </h2>
 
               <div className="flex flex-wrap items-center gap-3 mb-5">

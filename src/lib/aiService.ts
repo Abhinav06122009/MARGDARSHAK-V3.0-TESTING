@@ -254,15 +254,16 @@ export const aiService = {
         tier: 'premium',
       });
 
-      if (!briefing) throw new Error("Invalid JSON from AI");
+      if (!briefing || !briefing.greeting) throw new Error("Invalid or empty JSON from AI");
 
       return briefing;
 
     } catch (e) {
       console.error("[aiService] Briefing Gen Failure, using fallback:", e);
       // Graceful fallback so the dashboard doesn't break
+      const safeName = (userName || "Scholar").split(' ')[0];
       return {
-        greeting: `Welcome back, ${userName.split(' ')[0]}`,
+        greeting: `Welcome back, ${safeName}`,
         focus_area: "Daily Overview",
         message: "I'm ready to help you organize your studies today. Let's start with your most important tasks.",
         color: "text-indigo-400"
