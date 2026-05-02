@@ -42,69 +42,87 @@ interface SecurityPanelProps {
 }
 
 const SecurityMetric = ({ title, value, icon, status = 'default' }: any) => (
-  <div className="bg-zinc-900/50 p-4 rounded-xl border border-white/5 flex items-center justify-between">
-    <div>
-      <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1">{title}</p>
-      <p className="text-2xl font-bold text-zinc-100">{value}</p>
+  <motion.div 
+    whileHover={{ y: -5, scale: 1.02 }}
+    className="bg-zinc-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/5 flex items-center justify-between group transition-all duration-300 hover:border-indigo-500/30"
+  >
+    <div className="space-y-1">
+      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">{title}</p>
+      <p className="text-3xl font-black text-white tracking-tighter">{value}</p>
     </div>
-    <div className={`p-3 rounded-lg ${
-      status === 'warning' ? 'bg-amber-500/10 text-amber-500' : 
-      status === 'danger' ? 'bg-red-500/10 text-red-500' : 
-      'bg-zinc-800 text-zinc-400'
+    <div className={`p-4 rounded-xl shadow-2xl transition-all duration-500 group-hover:scale-110 ${
+      status === 'warning' ? 'bg-amber-500/10 text-amber-500 shadow-amber-500/5' : 
+      status === 'danger' ? 'bg-red-500/10 text-red-500 shadow-red-500/5' : 
+      'bg-indigo-500/10 text-indigo-400 shadow-indigo-500/5'
     }`}>
       {icon}
     </div>
-  </div>
+  </motion.div>
 );
 
 const SecurityPanel: React.FC<SecurityPanelProps> = ({ dashboardData, threats }) => {
   if (!dashboardData) return null;
 
   return (
-    <div className="bg-zinc-950 border border-white/10 rounded-3xl p-6 md:p-8 space-y-8">
-      
+    <div className="bg-zinc-950/40 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-10 relative overflow-hidden group">
+      {/* Background Pulse */}
+      <motion.div 
+        animate={{ opacity: [0.05, 0.15, 0.05] }}
+        transition={{ duration: 4, repeat: Infinity }}
+        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_70%)] pointer-events-none" 
+      />
+
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-            <ShieldCheck className="w-6 h-6 text-indigo-400" />
-          </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
+        <div className="flex items-center gap-6">
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="p-5 bg-indigo-500/10 rounded-[2rem] border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.2)]"
+          >
+            <ShieldCheck className="w-8 h-8 text-indigo-400" />
+          </motion.div>
           <div>
-            <h2 className="text-xl font-bold text-white">Security Overview</h2>
-            <p className="text-zinc-400 text-sm">Account activity and login sessions.</p>
+            <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Zero-Trust Command</h2>
+            <p className="text-zinc-500 text-sm font-bold tracking-tight">Vanguard Defense Matrix Active</p>
           </div>
         </div>
         
         {/* Real Status Badge */}
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1">
-          <CheckCircle className="w-3 h-3 mr-2" />
-          Protected
-        </Badge>
+        <motion.div
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Shields_Online
+          </Badge>
+        </motion.div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         <SecurityMetric 
-          title="Security Alerts" 
+          title="Active Alerts" 
           value={dashboardData.threats_today} 
-          icon={<AlertTriangle size={20} />} 
+          icon={<AlertTriangle size={24} />} 
           status={dashboardData.threats_today > 0 ? 'warning' : 'default'}
         />
         <SecurityMetric 
-          title="Flagged Logins" 
+          title="High Risk" 
           value={dashboardData.high_risk_logins} 
-          icon={<Ban size={20} />} 
+          icon={<Ban size={24} />} 
           status={dashboardData.high_risk_logins > 0 ? 'danger' : 'default'}
         />
         <SecurityMetric 
-          title="Active Sessions" 
+          title="Nodes Active" 
           value={dashboardData.active_sessions_count || 1} 
-          icon={<Smartphone size={20} />} 
+          icon={<Smartphone size={24} />} 
         />
         <SecurityMetric 
-          title="Security Score" 
+          title="Core Health" 
           value={`${dashboardData.security_score || 98}%`} 
-          icon={<ShieldCheck size={20} />} 
+          icon={<ShieldCheck size={24} />} 
         />
       </div>
 

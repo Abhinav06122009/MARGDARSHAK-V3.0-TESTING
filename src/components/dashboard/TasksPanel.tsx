@@ -4,8 +4,8 @@ import { CheckSquare, Plus, Search, ChevronDown, AlertCircle, Trash2, Download, 
 import TaskItem from './TaskItem';
 import type { RealTask } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
-import NeumorphicButton from '@/lib/NeumorphicButton';
-import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRankTheme } from '@/context/ThemeContext';
 
 interface TasksPanelProps {
   tasks: RealTask[];
@@ -28,29 +28,11 @@ interface TasksPanelProps {
   className?: string;
 }
 
-const getPriorityClasses = (priority: string) => {
-  switch (priority) {
-    case 'high': return 'text-red-300 bg-red-500/20 border-red-400/30';
-    case 'medium': return 'text-amber-300 bg-amber-500/20 border-amber-400/30';
-    case 'low': return 'text-emerald-300 bg-emerald-500/20 border-emerald-400/30';
-    default: return 'text-gray-400 bg-gray-500/20 border-gray-500/30';
-  }
-};
-
-const getStatusBorderColor = (status: string) => {
-  switch (status) {
-    case 'completed': return 'border-emerald-500/50';
-    case 'in_progress': return 'border-amber-500/50';
-    case 'pending': return 'border-blue-500/50';
-    default: return 'border-gray-600/50';
-  }
-};
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-const TasksPanel: React.FC<TasksPanelProps> = ({
+export const TasksPanel: React.FC<TasksPanelProps> = ({
   tasks,
   filteredTasks,
   selectedTasks,
@@ -70,6 +52,8 @@ const TasksPanel: React.FC<TasksPanelProps> = ({
   onClearSelection,
   className,
 }) => {
+  const { theme } = useRankTheme();
+  
   const overdueTasks = filteredTasks.filter(task => 
     task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed'
   ).length;
@@ -78,185 +62,166 @@ const TasksPanel: React.FC<TasksPanelProps> = ({
     task.priority === 'high' && task.status !== 'completed'
   ).length;
 
-  const allFilteredTasksSelected = filteredTasks.length > 0 && selectedTasks.length === filteredTasks.length;
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0;
 
   return (
-    <motion.div className={cn("bg-black/20 backdrop-blur-xl p-4 md:p-8 rounded-3xl border border-white/10", className)}>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
-          <CheckSquare className="w-6 h-6 md:w-7 md:h-7 text-emerald-400" />
-          Your Tasks
-          <span className="text-base md:text-lg text-white/60">({filteredTasks.length})</span>
-        </h3>
-        
-        <div className="flex items-center space-x-2">
-          {selectedTasks.length > 0 && (
-            <motion.div              
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center space-x-2 bg-black/20 p-2 rounded-xl border border-white/10"
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn("bg-zinc-950/40 backdrop-blur-3xl p-6 md:p-10 rounded-[3rem] border relative overflow-hidden group shadow-[0_30px_80px_rgba(0,0,0,0.5)]", className)}
+      style={{ borderColor: theme.colors.border }}
+    >
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[100px] pointer-events-none opacity-10" 
+        style={{ backgroundColor: theme.colors.primary }} />
+
+      <div className="relative z-10 space-y-8">
+        {/* Header & Stats */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <motion.div 
+              whileHover={{ rotate: 15, scale: 1.1 }}
+              className="p-5 rounded-[2rem] border shadow-2xl"
+              style={{ backgroundColor: `${theme.colors.primary}10`, borderColor: `${theme.colors.primary}20` }}
             >
-              <span className="text-sm text-white/60">
-                {selectedTasks.length} selected
-              </span>
-              <button
-                onClick={() => onBulkAction('complete')}
-                className="p-2 text-emerald-400 rounded-lg hover:bg-emerald-500/20 transition-colors"
-                title="Mark as Complete"
-              >
-                <CheckSquare className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onBulkAction('export')}
-                className="p-2 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
-                title="Export Selected"
-              >
-                <Download className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onBulkAction('delete')}
-                className="p-2 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
-                title="Delete Selected"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-              <div className="w-px h-5 bg-white/20 mx-1"></div>
-              <button
-                onClick={onClearSelection}
-                className="p-2 text-gray-400 rounded-lg hover:bg-gray-500/20 transition-colors"
-                title="Clear Selection"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <CheckSquare className="w-8 h-8" style={{ color: theme.colors.primary }} />
             </motion.div>
-          )}
-          
-          <button
-            onClick={onCreateQuickTask}
-            className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-300 shadow-soft-light active:shadow-inner-soft hover:shadow-emerald-500/40"
-            title="Add New Task"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
+            <div>
+              <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                {theme.id.includes('a+') ? 'COMMAND_HUB' : 'OBJECTIVE_CORE'}
+              </h2>
+              <p className="text-zinc-500 text-xs font-black uppercase tracking-widest mt-1 opacity-60">Status: {theme.name} Protocol</p>
+            </div>
+          </div>
 
-      {/* Search and filter controls */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
-        <div className="flex items-center gap-2 pr-4 mr-2 border-r border-white/10">
-            <motion.button
-              onClick={onSelectAllTasks}
-              className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                allFilteredTasksSelected
-                  ? 'bg-emerald-500 border-emerald-500'
-                  : 'border-white/30 hover:border-emerald-400'
-              }`}
-              title={allFilteredTasksSelected ? "Deselect All" : "Select All Visible Tasks"}
-              whileTap={{ scale: 0.9 }}
-            >
-              {allFilteredTasksSelected && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                  <CheckSquare className="w-4 h-4 text-white" />
-                </motion.div>
-              )}
-            </motion.button>
-        </div>
-        <div className="relative flex-1 min-w-64">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
-          <input
-            type="text"
-            placeholder="Search your tasks..."
-            value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-emerald-400/50 transition-colors shadow-inner-soft"
-          />
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant={taskFilter === 'all' ? 'secondary' : 'ghost'} onClick={() => onTaskFilterChange('all')} className="transition-all">All</Button>
-          <Button size="sm" variant={taskFilter === 'pending' ? 'secondary' : 'ghost'} onClick={() => onTaskFilterChange('pending')} className="transition-all">Pending</Button>
-          <Button size="sm" variant={taskFilter === 'completed' ? 'secondary' : 'ghost'} onClick={() => onTaskFilterChange('completed')} className="transition-all">Completed</Button>
-          <Button size="sm" variant={taskFilter === 'overdue' ? 'secondary' : 'ghost'} onClick={() => onTaskFilterChange('overdue')} className="transition-all text-red-400 hover:bg-red-500/10 hover:text-red-300">Overdue</Button>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant={sortBy === 'date' ? 'secondary' : 'ghost'} onClick={() => onSortByChange('date')} className="transition-all">Date</Button>
-          <Button size="sm" variant={sortBy === 'priority' ? 'secondary' : 'ghost'} onClick={() => onSortByChange('priority')} className="transition-all">Priority</Button>
-          <Button size="sm" variant={sortBy === 'name' ? 'secondary' : 'ghost'} onClick={() => onSortByChange('name')} className="transition-all">Name</Button>
-        </div>
-      </div>
-
-      {/* Task alerts */}
-      {(overdueTasks > 0 || highPriorityTasks > 0) && (
-        <div className="flex items-center gap-4 mb-6 p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-xl border border-red-400/20">
-          <AlertCircle className="w-5 h-5 text-red-400" />
-          <div className="text-sm text-white">
-            {overdueTasks > 0 && (
-              <span className="text-red-400 font-medium">
-                {overdueTasks} overdue task{overdueTasks > 1 ? 's' : ''}
-              </span>
-            )}
-            {overdueTasks > 0 && highPriorityTasks > 0 && ', '}
-            {highPriorityTasks > 0 && (
-              <span className="text-orange-400 font-medium">
-                {highPriorityTasks} high priority task{highPriorityTasks > 1 ? 's' : ''}
-              </span>
-            )}
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-4">
+               <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">Efficiency</span>
+               <span className="text-2xl font-black text-white tabular-nums" style={{ color: theme.colors.primary }}>{Math.round(progress)}%</span>
+            </div>
+            <div className="w-56 h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 p-0.5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 1.5, type: 'spring' }}
+                className="h-full rounded-full"
+                style={{ background: theme.gradients.main, boxShadow: theme.effects.glowIntensity }}
+              />
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Tasks List */}
-      <motion.div className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
-        <AnimatePresence>
-          {filteredTasks.length > 0 ? (
-            filteredTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                isSelected={selectedTasks.includes(task.id)}
-                onSelect={() => onSelectTask(task.id)}
-                onStatusUpdate={onStatusUpdate}
-                onDelete={onDelete}
-                getPriorityClasses={getPriorityClasses}
-                getStatusBorderColor={getStatusBorderColor}
-                formatDate={formatDate}
-              />
-            ))
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16 flex flex-col items-center"
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0.5 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 10, delay: 0.2 }}
-                className="p-6 bg-black/20 rounded-full border border-white/10 mb-6"
+        {/* Action Row */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[280px] group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-white transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search active objectives..."
+              value={searchTerm}
+              onChange={(e) => onSearchTermChange(e.target.value)}
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 transition-all shadow-inner"
+              style={{ focusRingColor: theme.colors.primary }}
+            />
+          </div>
+          
+          <div className="flex gap-2 p-1.5 bg-white/[0.03] border border-white/10 rounded-2xl">
+            {(['all', 'pending', 'completed'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => onTaskFilterChange(f)}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                  taskFilter === f ? 'text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+                style={taskFilter === f ? { background: theme.gradients.main } : {}}
               >
-                <Inbox className="w-16 h-16 text-white/20" />
-              </motion.div>
-              <p className="text-white/50 mb-4 text-lg font-medium">
-                {searchTerm || taskFilter !== 'all' ? 'No tasks match your filters.' : 'Your task list is empty.'}
-              </p>
-              {(!searchTerm && taskFilter === 'all') ? (
-                <motion.button
-                  onClick={onCreateQuickTask}
-                  className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors px-6 py-3 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 shadow-soft-light"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Plus className="w-4 h-4" /> Create Your First Task
-                </motion.button>
-              ) : null}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                {f}
+              </button>
+            ))}
+          </div>
 
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onCreateQuickTask}
+            className="p-4 text-white rounded-2xl shadow-2xl"
+            style={{ background: theme.gradients.main, boxShadow: theme.effects.glowIntensity }}
+          >
+            <Plus className="w-6 h-6" strokeWidth={3} />
+          </motion.button>
+        </div>
+
+        {/* Task Alerts */}
+        {(overdueTasks > 0 || highPriorityTasks > 0) && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-4 p-5 bg-red-500/5 border border-red-500/20 rounded-[1.5rem] relative overflow-hidden"
+          >
+            <AlertCircle className="w-5 h-5 text-red-500 relative z-10" />
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-300 relative z-10">
+              {overdueTasks > 0 && <span className="text-red-500">{overdueTasks} Critical Violations</span>}
+              {overdueTasks > 0 && highPriorityTasks > 0 && <span className="mx-3 opacity-20">|</span>}
+              {highPriorityTasks > 0 && <span className="text-orange-500">{highPriorityTasks} High Priority Node</span>}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Task List */}
+        <div className="relative min-h-[450px]">
+          <ScrollArea className="h-[500px] pr-4">
+            <AnimatePresence mode="popLayout">
+              {filteredTasks.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredTasks.map((task, idx) => (
+                    <motion.div
+                      key={task.id}
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                      <TaskItem 
+                        task={task}
+                        isSelected={selectedTasks.includes(task.id)}
+                        onSelect={() => onSelectTask(task.id)}
+                        onStatusUpdate={onStatusUpdate}
+                        onDelete={onDelete}
+                        getPriorityClasses={() => ""} 
+                        getStatusBorderColor={() => ""}
+                        formatDate={formatDate}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-32 text-center"
+                >
+                  <div className="p-12 rounded-full bg-white/[0.02] border border-white/5 mb-8 relative">
+                    <Inbox className="w-20 h-20 text-zinc-800" />
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 15, ease: 'linear' }}
+                      className="absolute inset-0 border border-dashed border-zinc-800 rounded-full"
+                    />
+                  </div>
+                  <p className="text-zinc-500 font-black text-xl uppercase tracking-tighter">Sector Clear</p>
+                  <p className="text-zinc-700 text-[10px] mt-3 uppercase tracking-[0.3em] font-black opacity-50">All objectives secured and verified</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </ScrollArea>
+        </div>
+      </div>
     </motion.div>
   );
 };
+
+export default TasksPanel;
 
 export default TasksPanel;

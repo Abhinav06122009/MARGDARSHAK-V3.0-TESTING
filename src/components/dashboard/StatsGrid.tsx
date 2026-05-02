@@ -126,16 +126,22 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
         return (
           <motion.div
             key={cfg.key}
-            initial={{ opacity: 0, y: 30, scale: 0.92 }}
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, delay: i * 0.1, type: 'spring', stiffness: 130, damping: 18 }}
-            whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.22, type: 'spring' } }}
-            className={`glare-card relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${cfg.gradient} backdrop-blur-xl border ${cfg.border} hover:${cfg.hoverBorder} p-5 group cursor-default transition-colors duration-300 shadow-lg`}
+            transition={{ duration: 0.8, delay: i * 0.1, type: 'spring', stiffness: 100, damping: 20 }}
+            whileHover={{ y: -10, scale: 1.05, rotateZ: 1 }}
+            className={`glare-card relative overflow-hidden rounded-[2rem] bg-zinc-900/60 backdrop-blur-3xl border ${cfg.border} hover:${cfg.hoverBorder} p-6 group cursor-default transition-all duration-500 shadow-2xl`}
+            style={{ boxShadow: '0 25px 60px -15px rgba(0,0,0,0.4)' }}
           >
-            {/* Corner ambient glow */}
+            {/* Magnetic Glow Effect */}
             <motion.div
-              className="absolute -right-6 -top-6 w-36 h-36 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-              style={{ backgroundColor: cfg.glow }}
+              className="absolute w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none"
+              style={{ 
+                backgroundColor: cfg.ring,
+                top: '0%', 
+                right: '0%',
+                transform: 'translate(30%, -30%)'
+              }}
             />
 
             {/* Gradient hover intensify */}

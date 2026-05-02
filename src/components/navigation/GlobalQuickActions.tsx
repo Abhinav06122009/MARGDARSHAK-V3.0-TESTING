@@ -184,11 +184,30 @@ const GlobalQuickActions: React.FC = () => {
 
             {/* Panel */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: -10 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="fixed z-[1001] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[540px] max-w-[95vw] max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden"
+              initial={{ 
+                opacity: 0, 
+                scale: 0.5, 
+                x: position.x, 
+                y: position.y,
+                translateX: position.x > window.innerWidth / 2 ? '-100%' : '0%',
+                translateY: position.y > window.innerHeight / 2 ? '-100%' : '0%'
+              }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1, 
+                x: position.x > window.innerWidth / 2 ? position.x + 56 : position.x, 
+                y: position.y > window.innerHeight / 2 ? position.y + 56 : position.y,
+                translateX: position.x > window.innerWidth / 2 ? '-100%' : '0%',
+                translateY: position.y > window.innerHeight / 2 ? '-100%' : '0%'
+              }}
+              exit={{ 
+                opacity: 0, 
+                scale: 0.5, 
+                x: position.x, 
+                y: position.y 
+              }}
+              transition={{ type: 'spring', stiffness: 500, damping: 35, mass: 0.8 }}
+              className="fixed z-[1001] w-[540px] max-w-[95vw] max-h-[85vh] flex flex-col rounded-[2.5rem] overflow-hidden"
               style={{
                 background: 'linear-gradient(145deg, rgba(10,10,15,0.98) 0%, rgba(15,15,25,0.96) 100%)',
                 border: '1px solid rgba(255,255,255,0.08)',
