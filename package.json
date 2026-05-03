@@ -2,7 +2,10 @@
   "name": "margdarshak-student-platform",
   "private": true,
   "version": "2.1.0",
+  "description": "MARGDARSHAK - The Ultimate Student Platform",
+  "author": "VSAV GYANTA",
   "type": "module",
+  "main": "electron-main.cjs",
   "engines": {
     "node": ">=20.0.0"
   },
@@ -11,9 +14,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "build:exe": "npm run build && electron-builder build --win --publish never",
-    "build:apk": "npm run build && npx cap copy android && npx cap open android"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@clerk/react": "^6.4.5",
@@ -129,16 +130,29 @@
     "vite": "^5.4.19"
   },
   "build": {
-    "appId": "tech.margdarshan.app",
+    "appId": "com.margdarshak.platform",
     "productName": "MARGDARSHAK",
+    "directories": {
+      "output": "out"
+    },
+    "compression": "normal",
     "files": [
       "dist/**/*",
-      "electron-main.js",
-      "public/**/*"
+      "electron-main.cjs",
+      "index.js",
+      "public/**/*",
+      "!android/**/*",
+      "!supabase/**/*"
     ],
     "win": {
-      "target": "portable",
+      "target": "nsis",
       "icon": "public/logo.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "MARGDARSHAK"
     }
   }
 }

@@ -65,6 +65,8 @@ import Profile from "@/pages/Profile";
 import Status from "@/pages/Status";
 import Sitemap from "@/pages/Sitemap";
 
+
+
 // New AI Features - lazy loaded
 const QuizGenerator = lazy(() => import('@/pages/QuizGenerator'));
 const EssayHelper = lazy(() => import('@/pages/EssayHelper'));
@@ -210,6 +212,8 @@ const AppContent = () => {
                         <Route path="/cookies" element={<><SEO title="Cookie Policy | MARGDARSHAK" description="Information about how we use cookies to improve your experience." /><CookiePolicy /></>} />
                         <Route path="/gdpr" element={<><SEO title="GDPR Compliance | MARGDARSHAK" description="Our commitment to GDPR and data protection standards." /><GDPRCompliance /></>} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+
 
                         {/* --- PROTECTED ROUTES (Dashboard) --- */}
                         <Route path="/dashboard" element={
