@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARGDARSHAK V3.0 | COMPLETE FEATURE UNVEIL</title>
-    <meta name="description" content="The ultimate student productivity suite. 30+ features re-engineered for academic excellence.">
+    <title>MARGDARSHAK V3.0 | LIVE</title>
     
     <!-- Meta for Social Sharing -->
     <meta property="og:title" content="MARGDARSHAK V3.0 | Beta Live">
-    <meta property="og:description" content="Explore the ultimate student productivity suite at margdarshan.tech">
+    <meta property="og:description" content="Access the ultimate student productivity suite at margdarshan.tech">
     <meta property="og:image" content="https://margdarshan.tech/logo.png">
 
     <!-- Fonts -->
@@ -20,219 +19,217 @@
         :root {
             --primary: #10b981;
             --primary-bright: #34d399;
-            --primary-glow: rgba(16, 185, 129, 0.6);
-            --secondary: #0ea5e9;
-            --bg: #030303;
-            --card-bg: rgba(10, 10, 10, 0.8);
-            --border-glow: rgba(255, 255, 255, 0.15);
+            --primary-glow: rgba(16, 185, 129, 0.7);
+            --bg: #020202;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            scroll-behavior: smooth;
         }
 
         body {
             background-color: var(--bg);
             color: #fff;
             font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Animated Mesh Background */
         .mesh-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: -1;
             background: 
-                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.2) 0%, transparent 40%),
-                radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.15) 0%, transparent 40%);
-            filter: blur(80px);
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+            filter: blur(100px);
+            animation: pulseBg 10s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
         }
 
         .noise {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: -1;
-            opacity: 0.05;
+            opacity: 0.04;
             background-image: url('/noise.svg');
             pointer-events: none;
         }
 
-        /* Hero Section (Compact Card) */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .share-card {
-            width: 100%;
-            max-width: 700px;
+        /* COMPACT POSTER CARD (Social Optimized) */
+        .poster {
+            width: 90vw;
+            max-width: 600px;
+            aspect-ratio: 4/5;
             background: var(--card-bg);
-            backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid var(--border-glow);
-            border-radius: 40px;
-            padding: 4rem 3rem;
-            text-align: center;
+            backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             position: relative;
-            box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
-            animation: cardEntrance 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
+            animation: entrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+        @keyframes entrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .logo {
-            width: 120px;
+        /* Center Logo Section */
+        .logo-wrap {
+            position: relative;
             margin-bottom: 2rem;
+        }
+
+        .logo-aura {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            background: var(--primary);
+            filter: blur(70px);
+            opacity: 0.5;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulseAura 3s infinite alternate;
+        }
+
+        @keyframes pulseAura {
+            0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .logo {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
             filter: drop-shadow(0 0 20px var(--primary-glow));
-            animation: float 6s ease-in-out infinite;
+            animation: float 5s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        /* Headline */
+        .status-badge {
+            background: linear-gradient(90deg, var(--primary), #34d399);
+            color: #000;
+            padding: 0.4rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px var(--primary-glow);
         }
 
         h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-size: clamp(2rem, 8vw, 3rem);
             font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to bottom, #fff, #aaa);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            background: linear-gradient(to bottom, #fff, #999);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .badge {
-            display: inline-block;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 0.5rem 1.5rem;
-            border-radius: 99px;
-            font-size: 0.8rem;
+        .url {
+            color: var(--primary-bright);
+            font-family: monospace;
+            font-size: 1.2rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             margin-bottom: 2rem;
+            opacity: 0.9;
         }
 
-        .scroll-hint {
-            margin-top: 3rem;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.4);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        /* Features Section */
-        .features-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-category {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 2.5rem;
-            border-radius: 30px;
-            transition: all 0.4s ease;
-        }
-
-        .feature-category:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--primary);
-            transform: translateY(-10px);
-        }
-
-        .feature-category h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
+        /* Feature Cloud (Compact Chips) */
+        .feature-cloud {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+            max-width: 90%;
         }
 
-        .feature-list {
-            list-style: none;
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
-        .feature-list li {
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.7);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .feature-list li::before {
-            content: '→';
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        /* Reveal Animation */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease-out;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        footer {
-            padding: 4rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .cta-btn {
+        .chip:hover {
             background: var(--primary);
             color: #000;
-            padding: 1.2rem 2.5rem;
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        .chip.highlight {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Final Action */
+        .btn {
+            background: #fff;
+            color: #000;
+            padding: 1rem 2.5rem;
             border-radius: 15px;
             text-decoration: none;
             font-weight: 800;
-            font-size: 1.1rem;
-            display: inline-block;
+            font-size: 1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px var(--primary-glow);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
         }
 
-        .cta-btn:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
+        .btn:hover {
+            transform: translateY(-3px);
+            background: var(--primary-bright);
+            box-shadow: 0 15px 40px var(--primary-glow);
+        }
+
+        .footer-tag {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
         }
     </style>
 </head>
@@ -240,118 +237,49 @@
     <div class="mesh-bg"></div>
     <div class="noise"></div>
 
-    <section class="hero">
-        <div class="share-card">
+    <div class="poster">
+        <div class="logo-wrap">
+            <div class="logo-aura"></div>
             <img src="/logo.png" alt="Logo" class="logo">
-            <div class="badge">V3.0 IS LIVE</div>
-            <h1>MARGDARSHAK<br><span style="color: var(--primary); -webkit-text-fill-color: initial;">BETA RELEASE</span></h1>
-            <p style="font-size: 1.2rem; color: rgba(255,255,255,0.6); margin-bottom: 2rem;">Every tool a student needs. Re-imagined.</p>
-            <a href="https://margdarshan.tech" class="cta-btn">Access margdarshan.tech</a>
-            <div class="scroll-hint">Explore 30+ New Features ↓</div>
-        </div>
-    </section>
-
-    <div class="features-grid">
-        <!-- AI & Learning -->
-        <div class="feature-category reveal">
-            <h2>AI & Learning Hub</h2>
-            <ul class="feature-list">
-                <li>AI Study Orchestrator</li>
-                <li>Adaptive Learning Paths</li>
-                <li>Smart Course Integration</li>
-                <li>Interactive Syllabus Manager</li>
-                <li>AI-Powered Note Taking</li>
-                <li>Resource Vault</li>
-            </ul>
         </div>
 
-        <!-- Productivity -->
-        <div class="feature-category reveal">
-            <h2>Productivity Suite</h2>
-            <ul class="feature-list">
-                <li>Automated Timetable Maker</li>
-                <li>Smart Task Manager</li>
-                <li>Dynamic Calendar Sync</li>
-                <li>Project Challenge System</li>
-                <li>Attendance Tracker</li>
-                <li>Focus Pomodoro Timer</li>
-            </ul>
+        <div class="status-badge">BETA RELEASE LIVE</div>
+        
+        <h1>MARGDARSHAK V3.0</h1>
+        <div class="url">margdarshan.tech</div>
+
+        <div class="feature-cloud">
+            <div class="chip highlight">AI Study Orchestrator</div>
+            <div class="chip">Zero-Trust Identity</div>
+            <div class="chip highlight">Elite Rhodium UI</div>
+            <div class="chip">Adaptive Courses</div>
+            <div class="chip">Quantum Search</div>
+            <div class="chip highlight">Grade Pro</div>
+            <div class="chip">Virtual Pet</div>
+            <div class="chip">Pomodoro Focus</div>
+            <div class="chip highlight">Interview Prep</div>
+            <div class="chip">Smart Timetable</div>
+            <div class="chip">Resume Builder</div>
+            <div class="chip">Forensic Logs</div>
+            <div class="chip highlight">Syllabus AI</div>
         </div>
 
-        <!-- Academic Tools -->
-        <div class="feature-category reveal">
-            <h2>Academic Tools</h2>
-            <ul class="feature-list">
-                <li>Grade Tracker Pro</li>
-                <li>Scientific Calculator Suite</li>
-                <li>Forensic Growth Analytics</li>
-                <li>Academic Report Export</li>
-                <li>Flashcard Generator</li>
-                <li>Performance Forecasts</li>
-            </ul>
-        </div>
+        <a href="https://margdarshan.tech" class="btn">Launch Suite</a>
 
-        <!-- Career & Success -->
-        <div class="feature-category reveal">
-            <h2>Career & Success</h2>
-            <ul class="feature-list">
-                <li>AI Interview Prep</li>
-                <li>Career Path Discovery</li>
-                <li>Skill Progress Tracking</li>
-                <li>Digital Resume Builder</li>
-                <li>Academic Networking</li>
-                <li>Success Milestones</li>
-            </ul>
-        </div>
-
-        <!-- Security & Identity -->
-        <div class="feature-category reveal">
-            <h2>Elite Security</h2>
-            <ul class="feature-list">
-                <li>Zero-Trust Identity Hub</li>
-                <li>Bio-Metric Passkey Login</li>
-                <li>Rhodium Rank UI Themes</li>
-                <li>Forensic Threat Logging</li>
-                <li>Encrypted Data Vault</li>
-                <li>Privacy-First Guard</li>
-            </ul>
-        </div>
-
-        <!-- Wellness -->
-        <div class="feature-category reveal">
-            <h2>Wellness & Fun</h2>
-            <ul class="feature-list">
-                <li>Interactive Virtual Pet</li>
-                <li>Habit Streak Tracker</li>
-                <li>Student Wellness Hub</li>
-                <li>Community Discussions</li>
-                <li>Gamified Rewards</li>
-                <li>Mental Health Check-ins</li>
-            </ul>
-        </div>
+        <div class="footer-tag">Created by Abhinav Jha</div>
     </div>
 
-    <footer>
-        <p style="color: rgba(255,255,255,0.4); margin-bottom: 2rem;">Developed with passion by Abhinav Jha</p>
-        <a href="https://margdarshan.tech" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 1.2rem;">margdarshan.tech</a>
-    </footer>
-
     <script>
-        // Reveal on scroll
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 150;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
-                }
-            }
-        }
-
-        window.addEventListener("scroll", reveal);
-        reveal(); // Initial check
+        // Maxxed interactivity: Mouse tracking parallax
+        const poster = document.querySelector('.poster');
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 40;
+            const y = (window.innerHeight / 2 - e.pageY) / 40;
+            poster.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+        document.addEventListener('mouseleave', () => {
+            poster.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
     </script>
 </body>
 </html>
