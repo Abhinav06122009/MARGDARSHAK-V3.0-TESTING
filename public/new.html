@@ -23,6 +23,7 @@
             --ai-glow: #0ea5e9;
             --primary: #10b981;
             --primary-bright: #34d399;
+            --accent: #6366f1;
             --bg: #000;
         }
 
@@ -41,152 +42,158 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 0;
-            /* Add space for scrolling if needed */
-            overflow-x: hidden;
+            padding: 1rem;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 60%),
+                #000;
         }
 
-        /* CENTER FILLED STORY CONTAINER */
+        /* 1:1 SQUARE - OPTIMIZED FOR VISIBILITY */
         .story-card {
-            width: 92%;
-            max-width: 520px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 1) 100%);
-            backdrop-filter: blur(50px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 650px;
+            aspect-ratio: 1 / 1;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(50px) saturate(200%);
             border-radius: 40px;
-            padding: 2.5rem 1.5rem;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 1);
-            animation: cardFade 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 50px 120px rgba(0, 0, 0, 1), inset 0 0 0 1px rgba(255,255,255,0.05);
+            justify-content: space-between;
+            overflow: hidden;
         }
 
-        @keyframes cardFade {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* Ambient Glows */
-        .glow {
+        .story-card::before {
+            content: '';
             position: absolute;
-            width: 150%;
-            height: 80%;
-            background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
-            top: -10%;
+            inset: -2px;
+            background: linear-gradient(135deg, var(--ai-glow), var(--primary), var(--accent), var(--ai-glow));
+            border-radius: 40px;
             z-index: -1;
-            pointer-events: none;
         }
 
-        /* LOGO */
-        .logo {
+        .story-card::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #000;
+            border-radius: 38px;
+            z-index: -1;
+        }
+
+        .logo-wrap {
+            position: relative;
+            margin-bottom: 0.2rem;
+        }
+
+        .logo-aura {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100px;
-            margin-bottom: 1.5rem;
+            height: 100px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+            filter: blur(25px);
+            z-index: -1;
+        }
+
+        .logo {
+            width: 65px;
             filter: drop-shadow(0 0 20px var(--ai-glow));
-            animation: float 6s ease-in-out infinite;
         }
 
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        /* HEADLINE */
         .beta-badge {
-            background: rgba(16, 185, 129, 0.1);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(14, 165, 233, 0.3));
             border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 0.4rem 1.2rem;
+            color: #fff;
+            padding: 0.3rem 1.2rem;
             border-radius: 99px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.15em;
-            margin-bottom: 1rem;
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.4rem;
             text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
         h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: clamp(2rem, 8vw, 3rem);
+            font-size: 2.4rem;
             font-weight: 900;
-            line-height: 0.9;
-            margin-bottom: 0.8rem;
+            line-height: 1;
+            margin-bottom: 0.3rem;
             text-align: center;
-            background: linear-gradient(to bottom, #fff, #999);
+            background: linear-gradient(to bottom, #fff 50%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .announcement {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.75rem;
+            font-weight: 600;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 0.8rem;
             line-height: 1.4;
             max-width: 90%;
         }
 
         .announcement b {
             color: var(--primary-bright);
-            font-weight: 800;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
         }
 
-        /* AI SECTION - HIGHLIGHTED */
         .ai-hub {
             width: 100%;
-            background: rgba(14, 165, 233, 0.08);
+            background: rgba(14, 165, 233, 0.04);
             border: 1px solid rgba(14, 165, 233, 0.3);
-            border-radius: 28px;
-            padding: 1.5rem 1.2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 0 40px rgba(14, 165, 233, 0.1);
+            border-radius: 22px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            box-shadow: inset 0 0 20px rgba(14, 165, 233, 0.05);
         }
 
         .ai-title {
-            font-size: 0.8rem;
-            font-weight: 800;
+            font-size: 0.7rem;
+            font-weight: 900;
             color: var(--ai-glow);
             text-transform: uppercase;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.6rem;
-            letter-spacing: 0.05em;
+            gap: 0.5rem;
+            letter-spacing: 0.1em;
         }
 
         .ai-list {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.6rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
         }
 
         .ai-feature {
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.6rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            background: rgba(14, 165, 233, 0.05);
-            padding: 0.6rem 0.8rem;
-            border-radius: 14px;
-            border: 1px solid rgba(14, 165, 233, 0.1);
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.5rem 0.7rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .ai-feature svg {
@@ -194,140 +201,125 @@
             flex-shrink: 0;
         }
 
-        /* CORE GRID */
         .core-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
+            gap: 0.4rem;
             width: 100%;
-            margin-bottom: 2rem;
+            margin-bottom: 0.8rem;
         }
 
         .core-tag {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.45rem;
             border-radius: 10px;
-            font-size: 0.6rem;
-            font-weight: 600;
+            font-size: 0.55rem;
+            font-weight: 700;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
         }
 
-        /* CALL TO ACTION */
         .cta-banner {
             width: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--ai-glow));
+            background: linear-gradient(135deg, var(--primary), var(--ai-glow), var(--accent));
             color: #000;
-            padding: 1rem;
-            border-radius: 18px;
+            padding: 0.9rem;
+            border-radius: 20px;
             text-align: center;
             text-decoration: none;
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0.1rem;
             box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
-            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .cta-top {
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.8;
+        .cta-banner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
         }
 
-        .cta-url {
-            font-size: 1.3rem;
-            font-weight: 900;
-        }
+        .cta-top { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; }
+        .cta-url { font-size: 1.25rem; font-weight: 900; letter-spacing: -0.01em; }
 
         .credit {
-            margin-top: 1.5rem;
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.3);
+            margin-top: 0.6rem;
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.6);
             text-transform: uppercase;
             letter-spacing: 0.3em;
-            font-weight: 700;
-            text-align: center;
+            font-weight: 800;
+        }
+
+        .noise {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.04;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
         }
     </style>
 </head>
 
 <body>
     <div class="story-card">
-        <div class="glow"></div>
+        <div class="noise"></div>
 
-        <img src="/logo.png" alt="Logo" class="logo">
-
-        <div class="beta-badge">BETA IS LIVE</div>
-
-        <h1>MARGDARSHAK</h1>
-
-        <p class="announcement">
-            We are launched for <b>beta testing</b>!<br>
-            The complete AI Educational Suite is now ready.
-        </p>
+        <div style="display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 2;">
+            <div class="logo-wrap">
+                <div class="logo-aura"></div>
+                <img src="/logo.png" alt="Logo" class="logo">
+            </div>
+            <div class="beta-badge">BETA IS LIVE</div>
+            <h1>MARGDARSHAK</h1>
+            <p class="announcement">
+                We are launched for <b>beta testing</b>!<br>
+                The complete AI Educational Suite is now ready.
+            </p>
+        </div>
 
         <!-- AI Hub -->
         <div class="ai-hub">
             <div class="ai-title">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v4"></path>
-                    <path d="m4.2 4.2 2.8 2.8"></path>
-                    <path d="M2 12h4"></path>
-                    <path d="m4.2 19.8 2.8-2.8"></path>
-                    <path d="M12 18v4"></path>
-                    <path d="m16.2 19.8 2.8-2.8"></path>
-                    <path d="M18 12h4"></path>
-                    <path d="m16.2 4.2 2.8 2.8"></path>
+                    <path d="M12 2v4"></path><path d="M2 12h4"></path><path d="M12 18v4"></path><path d="M18 12h4"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
                 </svg>
                 AI POWERED REVOLUTION
             </div>
             <div class="ai-list">
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Margdarshak Saarthi (Your AI Companion)
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    AI Saarthi Companion
                 </div>
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Syllabus AI & Smart Course Planner
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Syllabus Planner AI
                 </div>
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    AI Quiz & Flashcard Generator
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Quiz & Flashcard AI
                 </div>
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Smart Summary & Essay Suite
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Smart Essay Suite
                 </div>
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Security Powered By Gemini 2.5 & Nvidia Nemotron
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Gemini & Nvidia AI
                 </div>
                 <div class="ai-feature">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Real-time Academic AI Support
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Real-time AI Support
                 </div>
             </div>
         </div>
@@ -340,18 +332,18 @@
             <div class="core-tag">Tasks</div>
             <div class="core-tag">Career</div>
             <div class="core-tag">Wellness</div>
-            <div class="core-tag">Built-in-Station</div>
+            <div class="core-tag">Station</div>
             <div class="core-tag">Calendar</div>
-            <div class="core-tag">And Much More</div>
+            <div class="core-tag">More</div>
         </div>
 
-        <a href="https://margdarshan.tech" class="cta-banner">
-            <div class="cta-top">Access for Beta Now At</div>
-            <div class="cta-url">margdarshan.tech</div>
-        </a>
-
-        <div class="credit">Developed by VSAV GYANTAPA</div>
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 2;">
+            <a href="https://margdarshan.tech" class="cta-banner">
+                <div class="cta-top">Access for Beta Now At</div>
+                <div class="cta-url">margdarshan.tech</div>
+            </a>
+            <div class="credit">Developed by VSAV GYANTAPA</div>
+        </div>
     </div>
 </body>
-
 </html>
