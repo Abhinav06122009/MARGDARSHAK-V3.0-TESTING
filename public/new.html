@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARGDARSHAK V3.0 | LIVE</title>
-    
+    <title>MARGDARSHAK V3.0 | BETA IS LIVE</title>
+
     <!-- Meta for Social Sharing -->
     <meta property="og:title" content="MARGDARSHAK V3.0 | Beta Live">
-    <meta property="og:description" content="Access the ultimate student productivity suite at margdarshan.tech">
+    <meta property="og:description" content="We are launched for beta testing! Access now at margdarshan.tech">
     <meta property="og:image" content="https://margdarshan.tech/logo.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;900&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
+            --ai-glow: #0ea5e9;
             --primary: #10b981;
-            --primary-bright: #34d399;
-            --primary-glow: rgba(16, 185, 129, 0.7);
-            --bg: #020202;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #000;
         }
 
         * {
@@ -34,252 +34,319 @@
         body {
             background-color: var(--bg);
             color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
-        /* Animated Mesh Background */
-        .mesh-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
-            filter: blur(100px);
-            animation: pulseBg 10s infinite alternate;
-        }
-
-        @keyframes pulseBg {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-
-        .noise {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            opacity: 0.04;
-            background-image: url('/noise.svg');
-            pointer-events: none;
-        }
-
-        /* COMPACT POSTER CARD (Social Optimized) */
-        .poster {
-            width: 90vw;
-            max-width: 600px;
-            aspect-ratio: 4/5;
-            background: var(--card-bg);
-            backdrop-filter: blur(40px) saturate(200%);
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 3rem 2rem;
+        /* SOCIAL STORY CONTAINER (9:16 Aspect) */
+        .story-card {
+            width: 95vw;
+            max-width: 440px;
+            height: 98vh;
+            max-height: 920px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 1) 100%);
+            backdrop-filter: blur(50px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 45px;
+            padding: 3rem 1.8rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
-            box-shadow: 
-                0 40px 100px rgba(0, 0, 0, 0.8),
-                inset 0 0 20px rgba(255, 255, 255, 0.05);
-            animation: entrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 1);
+            overflow: hidden;
+            animation: cardFade 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        @keyframes entrance {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes cardFade {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
-        /* Center Logo Section */
-        .logo-wrap {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .logo-aura {
+        /* Ambient Glows */
+        .glow {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
-            background: var(--primary);
-            filter: blur(70px);
-            opacity: 0.5;
-            border-radius: 50%;
+            width: 150%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+            top: -20%;
             z-index: -1;
-            animation: pulseAura 3s infinite alternate;
         }
 
-        @keyframes pulseAura {
-            0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.9); }
-            100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
-        }
-
+        /* LOGO */
         .logo {
-            width: 140px;
-            height: 140px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 20px var(--primary-glow));
-            animation: float 5s ease-in-out infinite;
+            width: 110px;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 20px var(--ai-glow));
+            animation: float 6s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
-        /* Headline */
-        .status-badge {
-            background: linear-gradient(90deg, var(--primary), #34d399);
-            color: #000;
+        /* HEADLINE */
+        .beta-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
             padding: 0.4rem 1.2rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
+            border-radius: 99px;
+            font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.15em;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            box-shadow: 0 0 20px var(--primary-glow);
+            margin-bottom: 1.5rem;
         }
 
         h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: clamp(2rem, 8vw, 3rem);
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 0.5rem;
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 1rem;
             text-align: center;
             background: linear-gradient(to bottom, #fff, #999);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .url {
-            color: var(--primary-bright);
-            font-family: monospace;
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
+        .announcement {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
             margin-bottom: 2rem;
-            opacity: 0.9;
+            line-height: 1.5;
         }
 
-        /* Feature Cloud (Compact Chips) */
-        .feature-cloud {
+        .announcement b {
+            color: var(--primary-bright);
+            font-weight: 800;
+        }
+
+        /* AI SECTION */
+        .ai-hub {
+            width: 100%;
+            background: rgba(14, 165, 233, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 30px;
+            padding: 1.8rem 1.5rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 0 30px rgba(14, 165, 233, 0.1);
+        }
+
+        .ai-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--ai-glow);
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
             gap: 0.6rem;
-            margin-bottom: 2rem;
-            max-width: 90%;
+            letter-spacing: 0.1em;
         }
 
-        .chip {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.4rem 0.8rem;
-            border-radius: 10px;
+        .ai-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
+        .ai-feature {
             font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(14, 165, 233, 0.1);
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px;
+            border: 1px solid rgba(14, 165, 233, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .ai-feature:hover {
+            background: var(--ai-glow);
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        .ai-feature svg {
+            color: var(--ai-glow);
+            flex-shrink: 0;
+        }
+
+        .ai-feature:hover svg {
+            color: #000;
+        }
+
+        /* CORE GRID */
+        .core-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            width: 100%;
+            margin-bottom: 2.8rem;
+        }
+
+        .core-tag {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.6rem;
+            border-radius: 12px;
+            font-size: 0.6rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
         }
 
-        .chip:hover {
-            background: var(--primary);
+        /* CALL TO ACTION */
+        .cta-banner {
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--ai-glow));
             color: #000;
-            transform: scale(1.1);
-            border-color: var(--primary);
-        }
-
-        .chip.highlight {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Final Action */
-        .btn {
-            background: #fff;
-            color: #000;
-            padding: 1rem 2.5rem;
-            border-radius: 15px;
+            padding: 1.2rem;
+            border-radius: 22px;
+            text-align: center;
+            margin-top: auto;
             text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .cta-banner:hover {
+            transform: scale(1.02);
+        }
+
+        .cta-top {
+            font-size: 0.7rem;
             font-weight: 800;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            background: var(--primary-bright);
-            box-shadow: 0 15px 40px var(--primary-glow);
-        }
-
-        .footer-tag {
-            position: absolute;
-            bottom: 2rem;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.3);
             text-transform: uppercase;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+        }
+
+        .cta-url {
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+
+        .credit {
+            margin-top: 1.8rem;
+            margin-bottom: 1rem;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            font-weight: 800;
         }
     </style>
 </head>
+
 <body>
-    <div class="mesh-bg"></div>
-    <div class="noise"></div>
+    <div class="story-card">
+        <div class="glow"></div>
 
-    <div class="poster">
-        <div class="logo-wrap">
-            <div class="logo-aura"></div>
-            <img src="/logo.png" alt="Logo" class="logo">
+        <img src="/logo.png" alt="Logo" class="logo">
+
+        <div class="beta-badge">BETA IS LIVE</div>
+
+        <h1>MARGDARSHAK</h1>
+
+        <p class="announcement">
+            We are launched for <b>beta testing</b>!<br>
+            The complete AI Educational Suite is now ready.
+        </p>
+
+        <!-- AI Hub -->
+        <div class="ai-hub">
+            <div class="ai-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4"></path>
+                    <path d="m4.2 4.2 2.8 2.8"></path>
+                    <path d="M2 12h4"></path>
+                    <path d="m4.2 19.8 2.8-2.8"></path>
+                    <path d="M12 18v4"></path>
+                    <path d="m16.2 19.8 2.8-2.8"></path>
+                    <path d="M18 12h4"></path>
+                    <path d="m16.2 4.2 2.8 2.8"></path>
+                </svg>
+                AI POWERED REVOLUTION
+            </div>
+            <div class="ai-list">
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>AI Companion</div>
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>Syllabus AI</div>
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>Quiz Gen</div>
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>Smart Summary</div>
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>Essay Hub</div>
+                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>Security AI</div>
+            </div>
         </div>
 
-        <div class="status-badge">BETA RELEASE LIVE</div>
-        
-        <h1>MARGDARSHAK V3.0</h1>
-        <div class="url">margdarshan.tech</div>
-
-        <div class="feature-cloud">
-            <div class="chip highlight">AI Study Orchestrator</div>
-            <div class="chip">Zero-Trust Identity</div>
-            <div class="chip highlight">Elite Rhodium UI</div>
-            <div class="chip">Adaptive Courses</div>
-            <div class="chip">Quantum Search</div>
-            <div class="chip highlight">Grade Pro</div>
-            <div class="chip">Virtual Pet</div>
-            <div class="chip">Pomodoro Focus</div>
-            <div class="chip highlight">Interview Prep</div>
-            <div class="chip">Smart Timetable</div>
-            <div class="chip">Resume Builder</div>
-            <div class="chip">Forensic Logs</div>
-            <div class="chip highlight">Syllabus AI</div>
+        <!-- Core Tools -->
+        <div class="core-grid">
+            <div class="core-tag">Timetables</div>
+            <div class="core-tag">Grades</div>
+            <div class="core-tag">Focus Timer</div>
+            <div class="core-tag">Tasks</div>
+            <div class="core-tag">Career</div>
+            <div class="core-tag">Wellness</div>
+            <div class="core-tag">Built-in-Station</div>
+            <div class="core-tag">Calendar</div>
+            <div class="core-tag">And Much More</div>
         </div>
 
-        <a href="https://margdarshan.tech" class="btn">Launch Suite</a>
+        <a href="https://margdarshan.tech" class="cta-banner">
+            <div class="cta-top">Access for Beta Now At</div>
+            <div class="cta-url">margdarshan.tech</div>
+        </a>
 
-        <div class="footer-tag">Created by Abhinav Jha</div>
+        <div class="credit">Developed by VSAV GYANTAPA</div>
     </div>
-
-    <script>
-        // Maxxed interactivity: Mouse tracking parallax
-        const poster = document.querySelector('.poster');
-        document.addEventListener('mousemove', (e) => {
-            const x = (window.innerWidth / 2 - e.pageX) / 40;
-            const y = (window.innerHeight / 2 - e.pageY) / 40;
-            poster.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
-        });
-        document.addEventListener('mouseleave', () => {
-            poster.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        });
-    </script>
 </body>
+
 </html>
