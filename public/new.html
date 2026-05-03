@@ -22,6 +22,7 @@
         :root {
             --ai-glow: #0ea5e9;
             --primary: #10b981;
+            --primary-bright: #34d399;
             --bg: #000;
         }
 
@@ -35,38 +36,37 @@
             background-color: var(--bg);
             color: #fff;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            height: 100vh;
-            width: 100vw;
+            min-height: 100vh;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 2rem 0;
+            /* Add space for scrolling if needed */
+            overflow-x: hidden;
         }
 
-        /* SOCIAL STORY CONTAINER (9:16 Aspect) */
+        /* CENTER FILLED STORY CONTAINER */
         .story-card {
-            width: 95vw;
-            max-width: 440px;
-            height: 98vh;
-            max-height: 920px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 1) 100%);
+            width: 92%;
+            max-width: 520px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 1) 100%);
             backdrop-filter: blur(50px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 45px;
-            padding: 3rem 1.8rem;
+            border-radius: 40px;
+            padding: 2.5rem 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 1);
-            overflow: hidden;
             animation: cardFade 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         @keyframes cardFade {
             from {
                 opacity: 0;
-                transform: scale(0.9);
+                transform: scale(0.95);
             }
 
             to {
@@ -79,16 +79,17 @@
         .glow {
             position: absolute;
             width: 150%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
-            top: -20%;
+            height: 80%;
+            background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
+            top: -10%;
             z-index: -1;
+            pointer-events: none;
         }
 
         /* LOGO */
         .logo {
-            width: 110px;
-            margin-bottom: 2rem;
+            width: 100px;
+            margin-bottom: 1.5rem;
             filter: drop-shadow(0 0 20px var(--ai-glow));
             animation: float 6s ease-in-out infinite;
         }
@@ -101,7 +102,7 @@
             }
 
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-8px);
             }
         }
 
@@ -115,15 +116,16 @@
             font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.15em;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
         }
 
         h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.8rem;
+            font-size: clamp(2rem, 8vw, 3rem);
             font-weight: 900;
             line-height: 0.9;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             text-align: center;
             background: linear-gradient(to bottom, #fff, #999);
             -webkit-background-clip: text;
@@ -132,11 +134,12 @@
 
         .announcement {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             text-align: center;
             margin-bottom: 2rem;
-            line-height: 1.5;
+            line-height: 1.4;
+            max-width: 90%;
         }
 
         .announcement b {
@@ -144,53 +147,46 @@
             font-weight: 800;
         }
 
-        /* AI SECTION */
+        /* AI SECTION - HIGHLIGHTED */
         .ai-hub {
             width: 100%;
             background: rgba(14, 165, 233, 0.08);
             border: 1px solid rgba(14, 165, 233, 0.3);
-            border-radius: 30px;
-            padding: 1.8rem 1.5rem;
-            margin-bottom: 2.2rem;
-            box-shadow: 0 0 30px rgba(14, 165, 233, 0.1);
+            border-radius: 28px;
+            padding: 1.5rem 1.2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 40px rgba(14, 165, 233, 0.1);
         }
 
         .ai-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 800;
             color: var(--ai-glow);
             text-transform: uppercase;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
         }
 
         .ai-list {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.8rem;
+            grid-template-columns: 1fr;
+            gap: 0.6rem;
         }
 
         .ai-feature {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            background: rgba(14, 165, 233, 0.1);
+            gap: 0.6rem;
+            background: rgba(14, 165, 233, 0.05);
             padding: 0.6rem 0.8rem;
-            border-radius: 12px;
-            border: 1px solid rgba(14, 165, 233, 0.15);
-            transition: all 0.3s ease;
-        }
-
-        .ai-feature:hover {
-            background: var(--ai-glow);
-            color: #000;
-            transform: translateY(-2px);
+            border-radius: 14px;
+            border: 1px solid rgba(14, 165, 233, 0.1);
         }
 
         .ai-feature svg {
@@ -198,28 +194,24 @@
             flex-shrink: 0;
         }
 
-        .ai-feature:hover svg {
-            color: #000;
-        }
-
         /* CORE GRID */
         .core-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.6rem;
+            gap: 0.5rem;
             width: 100%;
-            margin-bottom: 2.8rem;
+            margin-bottom: 2rem;
         }
 
         .core-tag {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.6rem;
-            border-radius: 12px;
+            padding: 0.5rem;
+            border-radius: 10px;
             font-size: 0.6rem;
             font-weight: 600;
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         /* CALL TO ACTION */
@@ -227,24 +219,19 @@
             width: 100%;
             background: linear-gradient(90deg, var(--primary), var(--ai-glow));
             color: #000;
-            padding: 1.2rem;
-            border-radius: 22px;
+            padding: 1rem;
+            border-radius: 18px;
             text-align: center;
-            margin-top: auto;
             text-decoration: none;
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
+            gap: 0.2rem;
             box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
             transition: transform 0.3s ease;
         }
 
-        .cta-banner:hover {
-            transform: scale(1.02);
-        }
-
         .cta-top {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -252,18 +239,18 @@
         }
 
         .cta-url {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 900;
         }
 
         .credit {
-            margin-top: 1.8rem;
-            margin-bottom: 1rem;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.4);
+            margin-top: 1.5rem;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
             text-transform: uppercase;
-            letter-spacing: 0.4em;
-            font-weight: 800;
+            letter-spacing: 0.3em;
+            font-weight: 700;
+            text-align: center;
         }
     </style>
 </head>
@@ -286,7 +273,7 @@
         <!-- AI Hub -->
         <div class="ai-hub">
             <div class="ai-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 2v4"></path>
                     <path d="m4.2 4.2 2.8 2.8"></path>
@@ -300,22 +287,48 @@
                 AI POWERED REVOLUTION
             </div>
             <div class="ai-list">
-                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>AI Companion</div>
-                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    </svg>
+                    Margdarshak Saarthi (Your AI Companion)
+                </div>
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>Quiz Gen</div>
-                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    </svg>
+                    Syllabus AI & Smart Course Planner
+                </div>
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>Security Powered By Nvidia & Gemini AI</div>
-                <div class="ai-feature"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    </svg>
+                    AI Quiz & Flashcard Generator
+                </div>
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>And Much More</div>
+                    </svg>
+                    Smart Summary & Essay Suite
+                </div>
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Security Powered By Gemini 2.5 & Nvidia Nemotron
+                </div>
+                <div class="ai-feature">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Real-time Academic AI Support
+                </div>
             </div>
         </div>
 
@@ -325,7 +338,10 @@
             <div class="core-tag">Grades</div>
             <div class="core-tag">Focus Timer</div>
             <div class="core-tag">Tasks</div>
-            <div class="core-tag">Wellness Centre</div>
+            <div class="core-tag">Career</div>
+            <div class="core-tag">Wellness</div>
+            <div class="core-tag">Built-in-Station</div>
+            <div class="core-tag">Calendar</div>
             <div class="core-tag">And Much More</div>
         </div>
 
