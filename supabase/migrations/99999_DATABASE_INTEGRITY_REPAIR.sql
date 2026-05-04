@@ -92,6 +92,26 @@ CREATE POLICY "Admins can manage contact messages" ON public.contact_messages FO
 DROP POLICY IF EXISTS "Admins can manage support tickets" ON public.support_tickets;
 CREATE POLICY "Admins can manage support tickets" ON public.support_tickets FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
 
--- 7. Realtime Activation
-ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;
+-- 7. Realtime Activation (Idempotent)
+DO $$
+BEGIN
+    -- Add contact_messages if missing
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'contact_messages'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
+    END IF;
+
+    -- Add support_tickets if missing
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'support_tickets'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;
+    END IF;
+END $$;
