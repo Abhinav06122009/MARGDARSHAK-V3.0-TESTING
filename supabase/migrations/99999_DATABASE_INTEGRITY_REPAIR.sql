@@ -1,5 +1,5 @@
 -- MASTER PLATFORM RESTORATION SCRIPT (ZENITH ARCHITECTURE)
--- VERSION 5.0: RECOVERS 404 DELETED TABLES AND FIXES ID-SYNC
+-- VERSION 6.0: FIXES PROFILE SYNC AND SUPPORT FETCHING LOCKOUT
 
 -- 1. EXTENSIONS & SCHEMA
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
@@ -64,17 +64,6 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   created_at timestamptz default now()
 );
 
-CREATE TABLE IF NOT EXISTS public.notes (
-  id uuid primary key default uuid_generate_v4(),
-  user_id text references public.profiles(id) on delete cascade,
-  title text not null,
-  content text,
-  folder_id uuid,
-  is_favorite boolean default false,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
 CREATE TABLE IF NOT EXISTS public.contact_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name TEXT,
@@ -99,34 +88,48 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. PERMISSIONS & RLS
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
-
+-- 4. UNIFIED ADMIN CHECK (SECURITY DEFINER TO BYPASS RLS)
 CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
         SELECT 1 FROM public.profiles
         WHERE id = public.translate_clerk_id_to_uuid(p_user_id)
-        AND (user_type ILIKE ANY (ARRAY['%admin%', '%ceo%', '%manager%', '%moderator%', '%official%']))
+        AND (user_type ILIKE ANY (ARRAY['%admin%', '%ceo%', '%manager%', '%moderator%', '%official%', '%hr%']))
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. POLICIES
+-- 5. PROFILE POLICIES (THE SYNC FIX)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can manage their own profiles" ON public.profiles;
+CREATE POLICY "Users can manage their own profiles" ON public.profiles 
+FOR ALL USING (id = public.requesting_user_id());
+
+-- 6. FEATURE POLICIES
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "Users can manage their own tasks" ON public.tasks;
 CREATE POLICY "Users can manage their own tasks" ON public.tasks FOR ALL USING (user_id = public.requesting_user_id());
+
+DROP POLICY IF EXISTS "Admins can manage contact messages" ON public.contact_messages;
+CREATE POLICY "Admins can manage contact messages" ON public.contact_messages FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
 
 DROP POLICY IF EXISTS "Admins can manage support tickets" ON public.support_tickets;
 CREATE POLICY "Admins can manage support tickets" ON public.support_tickets FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
 
--- 6. REALTIME
+-- 7. REALTIME
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'profiles') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+    END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'tasks') THEN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
     END IF;
