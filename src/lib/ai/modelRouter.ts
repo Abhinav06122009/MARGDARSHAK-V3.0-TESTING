@@ -8,7 +8,7 @@ import { getConfiguredAIGatewayUrl } from './constants';
  */
 
 const POLLINATIONS_API_KEY = import.meta.env.VITE_POLLINATIONS_API_KEY || "";
-const UNIVERSAL_MODEL = "Gemini 2.5 Flash Lite";
+const UNIVERSAL_MODEL = "gemini-fast";
 
 export interface RouterOptions {
   task?: string;
