@@ -14,7 +14,8 @@ export const SecurityWarningOverlay = () => {
     
     const handleBan = () => {
       // Force immediate reload to trigger GlobalSecurityGuard lockdown
-      window.location.reload();
+      // window.location.reload(); // DEACTIVATED FOR DIAGNOSTIC RECORDING
+      console.warn('🛡️ [SECURITY_BYPASS] Auto-reload suppressed for diagnostic recording.');
     };
 
     window.addEventListener('security-warning', handleWarning);

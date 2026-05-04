@@ -204,7 +204,7 @@ export const initSecurityHardening = () => {
     if (widthThreshold || heightThreshold) {
       if (!devtoolsOpen) {
         devtoolsOpen = true;
-        logViolation('DevTools Opened', { state: 'detected' });
+        // logViolation('DevTools Opened', { state: 'detected' }); // DEACTIVATED FOR DIAGNOSTIC RECORDING
       }
     } else {
       devtoolsOpen = false;
