@@ -82,10 +82,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // STRICT METADATA RESOLUTION (Clerk-Only as requested)
           let tier = (subscription.tier || 'free').toLowerCase();
           const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
-          const role = (roleArray[0] || 'student').toLowerCase();
+          const role = roleArray.map(r => String(r).trim().toLowerCase()).join(', ');
 
           // SuperAdmin/CEO Overrides (Safety Net)
-          if (role === 'ceo' || role === 'admin' || role === 'superadmin') {
+          const lowerRoles = role.toLowerCase();
+          if (lowerRoles.includes('ceo') || lowerRoles.includes('admin') || lowerRoles.includes('superadmin') || lowerRoles.includes('owner')) {
             tier = 'premium_elite';
           }
 
@@ -98,7 +99,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               id: translatedId,
               clerk_id: clerkUser.id,
               subscription_tier: tier,
-              role: role
+              role: role,
+              user_type: role
             }
           });
 
