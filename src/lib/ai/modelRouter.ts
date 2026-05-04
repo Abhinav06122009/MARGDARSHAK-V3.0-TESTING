@@ -24,7 +24,7 @@ export interface RouterOptions {
  */
 const callPollinations = async (messages: any[], options: RouterOptions): Promise<string> => {
   try {
-    const response = await fetch('https://text.pollinations.ai/', {
+    const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -40,7 +40,8 @@ const callPollinations = async (messages: any[], options: RouterOptions): Promis
     
     if (!response.ok) throw new Error(`Pollinations API Error: ${response.status}`);
     
-    return await response.text();
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
   } catch (error) {
     console.error("Pollinations Router Failure:", error);
     return "AI system is currently re-routing. Please try again in a moment.";

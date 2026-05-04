@@ -75,7 +75,7 @@ const cleanAndParseJSON = (text: string): any => {
  */
 const callPollinationsText = async (messages: any[], jsonMode = false): Promise<string> => {
   try {
-    const response = await fetch('https://text.pollinations.ai/', {
+    const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -91,7 +91,8 @@ const callPollinationsText = async (messages: any[], jsonMode = false): Promise<
     
     if (!response.ok) throw new Error(`Pollinations API Error: ${response.status}`);
     
-    return await response.text();
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
   } catch (error) {
     console.error("Pollinations Universal Call Failure:", error);
     throw error;
@@ -131,7 +132,7 @@ export const aiService = {
         .replace(/(draw|generate|create|show|make|visualize).*(image|picture|photo|diagram|sketch|illustration)( of)?/i, "")
         .trim() || prompt;
 
-      const response = await fetch('https://text.pollinations.ai/v1/chat/completions', {
+      const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
         method: "POST",
         headers: { 
           'Content-Type': 'application/json',
