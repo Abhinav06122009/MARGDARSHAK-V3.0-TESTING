@@ -28,7 +28,7 @@ CREATE POLICY "Allow admins to view contact messages" ON public.contact_messages
     USING (
         EXISTS (
             SELECT 1 FROM public.profiles
-            WHERE id::text = public.requesting_user_id()::text
+            WHERE (id::text = public.requesting_user_id()::text OR clerk_id = (current_setting('request.jwt.claims', true)::json->>'sub'))
             AND (
                 user_type ILIKE '%admin%' OR 
                 user_type ILIKE '%ceo%' OR 
