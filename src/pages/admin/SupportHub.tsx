@@ -109,8 +109,45 @@ const SupportHub = () => {
   };
 
   const handleEscalate = async (ticket: SupportTicket) => {
+    if (!resolutionResponse) {
+      toast.error('Tactical Error', { description: 'Escalation notes required for routing.' });
+      return;
+    }
+
     try {
+      const officialName = user?.fullName || 'Official Sentinel';
+      const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
+
+      // 1. Update Database Status & Resolution (Escalation) Text
       await escalateTicket(ticket.id, ticket.type, resolutionResponse);
+
+      // 2. Automated API Dispatch Bridge (Resend)
+      const subject = `ALERT: ${ticket.subject || 'Support Inquiry'} [ESCALATED]`;
+      const htmlBody = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #09090b; color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #27272a;">
+          <h1 style="color: #f59e0b; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Escalation Active</h1>
+          <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">Your inquiry regarding "<strong>${ticket.message?.slice(0, 50)}...</strong>" has been routed to the <strong>SUPPORT-NEXUS</strong> for High-Command review.</p>
+          
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; margin-bottom: 32px;">
+            <h2 style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Escalation Notes</h2>
+            <p style="color: #ffffff; font-size: 13px; font-weight: 500; line-height: 1.6; margin: 0;">${resolutionResponse}</p>
+          </div>
+
+          <div style="border-top: 1px solid #27272a; padding-top: 24px;">
+            <p style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Escalating Officer</p>
+            <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0;">${officialName} [${rank}]</p>
+            <p style="color: #71717a; font-size: 12px; margin: 4px 0 0 0;">VSAV GYANTAPA SUPPORT TEAM</p>
+            <p style="color: #3f3f46; font-size: 10px; margin-top: 16px;">REF_ID: ${ticket.id}</p>
+          </div>
+        </div>
+      `;
+
+      await emailService.sendDirect({
+        to: ticket.email,
+        subject,
+        html: htmlBody
+      });
+
       toast.info('ESCALATION PROTOCOL ACTIVE', {
         description: `Ticket #${ticket.id.slice(0, 8)} has been routed to the Nexus with your official notes.`,
       });

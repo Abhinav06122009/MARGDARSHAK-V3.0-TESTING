@@ -93,6 +93,7 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "resend": "^6.12.2",
     "sonner": "^1.5.0",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^2.5.2",

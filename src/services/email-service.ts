@@ -1,11 +1,12 @@
+import { Resend } from 'resend';
 
 /**
  * TACTICAL EMAIL DISPATCH SERVICE
- * Interfaces directly with Resend API for automated background mailing.
+ * Interfaces directly with the official Resend SDK.
  */
 
-const RESEND_API_URL = 'https://api.resend.com/emails';
 const API_KEY = import.meta.env.VITE_RESEND_API_KEY;
+const resend = API_KEY ? new Resend(API_KEY) : null;
 
 export interface EmailPayload {
   to: string;
@@ -16,33 +17,22 @@ export interface EmailPayload {
 
 export const emailService = {
   sendDirect: async (payload: EmailPayload) => {
-    if (!API_KEY) {
-      console.warn('⚠️ [EMAIL-SERVICE] No API key detected. Falling back to manual dispatch.');
+    if (!resend) {
+      console.warn('⚠️ [EMAIL-SERVICE] No API key detected or Resend SDK not initialized.');
       return { success: false, error: 'NO_API_KEY' };
     }
 
     try {
-      const response = await fetch(RESEND_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: payload.from || 'Margdarshak Support <support@margdarshan.tech>',
-          to: [payload.to],
-          subject: payload.subject,
-          html: payload.html,
-        }),
+      const { data, error } = await resend.emails.send({
+        from: payload.from || 'onboarding@resend.dev',
+        to: [payload.to],
+        subject: payload.subject,
+        html: payload.html,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'API_RESPONSE_ERROR');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      console.log('🛰️ [EMAIL-SERVICE] Automated dispatch successful:', data.id);
+      console.log('🛰️ [EMAIL-SERVICE] Automated dispatch successful:', data?.id);
       return { success: true, data };
     } catch (error: any) {
       console.error('❌ [EMAIL-SERVICE] Automated dispatch failed:', error);
