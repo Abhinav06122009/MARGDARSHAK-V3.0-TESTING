@@ -78,6 +78,42 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
     const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
     const cRoles = ['moderator', 'staff', 'support_executive', 'supportexecutive', 'manager', 'hr', 'admin'];
 
+    const getFullTitle = (r: string) => {
+      const mapping: Record<string, string> = {
+        ceo: 'CHIEF EXECUTIVE OFFICER',
+        cto: 'CHIEF TECHNOLOGY OFFICER',
+        cfo: 'CHIEF FINANCIAL OFFICER',
+        coo: 'CHIEF OPERATIONS OFFICER',
+        cmo: 'CHIEF MARKETING OFFICER',
+        cio: 'CHIEF INFORMATION OFFICER',
+        cso: 'CHIEF SECURITY OFFICER',
+        owner: 'PLATFORM OWNER',
+        'co-founder': 'CO-FOUNDER & VISIONARY',
+        cofounder: 'CO-FOUNDER & VISIONARY',
+        aceo: 'ASST. CHIEF EXECUTIVE OFFICER',
+        acto: 'ASST. CHIEF TECHNOLOGY OFFICER',
+        acfo: 'ASST. CHIEF FINANCIAL OFFICER',
+        acoo: 'ASST. CHIEF OPERATIONS OFFICER',
+        acmo: 'ASST. CHIEF MARKETING OFFICER',
+        acio: 'ASST. CHIEF INFORMATION OFFICER',
+        aeo: 'ASSISTANT EXECUTIVE OFFICER',
+        ato: 'ASSISTANT TECHNICAL OFFICER',
+        afo: 'ASSISTANT FINANCIAL OFFICER',
+        aoo: 'ASSISTANT OPERATIONAL OFFICER',
+        amo: 'ASSISTANT MARKETING OFFICER',
+        aio: 'ASSISTANT INFORMATION OFFICER',
+        superadmin: 'SUPREME SYSTEM ADMINISTRATOR',
+        admin: 'SYSTEM ADMINISTRATOR',
+        manager: 'DEPARTMENTAL MANAGER',
+        hr: 'HUMAN RESOURCES DIRECTOR',
+        moderator: 'SYSTEM MODERATOR',
+        staff: 'OPERATIONAL STAFF',
+        support_executive: 'CUSTOMER SUPPORT EXECUTIVE',
+        supportexecutive: 'CUSTOMER SUPPORT EXECUTIVE'
+      };
+      return mapping[r] || 'ACADEMIC SENTINEL';
+    };
+
     const primaryRole = normalizedRoles.find(r => [...aPlusRoles, ...aRoles, ...bRoles, ...cRoles].includes(r)) || 'standard';
 
     // A+ CLASS — RHODIUM GRADE
@@ -85,7 +121,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
       return {
         class: 'A+ CLASS',
         grade: 'RHODIUM',
-        title: primaryRole.toUpperCase().replace('_', '-'),
+        title: getFullTitle(primaryRole),
         colorStyle: 'linear-gradient(135deg,#ffffff,#e2e8f0,#94a3b8)',
         text: 'text-slate-900',
         glow: 'shadow-[0_0_60px_rgba(255,255,255,0.4),0_0_20px_rgba(255,255,255,0.6)]',
@@ -100,7 +136,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
       return {
         class: 'A CLASS',
         grade: 'PLATINUM',
-        title: primaryRole.toUpperCase().replace('_', '-'),
+        title: getFullTitle(primaryRole),
         colorStyle: 'linear-gradient(135deg,#e2e8f0,#94a3b8,#475569)',
         text: 'text-white',
         glow: 'shadow-[0_0_50px_rgba(148,163,184,0.5)]',
@@ -115,7 +151,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
       return {
         class: 'B CLASS',
         grade: 'GOLD',
-        title: primaryRole.toUpperCase().replace('_', '-'),
+        title: getFullTitle(primaryRole),
         colorStyle: 'linear-gradient(135deg,#fde047,#eab308,#854d0e)',
         text: 'text-black',
         glow: 'shadow-[0_0_60px_rgba(234,179,8,0.6),0_0_20px_rgba(253,224,71,0.8)]',
@@ -130,7 +166,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
       return {
         class: 'C CLASS',
         grade: 'SILVER',
-        title: primaryRole.toUpperCase().replace('_', '-'),
+        title: getFullTitle(primaryRole),
         colorStyle: 'linear-gradient(135deg,#d1d5db,#9ca3af,#4b5563)',
         text: 'text-black',
         glow: 'shadow-[0_0_30px_rgba(156,163,175,0.5)]',

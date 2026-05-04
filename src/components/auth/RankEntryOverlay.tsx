@@ -40,17 +40,52 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
       const cRoles = ['moderator', 'staff', 'support_executive', 'supportexecutive', 'manager', 'hr', 'admin'];
 
+      const getFullTitle = (role: string) => {
+        const mapping: Record<string, string> = {
+          ceo: 'CHIEF EXECUTIVE OFFICER',
+          cto: 'CHIEF TECHNOLOGY OFFICER',
+          cfo: 'CHIEF FINANCIAL OFFICER',
+          coo: 'CHIEF OPERATIONS OFFICER',
+          cmo: 'CHIEF MARKETING OFFICER',
+          cio: 'CHIEF INFORMATION OFFICER',
+          cso: 'CHIEF SECURITY OFFICER',
+          owner: 'PLATFORM OWNER',
+          'co-founder': 'CO-FOUNDER & VISIONARY',
+          cofounder: 'CO-FOUNDER & VISIONARY',
+          aceo: 'ASST. CHIEF EXECUTIVE OFFICER',
+          acto: 'ASST. CHIEF TECHNOLOGY OFFICER',
+          acfo: 'ASST. CHIEF FINANCIAL OFFICER',
+          acoo: 'ASST. CHIEF OPERATIONS OFFICER',
+          acmo: 'ASST. CHIEF MARKETING OFFICER',
+          acio: 'ASST. CHIEF INFORMATION OFFICER',
+          aeo: 'ASSISTANT EXECUTIVE OFFICER',
+          ato: 'ASSISTANT TECHNICAL OFFICER',
+          afo: 'ASSISTANT FINANCIAL OFFICER',
+          aoo: 'ASSISTANT OPERATIONAL OFFICER',
+          amo: 'ASSISTANT MARKETING OFFICER',
+          aio: 'ASSISTANT INFORMATION OFFICER',
+          superadmin: 'SUPREME SYSTEM ADMINISTRATOR',
+          admin: 'SYSTEM ADMINISTRATOR',
+          manager: 'DEPARTMENTAL MANAGER',
+          hr: 'HUMAN RESOURCES DIRECTOR',
+          moderator: 'SYSTEM MODERATOR',
+          staff: 'OPERATIONAL STAFF',
+          support_executive: 'CUSTOMER SUPPORT EXECUTIVE',
+          supportexecutive: 'CUSTOMER SUPPORT EXECUTIVE'
+        };
+        return mapping[role] || 'ACADEMIC SENTINEL';
+      };
+
       let info: any = null;
       const primaryRole = normalizedRoles.find(r => [...aPlusRoles, ...aRoles, ...bRoles, ...cRoles].includes(r));
 
-      if (!primaryRole) return; // Standard users (students/no roles) don't get the overlay
+      if (!primaryRole) return; 
 
-      // A+ CLASS: RHODIUM GRADE
       if (aPlusRoles.includes(primaryRole)) {
         info = {
           tier: 'A+',
           grade: 'RHODIUM',
-          title: primaryRole.toUpperCase().replace('_', '-'),
+          title: getFullTitle(primaryRole),
           icon: Crown,
           style: {
             gradient: 'from-[#FFFFFF] via-[#E2E8F0] to-[#94A3B8]',
@@ -66,13 +101,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             theme: 'rhodium'
           }
         };
-      }
-      // A CLASS: PLATINUM GRADE
-      else if (aRoles.includes(primaryRole)) {
+      } else if (aRoles.includes(primaryRole)) {
         info = {
           tier: 'A',
           grade: 'PLATINUM',
-          title: primaryRole.toUpperCase().replace('_', '-'),
+          title: getFullTitle(primaryRole),
           icon: Shield,
           style: {
             gradient: 'from-[#E2E8F0] via-[#94A3B8] to-[#475569]',
@@ -88,13 +121,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             theme: 'platinum'
           }
         };
-      }
-      // B CLASS: GOLD GRADE
-      else if (bRoles.includes(primaryRole)) {
+      } else if (bRoles.includes(primaryRole)) {
         info = {
           tier: 'B',
           grade: 'GOLD',
-          title: primaryRole.toUpperCase().replace('_', '-'),
+          title: getFullTitle(primaryRole),
           icon: Zap,
           style: {
             gradient: 'from-[#FDE047] via-[#EAB308] to-[#854D0E]',
@@ -110,13 +141,11 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             theme: 'gold'
           }
         };
-      }
-      // C CLASS: SILVER GRADE
-      else if (cRoles.includes(primaryRole)) {
+      } else if (cRoles.includes(primaryRole)) {
         info = {
           tier: 'C',
           grade: 'SILVER',
-          title: primaryRole.toUpperCase().replace('_', '-'),
+          title: getFullTitle(primaryRole),
           icon: Activity,
           style: {
             gradient: 'from-[#D1D5DB] via-[#9CA3AF] to-[#4B5563]',
@@ -209,10 +238,10 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                className="relative z-[10] flex flex-col items-center gap-12"
+                className="relative z-[10] flex flex-col items-center gap-8 sm:gap-12"
               >
-                {/* Biometric Circle */}
-                <div className="relative w-80 h-80 flex items-center justify-center">
+                {/* Biometric Circle - Responsive */}
+                <div className="relative w-[65vw] h-[65vw] max-w-[320px] max-h-[320px] flex items-center justify-center">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
@@ -221,7 +250,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   <motion.div
                     animate={{ rotate: -360 }}
                     transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                    className="absolute inset-6 border border-emerald-500/10 border-dashed rounded-full"
+                    className="absolute inset-4 sm:inset-6 border border-emerald-500/10 border-dashed rounded-full"
                   />
                   
                   {/* Fingerprint / Scanner */}
@@ -230,7 +259,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                     transition={{ repeat: Infinity, duration: 2 }}
                     className="relative z-10 text-emerald-500"
                   >
-                    <Fingerprint size={100} strokeWidth={1} />
+                    <Fingerprint className="size-[15vw] max-w-[100px] max-h-[100px]" strokeWidth={1} />
                   </motion.div>
 
                   {/* Scan Line */}
@@ -239,27 +268,24 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                     transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
                     className="absolute left-4 right-4 h-0.5 bg-emerald-400/60 shadow-[0_0_25px_rgba(52,211,153,0.8)] z-20"
                   />
-                  
-                  {/* Hexagon Grid Overlay */}
-                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] rounded-full" />
                 </div>
 
                 {/* Status Readouts */}
-                <div className="text-center space-y-6">
+                <div className="text-center space-y-4 sm:space-y-6">
                   <div className="flex flex-col gap-1">
                     <motion.p
                       key={scanStep}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-emerald-400 font-mono text-sm tracking-[0.4em] font-black uppercase"
+                      className="text-emerald-400 font-mono text-[10px] sm:text-sm tracking-[0.4em] font-black uppercase"
                     >
                       {scanLabels[scanStep]}
                     </motion.p>
-                    <span className="text-white/20 font-mono text-[8px] tracking-[1em] uppercase">SYSTEM_ENCRYPTION_V4.0</span>
+                    <span className="text-white/20 font-mono text-[6px] sm:text-[8px] tracking-[1em] uppercase">SYSTEM_ENCRYPTION_V4.0</span>
                   </div>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-1 sm:gap-2 justify-center">
                     {[0, 1, 2, 3].map((s) => (
-                      <div key={s} className="h-1 w-12 rounded-full overflow-hidden bg-zinc-900 border border-white/5">
+                      <div key={s} className="h-1 w-8 sm:w-12 rounded-full overflow-hidden bg-zinc-900 border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: s <= scanStep ? '100%' : '0%' }}
@@ -276,83 +302,104 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
                 initial={{ opacity: 0, scale: 0.5, rotateX: 30 }}
                 animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                className="relative z-[10] group"
+                className="relative z-[10] group w-[90vw] max-w-[500px]"
               >
                 {/* DYNAMIC AMBIENT SHADOW */}
                 <div className={`absolute -inset-32 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[120px] pointer-events-none transition-all duration-1000`} />
 
                 {/* THE HIGH-COMMAND ASSET */}
-                <div className={`relative w-[480px] aspect-[1/1.45] bg-[#050505] rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-14 shadow-2xl backdrop-blur-3xl`}>
+                <div className={`relative w-full aspect-[1/1.45] bg-[#050505] rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-14 shadow-2xl backdrop-blur-3xl`}>
                   
-                  {/* HOLOGRAPHIC SHIMMER */}
+                  {/* HOLOGRAPHIC SHIMMER & GLARE */}
                   <motion.div
                     animate={{ x: ['-200%', '200%'] }}
                     transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
                     className={`absolute inset-0 bg-gradient-to-r ${rankInfo.style.shimmer} skew-x-[-20deg] opacity-10 pointer-events-none`}
                   />
+                  <div className="absolute inset-0 z-30 pointer-events-none opacity-20 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
 
                   {/* HEADER BRANDING */}
-                  <div className="flex items-center justify-between mb-12">
+                  <div className="flex items-center justify-between mb-8 sm:mb-12">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-white rounded-xl border border-white/20 shadow-2xl">
-                          <img src="/logo.png" alt="M" className="w-6 h-6 object-contain" />
+                        <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-white/20 shadow-2xl">
+                          <img src="/logo.png" alt="M" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
                         </div>
-                        <h2 className="text-xl font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
+                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
                       </div>
-                      <span className="text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.6em] ml-14">VSAV GYANTAPA FAMILY</span>
+                      <span className="text-[6px] sm:text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.6em] ml-10 sm:ml-14">VSAV GYANTAPA FAMILY</span>
                     </div>
                   </div>
 
                   {/* RANK RIBBON */}
-                  <div className={`absolute top-24 left-0 px-10 py-4 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20`}>
-                    <div className="flex items-center gap-3">
-                      <Sparkles size={16} className="text-black/70" />
+                  <div className={`absolute top-20 sm:top-24 left-0 px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20`}>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Sparkles size={14} className="text-black/70 sm:size-16" />
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
-                        <span className="text-[12px] font-black text-black uppercase tracking-[0.2em] italic">{rankInfo.grade}</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
+                        <span className="text-[10px] sm:text-[12px] font-black text-black uppercase tracking-[0.2em] italic">{rankInfo.grade}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col items-center justify-center gap-14 text-center">
+                  <div className="flex-1 flex flex-col items-center justify-center gap-8 sm:gap-14 text-center">
                     {/* ICON CONSTRUCT */}
-                    <motion.div
-                      initial={{ scale: 0, rotate: -45 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
-                      className={`p-12 rounded-[2.5rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-110 transition-all duration-500`}
-                      style={{ transform: "translateZ(50px)" }}
-                    >
-                      <rankInfo.icon size={90} className="text-black" strokeWidth={1.5} />
+                    <div className="relative">
                       <motion.div
-                        animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
-                        transition={{ repeat: Infinity, duration: 4 }}
-                        className="absolute inset-0 border-4 border-white/30 rounded-[2.5rem]"
-                      />
-                    </motion.div>
+                        initial={{ scale: 0, rotate: -45 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
+                        className={`p-8 sm:p-12 rounded-[2.5rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-110 transition-all duration-500`}
+                        style={{ transform: "translateZ(50px)" }}
+                      >
+                        <rankInfo.icon size={70} className="text-black sm:size-[90px]" strokeWidth={1.5} />
+                        <motion.div
+                          animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
+                          transition={{ repeat: Infinity, duration: 4 }}
+                          className="absolute inset-0 border-4 border-white/30 rounded-[2.5rem]"
+                        />
+                      </motion.div>
+                      
+                      {/* Orbiting Text (Prestige Detail) */}
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="absolute -inset-12 sm:-inset-16 pointer-events-none opacity-20"
+                      >
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
+                          <text className="text-[4px] font-black uppercase tracking-[1em] fill-white">
+                            <textPath href="#circlePath">
+                              • VSAV HIGH COMMAND • AUTHORIZED PERSONNEL ONLY •
+                            </textPath>
+                          </text>
+                        </svg>
+                      </motion.div>
+                    </div>
 
-                    <div className="space-y-6" style={{ transform: "translateZ(30px)" }}>
-                      <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em]">IDENTITY_RECOGNIZED</span>
-                        <h2 className={`text-6xl font-black italic tracking-tighter uppercase leading-none bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent`}>
+                    <div className="space-y-4 sm:space-y-6" style={{ transform: "translateZ(30px)" }}>
+                      <div className="flex flex-col gap-1 sm:gap-2">
+                        <span className="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[1em]">IDENTITY_RECOGNIZED</span>
+                        <h2 className={`text-3xl sm:text-5xl font-black italic tracking-tighter uppercase leading-tight bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-4`}>
                           {rankInfo.title}
                         </h2>
                       </div>
                       
-                      <div className="h-px w-32 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent mx-auto" />
+                      <div className="h-px w-24 sm:w-32 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent mx-auto" />
                       
-                      <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.25em] max-w-[320px] leading-relaxed mx-auto">
-                        High Command Status Confirmed.<br />
-                        <span className="text-zinc-400">Node Session V4.0 Initialized.</span>
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-zinc-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.25em] max-w-[280px] sm:max-w-[320px] leading-relaxed mx-auto">
+                          Visionary of the VSAV Ecosystem.<br />
+                          <span className="text-zinc-400">Node Session V4.0 Initialized.</span>
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   {/* PREMIUM ACTION BUTTON */}
                   <button
                     onClick={handleClose}
-                    className="relative mt-10 py-7 rounded-[2rem] bg-white text-black font-black uppercase tracking-[0.6em] text-[11px] hover:scale-105 active:scale-95 transition-all overflow-hidden group/btn shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
+                    className="relative mt-6 sm:mt-10 py-5 sm:py-7 rounded-[2rem] bg-white text-black font-black uppercase tracking-[0.6em] text-[9px] sm:text-[11px] hover:scale-105 active:scale-95 transition-all overflow-hidden group/btn shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                     <span className="relative z-10">ENTER_DASHBOARD</span>
