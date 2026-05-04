@@ -81,16 +81,20 @@ const POLLINATIONS_TEXT_MODEL = "openai"; // High-reliability text model from Po
  */
 const callPollinationsText = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('https://text.pollinations.ai/', {
+    const response = await fetch('https://text.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }],
-        model: POLLINATIONS_TEXT_MODEL,
-        jsonMode: true
+        model: "openai", // Use 'openai' for stable JSON output
+        seed: Math.floor(Math.random() * 1000000) // Random seed for fresh responses
       })
     });
-    return await response.text();
+    
+    if (!response.ok) throw new Error(`Pollinations API Error: ${response.status}`);
+    
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
   } catch (error) {
     console.error("Pollinations Text API Failure:", error);
     throw error;
