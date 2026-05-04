@@ -73,6 +73,29 @@ const cleanAndParseJSON = (text: string): any => {
 
 const AI_GATEWAY_URL = getConfiguredAIGatewayUrl();
 const POLLINATIONS_IMAGE_MODEL = "pollinations-flux-schnell";
+const POLLINATIONS_TEXT_MODEL = "openai"; // High-reliability text model from Pollinations
+
+/**
+ * Helper to call Pollinations.ai Text API
+ * This ensures we use the Pollinations ecosystem for text generation.
+ */
+const callPollinationsText = async (prompt: string): Promise<string> => {
+  try {
+    const response = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }],
+        model: POLLINATIONS_TEXT_MODEL,
+        jsonMode: true
+      })
+    });
+    return await response.text();
+  } catch (error) {
+    console.error("Pollinations Text API Failure:", error);
+    throw error;
+  }
+};
 
 const getGatewayAuthHeaders = async () => {
   if (!AI_GATEWAY_URL) {
@@ -250,10 +273,8 @@ export const aiService = {
     `;
 
     try {
-      const briefing = await modelRouter.generateJSON(systemPrompt, {
-        tier: 'premium',
-        model: 'qwen-coder'
-      });
+      const rawResponse = await callPollinationsText(systemPrompt);
+      const briefing = cleanAndParseJSON(rawResponse);
 
       if (!briefing || !briefing.greeting) throw new Error("Invalid or empty JSON from AI");
 
@@ -476,11 +497,8 @@ export const aiService = {
         - Overdue Tasks: ${stats.overdueTasks}
         - Completion Rate: ${stats.completionRate}%
       `;
-      const result = await modelRouter.generateJSON(systemPrompt, { 
-        tier: 'premium',
-        model: 'qwen-coder'
-      });
-      return result || null;
+      const rawResponse = await callPollinationsText(systemPrompt);
+      return cleanAndParseJSON(rawResponse);
     } catch (e) {
       console.error("Burnout Predictor Error", e);
       return null;
