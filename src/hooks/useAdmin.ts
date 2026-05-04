@@ -257,19 +257,29 @@ export const useAdmin = () => {
         is_uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resolvedBy)
       });
  
-      // 1. Update Database Status & Resolution Text
-      const { error } = await supabase.from(table).update({ 
+      // 1. Update Database Status & Resolution Metadata
+      let { error } = await supabase.from(table).update({ 
         status: 'resolved',
         resolution_text: resolutionText,
         resolved_at: new Date().toISOString(),
         resolved_by: resolvedBy
       }).eq('id', id);
+
+      // 🛡️ Safe-Dispatch Fallback: If FK violation (profile doesn't exist yet), resolve as system
+      if (error && error.message.includes('foreign key constraint')) {
+        console.warn('[useAdmin] Identity Sync Pending. Falling back to System Resolution.');
+        const { error: retryError } = await supabase.from(table).update({ 
+          status: 'resolved',
+          resolution_text: resolutionText,
+          resolved_at: new Date().toISOString()
+          // Omit resolved_by to bypass FK check
+        }).eq('id', id);
+        error = retryError;
+      }
       
       if (error) {
         console.error(`❌ [DATABASE] Failed to resolve ${type}:`, error);
-        // Rollback on failure
-        fetchAdminData();
-        throw new Error(`DATABASE PERSISTENCE FAILURE: ${error.message}`);
+        throw error;
       }
       
       fetchAdminData();

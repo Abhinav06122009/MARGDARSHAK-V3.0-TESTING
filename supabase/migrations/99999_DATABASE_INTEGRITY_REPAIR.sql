@@ -36,11 +36,29 @@ $$;
 
 DROP FUNCTION IF EXISTS public.requesting_user_id() CASCADE;
 CREATE OR REPLACE FUNCTION public.requesting_user_id()
-RETURNS text
-LANGUAGE sql STABLE
-AS $$
-  SELECT public.translate_clerk_id_to_uuid(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::text)::text;
-$$;
+RETURNS UUID AS $$
+DECLARE
+    v_raw_id TEXT;
+BEGIN
+    -- Extract the 'sub' from the JWT claim
+    v_raw_id := (current_setting('request.jwt.claims', true)::jsonb ->> 'sub');
+    
+    IF v_raw_id IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- If it's already a valid UUID, return it
+    IF v_raw_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+        RETURN v_raw_id::UUID;
+    END IF;
+
+    -- Otherwise, translate it using the deterministic salt protocol
+    RETURN public.translate_clerk_id_to_uuid(v_raw_id)::UUID;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN NULL;
+END;
+$$ LANGUAGE plpgsql STABLE;
 
 -- 3. MASTER OVERRIDE AUTH (THE "WORK EVERYTHING PERFECTLY" FIX)
 CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)

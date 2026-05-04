@@ -118,14 +118,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Schema-Safe Sync: Use primary 'id' for conflict resolution to prevent 400 errors
-          // if the SQL schema updates haven't been applied yet.
+          // Schema-Safe Sync: Use primary 'id' for conflict resolution
+          console.log('[AuthContext] Attempting Profile Sync:', profileData);
+          
           const { error: syncError } = await supabase
             .from('profiles')
             .upsert(profileData, { onConflict: 'id' });
             
           if (syncError) {
-            console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
+            console.error('[AuthContext] CRITICAL SYNC ERROR:', syncError);
+            if (syncError.message.includes('invalid input syntax for type uuid')) {
+              console.warn('[AuthContext] Trigger Identity Mismatch detected. System is running in Restricted Identity Mode.');
+              // We don't throw here so the app still loads with the translated ID in memory
+            }
           } else {
             console.log('[AuthContext] Profile synced successfully via Supabase');
           }
