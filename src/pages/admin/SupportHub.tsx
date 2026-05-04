@@ -84,6 +84,7 @@ const SupportHub = () => {
 
       const result = await emailService.sendDirect({
         to: ticket.email,
+        from: 'support@margdarshan.tech',
         subject,
         html: htmlBody
       });
@@ -172,6 +173,7 @@ const SupportHub = () => {
 
       await emailService.sendDirect({
         to: ticket.email,
+        from: 'support@margdarshan.tech',
         subject,
         html: htmlBody
       });
