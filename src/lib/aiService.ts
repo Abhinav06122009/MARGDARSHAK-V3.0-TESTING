@@ -75,7 +75,7 @@ const cleanAndParseJSON = (text: string): any => {
  */
 const callPollinationsText = async (messages: any[], jsonMode = false): Promise<string> => {
   try {
-    const response = await fetch('https://text.pollinations.ai/v1/chat/completions', {
+    const response = await fetch('https://text.pollinations.ai/', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -91,8 +91,7 @@ const callPollinationsText = async (messages: any[], jsonMode = false): Promise<
     
     if (!response.ok) throw new Error(`Pollinations API Error: ${response.status}`);
     
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || "";
+    return await response.text();
   } catch (error) {
     console.error("Pollinations Universal Call Failure:", error);
     throw error;
