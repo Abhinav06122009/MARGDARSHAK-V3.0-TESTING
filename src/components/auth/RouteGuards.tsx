@@ -4,6 +4,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { AdminContext } from '@/contexts/AdminContext';
 import { courseService } from '@/components/dashboard/courseService';
 import { BlockedUserOverlay } from './BlockedUserOverlay';
+import NotFound from '@/pages/NotFound';
 
 /**
  * High-fidelity full-screen loading indicator.
@@ -147,8 +148,6 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
   if (authLoading || isPremium === null) return <PageLoader />;
   return isPremium ? <>{children}</> : null;
 };
-
-import NotFound from '@/pages/NotFound';
 
 /**
  * Ensures user has admin privileges.

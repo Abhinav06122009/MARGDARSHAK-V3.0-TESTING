@@ -48,6 +48,7 @@ import Analytics from '@/pages/admin/Analytics';
 import SupportCenter from '@/pages/admin/SupportCenter';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import CommandCenter from '@/pages/admin/CommandCenter';
+import SupportNexus from '@/pages/admin/SupportNexus';
 
 // Features - eagerly loaded
 import Tasks from "@/components/tasks/Tasks";

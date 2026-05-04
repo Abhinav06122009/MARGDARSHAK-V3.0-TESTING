@@ -22,7 +22,8 @@ import {
   Activity,
   ChevronRight,
   RefreshCw,
-  Terminal
+  Terminal,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -138,7 +139,7 @@ const SupportNexus = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <RefreshCw className={`w-3 h-3 text-zinc-600 ${loading ? 'animate-spin text-blue-500' : ''}`} />
-                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest italic">Neural Pulse: {lastSync.toLocaleTimeString()}</p>
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest italic">Neural Pulse: {lastSync instanceof Date ? lastSync.toLocaleTimeString() : 'SYNCHRONIZING...'}</p>
               </div>
               <span className="text-zinc-800">|</span>
               <p className="text-[8px] font-black text-blue-500/50 uppercase tracking-[0.3em] italic">Grade: {role.toUpperCase()}</p>
