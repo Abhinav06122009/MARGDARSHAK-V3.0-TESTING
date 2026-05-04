@@ -81,7 +81,8 @@ const SupportHub = () => {
 
             <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
               <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.025em;">Margdarshak Support Team</p>
+              <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.025em;">${rank}</p>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">VSAV GYANTAPA SUPPORT TEAM</p>
             </div>
           </div>
 
@@ -185,7 +186,8 @@ const SupportHub = () => {
 
             <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
               <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.025em;">Margdarshak Administration</p>
+              <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.025em;">${rank}</p>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">VSAV GYANTAPA SUPPORT TEAM</p>
             </div>
           </div>
 
