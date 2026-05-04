@@ -60,6 +60,9 @@ const SupportHub = () => {
       
       // Update Database with Resolution Text First
       await resolveTicket(ticket.id, ticket.type, resolutionResponse);
+      toast.success('DATABASE SYNCHRONIZED', {
+        description: `Ticket status successfully updated to RESOLVED in Supabase.`,
+      });
 
       // Automated API Dispatch Bridge (Resend)
       const subject = `RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`;
@@ -165,6 +168,9 @@ const SupportHub = () => {
 
       // 1. Update Database Status & Resolution (Escalation) Text
       await escalateTicket(ticket.id, ticket.type, resolutionResponse);
+      toast.success('DATABASE SYNCHRONIZED', {
+        description: `Ticket status successfully updated to ESCALATED in Supabase.`,
+      });
 
       // 2. Automated API Dispatch Bridge (Resend)
       const subject = `ALERT: ${ticket.subject || 'Support Inquiry'} [ESCALATED]`;
