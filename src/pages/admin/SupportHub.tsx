@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { emailService } from '@/services/email-service';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PremiumIDCard from '@/components/settings/PremiumIDCard';
@@ -43,47 +44,63 @@ const SupportHub = () => {
   });
 
   const handleResolve = async (ticket: SupportTicket) => {
+    if (!resolutionResponse) {
+      toast.error('Tactical Error', { description: 'Resolution notes required for dispatch.' });
+      return;
+    }
+
     try {
       const officialName = user?.fullName || 'Official Sentinel';
       const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
       
-      // Update Database with Resolution Text
+      // Update Database with Resolution Text First
       await resolveTicket(ticket.id, ticket.type, resolutionResponse);
 
-      // Automated API Dispatch Bridge
-      const emailApiKey = import.meta.env.VITE_EMAIL_API_KEY;
-      if (emailApiKey) {
-        toast.promise(
-          // Simulating the API call to Resend/SendGrid
-          new Promise((resolve) => setTimeout(resolve, 1500)),
-          {
-            loading: 'AUTOMATED DISPATCH IN PROGRESS...',
-            success: 'DIRECT EMAIL TRANSMITTED VIA API',
-            error: 'API DISPATCH FAILED - USE MANUAL BACKUP',
-          }
-        );
+      // Automated API Dispatch Bridge (Resend)
+      const subject = `RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`;
+      const htmlBody = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #09090b; color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #27272a;">
+          <h1 style="color: #10b981; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Official Resolution</h1>
+          <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">Your inquiry regarding "<strong>${ticket.message?.slice(0, 50)}...</strong>" has been formally reviewed and marked as RESOLVED by our strategic operations team.</p>
+          
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; margin-bottom: 32px;">
+            <h2 style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Official Response</h2>
+            <p style="color: #ffffff; font-size: 13px; font-weight: 500; line-height: 1.6; margin: 0;">${resolutionResponse}</p>
+          </div>
+
+          <div style="border-top: 1px solid #27272a; padding-top: 24px;">
+            <p style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Signatory</p>
+            <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0;">${officialName} [${rank}]</p>
+            <p style="color: #71717a; font-size: 12px; margin: 4px 0 0 0;">VSAV GYANTAPA SUPPORT TEAM</p>
+            <p style="color: #3f3f46; font-size: 10px; margin-top: 16px;">REF_ID: ${ticket.id}</p>
+          </div>
+        </div>
+      `;
+
+      const result = await emailService.sendDirect({
+        to: ticket.email,
+        subject,
+        html: htmlBody
+      });
+
+      if (result.success) {
+        toast.success('AUTOMATED DISPATCH SUCCESSFUL', {
+          description: `Strategic resolution transmitted to ${ticket.email} via direct API.`,
+        });
       } else {
-        // Fallback to Mailto Protocol if no API Key is provided
-        const subject = encodeURIComponent(`RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`);
-        const body = encodeURIComponent(
-          `Dear User,\n\n` +
-          `Your inquiry regarding "${ticket.message?.slice(0, 50)}..." has been formally reviewed and marked as RESOLVED by our strategic operations team.\n\n` +
-          `OFFICIAL RESOLUTION:\n` +
-          `${resolutionResponse}\n\n` +
-          `--- OFFICIAL DISPATCH ---\n` +
-          `SIGNATORY: ${officialName}\n` +
-          `RANK: ${rank}\n` +
-          `ENTITY: VSAV GYANTAPA SUPPORT TEAM\n` +
-          `REF_ID: ${ticket.id}\n\n` +
-          `Best Regards,\n` +
-          `Margdarshak Technical Support`
+        // Fallback to Mailto Protocol if API fails
+        console.warn('Falling back to mailto protocol...');
+        const mailtoSubject = encodeURIComponent(subject);
+        const mailtoBody = encodeURIComponent(
+          `OFFICIAL RESOLUTION:\n${resolutionResponse}\n\nSigned by: ${officialName} [${rank}]`
         );
-        window.location.href = `mailto:${ticket.email}?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:${ticket.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
+        
+        toast.info('MANUAL DISPATCH REQUIRED', {
+          description: `Direct API transmission paused. External mail application initialized.`,
+        });
       }
       
-      toast.success('RESOLUTION ARCHIVED', {
-        description: `Status updated and signature appended to official logs.`,
-      });
       setResolutionResponse('');
       setSelectedTicket(null);
     } catch (err) {
