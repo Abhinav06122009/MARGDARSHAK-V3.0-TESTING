@@ -29,6 +29,7 @@ const SupportHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [resolutionResponse, setResolutionResponse] = useState('');
 
   const filteredTickets = (tickets || []).filter(ticket => {
     const matchesSearch = 
@@ -51,6 +52,8 @@ const SupportHub = () => {
       const body = encodeURIComponent(
         `Dear User,\n\n` +
         `Your inquiry regarding "${ticket.message?.slice(0, 50)}..." has been formally reviewed and marked as RESOLVED by our strategic operations team.\n\n` +
+        `OFFICIAL RESOLUTION:\n` +
+        `${resolutionResponse}\n\n` +
         `--- OFFICIAL DISPATCH ---\n` +
         `SIGNATORY: ${officialName}\n` +
         `RANK: ${rank}\n` +
@@ -67,6 +70,7 @@ const SupportHub = () => {
       toast.success('OFFICIAL DISPATCH INITIALIZED', {
         description: `Mailing resolution from support@margdarshan.tech. Signed by: ${officialName} [${rank}]`,
       });
+      setResolutionResponse('');
       setSelectedTicket(null);
     } catch (err) {
       toast.error('DISPATCH FAILURE', { description: 'Could not synchronize resolution status.' });
@@ -79,6 +83,7 @@ const SupportHub = () => {
       toast.info('ESCALATION PROTOCOL ACTIVE', {
         description: `Ticket #${ticket.id.slice(0, 8)} has been routed to the SUPPORT-NEXUS for High-Command review.`,
       });
+      setResolutionResponse('');
       setSelectedTicket(null);
     } catch (err) {
       toast.error('ESCALATION FAILURE', { description: 'Could not route ticket to Nexus.' });
@@ -241,18 +246,31 @@ const SupportHub = () => {
 
                   <div className="space-y-4">
                     <div className="p-5 bg-white/[0.03] border border-white/5 rounded-2xl">
+                      <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2 italic">User Message</h4>
                       <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">
                         "{selectedTicket.message}"
                       </p>
                     </div>
 
+                    <div className="space-y-3">
+                      <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">Official Resolution / Response</label>
+                      <textarea
+                        rows={4}
+                        value={resolutionResponse}
+                        onChange={(e) => setResolutionResponse(e.target.value)}
+                        placeholder="WRITE OFFICIAL RESOLUTION OR ESCALATION NOTES..."
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-[11px] font-medium text-white placeholder:text-zinc-800 focus:outline-none focus:border-emerald-500/30 transition-all resize-none"
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <Button 
                         onClick={() => handleResolve(selectedTicket)}
-                        className="bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-2xl h-14 shadow-xl shadow-emerald-500/10"
+                        disabled={!resolutionResponse}
+                        className="bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-2xl h-14 shadow-xl shadow-emerald-500/10 disabled:opacity-30"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Resolve Dispatch
+                        Resolve & Mail
                       </Button>
                       <Button 
                         variant="outline"
@@ -260,7 +278,7 @@ const SupportHub = () => {
                         className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] rounded-2xl h-14"
                       >
                         <ArrowUpRight className="w-4 h-4 mr-2" />
-                        Escalate to Nexus
+                        Escalate
                       </Button>
                     </div>
                   </div>
