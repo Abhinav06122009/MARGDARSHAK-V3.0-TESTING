@@ -286,7 +286,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
           <div className="flex flex-col gap-1.5 relative z-10 mb-8">
             <span className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase italic">Universal Identity Node</span>
             <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none drop-shadow-2xl">
-              {profile?.full_name || 'AUTHENTICATING...'}
+              {fullName || 'AUTHENTICATING...'}
             </h2>
           </div>
 
