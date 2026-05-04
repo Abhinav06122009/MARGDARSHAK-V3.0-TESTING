@@ -115,10 +115,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Direct sync with Supabase with explicit conflict resolution
+          // Schema-Safe Sync: Use primary 'id' for conflict resolution to prevent 400 errors
+          // if the SQL schema updates haven't been applied yet.
           const { error: syncError } = await supabase
             .from('profiles')
-            .upsert(profileData, { onConflict: 'clerk_id' });
+            .upsert(profileData, { onConflict: 'id' });
             
           if (syncError) {
             console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
