@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Monitor, Smartphone, Archive, Shield, Zap, CheckCircle } from 'lucide-react';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import GlobalFooter from '@/components/layout/GlobalFooter';
+import { SoundProvider } from '@/components/landing/SoundContext';
+import { CustomCursor, ScrollProgressBar } from '@/components/landing/UIEffects';
 
-const DownloadPage = () => {
+const DownloadPageContent = () => {
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
   const downloads = [
     {
       title: "Windows Application",
@@ -49,7 +57,9 @@ const DownloadPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-blue-500/30">
+    <div className={`min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 ${!isTouch ? 'cursor-none' : ''}`}>
+      {!isTouch && <CustomCursor />}
+      <ScrollProgressBar />
       <LandingHeader />
 
       <main className="relative pt-20 pb-32 overflow-hidden">
@@ -161,5 +171,11 @@ const DownloadPage = () => {
     </div>
   );
 };
+
+const DownloadPage = () => (
+  <SoundProvider>
+    <DownloadPageContent />
+  </SoundProvider>
+);
 
 export default DownloadPage;
