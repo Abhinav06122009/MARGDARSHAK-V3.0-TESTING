@@ -105,18 +105,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const profileData: any = {
             id: translatedId,
-            clerk_id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
             user_type: role,
-            subscription_tier: tier,
             updated_at: new Date().toISOString()
           };
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Surgical Sync: Use the translated UUID for maximum stability
+          // Surgical Sync: Use only the stable primary UUID
           const { data: existingProfile } = await supabase
             .from('profiles')
             .select('id')
@@ -126,22 +124,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           let syncError = null;
 
           if (existingProfile) {
-            // Update existing profile - Targeted by primary UUID
+            // Update existing profile - Safe columns only
             const { error } = await supabase
               .from('profiles')
               .update({
-                clerk_id: clerkUser.id,
                 email: profileData.email,
                 full_name: profileData.full_name,
                 avatar_url: profileData.avatar_url,
                 user_type: profileData.user_type,
-                subscription_tier: profileData.subscription_tier,
                 updated_at: profileData.updated_at
               })
               .eq('id', translatedId);
             syncError = error;
           } else {
-            // Insert new profile
+            // Insert new profile - Safe columns only
             const { error } = await supabase
               .from('profiles')
               .insert([profileData]);
