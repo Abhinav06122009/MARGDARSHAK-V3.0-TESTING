@@ -111,18 +111,29 @@ const StudyPlanner: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       ? `Exam is in ${daysUntilExam} days (${config.examDate})`
       : 'No specific exam date (general study plan for 7 days)';
 
-    const prompt = `Synthesize a high-density study plan for: ${config.subjects}.
-Deadline: ${daysInfo}.
+    const daysCount = daysUntilExam > 0 ? daysUntilExam : 7;
+    const prompt = `Synthesize a high-density, professional academic study plan for: ${config.subjects}.
+Duration: ${daysCount} days.
+Context: ${daysInfo}.
 Available: ${config.dailyHours}h/day.
-Focus: ${config.weakAreas || 'Balanced'}.
-Style: ${config.studyStyle}.
+Focus Areas: ${config.weakAreas || 'Balanced approach'}.
+Instructional Style: ${config.studyStyle}.
 
-Generate a 7-day schedule. Return ONLY valid JSON:
+Generate a comprehensive ${daysCount}-day schedule covering every day from now until the deadline.
+Return ONLY a valid JSON object with this structure:
 {
-  "overview": "Summary",
-  "schedule": [{"day": "Day 1", "sessions": [{"time": "Slot", "subject": "Topic", "activity": "Task", "duration": "Duration"}], "totalHours": 0}],
-  "tips": ["Tip 1", "Tip 2"],
-  "milestones": ["M1"]
+  "overview": "A professional strategic executive summary of the plan",
+  "schedule": [
+    {
+      "day": "Day 1", 
+      "sessions": [
+        {"time": "09:00 AM", "subject": "Topic Name", "activity": "Specific Study Task", "duration": "1.5h"}
+      ], 
+      "totalHours": 1.5
+    }
+  ],
+  "tips": ["Strategic tip 1", "Strategic tip 2"],
+  "milestones": ["Key milestone to reach by Day X"]
 }`;
 
     try {
