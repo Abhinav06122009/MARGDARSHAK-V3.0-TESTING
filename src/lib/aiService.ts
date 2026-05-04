@@ -60,8 +60,14 @@ const POLLINATIONS_IMAGE_MODEL = "pollinations-flux-schnell";
  */
 const cleanAndParseJSON = (text: string): any => {
   try {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
+    const startObj = text.indexOf("{");
+    const startArr = text.indexOf("[");
+    const start = (startObj !== -1 && (startArr === -1 || startObj < startArr)) ? startObj : startArr;
+    
+    const endObj = text.lastIndexOf("}");
+    const endArr = text.lastIndexOf("]");
+    const end = (endObj !== -1 && (endArr === -1 || endObj > endArr)) ? endObj : endArr;
+
     if (start === -1 || end === -1) return null;
     return JSON.parse(text.substring(start, end + 1));
   } catch (err) {

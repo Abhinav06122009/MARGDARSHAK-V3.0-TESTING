@@ -65,9 +65,15 @@ export const modelRouter = {
     const raw = await modelRouter.complete(jsonPrompt, { ...options, jsonMode: true });
     
     try {
-      // Basic cleaning for JSON
-      const start = raw.indexOf("{");
-      const end = raw.lastIndexOf("}");
+      // Robust cleaning for both Objects and Arrays
+      const startObj = raw.indexOf("{");
+      const startArr = raw.indexOf("[");
+      const start = (startObj !== -1 && (startArr === -1 || startObj < startArr)) ? startObj : startArr;
+      
+      const endObj = raw.lastIndexOf("}");
+      const endArr = raw.lastIndexOf("]");
+      const end = (endObj !== -1 && (endArr === -1 || endObj > endArr)) ? endObj : endArr;
+
       if (start === -1 || end === -1) return null;
       return JSON.parse(raw.substring(start, end + 1)) as T;
     } catch (e) {
