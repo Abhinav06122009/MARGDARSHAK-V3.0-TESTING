@@ -210,7 +210,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
         {/* CLEAN GRADIENTS */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-fuchsia-500/5 pointer-events-none" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')] opacity-20 pointer-events-none" />
-one" />
+
 
         {/* ROLE RIBBON: Perfectly Anchored */}
         <div className="absolute top-10 left-0 z-40">
