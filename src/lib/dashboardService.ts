@@ -95,7 +95,7 @@ export const dashboardService = {
         supabase.from('courses').select('*').eq('user_id', translatedId),
         (supabase.from('timetable_events' as any) as any).select('*').eq('user_id', translatedId),
         (supabase.rpc('get_my_calendar_events' as any) as any),
-        supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
+        supabase.from('profiles').select('id, full_name, email, user_type').eq('id', translatedId).maybeSingle()
       ]);
 
       // Map RPC result to the expected format

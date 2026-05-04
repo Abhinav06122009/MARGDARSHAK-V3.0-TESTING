@@ -174,7 +174,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     if (sessionLoaded && userLoaded && clerkUser) {
-      syncProfile();
+      // syncProfile(); // DEACTIVATED: Prevent schema-related 400 errors until audit complete
+      console.log('[AUTH] Background sync paused for stability.');
     }
   }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
 

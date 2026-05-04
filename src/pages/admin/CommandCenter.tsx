@@ -24,7 +24,8 @@ import {
   Edit3,
   Save,
   X,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
