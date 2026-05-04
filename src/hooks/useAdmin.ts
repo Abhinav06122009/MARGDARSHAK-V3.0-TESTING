@@ -242,6 +242,18 @@ export const useAdmin = () => {
       const { error } = await supabase.from('admin_reports').delete().eq('id', id);
       if (error) throw error;
       fetchAdminData();
+    },
+    resolveTicket: async (id: string, type: 'contact' | 'ticket') => {
+      const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
+      const { error } = await supabase.from(table).update({ status: 'resolved' }).eq('id', id);
+      if (error) throw error;
+      fetchAdminData();
+    },
+    escalateTicket: async (id: string, type: 'contact' | 'ticket') => {
+      const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
+      const { error } = await supabase.from(table).update({ status: 'escalated' }).eq('id', id);
+      if (error) throw error;
+      fetchAdminData();
     }
   };
 };

@@ -24,41 +24,65 @@ import { useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 
 const SupportHub = () => {
-  const { tickets = [], loading, refresh } = useAdmin();
+  const { tickets = [], loading, refresh, resolveTicket, escalateTicket } = useAdmin();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
 
-  const filteredTickets = tickets.filter(ticket => {
+  const filteredTickets = (tickets || []).filter(ticket => {
     const matchesSearch = 
-      ticket.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.message?.toLowerCase().includes(searchQuery.toLowerCase());
+      (ticket.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.message || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesFilter = filterStatus === 'all' || ticket.status === filterStatus;
     
     return matchesSearch && matchesFilter;
   });
 
-  const handleResolve = (ticket: SupportTicket) => {
-    const officialName = user?.fullName || 'Official Sentinel';
-    const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
-    
-    toast.success('OFFICIAL DISPATCH INITIALIZED', {
-      description: `Mailing resolution from support@margdarshan.tech. Signed by: ${officialName} [${rank}] | VSAV GYANTAPA SUPPORT TEAM`,
-      duration: 5000,
-    });
-    
-    // In a real app, this would call an API to send the email and update the ticket status
-    setTimeout(() => refresh(), 1000);
+  const handleResolve = async (ticket: SupportTicket) => {
+    try {
+      const officialName = user?.fullName || 'Official Sentinel';
+      const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
+      
+      // Professional Email Dispatch Protocol
+      const subject = encodeURIComponent(`RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`);
+      const body = encodeURIComponent(
+        `Dear User,\n\n` +
+        `Your inquiry regarding "${ticket.message?.slice(0, 50)}..." has been formally reviewed and marked as RESOLVED by our strategic operations team.\n\n` +
+        `--- OFFICIAL DISPATCH ---\n` +
+        `SIGNATORY: ${officialName}\n` +
+        `RANK: ${rank}\n` +
+        `ENTITY: VSAV GYANTAPA SUPPORT TEAM\n` +
+        `REF_ID: ${ticket.id}\n\n` +
+        `Best Regards,\n` +
+        `Margdarshak Technical Support`
+      );
+      
+      window.location.href = `mailto:${ticket.email}?subject=${subject}&body=${body}`;
+
+      await resolveTicket(ticket.id, ticket.type);
+      
+      toast.success('OFFICIAL DISPATCH INITIALIZED', {
+        description: `Mailing resolution from support@margdarshan.tech. Signed by: ${officialName} [${rank}]`,
+      });
+      setSelectedTicket(null);
+    } catch (err) {
+      toast.error('DISPATCH FAILURE', { description: 'Could not synchronize resolution status.' });
+    }
   };
 
-  const handleEscalate = (ticket: SupportTicket) => {
-    toast.info('ESCALATION PROTOCOL ACTIVE', {
-      description: `Ticket #${ticket.id.slice(0, 8)} has been routed to the SUPPORT-NEXUS for High-Command review.`,
-    });
-    setTimeout(() => refresh(), 1000);
+  const handleEscalate = async (ticket: SupportTicket) => {
+    try {
+      await escalateTicket(ticket.id, ticket.type);
+      toast.info('ESCALATION PROTOCOL ACTIVE', {
+        description: `Ticket #${ticket.id.slice(0, 8)} has been routed to the SUPPORT-NEXUS for High-Command review.`,
+      });
+      setSelectedTicket(null);
+    } catch (err) {
+      toast.error('ESCALATION FAILURE', { description: 'Could not route ticket to Nexus.' });
+    }
   };
 
   return (
