@@ -24,7 +24,7 @@ import { useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 
 const SupportHub = () => {
-  const { tickets, loading, refresh } = useAdmin();
+  const { tickets = [], loading, refresh } = useAdmin();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('all');
@@ -183,9 +183,9 @@ const SupportHub = () => {
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.05] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
               <div className="relative z-10 scale-[0.85] -mx-10 -my-6">
-                 {user && (
+                 {user && user.profile && (
                    <PremiumIDCard 
-                     user={user} 
+                     user={user as any} 
                      fullName={user.fullName || ''} 
                      setFullName={() => {}} 
                      studentId={user.profile?.id?.slice(0,8) || '0000'} 
