@@ -1,11 +1,11 @@
 -- MASTER PLATFORM RESTORATION SCRIPT (ZENITH ARCHITECTURE)
--- VERSION 10.0: EMERGENCY RECOVERY OF DELETED SECURITY POLICIES
+-- VERSION 14.0: RESOLVES SYNC DEADLOCKS VIA PROACTIVE IDENTITY SCAN
 
--- 1. EXTENSIONS & SCHEMA
+-- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
 
--- 2. IDENTITY TRANSLATION (SALTED & HARDENED)
+-- 2. IDENTITY TRANSLATION (SALTED)
 DROP FUNCTION IF EXISTS public.translate_clerk_id_to_uuid(text) CASCADE;
 CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
 RETURNS text
@@ -14,6 +14,9 @@ AS $$
 DECLARE
     v_salt TEXT := 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
 BEGIN
+  IF p_clerk_id IS NULL OR p_clerk_id = '' THEN RETURN NULL; END IF;
+  
+  -- If already a UUID, return as is
   IF p_clerk_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
     RETURN p_clerk_id;
   END IF;
@@ -41,33 +44,36 @@ AS $$
   SELECT public.translate_clerk_id_to_uuid(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::text)::text;
 $$;
 
--- 3. ADMINISTRATIVE RPCs
-DROP FUNCTION IF EXISTS public.get_current_user_role() CASCADE;
-CREATE OR REPLACE FUNCTION public.get_current_user_role()
-RETURNS text
-LANGUAGE plpgsql SECURITY DEFINER
-AS $$
+-- 3. PROACTIVE IDENTITY MIGRATION ENGINE (THE DEADLOCK FIX)
+DO $$
+DECLARE
+    r RECORD;
+    v_new_id TEXT;
 BEGIN
-  RETURN (
-    SELECT user_type FROM public.profiles 
-    WHERE id::text = public.requesting_user_id()::text
-  );
-END;
-$$;
+    -- STEP 1: Find ANY profile whose ID does not match the salted translation of its Clerk ID
+    FOR r IN (
+        SELECT id, clerk_id, email, full_name, avatar_url, user_type 
+        FROM public.profiles 
+        WHERE id::text != public.translate_clerk_id_to_uuid(clerk_id)::text
+    ) LOOP
+        v_new_id := public.translate_clerk_id_to_uuid(r.clerk_id);
+        
+        -- A. Upsert the data into the CORRECT salted ID
+        INSERT INTO public.profiles (id, clerk_id, email, full_name, avatar_url, user_type)
+        VALUES (v_new_id, r.clerk_id, r.email, r.full_name, r.avatar_url, r.user_type)
+        ON CONFLICT (id) DO UPDATE SET 
+            user_type = EXCLUDED.user_type,
+            email = EXCLUDED.email;
 
-DROP FUNCTION IF EXISTS public.get_my_calendar_events() CASCADE;
-CREATE OR REPLACE FUNCTION public.get_my_calendar_events()
-RETURNS SETOF json
-LANGUAGE plpgsql SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN QUERY SELECT row_to_json(t) FROM (
-    SELECT * FROM public.profiles WHERE id = public.requesting_user_id()
-  ) t;
-END;
-$$;
+        -- B. Migrate referencing data
+        UPDATE public.tasks SET user_id = v_new_id::text WHERE user_id::text = r.id::text;
+        
+        -- C. Delete the ghost record (Clears the 409 Conflict)
+        DELETE FROM public.profiles WHERE id::text = r.id::text;
+    END LOOP;
+END $$;
 
--- 4. CORE TABLE RESTORATION (THE 404 FIX)
+-- 4. CORE TABLES
 CREATE TABLE IF NOT EXISTS public.profiles (
   id text primary key,
   clerk_id text unique,
@@ -90,7 +96,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   created_at timestamptz default now()
 );
 
--- 5. UNIFIED ADMIN CHECK (TYPE-SAFE)
+-- 5. ADMINISTRATIVE AUTH
 CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -102,18 +108,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 6. GLOBAL SECURITY RESTORATION (THE FIX)
+-- 6. SECURITY POLICIES
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policies
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can manage their own profiles" ON public.profiles;
 CREATE POLICY "Users can manage their own profiles" ON public.profiles FOR ALL USING (id::TEXT = public.requesting_user_id()::TEXT);
 
--- Tasks Policies
 DROP POLICY IF EXISTS "Users can manage their own tasks" ON public.tasks;
 CREATE POLICY "Users can manage their own tasks" ON public.tasks FOR ALL USING (user_id::TEXT = public.requesting_user_id()::TEXT);
 
