@@ -67,11 +67,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       console.warn('Admin role RPC unavailable', error);
     }
 
-    // Fetch profile data using translated ID.
+    // Fetch profile data using both translated UUID and raw Clerk ID for maximum resilience
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, email, user_type')
-      .eq('id', translatedId)
+      .select('id, full_name, email, user_type, clerk_id')
+      .or(`id.eq.${translatedId},clerk_id.eq.${userId}`)
       .maybeSingle();
 
     if (profileError) {

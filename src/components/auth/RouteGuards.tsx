@@ -167,15 +167,17 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
     }
 
     if (user) {
-      const role = (user.profile?.user_type || '').toLowerCase();
-      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
+      const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
+      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder'];
       const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
-      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin', 'admin']; // Re-added admin temporarily
+      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin', 'admin'];
       
-      const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
+      const isHighCommand = rawRoles.some(role => 
+        [...aPlusRoles, ...aRoles, ...bRoles].includes(role)
+      );
       
       if (!isHighCommand) {
-        console.warn(`[SECURITY] Restricted access attempt by ${role}. Reverting to dashboard.`);
+        console.warn(`[SECURITY] Restricted access attempt by roles: ${rawRoles.join(', ')}. Reverting to dashboard.`);
         navigate('/dashboard', { replace: true });
       }
     }
