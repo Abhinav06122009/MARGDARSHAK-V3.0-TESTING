@@ -10,6 +10,7 @@ const DownloadPage = () => {
       title: "Windows Application",
       description: "Complete desktop experience with offline support and system notifications.",
       filename: "MARGDARSHAK.exe",
+      downloadUrl: "https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING/releases/download/V3.0/MARGDARSHAK.exe", 
       icon: <Monitor className="w-8 h-8" />,
       size: "212 MB",
       version: "v3.0.1",
@@ -19,6 +20,7 @@ const DownloadPage = () => {
       title: "Windows Setup",
       description: "Standard installer for Windows with automatic updates and system integration.",
       filename: "Margdarshak_Setup.exe",
+      downloadUrl: "https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING/releases/download/V3.0/Margdarshak_Setup.exe",
       icon: <Download className="w-8 h-8" />,
       size: "917 MB",
       version: "v3.0.1",
@@ -28,6 +30,7 @@ const DownloadPage = () => {
       title: "Android Mobile App",
       description: "Stay productive on the go with our feature-rich mobile companion.",
       filename: "Margdarshak.apk",
+      downloadUrl: "https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING/releases/download/V3.0/Margdarshak.apk",
       icon: <Smartphone className="w-8 h-8" />,
       size: "7 MB",
       version: "v3.0.0",
@@ -37,6 +40,7 @@ const DownloadPage = () => {
       title: "Portable Version",
       description: "No installation required. Run MARGDARSHAK directly from any USB drive.",
       filename: "MARGDARSHAK_Portable.zip",
+      downloadUrl: "https://github.com/Abhinav06122009/MARGDARSHAK-V3.0-TESTING/releases/download/V3.0/MARGDARSHAK_Portable.zip",
       icon: <Archive className="w-8 h-8" />,
       size: "1.9 GB",
       version: "v3.0.1",
@@ -107,8 +111,9 @@ const DownloadPage = () => {
                 </div>
 
                 <a
-                  href={`/downloads/${item.filename}`}
-                  download
+                  href={item.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-bold py-4 px-6 rounded-2xl shadow-xl shadow-blue-900/20 group-hover:shadow-blue-500/20 transition-all duration-300"
                 >
                   <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
