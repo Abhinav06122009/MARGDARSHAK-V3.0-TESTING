@@ -166,7 +166,14 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
 
     if (user) {
       const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
-      const highCommand = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder', 'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+      const highCommand = [
+        'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 
+        'owner', 'owners', 
+        'co-founder', 'cofounder', 'co-founders', 'cofounders', 
+        'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 
+        'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 
+        'superadmin', 'superadmins', 'admin', 'admins'
+      ];
       
       const isAuthorized = rawRoles.some(role => highCommand.includes(role));
       
@@ -193,7 +200,14 @@ export const ClassCRoute = ({ children }: { children: React.ReactNode }) => {
     if (!user) { navigate('/auth', { replace: true }); return; }
 
     const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
-    const cRoles = ['admin', 'moderator', 'manager', 'hr', 'support_executive', 'supportexecutive'];
+    const cRoles = [
+      'admin', 'admins', 
+      'moderator', 'moderators', 
+      'manager', 'managers', 
+      'hr', 'human_resources',
+      'support_executive', 'supportexecutive', 'support_executives', 'supportexecutives',
+      'official', 'officials'
+    ];
     const isAuthorized = rawRoles.some(role => cRoles.includes(role));
     
     if (!isAuthorized) {
@@ -217,7 +231,14 @@ export const NexusRoute = ({ children }: { children: React.ReactNode }) => {
     if (!user) { navigate('/auth', { replace: true }); return; }
 
     const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
-    const nexusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder', 'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+    const nexusRoles = [
+      'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 
+      'owner', 'owners', 
+      'co-founder', 'cofounder', 'co-founders', 'cofounders', 
+      'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 
+      'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 
+      'superadmin', 'superadmins', 'admin', 'admins'
+    ];
     const isAuthorized = rawRoles.some(role => nexusRoles.includes(role));
     
     if (!isAuthorized) {
