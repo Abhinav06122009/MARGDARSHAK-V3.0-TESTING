@@ -25,7 +25,7 @@ import { useContext } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 
 const SupportHub = () => {
-  const { tickets = [], loading, refresh, resolveTicket, escalateTicket } = useAdmin();
+  const { tickets = [], loading, refresh, resolveTicket, escalateTicket, saveResolution } = useAdmin();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('pending');
@@ -67,7 +67,7 @@ const SupportHub = () => {
       const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
 
       // Update Database with Resolution Text First
-      await resolveTicket(ticket.id, ticket.type, resolutionResponse);
+      await resolveTicket(ticket.id, ticket.type, resolutionResponse, user?.id || 'anonymous_officer');
       toast.success('DATABASE SYNCHRONIZED', {
         description: `Ticket status successfully updated to RESOLVED in Supabase.`,
       });
@@ -165,6 +165,22 @@ const SupportHub = () => {
     } finally {
       setResolutionResponse('');
       setSelectedTicket(null);
+    }
+  };
+
+  const handleSaveDraft = async (ticket: SupportTicket) => {
+    if (!resolutionResponse) {
+      toast.error('Tactical Error', { description: 'Resolution content required for draft storage.' });
+      return;
+    }
+
+    try {
+      await saveResolution(ticket.id, ticket.type, resolutionResponse);
+      toast.success('DRAFT PERSISTED', {
+        description: `Resolution draft for #${ticket.id.slice(0, 8)} saved successfully.`,
+      });
+    } catch (error) {
+      toast.error('STORAGE FAILURE', { description: 'Could not synchronize draft to matrix.' });
     }
   };
 
@@ -420,23 +436,34 @@ const SupportHub = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
                       <Button
                         onClick={() => handleResolve(selectedTicket)}
                         disabled={!resolutionResponse}
-                        className="bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-2xl h-14 shadow-xl shadow-emerald-500/10 disabled:opacity-30"
+                        className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-2xl h-14 shadow-xl shadow-emerald-500/10 disabled:opacity-30"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Resolve & Mail
+                        Execute Resolve & Dispatch
                       </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleEscalate(selectedTicket)}
-                        className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] rounded-2xl h-14"
-                      >
-                        <ArrowUpRight className="w-4 h-4 mr-2" />
-                        Escalate
-                      </Button>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleSaveDraft(selectedTicket)}
+                          className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] rounded-2xl h-12"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 mr-2 text-emerald-500" />
+                          Save Draft
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEscalate(selectedTicket)}
+                          className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] rounded-2xl h-12"
+                        >
+                          <ArrowUpRight className="w-3.5 h-3.5 mr-2 text-amber-500" />
+                          Escalate
+                        </Button>
+                      </div>
                     </div>
                   </div>
 

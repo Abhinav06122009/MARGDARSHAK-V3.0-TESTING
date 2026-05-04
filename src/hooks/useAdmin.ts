@@ -244,7 +244,7 @@ export const useAdmin = () => {
       if (error) throw error;
       fetchAdminData();
     },
-    resolveTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
+    resolveTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string, resolvedBy: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
       
       // Optimistic UI: Update local state immediately so it "disappears" from pending
@@ -255,7 +255,9 @@ export const useAdmin = () => {
       // 1. Update Database Status & Resolution Text
       const { error } = await supabase.from(table).update({ 
         status: 'resolved',
-        resolution_text: resolutionText 
+        resolution_text: resolutionText,
+        resolved_at: new Date().toISOString(),
+        resolved_by: resolvedBy
       }).eq('id', id);
       
       if (error) {
@@ -270,25 +272,23 @@ export const useAdmin = () => {
 
     escalateTicket: async (id: string, type: 'contact' | 'ticket', escalationNote: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
-
-      // Optimistic UI: Update local state immediately
       setTickets(prev => prev.map(t => 
         t.id === id ? { ...t, status: 'escalated', resolution_text: escalationNote } : t
       ));
-      
-      // 1. Update Database Status
       const { error } = await supabase.from(table).update({ 
         status: 'escalated',
         resolution_text: escalationNote 
       }).eq('id', id);
-      
       if (error) {
-        console.error(`❌ [DATABASE] Failed to escalate ${type}:`, error);
-        // Rollback on failure
         fetchAdminData();
         throw new Error(`DATABASE PERSISTENCE FAILURE: ${error.message}`);
       }
-      
+      fetchAdminData();
+    },
+    saveResolution: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
+      const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
+      const { error } = await supabase.from(table).update({ resolution_text: resolutionText }).eq('id', id);
+      if (error) throw new Error(`DRAFT SAVING FAILURE: ${error.message}`);
       fetchAdminData();
     }
   };
