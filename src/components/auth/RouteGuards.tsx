@@ -168,12 +168,13 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
     }
 
     if (user) {
-      const role = (user.profile?.user_type || '').toLowerCase();
+      const role = (user.profile?.user_type || '').toLowerCase().trim();
       const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
       const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
       const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
       
       const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
+      console.log(`🏛️ [GUARD] Admin Access attempt. Role: [${role}], High-Command: ${isHighCommand}`);
       setIsAuthorized(isHighCommand);
     }
   }, [session, isAdmin, adminLoading, navigate, user]);
@@ -239,7 +240,7 @@ export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) =
     }
 
     if (user) {
-      const role = (user.profile?.user_type || '').toLowerCase();
+      const role = (user.profile?.user_type || '').toLowerCase().trim();
       const authorizedRoles = [
         'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder',
         'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
@@ -247,11 +248,9 @@ export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) =
         'moderator', 'staff', 'support_executive', 'manager', 'hr', 'admin'
       ];
       
-      if (authorizedRoles.includes(role)) {
-        setIsAuthorized(true);
-      } else {
-        setIsAuthorized(false);
-      }
+      const authorized = authorizedRoles.includes(role);
+      console.log(`🛡️ [GUARD] Access attempt to Support Nexus. Role: [${role}], Authorized: ${authorized}`);
+      setIsAuthorized(authorized);
     }
   }, [user, authLoading, adminLoading, session, isAdmin, navigate]);
 
