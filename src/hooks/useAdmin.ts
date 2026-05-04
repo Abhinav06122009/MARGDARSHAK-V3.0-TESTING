@@ -87,27 +87,16 @@ export const useAdmin = () => {
     setLoading(true);
 
     try {
-      const [
-        usersRes, 
-        threatsRes, 
-        reportsRes, 
-        blockedRes, 
-        ticketsRes,
-        supportTicketsRes,
-        settingsRes,
-        moderationRes,
-        analyticsRes
-      ] = await Promise.all([
-        supabase.from('profiles').select('*'),
-        supabase.from('security_threats').select('*'),
-        supabase.from('admin_reports').select('*'),
-        supabase.from('blocked_users').select('*'),
-        supabase.from('contact_messages').select('*'),
-        supabase.from('support_tickets').select('*'),
-        supabase.from('security_settings').select('*').eq('id', 'global').single(),
-        supabase.from('moderation_queue').select('*'),
-        supabase.from('daily_metrics').select('*')
-      ]);
+      // RESILIENT DATA INGESTION: Query each table individually to prevent monolithic failure
+      const usersRes = await supabase.from('profiles').select('*');
+      const threatsRes = await supabase.from('security_threats').select('*');
+      const reportsRes = await supabase.from('admin_reports').select('*');
+      const blockedRes = await supabase.from('blocked_users').select('*');
+      const contactMessagesRes = await supabase.from('contact_messages').select('*');
+      const supportTicketsRes = await supabase.from('support_tickets').select('*');
+      const settingsRes = await supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle();
+      const moderationRes = await supabase.from('moderation_queue').select('*');
+      const analyticsRes = await supabase.from('daily_metrics').select('*');
 
       if (usersRes.data) setUsers(usersRes.data);
       
@@ -125,8 +114,8 @@ export const useAdmin = () => {
         );
       }
 
-      if (ticketsRes.data || supportTicketsRes.data) {
-        const contactMsgs = (ticketsRes.data || []).map((m: any) => ({ ...m, type: 'contact' }));
+      if (contactMessagesRes.data || supportTicketsRes.data) {
+        const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ ...m, type: 'contact' }));
         const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ ...m, type: 'ticket', first_name: 'Ticket', last_name: `#${m.id.slice(0,4)}` }));
         
         setTickets([...contactMsgs, ...supportTkts]
