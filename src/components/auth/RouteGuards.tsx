@@ -182,7 +182,8 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
   if (adminLoading || (session && isAdmin && isAuthorized === null)) return <PageLoader />;
   
   if (session && isAdmin && isAuthorized === false) {
-    return <NotFound />;
+    navigate('/dashboard', { replace: true });
+    return null;
   }
 
   return session && isAdmin ? <>{children}</> : null;
@@ -216,7 +217,8 @@ export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
   if (authLoading || isAuthorized === null) return <PageLoader />;
   
   if (isAuthorized === false) {
-    return <NotFound />;
+    navigate('/dashboard', { replace: true });
+    return null;
   }
 
   return isAuthorized ? <>{children}</> : null;
@@ -257,7 +259,8 @@ export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) =
   if (authLoading || adminLoading || isAuthorized === null) return <PageLoader />;
   
   if (isAuthorized === false) {
-    return <NotFound />;
+    navigate('/dashboard', { replace: true });
+    return null;
   }
 
   return isAuthorized ? <>{children}</> : null;
