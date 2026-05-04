@@ -106,10 +106,33 @@ const SupportHub = () => {
         });
       }
       
+    } catch (error: any) {
+      console.error('❌ [EMAIL-SERVICE] Critical failure:', error);
+      
+      if (error.message?.includes('verify a domain')) {
+        toast.error('DOMAIN VERIFICATION REQUIRED', {
+          description: 'Resend is in Sandbox Mode. Please verify margdarshan.tech at resend.com/domains to send to external users.',
+          duration: 6000
+        });
+      } else {
+        toast.error('DISPATCH FAILURE', { 
+          description: error.message || 'Could not synchronize resolution status.' 
+        });
+      }
+      
+      // Fallback to mailto protocol
+      console.warn('Falling back to mailto protocol...');
+      const officialName = user?.fullName || 'Official Sentinel';
+      const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
+      const subject = `RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`;
+      const mailtoSubject = encodeURIComponent(subject);
+      const mailtoBody = encodeURIComponent(
+        `OFFICIAL RESOLUTION:\n${resolutionResponse}\n\nSigned by: ${officialName} [${rank}]`
+      );
+      window.location.href = `mailto:${ticket.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
+    } finally {
       setResolutionResponse('');
       setSelectedTicket(null);
-    } catch (err) {
-      toast.error('DISPATCH FAILURE', { description: 'Could not synchronize resolution status.' });
     }
   };
 
