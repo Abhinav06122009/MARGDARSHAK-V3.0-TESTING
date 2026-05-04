@@ -152,32 +152,36 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
  * Ensures user has admin privileges.
  */
 export const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const { session, isAdmin, loading: adminLoading } = useContext(AdminContext);
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!adminLoading && (!session || !isAdmin)) {
+    // Wait for both Auth and Admin contexts to stabilize
+    if (authLoading || adminLoading) return;
+
+    if (!session || !isAdmin) {
+      console.warn('[SECURITY] No active admin session. Redirecting to login.');
       navigate('/admin/login', { replace: true });
       return;
     }
 
-    if (user && !adminLoading) {
+    if (user) {
       const role = (user.profile?.user_type || '').toLowerCase();
       const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
       const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
-      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin', 'admin']; // Re-added admin temporarily
       
       const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
       
       if (!isHighCommand) {
-        console.warn(`[SECURITY] Restricted access attempt by ${role}`);
+        console.warn(`[SECURITY] Restricted access attempt by ${role}. Reverting to dashboard.`);
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [session, isAdmin, adminLoading, navigate, user]);
+  }, [session, isAdmin, adminLoading, authLoading, navigate, user]);
 
-  if (adminLoading) return <PageLoader />;
+  if (authLoading || adminLoading) return <PageLoader />;
   return session && isAdmin ? <>{children}</> : null;
 };
 

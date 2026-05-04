@@ -28,9 +28,14 @@ export const AdminContext = createContext<AdminContextValue>({
 });
 
 const ADMIN_ROLES = new Set([
-  'admin', 'superadmin', 'super_admin', 'owner',
-  'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio',
-  'moderator', 'staff', 'manager', 'executive'
+  // A+ CLASS
+  'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder',
+  // A CLASS
+  'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
+  // B CLASS
+  'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin',
+  // C CLASS
+  'admin', 'moderator', 'staff', 'manager', 'hr', 'support_executive', 'supportexecutive'
 ]);
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
