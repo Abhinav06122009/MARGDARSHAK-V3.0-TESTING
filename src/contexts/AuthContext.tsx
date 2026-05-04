@@ -98,7 +98,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               id: translatedId,
               clerk_id: clerkUser.id,
               subscription_tier: tier,
-              role: role
+              role: role,
+              user_type: role
             }
           });
 
