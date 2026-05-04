@@ -5,7 +5,20 @@
  */
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
-const API_KEY = import.meta.env.VITE_RESEND_API_KEY;
+
+// TACTICAL KEY RESOLUTION: Try ENV -> then LocalStorage -> then Hardcoded Fallback
+const getApiKey = () => {
+  const envKey = import.meta.env.VITE_RESEND_API_KEY;
+  if (envKey && envKey !== 'undefined') return envKey;
+  
+  const localKey = localStorage.getItem('VITE_RESEND_API_KEY');
+  if (localKey) return localKey;
+
+  // HARDCODED FALLBACK FOR IMMEDIATE PRODUCTION STABILIZATION
+  return 're_eb2xA2md_9sa47ToKJ863s9uU6Jtt8cQZ';
+};
+
+const API_KEY = getApiKey();
 
 export interface EmailPayload {
   to: string;
@@ -17,11 +30,13 @@ export interface EmailPayload {
 export const emailService = {
   sendDirect: async (payload: EmailPayload) => {
     if (!API_KEY) {
-      console.warn('⚠️ [EMAIL-SERVICE] No API key detected in .env');
+      console.warn('⚠️ [EMAIL-SERVICE] No API key detected in .env or localStorage');
       return { success: false, error: 'NO_API_KEY' };
     }
 
     try {
+      console.log('🛰️ [EMAIL-SERVICE] Dispatching via Resend API...');
+      
       const response = await fetch(RESEND_API_URL, {
         method: 'POST',
         headers: {
