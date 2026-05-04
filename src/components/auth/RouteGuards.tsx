@@ -167,21 +167,13 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (user) {
-      const role = (user.profile?.user_type || '').toLowerCase().trim();
-      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
-      const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
-      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
-      
-      const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
-      console.log(`🏛️ [GUARD] Admin Access attempt. Role: [${role}], High-Command: ${isHighCommand}`);
-      setIsAuthorized(isHighCommand);
-    }
-  }, [session, isAdmin, adminLoading, navigate, user]);
+    // If we have isAdmin, we are authorized. No need to double-check against AuthContext user.
+    setIsAuthorized(true);
+  }, [session, isAdmin, adminLoading, navigate]);
 
-  if (adminLoading || (session && isAdmin && isAuthorized === null)) return <PageLoader />;
+  if (adminLoading || isAuthorized === null) return <PageLoader />;
   
-  if (session && isAdmin && isAuthorized === false) {
+  if (isAuthorized === false) {
     return <Navigate to="/dashboard" replace />;
   }
 

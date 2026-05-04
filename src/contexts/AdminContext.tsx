@@ -57,64 +57,69 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     const translatedId = await translateClerkIdToUUID(userId);
 
     try {
-      // First attempt to get role via RPC
-      const { data, error: rpcError } = await supabase.rpc('get_current_user_role');
-      if (!rpcError && data) role = data;
-    } catch (error) {
-      console.warn('Admin role RPC unavailable', error);
+      try {
+        // First attempt to get role via RPC
+        const { data, error: rpcError } = await supabase.rpc('get_current_user_role');
+        if (!rpcError && data) role = data;
+      } catch (error) {
+        console.warn('Admin role RPC unavailable', error);
+      }
+
+      // Fetch profile data using translated ID.
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, user_type')
+        .eq('id', translatedId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("Failed to fetch admin profile:", profileError);
+      }
+
+      setProfile(profileData || null);
+      
+      // Check both the RPC role and the Profile role
+      // Support Clerk-based roles in metadata as a fallback
+      const metadata = clerkUser?.publicMetadata || {};
+      const rawClerkRole = metadata.role || (metadata as any).user_type || '';
+      
+      // Normalize Clerk roles to an array
+      const clerkRoles = Array.isArray(rawClerkRole) 
+        ? rawClerkRole 
+        : (typeof rawClerkRole === 'string' ? rawClerkRole.split(',').map(r => r.trim()) : []);
+      
+      const isRpcAdmin = role ? ADMIN_ROLES.has(role.toLowerCase()) : false;
+      
+      // Support multiple roles in Profile as well (comma-separated)
+      const profileRoles = profileData?.user_type?.split(',').map(r => r.trim()) || [];
+      const isProfileAdmin = profileRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
+      const isClerkAdmin = clerkRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
+      
+      const clerkRoleDisplay = Array.isArray(rawClerkRole) ? rawClerkRole.join(', ') : rawClerkRole;
+      
+      const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
+      const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
+      const isMaster = MASTER_EMAILS.includes(userEmail);
+      
+      const finalAdminStatus = isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster;
+
+      console.group(`🛡️ [ADMIN AUDIT] ${userEmail}`);
+      console.log(`STATUS: ${finalAdminStatus ? '✅ GRANTED' : '❌ DENIED'}`);
+      console.log(`1. RPC Role [${role}]: ${isRpcAdmin}`);
+      console.log(`2. Profile Role [${profileData?.user_type || 'none'}]: ${isProfileAdmin}`);
+      console.log(`3. Clerk Metadata [${clerkRoleDisplay || 'none'}]: ${isClerkAdmin}`);
+      console.log(`4. Master Override: ${isMaster}`);
+      if (finalAdminStatus && !isMaster) {
+        console.warn('⚠️ WARNING: Admin access granted via non-master role. Verify DB/Metadata integrity.');
+      }
+      console.groupEnd();
+
+      setIsAdmin(finalAdminStatus);
+    } catch (err) {
+      console.error("🚨 Critical Admin Context Failure:", err);
+    } finally {
+      setLoading(false);
     }
-
-    // Fetch profile data using translated ID.
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, user_type')
-      .eq('id', translatedId)
-      .maybeSingle();
-
-    if (profileError) {
-      console.error("Failed to fetch admin profile:", profileError);
-    }
-
-    setProfile(profileData || null);
-    
-    // Check both the RPC role and the Profile role
-    // Support Clerk-based roles in metadata as a fallback
-    const metadata = clerkUser?.publicMetadata || {};
-    const rawClerkRole = metadata.role || (metadata as any).user_type || '';
-    
-    // Normalize Clerk roles to an array
-    const clerkRoles = Array.isArray(rawClerkRole) 
-      ? rawClerkRole 
-      : (typeof rawClerkRole === 'string' ? rawClerkRole.split(',').map(r => r.trim()) : []);
-    
-    const isRpcAdmin = role ? ADMIN_ROLES.has(role.toLowerCase()) : false;
-    
-    // Support multiple roles in Profile as well (comma-separated)
-    const profileRoles = profileData?.user_type?.split(',').map(r => r.trim()) || [];
-    const isProfileAdmin = profileRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
-    const isClerkAdmin = clerkRoles.some(r => ADMIN_ROLES.has(r.toLowerCase()));
-    
-    const clerkRoleDisplay = Array.isArray(rawClerkRole) ? rawClerkRole.join(', ') : rawClerkRole;
-    
-    const MASTER_EMAILS = ['abhinavjha393@gmail.com'];
-    const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
-    const isMaster = MASTER_EMAILS.includes(userEmail);
-    
-    const finalAdminStatus = isRpcAdmin || isProfileAdmin || isClerkAdmin || isMaster;
-
-    console.group(`🛡️ [ADMIN AUDIT] ${userEmail}`);
-    console.log(`STATUS: ${finalAdminStatus ? '✅ GRANTED' : '❌ DENIED'}`);
-    console.log(`1. RPC Role [${role}]: ${isRpcAdmin}`);
-    console.log(`2. Profile Role [${profileData?.user_type || 'none'}]: ${isProfileAdmin}`);
-    console.log(`3. Clerk Metadata [${clerkRoleDisplay || 'none'}]: ${isClerkAdmin}`);
-    console.log(`4. Master Override: ${isMaster}`);
-    if (finalAdminStatus && !isMaster) {
-      console.warn('⚠️ WARNING: Admin access granted via non-master role. Verify DB/Metadata integrity.');
-    }
-    console.groupEnd();
-
-    setIsAdmin(finalAdminStatus);
-    setLoading(false);
   };
 
   useEffect(() => {
