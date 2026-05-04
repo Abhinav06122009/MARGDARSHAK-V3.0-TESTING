@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import logo from "@/components/logo/logo.png";
 
 const navItems = [
-  { to: '/admin', label: 'Command Center', icon: Shield },
+  { to: '/admin/command-center', label: 'Command Center', icon: Shield },
+  { to: '/admin/dashboard', label: 'Security Nexus', icon: Zap },
   { to: '/admin/users', label: 'Vanguard Registry', icon: Users },
   { to: '/admin/security', label: 'Security Protocols', icon: Lock },
   { to: '/admin/reports', label: 'Investigations', icon: FileSearch },

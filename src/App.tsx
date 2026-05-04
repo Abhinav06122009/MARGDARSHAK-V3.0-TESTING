@@ -47,6 +47,7 @@ import ContentModeration from '@/pages/admin/ContentModeration';
 import Analytics from '@/pages/admin/Analytics';
 import SupportCenter from '@/pages/admin/SupportCenter';
 import AdminSettings from '@/pages/admin/AdminSettings';
+import CommandCenter from '@/pages/admin/CommandCenter';
 
 // Features - eagerly loaded
 import Tasks from "@/components/tasks/Tasks";
@@ -245,7 +246,9 @@ const AppContent = () => {
                         <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/admin/login" element={<AdminAuthPage />} />
-                        <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                        <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                        <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                        <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
                         <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
                         <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />
