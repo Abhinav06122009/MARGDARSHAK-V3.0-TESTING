@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import { AdminContext } from '@/contexts/AdminContext';
 import { courseService } from '@/components/dashboard/courseService';
@@ -182,8 +182,7 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
   if (adminLoading || (session && isAdmin && isAuthorized === null)) return <PageLoader />;
   
   if (session && isAdmin && isAuthorized === false) {
-    navigate('/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return session && isAdmin ? <>{children}</> : null;
@@ -217,8 +216,7 @@ export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
   if (authLoading || isAuthorized === null) return <PageLoader />;
   
   if (isAuthorized === false) {
-    navigate('/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return isAuthorized ? <>{children}</> : null;
@@ -259,8 +257,7 @@ export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) =
   if (authLoading || adminLoading || isAuthorized === null) return <PageLoader />;
   
   if (isAuthorized === false) {
-    navigate('/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return isAuthorized ? <>{children}</> : null;
