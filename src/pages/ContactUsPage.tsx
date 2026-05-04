@@ -36,7 +36,7 @@ const ContactUsPage = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await (supabase.from('contact_messages' as any) as any).insert({
+      const { error } = await supabase.from('contact_messages').insert({
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
