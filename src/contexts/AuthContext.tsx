@@ -103,17 +103,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
 
           const profileData: any = {
-            id: translatedId, // Use translated ID as primary key
+            id: translatedId,
             clerk_id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
             user_type: role,
             subscription_tier: tier,
-            subscription: {
-              tier: tier,
-              status: subscription.status || 'active'
-            },
             updated_at: new Date().toISOString()
           };
 
