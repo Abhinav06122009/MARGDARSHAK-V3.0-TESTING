@@ -39,13 +39,15 @@ export const emailService = {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error('❌ [RESEND_ERROR_CODE]:', response.status);
+        console.error('❌ [RESEND_ERROR_BODY]:', JSON.stringify(data, null, 2));
         throw new Error(data.message || 'API_RESPONSE_ERROR');
       }
 
       console.log('🛰️ [EMAIL-SERVICE] Automated dispatch successful:', data.id);
       return { success: true, data };
     } catch (error: any) {
-      console.error('❌ [EMAIL-SERVICE] Automated dispatch failed:', error);
+      console.error('❌ [EMAIL-SERVICE] Critical failure:', error);
       return { success: false, error: error.message };
     }
   }
