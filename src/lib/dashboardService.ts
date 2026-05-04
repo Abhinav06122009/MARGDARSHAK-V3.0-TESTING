@@ -50,7 +50,8 @@ export const dashboardService = {
       const fullName = clerkUser.user_metadata?.full_name || clerkUser.fullName || profile?.full_name || 'Scholar';
 
       return {
-        id: clerkUser.id,
+        id: translatedId, // USE TRANSLATED UUID
+        clerk_id: clerkUser.id,
         email: clerkUser.email || '',
         user_metadata: {
           ...clerkUser.user_metadata,
@@ -59,7 +60,8 @@ export const dashboardService = {
         },
         profile: {
           ...profile,
-          id: clerkUser.id,
+          id: translatedId, // USE TRANSLATED UUID
+          clerk_id: clerkUser.id,
           full_name: fullName,
           user_type: userRole,
           role: userRole,
