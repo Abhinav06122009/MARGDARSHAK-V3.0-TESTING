@@ -43,6 +43,11 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
   const rotateX = useSpring(useTransform(y, [-300, 300], [8, -8]), { stiffness: 80, damping: 25 });
   const rotateY = useSpring(useTransform(x, [-300, 300], [-8, 8]), { stiffness: 80, damping: 25 });
 
+  // HOLOGRAPHIC SPECULARITY
+  const glareX = useSpring(useTransform(x, [-200, 200], [0, 100]), { stiffness: 50, damping: 20 });
+  const glareY = useSpring(useTransform(y, [-300, 300], [0, 100]), { stiffness: 50, damping: 20 });
+  const glareOpacity = useSpring(useTransform(x, [-200, 200], [0.1, 0.4]), { stiffness: 50, damping: 20 });
+
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -66,64 +71,85 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
   const getDisplayRole = (role: string | string[]) => {
     const roles = Array.isArray(role) ? role : [role || 'student'];
-    const normalizedRoles = roles.map(r => String(r).toLowerCase().replace(/_/g, ''));
+    const normalizedRoles = roles.map(r => String(r).toLowerCase().replace(/\s+/g, '_'));
     
-    // A+ CLASS — RHODIUM: Pure Chrome Crystalline (multi-role)
-    if (normalizedRoles.length >= 2) {
+    const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder'];
+    const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
+    const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+    const cRoles = ['moderator', 'staff', 'support_executive', 'supportexecutive', 'manager', 'hr', 'admin'];
+
+    const primaryRole = normalizedRoles.find(r => [...aPlusRoles, ...aRoles, ...bRoles, ...cRoles].includes(r)) || 'standard';
+
+    // A+ CLASS — RHODIUM GRADE
+    if (aPlusRoles.includes(primaryRole)) {
       return {
         class: 'A+ CLASS',
-        title: 'RHODIUM_ZENITH',
-        colorStyle: 'linear-gradient(135deg,#ffffff,#c8c8c8,#8a8a8a)',
-        color: '',
-        text: 'text-white',
+        grade: 'RHODIUM',
+        title: primaryRole.toUpperCase().replace('_', '-'),
+        colorStyle: 'linear-gradient(135deg,#ffffff,#e2e8f0,#94a3b8)',
+        text: 'text-slate-900',
         glow: 'shadow-[0_0_60px_rgba(255,255,255,0.4),0_0_20px_rgba(255,255,255,0.6)]',
-        accent: 'text-white',
-        accentHex: '#F0F0F0',
-        codeColor: '#F0F0F0'
+        accentHex: '#FFFFFF',
+        codeColor: '#FFFFFF',
+        shimmer: 'from-white/40 via-white/10 to-white/40'
       };
     }
 
-    const cleanRole = normalizedRoles[0];
+    // A CLASS — PLATINUM GRADE
+    if (aRoles.includes(primaryRole)) {
+      return {
+        class: 'A CLASS',
+        grade: 'PLATINUM',
+        title: primaryRole.toUpperCase().replace('_', '-'),
+        colorStyle: 'linear-gradient(135deg,#e2e8f0,#94a3b8,#475569)',
+        text: 'text-white',
+        glow: 'shadow-[0_0_50px_rgba(148,163,184,0.5)]',
+        accentHex: '#CBD5E1',
+        codeColor: '#CBD5E1',
+        shimmer: 'from-blue-200/20 via-white/10 to-blue-200/20'
+      };
+    }
 
-    // A-CLASS — PLATINUM: Cold Silver-Blue Metallic (single C-Suite)
-    const cSuite: Record<string, any> = {
-      ceo: { title: 'CHIEF_EXECUTIVE', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
-      cto: { title: 'CHIEF_TECHNOLOGY', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
-      cfo: { title: 'CHIEF_FINANCIAL',  colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
-      coo: { title: 'CHIEF_OPERATIONS', colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
-      cmo: { title: 'CHIEF_MARKETING',  colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' },
-      cio: { title: 'CHIEF_INFORMATION',colorStyle: 'linear-gradient(135deg,#e8e8ff,#a0c8ff,#4488dd)', text: 'text-white', glow: 'shadow-[0_0_50px_rgba(100,180,255,0.5)]', accentHex: '#B0D8FF', codeColor: '#B0D8FF' }
-    };
+    // B CLASS — GOLD GRADE
+    if (bRoles.includes(primaryRole)) {
+      return {
+        class: 'B CLASS',
+        grade: 'GOLD',
+        title: primaryRole.toUpperCase().replace('_', '-'),
+        colorStyle: 'linear-gradient(135deg,#fde047,#eab308,#854d0e)',
+        text: 'text-black',
+        glow: 'shadow-[0_0_60px_rgba(234,179,8,0.6),0_0_20px_rgba(253,224,71,0.8)]',
+        accentHex: '#FDE047',
+        codeColor: '#FDE047',
+        shimmer: 'from-yellow-200/30 via-white/10 to-yellow-200/30'
+      };
+    }
 
-    if (cSuite[cleanRole]) return { ...cSuite[cleanRole], color: '', class: 'A-CLASS' };
-
-    // B-CLASS — IMPERIAL GOLD: Deep Warm Amber Fire (sovereign)
-    const bClass: Record<string, any> = {
-      owner:      { title: 'SYSTEM_OWNER', colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' },
-      superadmin: { title: 'SUPER_ADMIN',  colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' },
-      admin:      { title: 'SYSTEM_ADMIN', colorStyle: 'linear-gradient(135deg,#ffe566,#ffaa00,#7a4e00)', text: 'text-black', glow: 'shadow-[0_0_60px_rgba(255,180,0,0.6),0_0_20px_rgba(255,215,0,0.8)]', accentHex: '#FFD700', codeColor: '#FFD700' }
-    };
-
-    if (bClass[cleanRole]) return { ...bClass[cleanRole], color: '', class: 'B-CLASS' };
-
-    // C-Class: Oversight Chromatics
-    const cClass: Record<string, any> = {
-      moderator: { title: 'SYSTEM_MODERATOR', color: 'bg-[#10B981]', text: 'text-black', glow: 'shadow-[0_0_25px_rgba(16,185,129,0.5)]', accent: 'text-emerald-400' },
-      manager: { title: 'DEPT_MANAGER', color: 'bg-[#14B8A6]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(20,184,166,0.5)]', accent: 'text-teal-400' },
-      executive: { title: 'EXEC_PROCTOR', color: 'bg-[#475569]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(71,85,105,0.5)]', accent: 'text-slate-400' },
-      staff: { title: 'OPERATIONAL_STAFF', color: 'bg-[#64748B]', text: 'text-white', glow: 'shadow-[0_0_25px_rgba(100,116,139,0.5)]', accent: 'text-slate-500' }
-    };
-
-    if (cClass[cleanRole]) return { ...cClass[cleanRole], class: 'C-CLASS' };
+    // C CLASS — SILVER GRADE
+    if (cRoles.includes(primaryRole)) {
+      return {
+        class: 'C CLASS',
+        grade: 'SILVER',
+        title: primaryRole.toUpperCase().replace('_', '-'),
+        colorStyle: 'linear-gradient(135deg,#d1d5db,#9ca3af,#4b5563)',
+        text: 'text-black',
+        glow: 'shadow-[0_0_30px_rgba(156,163,175,0.5)]',
+        accentHex: '#D1D5DB',
+        codeColor: '#D1D5DB',
+        shimmer: 'from-gray-300/20 via-white/10 to-gray-300/20'
+      };
+    }
 
     // CORE: Standard Student Theme
     return {
       class: 'CORE',
+      grade: 'STANDARD',
       title: 'ELITE_SCHOLAR',
       color: 'bg-[#1a1a1a]',
       text: 'text-zinc-600',
       glow: 'shadow-none',
-      accent: 'text-zinc-800'
+      accentHex: '#3f3f46',
+      shimmer: 'from-white/5 via-transparent to-white/5'
     };
   };
 
@@ -159,8 +185,18 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
         onMouseLeave={handleMouseLeave}
         onClick={handleCardClick}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative w-full aspect-[1/1.58] rounded-[3rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,1)] border border-white/10 bg-[#050505] group cursor-pointer"
+        className="relative w-full aspect-[1/1.58] rounded-[3rem] overflow-hidden shadow-[0_60px_100px_-20px_rgba(0,0,0,1)] border border-white/10 bg-[#050505] group cursor-none"
       >
+        {/* HOLOGRAPHIC GLARE EFFECT */}
+        <motion.div 
+          className="absolute inset-0 z-30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{
+            background: `radial-gradient(circle at ${glareX}% ${glareY}%, white, transparent 50%)`,
+            opacity: glareOpacity,
+            mixBlendMode: 'overlay'
+          }}
+        />
+
         {/* SURGICAL NEON CLICK */}
         <AnimatePresence>
           {isClicked && (
@@ -174,6 +210,7 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
         {/* CLEAN GRADIENTS */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-fuchsia-500/5 pointer-events-none" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')] opacity-20 pointer-events-none" />
+one" />
 
         {/* ROLE RIBBON: Perfectly Anchored */}
         <div className="absolute top-10 left-0 z-40">
@@ -200,11 +237,18 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
                 </div>
                 <h2 className="text-xl font-black text-white tracking-tight uppercase italic leading-none">Margdarshak</h2>
               </div>
-              <span className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] ml-12">ENCRYPTED_STATUS</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] ml-12">VSAV GYANTAPA FAMILY</span>
+                <motion.div
+                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                />
+              </div>
             </div>
             <div className="text-right">
-              <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">REG_CODE</div>
-              <div className="text-[11px] font-mono font-bold tracking-widest" style={{ color: roleData.codeColor || (roleData.class === 'C-CLASS' ? '#a855f7' : '#52525b') }}>{studentId || 'ID_0000'}</div>
+              <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">{roleData.grade} GRADE</div>
+              <div className="text-[11px] font-mono font-bold tracking-widest" style={{ color: roleData.codeColor || '#52525b' }}>{studentId || 'ID_0000'}</div>
             </div>
           </div>
 
@@ -267,7 +311,10 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
                 <div className="h-10 italic font-signature text-emerald-500/30 text-4xl">
                   {fullName || 'Nexus_Sign'}
                 </div>
-                <span className="text-[6px] font-mono text-white/10 uppercase tracking-[0.4em]">UUID_{user.id.substring(0, 8).toUpperCase()}</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[6px] font-mono text-white/10 uppercase tracking-[0.4em]">UUID_{user.id.substring(0, 8).toUpperCase()}</span>
+                  <span className="text-[5px] font-black text-emerald-500/40 uppercase tracking-[0.8em]">MARGDARSHAK HIGH COMMAND</span>
+                </div>
               </div>
 
               <button
