@@ -266,7 +266,7 @@ export const initSecurityHardening = () => {
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      console.clear();
+      // console.clear(); // DEACTIVATED FOR DIAGNOSTIC RECORDING
       // Anti-tab-switching: Detect if user is trying to find bypasses elsewhere
     }
   });

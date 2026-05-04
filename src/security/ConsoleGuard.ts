@@ -89,7 +89,7 @@ export const initConsoleGuard = () => {
   };
 
   // Run immediately
-  blockConsole(); // ACTIVATED FOR PRODUCTION SECURITY
+  // blockConsole(); // DEACTIVATED FOR DIAGNOSTIC RECORDING
 
   const showWarning = () => {
     if (isDebug) {
