@@ -106,9 +106,9 @@ export const LandingHeader: React.FC = () => {
           <MagneticButton>
             <a
               href="/auth"
-              className="bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 group relative overflow-hidden"
+              className="bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 group relative overflow-hidden flex items-center justify-center min-w-[160px]"
             >
-              <span className="relative z-10">Launch</span>
+              <span className="relative z-10">Get Started</span>
               <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </a>
           </MagneticButton>
