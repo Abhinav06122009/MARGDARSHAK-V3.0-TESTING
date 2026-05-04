@@ -115,8 +115,18 @@ export const useAdmin = () => {
       }
 
       if (contactMessagesRes.data || supportTicketsRes.data) {
-        const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ ...m, type: 'contact' }));
-        const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ ...m, type: 'ticket', first_name: 'Ticket', last_name: `#${m.id.slice(0,4)}` }));
+        const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ 
+          ...m, 
+          type: 'contact',
+          subject: m.subject || 'PUBLIC CONTACT INQUIRY'
+        }));
+        const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ 
+          ...m, 
+          type: 'ticket', 
+          first_name: m.first_name || 'Ticket', 
+          last_name: m.last_name || `#${m.id.slice(0,4)}`,
+          subject: m.subject || 'INTERNAL SUPPORT TICKET'
+        }));
         
         setTickets([...contactMsgs, ...supportTkts]
           .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
