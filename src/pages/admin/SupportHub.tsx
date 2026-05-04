@@ -64,20 +64,35 @@ const SupportHub = () => {
       // Automated API Dispatch Bridge (Resend)
       const subject = `RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`;
       const htmlBody = `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #09090b; color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #27272a;">
-          <h1 style="color: #10b981; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Official Resolution</h1>
-          <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">Your inquiry regarding "<strong>${ticket.message?.slice(0, 50)}...</strong>" has been formally reviewed and marked as RESOLVED by our strategic operations team.</p>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
+          <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 64px; height: 64px; margin-bottom: 16px;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Query Resolution</h1>
+          </div>
           
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; margin-bottom: 32px;">
-            <h2 style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Official Response</h2>
-            <p style="color: #ffffff; font-size: 13px; font-weight: 500; line-height: 1.6; margin: 0;">${resolutionResponse}</p>
+          <div style="padding: 40px; line-height: 1.6;">
+            <p style="margin-top: 0; font-size: 16px; color: #4b5563;">Hello,</p>
+            <p style="font-size: 16px; color: #4b5563;">Your inquiry regarding <strong>"${ticket.subject || 'Support Request'}"</strong> has been resolved by our support team.</p>
+            
+            <div style="margin: 32px 0; padding: 24px; background: #f9fafb; border-radius: 16px; border: 1px solid #f3f4f6;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Resolution</p>
+              <p style="margin: 0; font-size: 15px; color: #1f2937;">${resolutionResponse}</p>
+            </div>
+
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
+              <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
+              <p style="margin: 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.025em;">Margdarshak Support Team</p>
+            </div>
           </div>
 
-          <div style="border-top: 1px solid #27272a; padding-top: 24px;">
-            <p style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Signatory</p>
-            <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0;">${officialName} [${rank}]</p>
-            <p style="color: #71717a; font-size: 12px; margin: 4px 0 0 0;">VSAV GYANTAPA SUPPORT TEAM</p>
-            <p style="color: #3f3f46; font-size: 10px; margin-top: 16px;">REF_ID: ${ticket.id}</p>
+          <div style="padding: 40px 20px; background: #050505; text-align: center; color: #9ca3af;">
+            <div style="margin-bottom: 24px;">
+              <a href="https://www.instagram.com/vsavgyantapa/" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Instagram</a>
+              <a href="https://x.com/gyantappas" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Twitter</a>
+              <a href="https://www.facebook.com/profile.php?id=61584618795158" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Facebook</a>
+            </div>
+            <p style="margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">© 2026 MARGDARSHAK</p>
+            <p style="margin: 4px 0 0 0; font-size: 9px; color: #4b5563;">POWERED BY VSAV GYANTAPA</p>
           </div>
         </div>
       `;
@@ -98,7 +113,7 @@ const SupportHub = () => {
         console.warn('Falling back to mailto protocol...');
         const mailtoSubject = encodeURIComponent(subject);
         const mailtoBody = encodeURIComponent(
-          `OFFICIAL RESOLUTION:\n${resolutionResponse}\n\nSigned by: ${officialName} [${rank}]`
+          `QUERY RESOLUTION:\n${resolutionResponse}\n\nSigned by: ${officialName} [${rank}]`
         );
         window.location.href = `mailto:${ticket.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
         
@@ -153,20 +168,35 @@ const SupportHub = () => {
       // 2. Automated API Dispatch Bridge (Resend)
       const subject = `ALERT: ${ticket.subject || 'Support Inquiry'} [ESCALATED]`;
       const htmlBody = `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #09090b; color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #27272a;">
-          <h1 style="color: #f59e0b; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Escalation Active</h1>
-          <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">Your inquiry regarding "<strong>${ticket.message?.slice(0, 50)}...</strong>" has been routed to the <strong>SUPPORT-NEXUS</strong> for High-Command review.</p>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
+          <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 64px; height: 64px; margin-bottom: 16px;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; color: #f59e0b; text-transform: uppercase;">Ticket Escalated</h1>
+          </div>
           
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 24px; border-radius: 16px; margin-bottom: 32px;">
-            <h2 style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Escalation Notes</h2>
-            <p style="color: #ffffff; font-size: 13px; font-weight: 500; line-height: 1.6; margin: 0;">${resolutionResponse}</p>
+          <div style="padding: 40px; line-height: 1.6;">
+            <p style="margin-top: 0; font-size: 16px; color: #4b5563;">Hello,</p>
+            <p style="font-size: 16px; color: #4b5563;">Your inquiry regarding <strong>"${ticket.subject || 'Support Request'}"</strong> has been escalated for high-level review.</p>
+            
+            <div style="margin: 32px 0; padding: 24px; background: #fffbeb; border-radius: 16px; border: 1px solid #fef3c7;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Escalation Notes</p>
+              <p style="margin: 0; font-size: 15px; color: #92400e;">${resolutionResponse}</p>
+            </div>
+
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
+              <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
+              <p style="margin: 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.025em;">Margdarshak Administration</p>
+            </div>
           </div>
 
-          <div style="border-top: 1px solid #27272a; padding-top: 24px;">
-            <p style="color: #71717a; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Escalating Officer</p>
-            <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0;">${officialName} [${rank}]</p>
-            <p style="color: #71717a; font-size: 12px; margin: 4px 0 0 0;">VSAV GYANTAPA SUPPORT TEAM</p>
-            <p style="color: #3f3f46; font-size: 10px; margin-top: 16px;">REF_ID: ${ticket.id}</p>
+          <div style="padding: 40px 20px; background: #050505; text-align: center; color: #9ca3af;">
+            <div style="margin-bottom: 24px;">
+              <a href="https://www.instagram.com/vsavgyantapa/" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Instagram</a>
+              <a href="https://x.com/gyantappas" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Twitter</a>
+              <a href="https://www.facebook.com/profile.php?id=61584618795158" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Facebook</a>
+            </div>
+            <p style="margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">© 2026 MARGDARSHAK</p>
+            <p style="margin: 4px 0 0 0; font-size: 9px; color: #4b5563;">POWERED BY VSAV GYANTAPA</p>
           </div>
         </div>
       `;
