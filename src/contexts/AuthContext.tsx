@@ -115,10 +115,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Direct sync with Supabase instead of missing Netlify function
+          // Direct sync with Supabase with explicit conflict resolution
           const { error: syncError } = await supabase
             .from('profiles')
-            .upsert(profileData);
+            .upsert(profileData, { onConflict: 'clerk_id' });
             
           if (syncError) {
             console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
