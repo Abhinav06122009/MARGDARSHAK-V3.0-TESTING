@@ -1,6 +1,6 @@
 {
-  "_TiltCard-ccR2SED0.js": {
-    "file": "assets/TiltCard-ccR2SED0.js",
+  "_TiltCard-DDnlBdMX.js": {
+    "file": "assets/TiltCard-DDnlBdMX.js",
     "name": "TiltCard",
     "imports": [
       "index.html",
@@ -12,7 +12,7 @@
     "name": "vendor"
   },
   "index.html": {
-    "file": "assets/index-FPVijUJU.js",
+    "file": "assets/index-34Bsy5T6.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -111,7 +111,7 @@
     ]
   },
   "node_modules/canvg/lib/index.es.js": {
-    "file": "assets/index.es-YEU-m0sL.js",
+    "file": "assets/index.es-BAwJf32V.js",
     "name": "index.es",
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,
@@ -363,7 +363,7 @@
     "src": "node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.woff2"
   },
   "src/components/attendance/Attendance.tsx": {
-    "file": "assets/Attendance-C3wv1BzJ.js",
+    "file": "assets/Attendance-DeLDasBe.js",
     "name": "Attendance",
     "src": "src/components/attendance/Attendance.tsx",
     "isDynamicEntry": true,
@@ -382,7 +382,7 @@
     ]
   },
   "src/components/landing/GeminiFeatureDemo.tsx": {
-    "file": "assets/GeminiFeatureDemo-DXBo937H.js",
+    "file": "assets/GeminiFeatureDemo-BWuiZD6L.js",
     "name": "GeminiFeatureDemo",
     "src": "src/components/landing/GeminiFeatureDemo.tsx",
     "isDynamicEntry": true,
@@ -392,29 +392,29 @@
     ]
   },
   "src/components/landing/LandingSections.tsx": {
-    "file": "assets/LandingSections-D3mM9W7L.js",
+    "file": "assets/LandingSections-OS9vtm_k.js",
     "name": "LandingSections",
     "src": "src/components/landing/LandingSections.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_TiltCard-ccR2SED0.js",
+      "_TiltCard-DDnlBdMX.js",
       "_vendor-CrsVX3-b.js"
     ]
   },
   "src/components/landing/Pricing.tsx": {
-    "file": "assets/Pricing-oOIFKUGH.js",
+    "file": "assets/Pricing-CipcSs13.js",
     "name": "Pricing",
     "src": "src/components/landing/Pricing.tsx",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
-      "_TiltCard-ccR2SED0.js",
+      "_TiltCard-DDnlBdMX.js",
       "_vendor-CrsVX3-b.js"
     ]
   },
   "src/components/landing/TechStack.tsx": {
-    "file": "assets/TechStack-SxMqPpCp.js",
+    "file": "assets/TechStack-CpPPRHG2.js",
     "name": "TechStack",
     "src": "src/components/landing/TechStack.tsx",
     "isDynamicEntry": true,
@@ -424,7 +424,7 @@
     ]
   },
   "src/components/legal/PrivacyPolicy.tsx": {
-    "file": "assets/PrivacyPolicy-Dmi13x8B.js",
+    "file": "assets/PrivacyPolicy-BdlN5mVN.js",
     "name": "PrivacyPolicy",
     "src": "src/components/legal/PrivacyPolicy.tsx",
     "isDynamicEntry": true,
@@ -434,7 +434,7 @@
     ]
   },
   "src/components/legal/TermsAndConditions.tsx": {
-    "file": "assets/TermsAndConditions-FQLW2-J0.js",
+    "file": "assets/TermsAndConditions-CJX1VNHu.js",
     "name": "TermsAndConditions",
     "src": "src/components/legal/TermsAndConditions.tsx",
     "isDynamicEntry": true,
@@ -448,7 +448,7 @@
     "src": "src/components/logo/logo.png"
   },
   "src/pages/AIAnalytics.tsx": {
-    "file": "assets/AIAnalytics-ENvb_NiD.js",
+    "file": "assets/AIAnalytics-BcQ4mZFN.js",
     "name": "AIAnalytics",
     "src": "src/pages/AIAnalytics.tsx",
     "isDynamicEntry": true,
@@ -458,7 +458,7 @@
     ]
   },
   "src/pages/Community.tsx": {
-    "file": "assets/Community-C0lgOzWW.js",
+    "file": "assets/Community-Cc6kDhxc.js",
     "name": "Community",
     "src": "src/pages/Community.tsx",
     "isDynamicEntry": true,
@@ -468,7 +468,7 @@
     ]
   },
   "src/pages/DeadlineTracker.tsx": {
-    "file": "assets/DeadlineTracker-ClqQRFHa.js",
+    "file": "assets/DeadlineTracker-Cn0nELgc.js",
     "name": "DeadlineTracker",
     "src": "src/pages/DeadlineTracker.tsx",
     "isDynamicEntry": true,
@@ -478,7 +478,7 @@
     ]
   },
   "src/pages/DoubtSolver.tsx": {
-    "file": "assets/DoubtSolver-DT4_7K9X.js",
+    "file": "assets/DoubtSolver-D9r7Ab_6.js",
     "name": "DoubtSolver",
     "src": "src/pages/DoubtSolver.tsx",
     "isDynamicEntry": true,
@@ -488,7 +488,7 @@
     ]
   },
   "src/pages/EssayHelper.tsx": {
-    "file": "assets/EssayHelper-D3qlGwvO.js",
+    "file": "assets/EssayHelper-DnUDHZNg.js",
     "name": "EssayHelper",
     "src": "src/pages/EssayHelper.tsx",
     "isDynamicEntry": true,
@@ -498,7 +498,7 @@
     ]
   },
   "src/pages/Flashcards.tsx": {
-    "file": "assets/Flashcards-QXNLqa5a.js",
+    "file": "assets/Flashcards-D_pvRf-L.js",
     "name": "Flashcards",
     "src": "src/pages/Flashcards.tsx",
     "isDynamicEntry": true,
@@ -508,7 +508,7 @@
     ]
   },
   "src/pages/PortfolioBuilder.tsx": {
-    "file": "assets/PortfolioBuilder-DFRxvxCk.js",
+    "file": "assets/PortfolioBuilder-kZ959PC4.js",
     "name": "PortfolioBuilder",
     "src": "src/pages/PortfolioBuilder.tsx",
     "isDynamicEntry": true,
@@ -518,7 +518,7 @@
     ]
   },
   "src/pages/QuizGenerator.tsx": {
-    "file": "assets/QuizGenerator-BnMhLxf6.js",
+    "file": "assets/QuizGenerator-Ds7-n_Vs.js",
     "name": "QuizGenerator",
     "src": "src/pages/QuizGenerator.tsx",
     "isDynamicEntry": true,
@@ -528,7 +528,7 @@
     ]
   },
   "src/pages/SmartNotes.tsx": {
-    "file": "assets/SmartNotes-BltxkEiw.js",
+    "file": "assets/SmartNotes-CKkvCMWg.js",
     "name": "SmartNotes",
     "src": "src/pages/SmartNotes.tsx",
     "isDynamicEntry": true,
@@ -538,7 +538,7 @@
     ]
   },
   "src/pages/StudyPlanner.tsx": {
-    "file": "assets/StudyPlanner-zEnOGGtT.js",
+    "file": "assets/StudyPlanner-D-9s52AZ.js",
     "name": "StudyPlanner",
     "src": "src/pages/StudyPlanner.tsx",
     "isDynamicEntry": true,

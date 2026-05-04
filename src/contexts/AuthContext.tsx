@@ -115,20 +115,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Surgical Sync: Check if profile exists first to avoid ID conflicts
+          // Surgical Sync: Use the translated UUID for maximum stability
           const { data: existingProfile } = await supabase
             .from('profiles')
             .select('id')
-            .eq('clerk_id', clerkUser.id)
+            .eq('id', translatedId)
             .maybeSingle();
 
           let syncError = null;
 
           if (existingProfile) {
-            // Update existing profile - Preserve the ID
+            // Update existing profile - Targeted by primary UUID
             const { error } = await supabase
               .from('profiles')
               .update({
+                clerk_id: clerkUser.id,
                 email: profileData.email,
                 full_name: profileData.full_name,
                 avatar_url: profileData.avatar_url,
@@ -136,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 subscription_tier: profileData.subscription_tier,
                 updated_at: profileData.updated_at
               })
-              .eq('clerk_id', clerkUser.id);
+              .eq('id', translatedId);
             syncError = error;
           } else {
             // Insert new profile
