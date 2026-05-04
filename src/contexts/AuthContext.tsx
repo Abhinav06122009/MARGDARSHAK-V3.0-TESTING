@@ -60,8 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsBlocked(blocked);
           setBlockedReason(reason);
         }
-        // Set loading to false early - we use Clerk data while Supabase syncs in background
-        setLoading(false);
+        // LOADING REMAINS TRUE until syncProfile augments the user
       }
     }
   }, [sessionLoaded, userLoaded, clerkUser]);
@@ -103,6 +102,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               user_type: role
             }
           });
+
+          // Resolve loading state ONLY after identity is augmented
+          setLoading(false);
 
           const profileData: any = {
             id: translatedId,
