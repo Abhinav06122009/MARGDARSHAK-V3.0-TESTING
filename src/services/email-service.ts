@@ -6,16 +6,21 @@
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
-// TACTICAL KEY RESOLUTION: Try ENV -> then LocalStorage -> then Hardcoded Fallback
+// TACTICAL KEY RESOLUTION: Try primary ENV -> then Netlify ENV -> then LocalStorage
 const getApiKey = () => {
-  const envKey = import.meta.env.VITE_RESEND_API_KEY;
-  if (envKey && envKey !== 'undefined') return envKey;
+  // Check primary Resend key
+  const resendKey = import.meta.env.VITE_RESEND_API_KEY;
+  if (resendKey && resendKey !== 'undefined' && resendKey !== '') return resendKey;
   
+  // Check Netlify-specific email key found in logs
+  const emailKey = import.meta.env.VITE_EMAIL_API_KEY;
+  if (emailKey && emailKey !== 'undefined' && emailKey !== '') return emailKey;
+
+  // Check LocalStorage fallback for runtime injection
   const localKey = localStorage.getItem('VITE_RESEND_API_KEY');
   if (localKey) return localKey;
 
-  // HARDCODED FALLBACK FOR IMMEDIATE PRODUCTION STABILIZATION
-  return 're_eb2xA2md_9sa47ToKJ863s9uU6Jtt8cQZ';
+  return null;
 };
 
 const API_KEY = getApiKey();
@@ -30,7 +35,7 @@ export interface EmailPayload {
 export const emailService = {
   sendDirect: async (payload: EmailPayload) => {
     if (!API_KEY) {
-      console.warn('⚠️ [EMAIL-SERVICE] No API key detected in .env or localStorage');
+      console.warn('⚠️ [EMAIL-SERVICE] No API key detected. Please add VITE_RESEND_API_KEY to Netlify environment variables.');
       return { success: false, error: 'NO_API_KEY' };
     }
 
