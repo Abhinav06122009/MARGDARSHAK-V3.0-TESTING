@@ -67,7 +67,7 @@ const SupportHub = () => {
       const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
 
       // Update Database with Resolution Text First
-      await resolveTicket(ticket.id, ticket.type, resolutionResponse, user?.id || 'anonymous_officer');
+      await resolveTicket(ticket.id, ticket.type, resolutionResponse, user?.profile?.id || 'anonymous_officer');
       toast.success('DATABASE SYNCHRONIZED', {
         description: `Ticket status successfully updated to RESOLVED in Supabase.`,
       });

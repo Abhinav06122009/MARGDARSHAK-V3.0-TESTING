@@ -48,8 +48,8 @@ const SupportNexus = () => {
       const officialName = user?.fullName || 'High-Command Official';
       const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
 
-      // 1. Resolve in Database
-      await resolveTicket(ticket.id, ticket.type, resolutionText, user?.id || 'nexus_override');
+      // 1. Resolve in Database using the translated UUID from profile
+      await resolveTicket(ticket.id, ticket.type, resolutionText, user?.profile?.id || ticket.id);
 
       // 2. Dispatch Email
       const subject = `EXECUTIVE RESOLUTION: ${ticket.subject}`;

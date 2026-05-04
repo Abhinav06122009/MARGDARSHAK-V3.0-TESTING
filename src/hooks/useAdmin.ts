@@ -252,6 +252,11 @@ export const useAdmin = () => {
         t.id === id ? { ...t, status: 'resolved', resolution_text: resolutionText } : t
       ));
 
+      console.log(`🛡️ [DISPATCH] Attempting to resolve ${type} #${id}`, { 
+        resolved_by: resolvedBy,
+        is_uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resolvedBy)
+      });
+ 
       // 1. Update Database Status & Resolution Text
       const { error } = await supabase.from(table).update({ 
         status: 'resolved',
