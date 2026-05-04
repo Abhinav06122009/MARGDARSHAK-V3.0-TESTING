@@ -26,7 +26,6 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Construct UUID (8-4-4-4-12) with version 4 and variant 8 markers to match SQL
     return [
       hash.slice(0, 8),
       hash.slice(8, 12),
@@ -35,8 +34,23 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
       hash.slice(20, 32)
     ].join('-');
   } catch (err) {
-    console.error('[ID-Translator] Crypto error:', err);
-    return clerkId; // Absolute fallback
+    console.warn('[ID-Translator] Crypto engine unavailable, using secondary deterministic fallback:', err);
+    
+    // Secondary Deterministic Fallback (Bitwise)
+    let hash1 = 0, hash2 = 0;
+    for (let i = 0; i < clerkId.length; i++) {
+      const char = clerkId.charCodeAt(i);
+      hash1 = ((hash1 << 5) - hash1) + char;
+      hash1 |= 0;
+      hash2 = ((hash2 << 7) - hash2) + char;
+      hash2 |= 0;
+    }
+    
+    const h1 = Math.abs(hash1).toString(16).padStart(8, '0');
+    const h2 = Math.abs(hash2).toString(16).padStart(8, '0');
+    const dummy = 'f0f0f0f0f0f0';
+    
+    return `${h1}-${h2.slice(0, 4)}-4${h2.slice(4, 7)}-8${h2.slice(7, 10)}-${dummy}`;
   }
 };
 
