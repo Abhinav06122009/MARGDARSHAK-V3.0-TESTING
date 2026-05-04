@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useAdmin, SupportTicket } from '@/hooks/useAdmin';
-import { 
-  LifeBuoy, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  CheckCircle2, 
-  Clock, 
+import {
+  LifeBuoy,
+  Search,
+  Filter,
+  MoreVertical,
+  CheckCircle2,
+  Clock,
   AlertCircle,
   Mail,
   User,
@@ -38,13 +38,13 @@ const SupportHub = () => {
   };
 
   const filteredTickets = (tickets || []).filter(ticket => {
-    const matchesSearch = 
+    const matchesSearch =
       (ticket.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (ticket.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (ticket.message || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesFilter = filterStatus === 'all' || ticket.status === filterStatus;
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -57,7 +57,7 @@ const SupportHub = () => {
     try {
       const officialName = user?.fullName || 'Official Sentinel';
       const rank = (user?.profile?.user_type || 'Officer').toUpperCase();
-      
+
       // Update Database with Resolution Text First
       await resolveTicket(ticket.id, ticket.type, resolutionResponse);
       toast.success('DATABASE SYNCHRONIZED', {
@@ -69,7 +69,7 @@ const SupportHub = () => {
       const htmlBody = `
         <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
           <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
-            <img src="https://margdarshan.tech/looogo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
             <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Resolution For Your Query</h1>
           </div>
           
@@ -124,26 +124,26 @@ const SupportHub = () => {
           `QUERY RESOLUTION:\n${resolutionResponse}\n\nSigned by: ${officialName} [${rank}]`
         );
         window.location.href = `mailto:${ticket.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
-        
+
         toast.info('MANUAL DISPATCH REQUIRED', {
           description: `Direct API transmission paused. External mail application initialized.`,
         });
       }
-      
+
     } catch (error: any) {
       console.error('❌ [EMAIL-SERVICE] Critical failure:', error);
-      
+
       if (error.message?.includes('verify a domain')) {
         toast.error('DOMAIN VERIFICATION REQUIRED', {
           description: 'Resend is in Sandbox Mode. Please verify margdarshan.tech at resend.com/domains to send to external users.',
           duration: 6000
         });
       } else {
-        toast.error('DISPATCH FAILURE', { 
-          description: error.message || 'Could not synchronize resolution status.' 
+        toast.error('DISPATCH FAILURE', {
+          description: error.message || 'Could not synchronize resolution status.'
         });
       }
-      
+
       // Fallback to mailto protocol
       console.warn('Falling back to mailto protocol...');
       const officialName = user?.fullName || 'Official Sentinel';
@@ -254,9 +254,9 @@ const SupportHub = () => {
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Support Uplink Active</span>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => refresh()}
               className="bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl h-10 gap-2"
             >
@@ -272,7 +272,7 @@ const SupportHub = () => {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-emerald-500 transition-colors" />
-                <input 
+                <input
                   type="text"
                   placeholder="SEARCH TICKETS, EMAILS, OR LOGS..."
                   value={searchQuery}
@@ -285,11 +285,10 @@ const SupportHub = () => {
                   <button
                     key={status}
                     onClick={() => setFilterStatus(status)}
-                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                      filterStatus === status 
-                        ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' 
+                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filterStatus === status
+                        ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
                         : 'text-zinc-600 hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     {status}
                   </button>
@@ -307,16 +306,14 @@ const SupportHub = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleSelectTicket(ticket)}
-                    className={`group p-6 bg-white/[0.02] border rounded-3xl cursor-pointer transition-all hover:bg-white/[0.04] ${
-                      selectedTicket?.id === ticket.id ? 'border-emerald-500/30 bg-white/[0.05]' : 'border-white/5'
-                    }`}
+                    className={`group p-6 bg-white/[0.02] border rounded-3xl cursor-pointer transition-all hover:bg-white/[0.04] ${selectedTicket?.id === ticket.id ? 'border-emerald-500/30 bg-white/[0.05]' : 'border-white/5'
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-2xl ${
-                          ticket.status === 'resolved' ? 'bg-emerald-500/10' : 
-                          ticket.status === 'escalated' ? 'bg-amber-500/10' : 'bg-blue-500/10'
-                        }`}>
+                        <div className={`p-3 rounded-2xl ${ticket.status === 'resolved' ? 'bg-emerald-500/10' :
+                            ticket.status === 'escalated' ? 'bg-amber-500/10' : 'bg-blue-500/10'
+                          }`}>
                           {ticket.status === 'resolved' ? (
                             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                           ) : ticket.status === 'escalated' ? (
@@ -336,11 +333,10 @@ const SupportHub = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge className={`uppercase text-[8px] font-black tracking-widest px-3 py-1 rounded-lg ${
-                        ticket.status === 'resolved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                        ticket.status === 'escalated' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
-                        'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                      }`}>
+                      <Badge className={`uppercase text-[8px] font-black tracking-widest px-3 py-1 rounded-lg ${ticket.status === 'resolved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                          ticket.status === 'escalated' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                            'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                        }`}>
                         {ticket.status || 'pending'}
                       </Badge>
                     </div>
@@ -356,18 +352,18 @@ const SupportHub = () => {
             <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.05] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
               <div className="relative z-10 scale-[0.85] -mx-10 -my-6">
-                 {user && user.profile && (
-                   <PremiumIDCard 
-                     user={user as any} 
-                     fullName={user.fullName || ''} 
-                     setFullName={() => {}} 
-                     studentId={user.profile?.id?.slice(0,8) || '0000'} 
-                     setStudentId={() => {}} 
-                     isSubmitting={false} 
-                     onSubmit={() => {}} 
-                     onRefresh={() => {}} 
-                   />
-                 )}
+                {user && user.profile && (
+                  <PremiumIDCard
+                    user={user as any}
+                    fullName={user.fullName || ''}
+                    setFullName={() => { }}
+                    studentId={user.profile?.id?.slice(0, 8) || '0000'}
+                    setStudentId={() => { }}
+                    isSubmitting={false}
+                    onSubmit={() => { }}
+                    onRefresh={() => { }}
+                  />
+                )}
               </div>
             </div>
 
@@ -417,7 +413,7 @@ const SupportHub = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <Button 
+                      <Button
                         onClick={() => handleResolve(selectedTicket)}
                         disabled={!resolutionResponse}
                         className="bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-2xl h-14 shadow-xl shadow-emerald-500/10 disabled:opacity-30"
@@ -425,7 +421,7 @@ const SupportHub = () => {
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Resolve & Mail
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         onClick={() => handleEscalate(selectedTicket)}
                         className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] rounded-2xl h-14"
