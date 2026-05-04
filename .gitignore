@@ -11,6 +11,8 @@ dist/
 build/
 out/
 public/downloads/
+public/download/
+dist/download/
 .netlify/
 
 # Misc

@@ -51,6 +51,7 @@ const GlobalFooter = () => {
     support: [
       { name: 'Help Center', path: '/help' },
       { name: 'Contact-Us', path: '/contact' },
+      { name: 'Download Center', path: '/download' },
       { name: 'Sitemap Index', path: '/sitemap' },
     ]
   };

@@ -28,6 +28,7 @@ export const LandingHeader: React.FC = () => {
     { name: 'margdarshak-Saarthi', label: 'margdarshak-Saarthi' },
     { name: 'testimonials', label: 'Success' },
     { name: 'about', label: 'Mission' },
+    { name: 'download', label: 'Download', path: '/download' },
     { name: 'blog', label: 'Blog', path: '/blog' },
     { name: 'pricing', label: 'Pricing' }
   ];

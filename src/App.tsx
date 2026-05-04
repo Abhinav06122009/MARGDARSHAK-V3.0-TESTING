@@ -64,6 +64,7 @@ import Wellness from "@/components/wellness/Wellness";
 import Profile from "@/pages/Profile";
 import Status from "@/pages/Status";
 import Sitemap from "@/pages/Sitemap";
+import DownloadPage from "@/pages/DownloadPage";
 
 
 
@@ -211,6 +212,7 @@ const AppContent = () => {
                         <Route path="/terms" element={<><SEO title="Terms & Conditions | MARGDARSHAK" description="The legal agreement for using the MARGDARSHAK platform." /><TermsAndConditions /></>} />
                         <Route path="/cookies" element={<><SEO title="Cookie Policy | MARGDARSHAK" description="Information about how we use cookies to improve your experience." /><CookiePolicy /></>} />
                         <Route path="/gdpr" element={<><SEO title="GDPR Compliance | MARGDARSHAK" description="Our commitment to GDPR and data protection standards." /><GDPRCompliance /></>} />
+                        <Route path="/download" element={<><SEO title="Download MARGDARSHAK | Desktop & Mobile Apps" description="Get the official MARGDARSHAK application for Windows and Android. Premium AI-powered educational tools on all your devices." /><DownloadPage /></>} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
 
