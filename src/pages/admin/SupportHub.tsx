@@ -28,7 +28,7 @@ const SupportHub = () => {
   const { tickets = [], loading, refresh, resolveTicket, escalateTicket } = useAdmin();
   const { user } = useContext(AuthContext);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved' | 'escalated'>('pending');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [resolutionResponse, setResolutionResponse] = useState('');
 
