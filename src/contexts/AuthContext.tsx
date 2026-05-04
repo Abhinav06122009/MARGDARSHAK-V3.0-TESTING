@@ -119,22 +119,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Fire and forget sync (mostly)
-          fetch('/.netlify/functions/profile-sync', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify(profileData),
-          }).then(async res => {
-            if (res.status === 401) {
-              const errorData = await res.json().catch(() => ({}));
-              console.error(`[AuthContext] 401 Unauthorized for profile-sync. Code: ${errorData.code}, Message: ${errorData.error}`);
-            } else if (!res.ok) {
-              console.warn('[AuthContext] Profile sync failed with status:', res.status);
-            }
-          }).catch(err => console.error('Sync Fetch Error:', err));
+          // Direct sync with Supabase instead of missing Netlify function
+          const { error: syncError } = await supabase
+            .from('profiles')
+            .upsert(profileData);
+            
+          if (syncError) {
+            console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
+          } else {
+            console.log('[AuthContext] Profile synced successfully via Supabase');
+          }
 
           // Check if blocked in Supabase - Keep this fast
           const { data: profile } = await supabase
