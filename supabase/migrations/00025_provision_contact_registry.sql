@@ -29,7 +29,15 @@ CREATE POLICY "Allow admins to view contact messages" ON public.contact_messages
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE id::text = auth.uid()::text
-            AND (user_type ILIKE '%admin%' OR user_type ILIKE '%ceo%' OR user_type ILIKE '%manager%')
+            WHERE id::text = auth.uid()::text
+            AND (
+                user_type ILIKE '%admin%' OR 
+                user_type ILIKE '%ceo%' OR 
+                user_type ILIKE '%manager%' OR 
+                user_type ILIKE '%moderator%' OR 
+                user_type ILIKE '%hr%' OR 
+                user_type ILIKE '%official%'
+            )
         )
     );
 
