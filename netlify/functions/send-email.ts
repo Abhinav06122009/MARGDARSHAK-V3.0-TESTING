@@ -24,7 +24,7 @@ export const handler: Handler = async (event) => {
     console.log('🛰️ [SERVER-EMAIL] Dispatching via Official Resend SDK...');
 
     const { data, error } = await resend.emails.send({
-      from: payload.from || 'onboarding@resend.dev',
+      from: payload.from || 'support@margdarshan.tech',
       to: Array.isArray(payload.to) ? payload.to : [payload.to],
       subject: payload.subject,
       html: payload.html,
