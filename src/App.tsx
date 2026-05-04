@@ -48,7 +48,6 @@ import Analytics from '@/pages/admin/Analytics';
 import SupportCenter from '@/pages/admin/SupportCenter';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import CommandCenter from '@/pages/admin/CommandCenter';
-import SupportNexus from '@/pages/admin/SupportNexus';
 
 // Features - eagerly loaded
 import Tasks from "@/components/tasks/Tasks";
@@ -95,15 +94,7 @@ const SEO = ({ title, description }: { title: string, description: string }) => 
 );
 
 
-import { 
-  ProtectedRoute, 
-  AdminProtectedRoute, 
-  PremiumRoute, 
-  PremiumEliteRoute,
-  OfficerRoute, 
-  PageLoader,
-  SupportNexusRoute
-} from '@/components/auth/RouteGuards';
+import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, OfficerRoute, PageLoader } from '@/components/auth/RouteGuards';
 import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
 import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay';
 import { trackActivity } from '@/lib/security/activityTracker';
@@ -258,7 +249,6 @@ const AppContent = () => {
                         <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                        <Route path="/support-nexus" element={<SupportNexusRoute><SupportNexus /></SupportNexusRoute>} />
                         <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
                         <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />

@@ -98,7 +98,7 @@ export const useAdmin = () => {
         moderationRes,
         analyticsRes
       ] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email, user_type, is_blocked'),
+        supabase.from('profiles').select('*'),
         supabase.from('security_threats').select('*'),
         supabase.from('admin_reports').select('*'),
         supabase.from('blocked_users').select('*'),
@@ -205,11 +205,11 @@ export const useAdmin = () => {
       })
       .subscribe();
 
-    // --- POLLING HEARTBEAT (Every 8 seconds) ---
+    // --- POLLING HEARTBEAT (Every 10 seconds) ---
     const pollingId = setInterval(() => {
-      console.log('💓 [SYNC] High-Command Heartbeat pulse (8s)...');
+      console.log('💓 [SYNC] High-Command Heartbeat pulse...');
       fetchAdminData();
-    }, 8000);
+    }, 10000);
 
     return () => {
       clearInterval(pollingId);

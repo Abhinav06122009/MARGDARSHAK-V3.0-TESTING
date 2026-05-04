@@ -98,56 +98,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               id: translatedId,
               clerk_id: clerkUser.id,
               subscription_tier: tier,
-              role: role,
-              user_type: role
+              role: role
             }
           });
 
           const profileData: any = {
             id: translatedId,
+            clerk_id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
             user_type: role,
+            subscription_tier: tier,
             updated_at: new Date().toISOString()
           };
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Surgical Sync: Use only the stable primary UUID
-          const { data: existingProfile } = await supabase
+          // Direct sync with Supabase with explicit conflict resolution
+          const { error: syncError } = await supabase
             .from('profiles')
-            .select('id')
-            .eq('id', translatedId)
-            .maybeSingle();
-
-          let syncError = null;
-
-          if (existingProfile) {
-            // Update existing profile - Safe columns only
-            const { error } = await supabase
-              .from('profiles')
-              .update({
-                email: profileData.email,
-                full_name: profileData.full_name,
-                avatar_url: profileData.avatar_url,
-                user_type: profileData.user_type,
-                updated_at: profileData.updated_at
-              })
-              .eq('id', translatedId);
-            syncError = error;
-          } else {
-            // Insert new profile - Safe columns only
-            const { error } = await supabase
-              .from('profiles')
-              .insert([profileData]);
-            syncError = error;
-          }
+            .upsert(profileData, { onConflict: 'clerk_id' });
             
           if (syncError) {
-            console.warn('[AuthContext] Tactical sync deferred:', syncError.message);
+            console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
           } else {
-            console.log('[AuthContext] Identity sync complete');
+            console.log('[AuthContext] Profile synced successfully via Supabase');
           }
 
           // Check if blocked in Supabase - Keep this fast
@@ -174,8 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     if (sessionLoaded && userLoaded && clerkUser) {
-      // syncProfile(); // DEACTIVATED: Prevent schema-related 400 errors until audit complete
-      console.log('[AUTH] Background sync paused for stability.');
+      syncProfile();
     }
   }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
 

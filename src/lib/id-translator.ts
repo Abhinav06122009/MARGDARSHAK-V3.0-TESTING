@@ -22,42 +22,21 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
     
     const encoder = new TextEncoder();
     const data = encoder.encode(combined);
-    
-    // Check for Secure Context (crypto.subtle availability)
-    if (typeof window !== 'undefined' && window.isSecureContext && crypto.subtle) {
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-      return [
-        hash.slice(0, 8),
-        hash.slice(8, 12),
-        '4' + hash.slice(12, 15),
-        '8' + hash.slice(16, 19),
-        hash.slice(20, 32)
-      ].join('-');
-    }
-
-    // FALLBACK: Deterministic non-crypto UUID (for non-secure contexts)
-    let hash = 0;
-    for (let i = 0; i < combined.length; i++) {
-      const char = combined.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    
-    const s = Math.abs(hash).toString(16).padEnd(32, 'f');
+    // Construct UUID (8-4-4-4-12) with version 4 and variant 8 markers to match SQL
     return [
-      s.slice(0, 8),
-      s.slice(8, 12),
-      '4' + s.slice(12, 15),
-      '8' + s.slice(16, 19),
-      s.slice(20, 32)
+      hash.slice(0, 8),
+      hash.slice(8, 12),
+      '4' + hash.slice(13, 16),
+      '8' + hash.slice(17, 20),
+      hash.slice(20, 32)
     ].join('-');
   } catch (err) {
-    console.error('[ID-Translator] Translation error:', err);
-    // Final emergency fallback: valid UUID format even if data is lost
-    return '00000000-0000-4000-8000-000000000000';
+    console.error('[ID-Translator] Crypto error:', err);
+    return clerkId; // Absolute fallback
   }
 };
 

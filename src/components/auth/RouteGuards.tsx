@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import { AdminContext } from '@/contexts/AdminContext';
 import { courseService } from '@/components/dashboard/courseService';
 import { BlockedUserOverlay } from './BlockedUserOverlay';
-import NotFound from '@/pages/NotFound';
 
 /**
  * High-fidelity full-screen loading indicator.
@@ -157,36 +156,39 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
   const { session, isAdmin, loading: adminLoading } = useContext(AdminContext);
   const navigate = useNavigate();
   
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-
   useEffect(() => {
-    if (adminLoading) return;
-
-    if (!session || !isAdmin) {
+    if (!adminLoading && (!session || !isAdmin)) {
       navigate('/admin/login', { replace: true });
       return;
     }
 
-    // If we have isAdmin, we are authorized. No need to double-check against AuthContext user.
-    setIsAuthorized(true);
-  }, [session, isAdmin, adminLoading, navigate]);
+    if (user && !adminLoading) {
+      const role = (user.profile?.user_type || '').toLowerCase();
+      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
+      const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
+      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+      
+      const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
+      
+      if (!isHighCommand) {
+        console.warn(`[SECURITY] Restricted access attempt by ${role}`);
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [session, isAdmin, adminLoading, navigate, user]);
 
-  if (adminLoading || isAuthorized === null) return <PageLoader />;
-  
-  if (isAuthorized === false) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  if (adminLoading) return <PageLoader />;
   return session && isAdmin ? <>{children}</> : null;
 };
 
 /**
  * Ensures user has at least B-Class (Officer) status or higher.
+ * Maps to CEO, CTO, Admin, SuperAdmin, etc.
  */
 export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [isOfficer, setIsOfficer] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -195,62 +197,17 @@ export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const role = (user.profile?.user_type || '').toLowerCase();
-    const authorizedRoles = [
-      'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder',
-      'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
-      'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'
-    ];
-    
-    setIsAuthorized(authorizedRoles.includes(role));
+    const role = (user.profile?.role || 'student').toLowerCase();
+    const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
+    const sovereignRoles = ['owner', 'superadmin', 'admin', 'moderator'];
+
+    if (cSuiteRoles.includes(role) || sovereignRoles.includes(role)) {
+      setIsOfficer(true);
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
   }, [user, authLoading, navigate]);
 
-  if (authLoading || isAuthorized === null) return <PageLoader />;
-  
-  if (isAuthorized === false) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return isAuthorized ? <>{children}</> : null;
-};
-
-/**
- * Ensures user has Support Nexus access (A+, A, B, or C class).
- */
-export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading: authLoading } = useContext(AuthContext);
-  const { session, isAdmin, loading: adminLoading } = useContext(AdminContext);
-  const navigate = useNavigate();
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (authLoading || adminLoading) return;
-    
-    if (!session || !isAdmin) {
-      navigate('/admin/login', { replace: true });
-      return;
-    }
-
-    if (user) {
-      const role = (user.profile?.user_type || '').toLowerCase().trim();
-      const authorizedRoles = [
-        'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder',
-        'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
-        'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin',
-        'moderator', 'staff', 'support_executive', 'manager', 'hr', 'admin'
-      ];
-      
-      const authorized = authorizedRoles.includes(role);
-      console.log(`🛡️ [GUARD] Access attempt to Support Nexus. Role: [${role}], Authorized: ${authorized}`);
-      setIsAuthorized(authorized);
-    }
-  }, [user, authLoading, adminLoading, session, isAdmin, navigate]);
-
-  if (authLoading || adminLoading || isAuthorized === null) return <PageLoader />;
-  
-  if (isAuthorized === false) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return isAuthorized ? <>{children}</> : null;
+  if (authLoading || isOfficer === null) return <PageLoader />;
+  return isOfficer ? <>{children}</> : null;
 };
