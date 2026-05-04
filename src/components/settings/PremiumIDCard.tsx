@@ -264,8 +264,8 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
 
         <div className="relative h-full flex flex-col z-20 p-10 lg:p-12" style={{ transform: "translateZ(40px)" }}>
 
-          {/* HEADER: Surgical Alignment */}
-          <div className="flex items-center justify-between mb-12">
+          {/* HEADER: Tactical Alignment */}
+          <div className="flex items-center justify-between mb-8 relative z-20">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg border border-white/20 shadow-xl">
@@ -273,19 +273,48 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
                 </div>
                 <h2 className="text-xl font-black text-white tracking-tight uppercase italic leading-none">Margdarshak</h2>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] ml-12">VSAV GYANTAPA FAMILY</span>
-                <motion.div
-                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                  className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                />
-              </div>
+              <p className="text-[7px] font-mono text-white/20 uppercase tracking-[0.5em] mt-1">VSAV GYANTAPA FAMILY</p>
             </div>
+            
             <div className="text-right">
               <div className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em]">{roleData.grade} GRADE</div>
               <div className="text-[11px] font-mono font-bold tracking-widest" style={{ color: roleData.codeColor || '#52525b' }}>{studentId || 'ID_0000'}</div>
             </div>
+          </div>
+
+          {/* Tactical Identity Tier */}
+          <div className="flex flex-col gap-1.5 relative z-10 mb-8">
+            <span className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase italic">Universal Identity Node</span>
+            <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none drop-shadow-2xl">
+              {profile?.full_name || 'AUTHENTICATING...'}
+            </h2>
+          </div>
+
+          {/* Holographic Verification Layer (Ghost-Matrix) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-1000 rotate-[-25deg] z-0">
+            <div className="flex flex-col items-center">
+              <span className="text-6xl font-black whitespace-nowrap tracking-[0.5em] text-white leading-none">VSAV GYANTAPA</span>
+              <span className="text-6xl font-black whitespace-nowrap tracking-[0.5em] text-white leading-none">FAMILY & EMPLOYEE</span>
+              <span className="text-6xl font-black whitespace-nowrap tracking-[0.5em] text-white leading-none">OFFICIAL_VERIFIED</span>
+            </div>
+          </div>
+
+          {/* High-Command Credentials */}
+          <div className="grid grid-cols-2 gap-8 relative z-10 mb-8">
+            <div className="space-y-1.5 group/stat">
+              <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] group-hover:text-emerald-500/50 transition-colors">Tactical Designation</p>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                <p className="text-xs font-black text-white uppercase tracking-widest italic">{roleData.title}</p>
+              </div>
+            </div>
+            <div className="space-y-1.5 group/stat text-right">
+              <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] group-hover:text-emerald-500/50 transition-colors">Clearance Protocol</p>
+              <p className="text-xs font-black text-emerald-400 uppercase tracking-widest italic">
+                {roleData.class === 'CORE' ? 'CLASS_C_STANDARD' : roleData.class === 'B CLASS' ? 'CLASS_B_SECURE' : 'CLASS_A_ELITE'}
+              </p>
+            </div>
+          </div>
           </div>
 
           {/* AVATAR: Balanced Proportions */}

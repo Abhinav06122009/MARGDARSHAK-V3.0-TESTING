@@ -157,27 +157,21 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Wait for both Auth and Admin contexts to stabilize
     if (authLoading || adminLoading) return;
 
     if (!session || !isAdmin) {
-      console.warn('[SECURITY] No active admin session. Redirecting to login.');
       navigate('/admin/login', { replace: true });
       return;
     }
 
     if (user) {
       const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
-      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder'];
-      const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
-      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin', 'admin'];
+      const highCommand = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder', 'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
       
-      const isHighCommand = rawRoles.some(role => 
-        [...aPlusRoles, ...aRoles, ...bRoles].includes(role)
-      );
+      const isAuthorized = rawRoles.some(role => highCommand.includes(role));
       
-      if (!isHighCommand) {
-        console.warn(`[SECURITY] Restricted access attempt by roles: ${rawRoles.join(', ')}. Reverting to dashboard.`);
+      if (!isAuthorized) {
+        console.warn(`[SECURITY] Access Denied to Command Zone for role(s): ${rawRoles.join(', ')}`);
         navigate('/dashboard', { replace: true });
       }
     }
@@ -185,6 +179,54 @@ export const AdminProtectedRoute = ({ children }: { children: React.ReactNode })
 
   if (authLoading || adminLoading) return <PageLoader />;
   return session && isAdmin ? <>{children}</> : null;
+};
+
+/**
+ * Restricted to Grade C Officials (Moderators, HR, Managers, Support).
+ */
+export const ClassCRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate('/auth', { replace: true }); return; }
+
+    const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
+    const cRoles = ['admin', 'moderator', 'manager', 'hr', 'support_executive', 'supportexecutive'];
+    const isAuthorized = rawRoles.some(role => cRoles.includes(role));
+    
+    if (!isAuthorized) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) return <PageLoader />;
+  return <>{children}</>;
+};
+
+/**
+ * Restricted to High-Command (A+ to B) for overriding and nexus-level ops.
+ */
+export const NexusRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate('/auth', { replace: true }); return; }
+
+    const rawRoles = (user.profile?.user_type || '').toLowerCase().split(',').map(r => r.trim());
+    const nexusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder', 'cofounder', 'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio', 'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+    const isAuthorized = rawRoles.some(role => nexusRoles.includes(role));
+    
+    if (!isAuthorized) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) return <PageLoader />;
+  return <>{children}</>;
 };
 
 /**

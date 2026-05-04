@@ -74,6 +74,10 @@ const QuizGenerator = lazy(() => import('@/pages/QuizGenerator'));
 const EssayHelper = lazy(() => import('@/pages/EssayHelper'));
 const StudyPlanner = lazy(() => import('@/pages/StudyPlanner'));
 const AIAnalytics = lazy(() => import('@/pages/AIAnalytics'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const SupportHub = lazy(() => import('./pages/admin/SupportHub'));
+const SupportNexus = lazy(() => import('./pages/admin/SupportNexus'));
+const CommandCenter = lazy(() => import('./pages/admin/CommandCenter'));
 const Flashcards = lazy(() => import('@/pages/Flashcards'));
 const DoubtSolver = lazy(() => import('@/pages/DoubtSolver'));
 const SmartNotes = lazy(() => import('@/pages/SmartNotes'));
@@ -94,7 +98,16 @@ const SEO = ({ title, description }: { title: string, description: string }) => 
 );
 
 
-import { ProtectedRoute, PremiumRoute, PremiumEliteRoute, AdminProtectedRoute, OfficerRoute, PageLoader } from '@/components/auth/RouteGuards';
+import { 
+  ProtectedRoute, 
+  PremiumRoute, 
+  PremiumEliteRoute, 
+  AdminProtectedRoute, 
+  OfficerRoute, 
+  PageLoader,
+  ClassCRoute,
+  NexusRoute
+} from '@/components/auth/RouteGuards';
 import { BlockedUserOverlay } from '@/components/auth/BlockedUserOverlay';
 import { SecurityWarningOverlay } from '@/components/auth/SecurityWarningOverlay';
 import { trackActivity } from '@/lib/security/activityTracker';
@@ -246,6 +259,14 @@ const AppContent = () => {
                         <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
                         <Route path="/admin/login" element={<AdminAuthPage />} />
+                        
+                        {/* Operational Support Hub (Class C) */}
+                        <Route path="/support" element={<ClassCRoute><SupportHub /></ClassCRoute>} />
+
+                        {/* Tactical Support Nexus (A+ to B) */}
+                        <Route path="/support-nexus" element={<NexusRoute><SupportNexus /></NexusRoute>} />
+
+                        {/* High-Command Admin (A+ to B) */}
                         <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
                         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
