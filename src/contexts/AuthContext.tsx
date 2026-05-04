@@ -115,15 +115,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Direct sync with Supabase with explicit conflict resolution
-          const { error: syncError } = await supabase
+          // Surgical Sync: Check if profile exists first to avoid ID conflicts
+          const { data: existingProfile } = await supabase
             .from('profiles')
-            .upsert(profileData, { onConflict: 'clerk_id' });
+            .select('id')
+            .eq('clerk_id', clerkUser.id)
+            .maybeSingle();
+
+          let syncError = null;
+
+          if (existingProfile) {
+            // Update existing profile - Preserve the ID
+            const { error } = await supabase
+              .from('profiles')
+              .update({
+                email: profileData.email,
+                full_name: profileData.full_name,
+                avatar_url: profileData.avatar_url,
+                user_type: profileData.user_type,
+                subscription_tier: profileData.subscription_tier,
+                updated_at: profileData.updated_at
+              })
+              .eq('clerk_id', clerkUser.id);
+            syncError = error;
+          } else {
+            // Insert new profile
+            const { error } = await supabase
+              .from('profiles')
+              .insert([profileData]);
+            syncError = error;
+          }
             
           if (syncError) {
-            console.warn('[AuthContext] Profile sync deferred/failed:', syncError.message);
+            console.warn('[AuthContext] Tactical sync deferred:', syncError.message);
           } else {
-            console.log('[AuthContext] Profile synced successfully via Supabase');
+            console.log('[AuthContext] Identity sync complete');
           }
 
           // Check if blocked in Supabase - Keep this fast
