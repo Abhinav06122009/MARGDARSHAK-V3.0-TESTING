@@ -148,31 +148,53 @@ export const PremiumRoute = ({ children }: { children: React.ReactNode }) => {
   return isPremium ? <>{children}</> : null;
 };
 
+import NotFound from '@/pages/NotFound';
+
 /**
  * Ensures user has admin privileges.
  */
 export const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session, isAdmin, loading } = useContext(AdminContext);
+  const { user } = useContext(AuthContext);
+  const { session, isAdmin, loading: adminLoading } = useContext(AdminContext);
   const navigate = useNavigate();
   
-  useEffect(() => {
-    if (!loading && (!session || !isAdmin)) {
-      navigate('/admin/login', { replace: true });
-    }
-  }, [session, isAdmin, loading, navigate]);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-  if (loading) return null;
+  useEffect(() => {
+    if (adminLoading) return;
+
+    if (!session || !isAdmin) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+
+    if (user) {
+      const role = (user.profile?.user_type || '').toLowerCase();
+      const aPlusRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder'];
+      const aRoles = ['aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio'];
+      const bRoles = ['aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'];
+      
+      const isHighCommand = [...aPlusRoles, ...aRoles, ...bRoles].includes(role);
+      setIsAuthorized(isHighCommand);
+    }
+  }, [session, isAdmin, adminLoading, navigate, user]);
+
+  if (adminLoading || (session && isAdmin && isAuthorized === null)) return <PageLoader />;
+  
+  if (session && isAdmin && isAuthorized === false) {
+    return <NotFound />;
+  }
+
   return session && isAdmin ? <>{children}</> : null;
 };
 
 /**
  * Ensures user has at least B-Class (Officer) status or higher.
- * Maps to CEO, CTO, Admin, SuperAdmin, etc.
  */
 export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isOfficer, setIsOfficer] = useState<boolean | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -181,17 +203,64 @@ export const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const role = (user.profile?.role || 'student').toLowerCase();
-    const cSuiteRoles = ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'];
-    const sovereignRoles = ['owner', 'superadmin', 'admin', 'moderator'];
-
-    if (cSuiteRoles.includes(role) || sovereignRoles.includes(role)) {
-      setIsOfficer(true);
-    } else {
-      navigate('/dashboard', { replace: true });
-    }
+    const role = (user.profile?.user_type || '').toLowerCase();
+    const authorizedRoles = [
+      'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder',
+      'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
+      'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin'
+    ];
+    
+    setIsAuthorized(authorizedRoles.includes(role));
   }, [user, authLoading, navigate]);
 
-  if (authLoading || isOfficer === null) return <PageLoader />;
-  return isOfficer ? <>{children}</> : null;
+  if (authLoading || isAuthorized === null) return <PageLoader />;
+  
+  if (isAuthorized === false) {
+    return <NotFound />;
+  }
+
+  return isAuthorized ? <>{children}</> : null;
+};
+
+/**
+ * Ensures user has Support Nexus access (A+, A, B, or C class).
+ */
+export const SupportNexusRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const { session, isAdmin, loading: adminLoading } = useContext(AdminContext);
+  const navigate = useNavigate();
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (authLoading || adminLoading) return;
+    
+    if (!session || !isAdmin) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+
+    if (user) {
+      const role = (user.profile?.user_type || '').toLowerCase();
+      const authorizedRoles = [
+        'ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'cso', 'owner', 'co-founder',
+        'aceo', 'acto', 'acfo', 'acoo', 'acmo', 'acio',
+        'aeo', 'ato', 'afo', 'aoo', 'amo', 'aio', 'superadmin',
+        'moderator', 'staff', 'support_executive', 'manager', 'hr', 'admin'
+      ];
+      
+      if (authorizedRoles.includes(role)) {
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
+      }
+    }
+  }, [user, authLoading, adminLoading, session, isAdmin, navigate]);
+
+  if (authLoading || adminLoading || isAuthorized === null) return <PageLoader />;
+  
+  if (isAuthorized === false) {
+    return <NotFound />;
+  }
+
+  return isAuthorized ? <>{children}</> : null;
 };

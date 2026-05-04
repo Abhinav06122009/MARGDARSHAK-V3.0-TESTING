@@ -121,7 +121,7 @@ export const useAdmin = () => {
       if (reportsRes.data) {
         setReports(reportsRes.data
           .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5)
+          .slice(0, 100)
         );
       }
 
@@ -205,7 +205,14 @@ export const useAdmin = () => {
       })
       .subscribe();
 
+    // --- POLLING HEARTBEAT (Every 8 seconds) ---
+    const pollingId = setInterval(() => {
+      console.log('💓 [SYNC] High-Command Heartbeat pulse (8s)...');
+      fetchAdminData();
+    }, 8000);
+
     return () => {
+      clearInterval(pollingId);
       supabase.removeChannel(contactChannel);
       supabase.removeChannel(supportChannel);
     };
@@ -222,5 +229,20 @@ export const useAdmin = () => {
     settings,
     loading,
     refresh: fetchAdminData,
+    createInvestigation: async (data: any) => {
+      const { error } = await supabase.from('admin_reports').insert([data]);
+      if (error) throw error;
+      fetchAdminData();
+    },
+    updateInvestigation: async (id: string, data: any) => {
+      const { error } = await supabase.from('admin_reports').update(data).eq('id', id);
+      if (error) throw error;
+      fetchAdminData();
+    },
+    deleteInvestigation: async (id: string) => {
+      const { error } = await supabase.from('admin_reports').delete().eq('id', id);
+      if (error) throw error;
+      fetchAdminData();
+    }
   };
 };
