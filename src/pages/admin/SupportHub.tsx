@@ -65,24 +65,28 @@ const SupportHub = () => {
       });
 
       // Automated API Dispatch Bridge (Resend)
-      const subject = `RE: ${ticket.subject || 'Support Inquiry'} [RESOLVED]`;
+      const subject = `RESOLUTION FOR YOUR QUERY`;
       const htmlBody = `
         <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
           <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
-            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 64px; height: 64px; margin-bottom: 16px;">
-            <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Query Resolution</h1>
+            <img src="https://margdarshan.tech/looogo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Resolution For Your Query</h1>
           </div>
           
           <div style="padding: 40px; line-height: 1.6;">
-            <p style="margin-top: 0; font-size: 16px; color: #4b5563;">Hello,</p>
-            <p style="font-size: 16px; color: #4b5563;">Your inquiry regarding <strong>"${ticket.subject || 'Support Request'}"</strong> has been resolved by our support team.</p>
+            <p style="margin-top: 0; font-size: 15px; color: #4b5563;">Hello,</p>
             
-            <div style="margin: 32px 0; padding: 24px; background: #f9fafb; border-radius: 16px; border: 1px solid #f3f4f6;">
-              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Resolution</p>
-              <p style="margin: 0; font-size: 15px; color: #1f2937;">${resolutionResponse}</p>
+            <div style="margin: 24px 0; padding: 20px; background: #f9fafb; border-radius: 16px; border: 1px solid #f3f4f6;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">You Asked</p>
+              <p style="margin: 0; font-size: 14px; color: #4b5563; font-style: italic;">"${ticket.message || 'No message provided'}"</p>
             </div>
 
-            <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
+            <div style="margin: 24px 0; padding: 20px; background: #ecfdf5; border-radius: 16px; border: 1px solid #d1fae5;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Official Resolution</p>
+              <p style="margin: 0; font-size: 15px; color: #064e3b; font-weight: 500;">${resolutionResponse}</p>
+            </div>
+
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 24px; margin-top: 32px;">
               <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
               <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.025em;">${rank}</p>
               <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">VSAV GYANTAPA SUPPORT TEAM</p>
@@ -173,24 +177,28 @@ const SupportHub = () => {
       });
 
       // 2. Automated API Dispatch Bridge (Resend)
-      const subject = `ALERT: ${ticket.subject || 'Support Inquiry'} [ESCALATED]`;
+      const subject = `RESOLUTION FOR YOUR QUERY`;
       const htmlBody = `
         <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
           <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
-            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 64px; height: 64px; margin-bottom: 16px;">
-            <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; color: #f59e0b; text-transform: uppercase;">Ticket Escalated</h1>
+            <img src="https://margdarshan.tech/looogo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #f59e0b; text-transform: uppercase;">Ticket Escalated</h1>
           </div>
           
           <div style="padding: 40px; line-height: 1.6;">
-            <p style="margin-top: 0; font-size: 16px; color: #4b5563;">Hello,</p>
-            <p style="font-size: 16px; color: #4b5563;">Your inquiry regarding <strong>"${ticket.subject || 'Support Request'}"</strong> has been escalated for high-level review.</p>
+            <p style="margin-top: 0; font-size: 15px; color: #4b5563;">Hello,</p>
             
-            <div style="margin: 32px 0; padding: 24px; background: #fffbeb; border-radius: 16px; border: 1px solid #fef3c7;">
-              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Escalation Notes</p>
-              <p style="margin: 0; font-size: 15px; color: #92400e;">${resolutionResponse}</p>
+            <div style="margin: 24px 0; padding: 20px; background: #f9fafb; border-radius: 16px; border: 1px solid #f3f4f6;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">You Asked</p>
+              <p style="margin: 0; font-size: 14px; color: #4b5563; font-style: italic;">"${ticket.message || 'No message provided'}"</p>
             </div>
 
-            <div style="border-top: 1px solid #f3f4f6; padding-top: 32px; margin-top: 32px;">
+            <div style="margin: 24px 0; padding: 20px; background: #fffbeb; border-radius: 16px; border: 1px solid #fef3c7;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Escalation Notes</p>
+              <p style="margin: 0; font-size: 15px; color: #92400e; font-weight: 500;">${resolutionResponse}</p>
+            </div>
+
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 24px; margin-top: 32px;">
               <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
               <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.025em;">${rank}</p>
               <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">VSAV GYANTAPA SUPPORT TEAM</p>
