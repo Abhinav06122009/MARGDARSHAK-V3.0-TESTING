@@ -247,28 +247,48 @@ export const useAdmin = () => {
     resolveTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
       
+      // Optimistic UI: Update local state immediately so it "disappears" from pending
+      setTickets(prev => prev.map(t => 
+        t.id === id ? { ...t, status: 'resolved', resolution_text: resolutionText } : t
+      ));
+
       // 1. Update Database Status & Resolution Text
       const { error } = await supabase.from(table).update({ 
         status: 'resolved',
         resolution_text: resolutionText 
       }).eq('id', id);
       
-      if (error) throw error;
-
-      // 2. Automated Email Dispatch Protocol (Placeholder for API integration)
-      // To activate, add VITE_EMAIL_API_KEY to your .env
-      console.log('🛰️ [AUTOMATED DISPATCH] Initiating direct mail via API...');
+      if (error) {
+        console.error(`❌ [DATABASE] Failed to resolve ${type}:`, error);
+        // Rollback on failure
+        fetchAdminData();
+        throw new Error(`DATABASE PERSISTENCE FAILURE: ${error.message}`);
+      }
       
       fetchAdminData();
     },
-    escalateTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
+
+    escalateTicket: async (id: string, type: 'contact' | 'ticket', escalationNote: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
+
+      // Optimistic UI: Update local state immediately
+      setTickets(prev => prev.map(t => 
+        t.id === id ? { ...t, status: 'escalated', resolution_text: escalationNote } : t
+      ));
+      
+      // 1. Update Database Status
       const { error } = await supabase.from(table).update({ 
         status: 'escalated',
-        resolution_text: resolutionText
+        resolution_text: escalationNote 
       }).eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error(`❌ [DATABASE] Failed to escalate ${type}:`, error);
+        // Rollback on failure
+        fetchAdminData();
+        throw new Error(`DATABASE PERSISTENCE FAILURE: ${error.message}`);
+      }
+      
       fetchAdminData();
     }
   };

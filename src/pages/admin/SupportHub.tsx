@@ -48,6 +48,14 @@ const SupportHub = () => {
     return matchesSearch && matchesFilter;
   });
 
+  // Clear selection if the ticket disappears from the filtered list (e.g. status change)
+  React.useEffect(() => {
+    if (selectedTicket && !filteredTickets.some(t => t.id === selectedTicket.id)) {
+      setSelectedTicket(null);
+      setResolutionResponse('');
+    }
+  }, [filteredTickets, selectedTicket]);
+
   const handleResolve = async (ticket: SupportTicket) => {
     if (!resolutionResponse) {
       toast.error('Tactical Error', { description: 'Resolution notes required for dispatch.' });
