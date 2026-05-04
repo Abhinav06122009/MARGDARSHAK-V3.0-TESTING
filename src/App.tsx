@@ -39,15 +39,7 @@ import BlogPage from "@/pages/BlogPage";
 import AchievementsPage from "@/pages/Achievements"; // Added Achievements
 import AdminMessages from "@/pages/AdminMessages";
 import AdminAuthPage from '@/components/auth/AdminAuthPage';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import UserManagement from '@/pages/admin/UserManagement';
-import SecurityCenter from '@/pages/admin/SecurityCenter';
-import ReportsInvestigation from '@/pages/admin/ReportsInvestigation';
-import ContentModeration from '@/pages/admin/ContentModeration';
-import Analytics from '@/pages/admin/Analytics';
-import SupportCenter from '@/pages/admin/SupportCenter';
-import AdminSettings from '@/pages/admin/AdminSettings';
-import CommandCenter from '@/pages/admin/CommandCenter';
+// Admin pages are lazy loaded below
 
 // Features - eagerly loaded
 import Tasks from "@/components/tasks/Tasks";
@@ -74,10 +66,17 @@ const QuizGenerator = lazy(() => import('@/pages/QuizGenerator'));
 const EssayHelper = lazy(() => import('@/pages/EssayHelper'));
 const StudyPlanner = lazy(() => import('@/pages/StudyPlanner'));
 const AIAnalytics = lazy(() => import('@/pages/AIAnalytics'));
-const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const SupportHub = lazy(() => import('./pages/admin/SupportHub'));
 const SupportNexus = lazy(() => import('./pages/admin/SupportNexus'));
 const CommandCenter = lazy(() => import('./pages/admin/CommandCenter'));
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const SecurityCenter = lazy(() => import('./pages/admin/SecurityCenter'));
+const ReportsInvestigation = lazy(() => import('./pages/admin/ReportsInvestigation'));
+const ContentModeration = lazy(() => import('./pages/admin/ContentModeration'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const SupportCenter = lazy(() => import('./pages/admin/SupportCenter'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const Flashcards = lazy(() => import('@/pages/Flashcards'));
 const DoubtSolver = lazy(() => import('@/pages/DoubtSolver'));
 const SmartNotes = lazy(() => import('@/pages/SmartNotes'));
