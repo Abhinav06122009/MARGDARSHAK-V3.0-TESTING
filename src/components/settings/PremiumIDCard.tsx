@@ -315,7 +315,6 @@ const PremiumIDCard: React.FC<PremiumIDCardProps> = ({
               </p>
             </div>
           </div>
-          </div>
 
           {/* AVATAR: Balanced Proportions */}
           <div className="flex flex-col items-center mb-12 relative" style={{ transform: "translateZ(60px)" }}>
