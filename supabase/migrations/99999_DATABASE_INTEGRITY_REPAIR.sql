@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
 );
 
 -- 4. Identity Translation Logic (ZENITH SYNC)
+DROP FUNCTION IF EXISTS public.translate_clerk_id_to_uuid(text) CASCADE;
 CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
 RETURNS text
 LANGUAGE plpgsql STABLE
