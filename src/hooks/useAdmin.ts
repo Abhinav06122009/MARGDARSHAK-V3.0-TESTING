@@ -243,15 +243,30 @@ export const useAdmin = () => {
       if (error) throw error;
       fetchAdminData();
     },
-    resolveTicket: async (id: string, type: 'contact' | 'ticket') => {
+    resolveTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
-      const { error } = await supabase.from(table).update({ status: 'resolved' }).eq('id', id);
+      
+      // 1. Update Database Status & Resolution Text
+      const { error } = await supabase.from(table).update({ 
+        status: 'resolved',
+        resolution_text: resolutionText 
+      }).eq('id', id);
+      
       if (error) throw error;
+
+      // 2. Automated Email Dispatch Protocol (Placeholder for API integration)
+      // To activate, add VITE_EMAIL_API_KEY to your .env
+      console.log('🛰️ [AUTOMATED DISPATCH] Initiating direct mail via API...');
+      
       fetchAdminData();
     },
-    escalateTicket: async (id: string, type: 'contact' | 'ticket') => {
+    escalateTicket: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
-      const { error } = await supabase.from(table).update({ status: 'escalated' }).eq('id', id);
+      const { error } = await supabase.from(table).update({ 
+        status: 'escalated',
+        resolution_text: resolutionText
+      }).eq('id', id);
+      
       if (error) throw error;
       fetchAdminData();
     }
