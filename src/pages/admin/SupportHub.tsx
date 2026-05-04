@@ -69,7 +69,7 @@ const SupportHub = () => {
       const htmlBody = `
         <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
           <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
-            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" width="120" style="display: block; margin: 0 auto 16px auto; border: none; outline: none; text-decoration: none;">
             <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Resolution For Your Query</h1>
           </div>
           
@@ -181,7 +181,7 @@ const SupportHub = () => {
       const htmlBody = `
         <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
           <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
-            <img src="https://margdarshan.tech/looogo.png" alt="Margdarshak" style="width: 120px; height: auto; margin-bottom: 16px;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" width="120" style="display: block; margin: 0 auto 16px auto; border: none; outline: none; text-decoration: none;">
             <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #f59e0b; text-transform: uppercase;">Ticket Escalated</h1>
           </div>
           
