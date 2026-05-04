@@ -1,11 +1,11 @@
--- MASTER DATABASE INTEGRITY REPAIR SCRIPT (SYNC STABILIZATION)
--- VERSION 4.0: CRITICAL FIX FOR ID-SALT DESYNCHRONIZATION
+-- MASTER PLATFORM RESTORATION SCRIPT (ZENITH ARCHITECTURE)
+-- VERSION 5.0: RECOVERS 404 DELETED TABLES AND FIXES ID-SYNC
 
--- 1. Ensure Extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- 1. EXTENSIONS & SCHEMA
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
 
--- 2. Identity Translation Logic (ZENITH SYNC - MATCHES FRONTEND SALT)
+-- 2. IDENTITY TRANSLATION (SALTED & HARDENED)
 DROP FUNCTION IF EXISTS public.translate_clerk_id_to_uuid(text) CASCADE;
 CREATE OR REPLACE FUNCTION public.translate_clerk_id_to_uuid(p_clerk_id text)
 RETURNS text
@@ -13,30 +13,27 @@ LANGUAGE plpgsql STABLE
 AS $$
 DECLARE
     v_salt TEXT := 'b8236e1f-1918-4447-9de9-9e363a37ff0d1d05da6b-ad8a-4734-bcd8-c10c7bdf39aa';
-    v_combined TEXT;
-    v_hash TEXT;
 BEGIN
-  -- If it's already a UUID, return it
   IF p_clerk_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
     RETURN p_clerk_id;
   END IF;
 
-  -- MATCH FRONTEND LOGIC: ID + SALT
-  v_combined := p_clerk_id || v_salt;
-  v_hash := encode(digest(v_combined, 'sha256'), 'hex');
-
   RETURN (
+    WITH hash AS (
+      SELECT encode(extensions.digest((p_clerk_id || v_salt)::text, 'sha256'::text), 'hex') as h
+    )
     SELECT 
-      substring(v_hash, 1, 8) || '-' || 
-      substring(v_hash, 9, 4) || '-' || 
-      '4' || substring(v_hash, 14, 3) || '-' || 
-      '8' || substring(v_hash, 18, 3) || '-' || 
-      substring(v_hash, 21, 12)
+      substring(h, 1, 8) || '-' || 
+      substring(h, 9, 4) || '-' || 
+      '4' || substring(h, 14, 3) || '-' || 
+      '8' || substring(h, 18, 3) || '-' || 
+      substring(h, 21, 12)
+    FROM hash
   );
 END;
 $$;
 
--- 3. Update Requesting User Resolution
+DROP FUNCTION IF EXISTS public.requesting_user_id() CASCADE;
 CREATE OR REPLACE FUNCTION public.requesting_user_id()
 RETURNS text
 LANGUAGE sql STABLE
@@ -44,29 +41,40 @@ AS $$
   SELECT public.translate_clerk_id_to_uuid(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::text);
 $$;
 
--- 4. Unified Admin Check Function
-CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)
-RETURNS BOOLEAN AS $$
-DECLARE
-    v_translated_id TEXT;
-BEGIN
-    v_translated_id := public.translate_clerk_id_to_uuid(p_user_id);
-    RETURN EXISTS (
-        SELECT 1 FROM public.profiles
-        WHERE id = v_translated_id
-        AND (
-            user_type ILIKE '%admin%' OR 
-            user_type ILIKE '%ceo%' OR 
-            user_type ILIKE '%manager%' OR 
-            user_type ILIKE '%moderator%' OR 
-            user_type ILIKE '%hr%' OR 
-            user_type ILIKE '%official%'
-        )
-    );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- 3. CORE TABLE RESTORATION (THE 404 FIX)
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id text primary key,
+  clerk_id text unique,
+  email text,
+  full_name text,
+  avatar_url text,
+  user_type text default 'student',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
 
--- 5. Infrastructure Check (No-Destructive)
+CREATE TABLE IF NOT EXISTS public.tasks (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text references public.profiles(id) on delete cascade,
+  title text not null,
+  description text,
+  completed boolean default false,
+  due_date timestamptz,
+  priority text default 'medium',
+  created_at timestamptz default now()
+);
+
+CREATE TABLE IF NOT EXISTS public.notes (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text references public.profiles(id) on delete cascade,
+  title text not null,
+  content text,
+  folder_id uuid,
+  is_favorite boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
 CREATE TABLE IF NOT EXISTS public.contact_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name TEXT,
@@ -91,23 +99,38 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. RLS Policy Sync
+-- 4. PERMISSIONS & RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Admins can manage contact messages" ON public.contact_messages;
-CREATE POLICY "Admins can manage contact messages" ON public.contact_messages FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
+CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = public.translate_clerk_id_to_uuid(p_user_id)
+        AND (user_type ILIKE ANY (ARRAY['%admin%', '%ceo%', '%manager%', '%moderator%', '%official%']))
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 5. POLICIES
+DROP POLICY IF EXISTS "Users can manage their own tasks" ON public.tasks;
+CREATE POLICY "Users can manage their own tasks" ON public.tasks FOR ALL USING (user_id = public.requesting_user_id());
 
 DROP POLICY IF EXISTS "Admins can manage support tickets" ON public.support_tickets;
 CREATE POLICY "Admins can manage support tickets" ON public.support_tickets FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
 
--- 7. Realtime Sync
+-- 6. REALTIME
 DO $$
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'tasks') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
+    END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'contact_messages') THEN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_messages;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'support_tickets') THEN
-        ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;
     END IF;
 END $$;
