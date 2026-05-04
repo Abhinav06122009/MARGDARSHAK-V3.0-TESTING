@@ -32,6 +32,11 @@ const SupportHub = () => {
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [resolutionResponse, setResolutionResponse] = useState('');
 
+  const handleSelectTicket = (ticket: SupportTicket) => {
+    setSelectedTicket(ticket);
+    setResolutionResponse(ticket.resolution_text || '');
+  };
+
   const filteredTickets = (tickets || []).filter(ticket => {
     const matchesSearch = 
       (ticket.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -230,7 +235,7 @@ const SupportHub = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={() => handleSelectTicket(ticket)}
                     className={`group p-6 bg-white/[0.02] border rounded-3xl cursor-pointer transition-all hover:bg-white/[0.04] ${
                       selectedTicket?.id === ticket.id ? 'border-emerald-500/30 bg-white/[0.05]' : 'border-white/5'
                     }`}
@@ -319,6 +324,15 @@ const SupportHub = () => {
                         "{selectedTicket.message}"
                       </p>
                     </div>
+
+                    {selectedTicket.status !== 'pending' && selectedTicket.resolution_text && (
+                      <div className="p-5 bg-emerald-500/[0.03] border border-emerald-500/10 rounded-2xl">
+                        <h4 className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2 italic">Archived Resolution</h4>
+                        <p className="text-[11px] text-zinc-300 leading-relaxed font-bold">
+                          "{selectedTicket.resolution_text}"
+                        </p>
+                      </div>
+                    )}
 
                     <div className="space-y-3">
                       <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1 italic">Official Resolution / Response</label>

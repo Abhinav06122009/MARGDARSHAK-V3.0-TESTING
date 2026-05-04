@@ -48,6 +48,7 @@ export interface SupportTicket {
   subject?: string | null;
   message?: string | null;
   status?: string | null;
+  resolution_text?: string | null;
   type: 'contact' | 'ticket';
 }
 

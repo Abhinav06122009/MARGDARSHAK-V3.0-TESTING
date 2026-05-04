@@ -1,7 +1,6 @@
 
 import { Handler } from '@netlify/functions';
-
-const RESEND_API_URL = 'https://api.resend.com/emails';
+import { Resend } from 'resend';
 
 export const handler: Handler = async (event) => {
   // Only allow POST requests
@@ -21,35 +20,28 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    console.log('🛰️ [SERVER-EMAIL] Dispatching to Resend...');
+    const resend = new Resend(apiKey);
+    console.log('🛰️ [SERVER-EMAIL] Dispatching via Official Resend SDK...');
 
-    const response = await fetch(RESEND_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: payload.from || 'onboarding@resend.dev',
-        to: Array.isArray(payload.to) ? payload.to : [payload.to],
-        subject: payload.subject,
-        html: payload.html,
-      }),
+    const { data, error } = await resend.emails.send({
+      from: payload.from || 'onboarding@resend.dev',
+      to: Array.isArray(payload.to) ? payload.to : [payload.to],
+      subject: payload.subject,
+      html: payload.html,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('❌ [SERVER-RESEND-ERROR]:', response.status, data);
+    if (error) {
+      console.error('❌ [SERVER-RESEND-SDK-ERROR]:', error);
       return { 
-        statusCode: response.status, 
-        body: JSON.stringify(data) 
+        statusCode: 400, 
+        body: JSON.stringify(error) 
       };
     }
 
+    console.log('🛰️ [SERVER-EMAIL] SDK dispatch successful:', data?.id);
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, id: data.id }),
+      body: JSON.stringify({ success: true, id: data?.id }),
     };
   } catch (error: any) {
     console.error('❌ [SERVER-EMAIL] Critical failure:', error);
