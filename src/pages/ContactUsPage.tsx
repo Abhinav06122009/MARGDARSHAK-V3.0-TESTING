@@ -45,7 +45,7 @@ const ContactUsPage = () => {
       });
 
       if (error) throw error;
-      toast.success("Message Sent", { description: "Our Technocal support team will reach out shortly." });
+      toast.success("Message Sent", { description: "Our Technical support team will reach out shortly." });
       setFormData({ firstName: '', lastName: '', email: '', message: '' });
     } catch (error: any) {
       console.error('Error:', error);

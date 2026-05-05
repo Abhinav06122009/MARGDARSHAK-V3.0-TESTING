@@ -205,6 +205,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#020202] overflow-hidden cursor-none"
         >
+
           {/* Custom Cursor Reticle */}
           <motion.div 
             className="fixed w-8 h-8 border border-emerald-500/50 rounded-full z-[10000] pointer-events-none mix-blend-difference flex items-center justify-center"
@@ -217,6 +218,15 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               className="absolute inset-0 border-t border-emerald-500 rounded-full"
             />
           </motion.div>
+
+          {/* QUICK CLOSE BUTTON FOR OFFICIALS */}
+          <button 
+            onClick={handleClose}
+            className="fixed top-8 right-8 z-[10001] p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all group cursor-auto"
+            title="Dismiss Overlay"
+          >
+            <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+          </button>
 
           {/* === TIER BG: SCANLINES === */}
           <div className="absolute inset-0 pointer-events-none z-[1] opacity-40" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${rankInfo.style.scanline} 0px, transparent 1px, transparent 3px)` }} />
@@ -238,7 +248,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                className="relative z-[10] flex flex-col items-center gap-8 sm:gap-12"
+                className="relative z-[10] flex flex-col items-center gap-6 sm:gap-12 w-full px-4"
               >
                 {/* Biometric Circle - Responsive */}
                 <div className="relative w-[65vw] h-[65vw] max-w-[320px] max-h-[320px] flex items-center justify-center">
@@ -259,7 +269,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                     transition={{ repeat: Infinity, duration: 2 }}
                     className="relative z-10 text-emerald-500"
                   >
-                    <Fingerprint className="size-[15vw] max-w-[100px] max-h-[100px]" strokeWidth={1} />
+                    <Fingerprint className="w-[12vw] h-[12vw] sm:size-[100px]" strokeWidth={1} />
                   </motion.div>
 
                   {/* Scan Line */}
@@ -302,13 +312,13 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
                 initial={{ opacity: 0, scale: 0.5, rotateX: 30 }}
                 animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                className="relative z-[10] group w-[90vw] max-w-[500px]"
+                className="relative z-[10] group w-[92vw] sm:w-[90vw] max-w-[500px]"
               >
                 {/* DYNAMIC AMBIENT SHADOW */}
-                <div className={`absolute -inset-32 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[120px] pointer-events-none transition-all duration-1000`} />
+                <div className={`absolute -inset-16 sm:-inset-32 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none transition-all duration-1000`} />
 
                 {/* THE HIGH-COMMAND ASSET */}
-                <div className={`relative w-full aspect-[1/1.45] bg-[#050505] rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-14 shadow-2xl backdrop-blur-3xl`}>
+                <div className={`relative w-full aspect-[1/1.55] sm:aspect-[1/1.45] max-h-[85vh] bg-[#050505] rounded-[2.5rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-6 sm:p-14 shadow-2xl backdrop-blur-3xl`}>
                   
                   {/* HOLOGRAPHIC SHIMMER & GLARE */}
                   <motion.div
@@ -323,21 +333,21 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
                         <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-white/20 shadow-2xl">
-                          <img src="/logo.png" alt="M" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
+                          <img src="/logo.png" alt="M" className="w-4 h-4 sm:w-6 sm:h-6 object-contain" />
                         </div>
-                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
+                        <h2 className="text-base sm:text-xl font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
                       </div>
-                      <span className="text-[6px] sm:text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.6em] ml-10 sm:ml-14">VSAV GYANTAPA FAMILY</span>
+                      <span className="text-[5px] sm:text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.6em] ml-8 sm:ml-14">VSAV GYANTAPA FAMILY</span>
                     </div>
                   </div>
 
                   {/* RANK RIBBON */}
-                  <div className={`absolute top-20 sm:top-24 left-0 px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20`}>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <Sparkles size={14} className="text-black/70 sm:size-16" />
+                  <div className={`absolute top-16 sm:top-24 left-0 px-4 sm:px-10 py-2 sm:py-4 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20`}>
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                      <Sparkles size={12} className="text-black/70 sm:size-16" />
                       <div className="flex flex-col">
-                        <span className="text-[8px] sm:text-[9px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
-                        <span className="text-[10px] sm:text-[12px] font-black text-black uppercase tracking-[0.2em] italic">{rankInfo.grade}</span>
+                        <span className="text-[7px] sm:text-[9px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
+                        <span className="text-[9px] sm:text-[12px] font-black text-black uppercase tracking-[0.2em] italic">{rankInfo.grade}</span>
                       </div>
                     </div>
                   </div>
@@ -349,10 +359,10 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                         initial={{ scale: 0, rotate: -45 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
-                        className={`p-8 sm:p-12 rounded-[2.5rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-110 transition-all duration-500`}
+                        className={`p-6 sm:p-12 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-110 transition-all duration-500`}
                         style={{ transform: "translateZ(50px)" }}
                       >
-                        <rankInfo.icon size={70} className="text-black sm:size-[90px]" strokeWidth={1.5} />
+                        <rankInfo.icon size={50} className="text-black sm:size-[90px]" strokeWidth={1.5} />
                         <motion.div
                           animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
                           transition={{ repeat: Infinity, duration: 4 }}
@@ -399,7 +409,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   {/* PREMIUM ACTION BUTTON */}
                   <button
                     onClick={handleClose}
-                    className="relative mt-6 sm:mt-10 py-5 sm:py-7 rounded-[2rem] bg-white text-black font-black uppercase tracking-[0.6em] text-[9px] sm:text-[11px] hover:scale-105 active:scale-95 transition-all overflow-hidden group/btn shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
+                    className="relative mt-auto mb-2 sm:mb-0 py-4 sm:py-7 rounded-2xl sm:rounded-[2rem] bg-white text-black font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-[10px] sm:text-[11px] hover:scale-[1.02] sm:hover:scale-105 active:scale-95 transition-all overflow-hidden group/btn shadow-[0_15px_40px_rgba(255,255,255,0.1)]"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                     <span className="relative z-10">ENTER_DASHBOARD</span>
@@ -420,7 +430,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           </AnimatePresence>
 
           {/* Luxury Border Frame */}
-          <div className="absolute inset-0 border-[32px] border-black z-[100] pointer-events-none" />
+          <div className="absolute inset-0 border-[12px] sm:border-[32px] border-black z-[100] pointer-events-none" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-80" />
         </motion.div>
       )}
