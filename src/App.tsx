@@ -12,10 +12,8 @@ import CookieConsent from '@/components/CookieConsent';
 import { AIProvider } from '@/contexts/AIContext';
 import { AdminProvider, AdminContext } from '@/contexts/AdminContext';
 import { SecurityProvider } from '@/contexts/SecurityContext';
-import GlobalAIAssistant from '@/components/ai/GlobalAIAssistant';
 import ShortcutsOverlay from '@/components/ui/ShortcutsOverlay';
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
-import { GlobalWellnessBar } from '@/components/wellness/GlobalWellnessBar';
 import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
@@ -56,6 +54,9 @@ const DownloadPage = lazy(() => import("@/pages/DownloadPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const AdminAuthPage = lazy(() => import("@/components/auth/AdminAuthPage"));
+// Lazy load heavy global components
+const GlobalAIAssistant = lazy(() => import('@/components/ai/GlobalAIAssistant'));
+const GlobalWellnessBar = lazy(() => import('@/components/wellness/GlobalWellnessBar'));
 
 
 
@@ -117,7 +118,11 @@ import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
   if (!session) return null;
-  return <GlobalAIAssistant />;
+  return (
+    <Suspense fallback={null}>
+      <GlobalAIAssistant />
+    </Suspense>
+  );
 };
 
 
@@ -392,7 +397,9 @@ const AppContent = () => {
         <AIWidgetWrapper />
         <GlobalQuickActions />
         <MobileNavbar />
-        <GlobalWellnessBar />
+        <Suspense fallback={null}>
+          <GlobalWellnessBar />
+        </Suspense>
         <GlobalFooter />
       </CursorProvider>
              <ShortcutsOverlay />

@@ -364,10 +364,36 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
     return analytics.subjectBreakdown.map((subject, index) => ({
       name: subject.subject,
       color: colors[index % colors.length],
-      completionRate: Math.floor(Math.random() * 40) + 60,
+      completionRate: 85, // Fixed stable rate for performance
       timeSpent: subject.time
     }));
   }, [analytics]);
+
+  const handleSelectTask = useCallback((id: string) => {
+    setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]));
+  }, []);
+
+  const handleSelectAllTasks = useCallback(() => {
+    setSelectedTasks(filteredTasks.map(t => t.id));
+  }, [filteredTasks]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedTasks([]);
+  }, []);
+
+  const handleBulkAction = useCallback(async (action: 'delete' | 'complete' | 'export') => { 
+    if (action === 'delete') {
+      await handleBulkDelete(selectedTasks);
+      setSelectedTasks([]);
+    } else if (action === 'complete') {
+      selectedTasks.forEach(id => handleTaskStatusUpdate(id, 'completed'));
+      setSelectedTasks([]);
+    } else if (action === 'export') {
+      const selectedData = activeTasks.filter(t => selectedTasks.includes(t.id));
+      handleExportData(selectedData, {}, {});
+      setSelectedTasks([]);
+    }
+  }, [selectedTasks, handleBulkDelete, handleTaskStatusUpdate, activeTasks]);
 
   return (
     <AnimatePresence mode="wait">
@@ -522,25 +548,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
                       onTaskFilterChange={setTaskFilter}
                       onSearchTermChange={setSearchTerm}
                       onSortByChange={setSortBy}
-                      onSelectTask={(id) => setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]))}
+                      onSelectTask={handleSelectTask}
                       onStatusUpdate={handleTaskStatusUpdate}
                       onDelete={handleDeleteTask}
                       onCreateQuickTask={handleCreateQuickTask}
-                      onSelectAllTasks={() => setSelectedTasks(filteredTasks.map(t => t.id))}
-                      onClearSelection={() => setSelectedTasks([])}
-                      onBulkAction={async (action) => { 
-                        if (action === 'delete') {
-                          await handleBulkDelete(selectedTasks);
-                          setSelectedTasks([]);
-                        } else if (action === 'complete') {
-                          selectedTasks.forEach(id => handleTaskStatusUpdate(id, 'completed'));
-                          setSelectedTasks([]);
-                        } else if (action === 'export') {
-                          const selectedData = activeTasks.filter(t => selectedTasks.includes(t.id));
-                          handleExportData(selectedData, {}, {});
-                          setSelectedTasks([]);
-                        }
-                      }}
+                      onSelectAllTasks={handleSelectAllTasks}
+                      onClearSelection={handleClearSelection}
+                      onBulkAction={handleBulkAction}
                       onNavigateToTasks={() => navigate('/tasks')}
                     />
                   </Suspense>

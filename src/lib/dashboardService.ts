@@ -15,10 +15,13 @@ import type {
 } from '@/lib/dashboard';
 
 export const dashboardService = {
-  // VERSION MARKER FOR CACHE VERIFICATION
   _init: (() => {
     console.log('%c🛡️ MARGDARSHAK_SYNC_V4: ACTIVE', 'color: #10b981; font-weight: bold; font-size: 14px;');
   })(),
+
+  // Simple In-Memory Cache
+  _cache: new Map<string, { data: any, timestamp: number }>(),
+  _CACHE_TTL: 30000, // 30 seconds
 
   getCurrentUser: async (): Promise<SecureUser | null> => {
     try {
@@ -75,8 +78,18 @@ export const dashboardService = {
     }
   },
 
-  fetchAllUserData: async (userId: string) => {
+  fetchAllUserData: async (userId: string, ignoreCache = false) => {
     const translatedId = await translateClerkIdToUUID(userId);
+    
+    // Check Cache
+    if (!ignoreCache) {
+      const cached = (dashboardService as any)._cache.get(translatedId);
+      if (cached && Date.now() - cached.timestamp < (dashboardService as any)._CACHE_TTL) {
+        console.log('[dashboardService] Returning cached data for:', translatedId);
+        return cached.data;
+      }
+    }
+
     console.log('Fetching all Supabase data for user:', translatedId, '(Clerk:', userId, ')');
     
     try {
@@ -90,12 +103,12 @@ export const dashboardService = {
         calendarEventsResult,
         profileResult
       ] = await Promise.all([
-        supabase.from('tasks').select('*').eq('user_id', translatedId),
-        supabase.from('study_sessions').select('*').eq('user_id', translatedId),
-        supabase.from('grades').select('*').eq('user_id', translatedId),
-        supabase.from('notes').select('*').eq('user_id', translatedId),
-        supabase.from('courses').select('*').eq('user_id', translatedId),
-        (supabase.from('timetable_events' as any) as any).select('*').eq('user_id', translatedId),
+        supabase.from('tasks').select('*').eq('user_id', translatedId).order('created_at', { ascending: false }).limit(50),
+        supabase.from('study_sessions').select('*').eq('user_id', translatedId).order('start_time', { ascending: false }).limit(20),
+        supabase.from('grades').select('*').eq('user_id', translatedId).order('created_at', { ascending: false }).limit(20),
+        supabase.from('notes').select('*').eq('user_id', translatedId).order('updated_at', { ascending: false }).limit(20),
+        supabase.from('courses').select('*').eq('user_id', translatedId).limit(30),
+        (supabase.from('timetable_events' as any) as any).select('*').eq('user_id', translatedId).limit(50),
         (supabase.rpc('get_my_calendar_events' as any) as any),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
@@ -103,7 +116,7 @@ export const dashboardService = {
       // Map RPC result to the expected format
       const calendarEventsData = (calendarEventsResult as any).data || [];
 
-      return {
+      const finalData = {
         tasks: tasksResult.data || [],
         studySessions: studySessionsResult.data || [],
         grades: gradesResult.data || [],
@@ -123,6 +136,11 @@ export const dashboardService = {
           profileResult.error
         ].filter(Boolean)
       };
+
+      // Save to Cache
+      (dashboardService as any)._cache.set(translatedId, { data: finalData, timestamp: Date.now() });
+
+      return finalData;
     } catch (error) {
       console.error('Error fetching user data from Supabase:', error);
       return {
@@ -384,11 +402,10 @@ export const dashboardService = {
     };
   },
 
-  calculateSecureAnalytics: async (userId: string): Promise<RealAnalytics> => {
-    const translatedId = await translateClerkIdToUUID(userId);
-    const { data: sessions } = await supabase.from('study_sessions').select('*').eq('user_id', translatedId);
-    const { data: grades } = await supabase.from('grades').select('*').eq('user_id', translatedId);
-
+  calculateSecureAnalytics: (data: any): RealAnalytics => {
+    const { studySessions: sessions, grades } = data;
+    
+    // Process analytics from existing data
     return {
       dailyStudyTime: [],
       subjectBreakdown: [],
