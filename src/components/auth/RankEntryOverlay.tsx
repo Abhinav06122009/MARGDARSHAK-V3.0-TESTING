@@ -255,7 +255,6 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           </div>
 
           <AnimatePresence mode="wait">
-          <AnimatePresence mode="wait">
             {isScanning ? (
               <motion.div
                 key="scanning"
