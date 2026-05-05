@@ -49,18 +49,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Initial loading state resolution - FAST BOOT
   useEffect(() => {
     if (sessionLoaded && userLoaded) {
-      // If no user, we are definitely not loading anymore
       if (!clerkUser) {
         setLoading(false);
       } else {
         // If we have a user, check cache for block status to show immediately
         const cachedBlock = localStorage.getItem(`blocked_${clerkUser.id}`);
         if (cachedBlock) {
-          const { blocked, reason } = JSON.parse(cachedBlock);
-          setIsBlocked(blocked);
-          setBlockedReason(reason);
+          try {
+            const { blocked, reason } = JSON.parse(cachedBlock);
+            setIsBlocked(blocked);
+            setBlockedReason(reason);
+          } catch (e) {}
         }
-        // LOADING REMAINS TRUE until syncProfile augments the user
       }
     }
   }, [sessionLoaded, userLoaded, clerkUser]);

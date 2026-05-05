@@ -377,17 +377,10 @@ const aiPlugin = (): Plugin => ({
   },
 });
 
-export default defineConfig(async ({ mode }) => {
-  // Load .env values into process.env so server-side middleware (auth verification,
-  // OpenRouter calls, etc.) can read SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY /
-  // OPENAI_API_KEY in development. Vite normally only exposes these via
-  // import.meta.env to the client.
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  for (const [k, v] of Object.entries(env)) {
-    if (process.env[k] === undefined && typeof v === "string") {
-      process.env[k] = v;
-    }
-  }
+  Object.assign(process.env, env);
+
   return {
     base: "/",
     server: {

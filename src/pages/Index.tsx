@@ -40,8 +40,8 @@ const Index = () => {
   }, [session, loading, navigate]);
 
   if (loading) return <PageLoader />;
+  if (session) return null; 
 
-  if (session) return null; // Will redirect
 
   return (
     <div className="min-h-screen bg-[#050505]">

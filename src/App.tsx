@@ -255,7 +255,7 @@ const AppContent = () => {
                     <SecurityWarningOverlay />
                     <AnimatePresence mode="wait">
                       <Suspense fallback={<PageLoader />}>
-                        <Routes location={location}>
+                        <Routes>
                         {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
                         <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform. Use our smart tutoring, quiz generator, study planner, and grade tracker for academic excellence." /><LandingPage /></>} />
                         <Route path="/auth" element={<Index />} />
