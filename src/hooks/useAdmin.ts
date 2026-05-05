@@ -85,34 +85,43 @@ export const useAdmin = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchAdminData = useCallback(async () => {
+    // Prevent redundant fetches
+    if (!loading && stats) return; 
+
     setLoading(true);
 
     try {
-      // RESILIENT DATA INGESTION: Query each table individually to prevent monolithic failure
-      const usersRes = await supabase.from('profiles').select('*');
-      const threatsRes = await supabase.from('security_threats').select('*');
-      const reportsRes = await supabase.from('admin_reports').select('*');
-      const blockedRes = await supabase.from('blocked_users').select('*');
-      const contactMessagesRes = await supabase.from('contact_messages').select('*');
-      const supportTicketsRes = await supabase.from('support_tickets').select('*');
-      const settingsRes = await supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle();
-      const moderationRes = await supabase.from('moderation_queue').select('*');
-      const analyticsRes = await supabase.from('daily_metrics').select('*');
+      // RESILIENT DATA INGESTION: Query each table with strict limits to prevent monolithic failure
+      const [
+        usersRes, 
+        threatsRes, 
+        reportsRes, 
+        blockedRes, 
+        contactMessagesRes, 
+        supportTicketsRes, 
+        settingsRes, 
+        moderationRes, 
+        analyticsRes
+      ] = await Promise.all([
+        supabase.from('profiles').select('*').limit(100),
+        supabase.from('security_threats').select('*').order('created_at', { ascending: false }).limit(20),
+        supabase.from('admin_reports').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('blocked_users').select('*').limit(50),
+        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle(),
+        supabase.from('moderation_queue').select('*').order('created_at', { ascending: false }).limit(20),
+        supabase.from('daily_metrics').select('*').order('date', { ascending: false }).limit(7)
+      ]);
 
       if (usersRes.data) setUsers(usersRes.data);
       
       if (threatsRes.data) {
-        setThreats(threatsRes.data
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5)
-        );
+        setThreats(threatsRes.data);
       }
 
       if (reportsRes.data) {
-        setReports(reportsRes.data
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 100)
-        );
+        setReports(reportsRes.data);
       }
 
       if (contactMessagesRes.data || supportTicketsRes.data) {
@@ -138,16 +147,11 @@ export const useAdmin = () => {
       if (settingsRes.data) setSettings(settingsRes.data as any);
 
       if (moderationRes.data) {
-        setModerationQueue(moderationRes.data
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 10)
-        );
+        setModerationQueue(moderationRes.data);
       }
 
       if (analyticsRes.data && analyticsRes.data.length > 0) {
         const formattedAnalytics = analyticsRes.data
-          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .slice(0, 7)
           .map((item: any) => {
             const date = new Date(item.date);
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -182,7 +186,7 @@ export const useAdmin = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loading, stats]);
 
   useEffect(() => {
     fetchAdminData();
@@ -205,11 +209,11 @@ export const useAdmin = () => {
       })
       .subscribe();
 
-    // --- POLLING HEARTBEAT (Every 10 seconds) ---
+    // --- POLLING HEARTBEAT (Every 30 seconds) ---
     const pollingId = setInterval(() => {
       console.log('💓 [SYNC] High-Command Heartbeat pulse...');
       fetchAdminData();
-    }, 10000);
+    }, 30000);
 
     return () => {
       clearInterval(pollingId);

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSound } from './SoundContext';
 import { MagneticButton } from './MagneticButton';
 import logo from '@/components/logo/logo.png';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * Responsive navigation header for the landing page.
@@ -88,6 +89,12 @@ export const LandingHeader = React.memo(() => {
               </button>
             </li>
           ))}
+          <li>
+            <button onClick={() => navigate('/download')} className="text-xs md:text-sm text-gray-300 hover:text-blue-400 transition-colors flex items-center gap-2 font-bold tracking-widest uppercase">
+              Download
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px] py-0">v3.0</Badge>
+            </button>
+          </li>
         </ul>
 
         {/* Desktop Actions */}

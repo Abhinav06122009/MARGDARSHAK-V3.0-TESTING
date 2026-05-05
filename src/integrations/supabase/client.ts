@@ -206,7 +206,7 @@ export const supabaseHelpers = {
 
       const translatedId = await translateClerkIdToUUID(clerkUser.id);
 
-      return {
+      const userData = {
         id: translatedId,
         clerk_id: clerkUser.id,
         email: email,
