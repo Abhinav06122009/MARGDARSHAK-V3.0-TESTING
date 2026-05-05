@@ -250,7 +250,7 @@ const AppContent = () => {
         <AdminProvider>
           <SecurityProvider>
             <AIProvider>
-                <div className="bg-[#050505] min-h-screen text-white">
+                <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden">
                   <GlobalSecurityGuard>
                     <NavigationTracker />
                     <SecurityWarningOverlay />

@@ -84,7 +84,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
       initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 18 }}
-      className="relative flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"
+      className="relative w-full flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"
     >
       {/* Premium glass background */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden">
@@ -133,7 +133,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
         </motion.div>
 
         {/* Brand name - Hidden on small mobile */}
-        <div className="hidden xs:block md:block">
+        <div className="block">
           <p className="text-white font-black text-xs md:text-base tracking-tight leading-none">MARGDARSHAK</p>
           <p className="text-zinc-500 text-[8px] md:text-[10px] font-semibold tracking-widest uppercase mt-0.5">AI Academic Platform</p>
         </div>

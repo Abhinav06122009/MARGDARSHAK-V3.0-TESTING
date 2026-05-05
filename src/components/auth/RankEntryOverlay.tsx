@@ -331,7 +331,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 <div className={`absolute -inset-24 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[100px] pointer-events-none transition-all duration-1000`} />
 
                 {/* THE HIGH-COMMAND ASSET */}
-                <div className={`relative w-full h-auto min-h-[580px] max-h-[82vh] bg-[#050505] rounded-[3rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-12 shadow-2xl backdrop-blur-3xl`}>
+                <div className={`relative w-full h-auto min-h-[500px] max-h-[90vh] bg-[#050505] rounded-[3rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-12 shadow-2xl backdrop-blur-3xl`}>
                   
                   {/* HOLOGRAPHIC SHIMMER & GLARE */}
                   <motion.div
@@ -442,9 +442,8 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             )}
           </AnimatePresence>
 
-          {/* Luxury Border Frame */}
-          <div className="absolute inset-0 border-[12px] sm:border-[32px] border-black z-[100] pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-80" />
+          {/* Luxury Ambient Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
         </motion.div>
       )}
     </AnimatePresence>

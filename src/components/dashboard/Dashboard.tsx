@@ -95,6 +95,8 @@ const LockedTrendChart = () => {
 
   return (
     <div className="w-full h-full bg-zinc-900/50 rounded-xl border border-white/5 p-6 relative overflow-hidden flex flex-col items-center justify-center text-center group">
+      {/* Luxury Ambient Vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
       <div className="absolute inset-0 opacity-10 pointer-events-none">
          <svg className="w-full h-full" viewBox="0 0 500 250" preserveAspectRatio="none">
              <path d="M0 200 C 150 200, 150 100, 250 150 C 350 200, 350 50, 500 50" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-500" />
@@ -435,7 +437,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 max-w-[1600px] 2xl:max-w-[2000px] 4xl:max-w-[3200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         
         <header className="flex flex-col gap-4">
           <DashboardHeader
