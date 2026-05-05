@@ -409,8 +409,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
       ) : (
         <motion.div
           key="dashboard-content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30"
         >

@@ -43,7 +43,7 @@ const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ fullName, totalTasks, tot
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, type: 'spring', stiffness: 80 }}
       className="relative overflow-hidden rounded-[2.5rem]"

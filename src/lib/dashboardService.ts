@@ -31,12 +31,18 @@ export const dashboardService = {
       // Translate ID for Supabase UUID lookup
       const translatedId = await translateClerkIdToUUID(clerkUser.id);
 
-      // Fetch the actual profile from Supabase using translated ID
-      const { data: profile, error: profileError } = await supabase
+      // Fetch profile with a local timeout safety
+      const fetchProfilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', translatedId)
         .maybeSingle();
+
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 8000)
+      );
+
+      const { data: profile, error: profileError } = await Promise.race([fetchProfilePromise, timeoutPromise]) as any;
 
       if (profileError) {
         console.error('dashboardService: Error fetching profile:', profileError);
@@ -93,16 +99,9 @@ export const dashboardService = {
     console.log('Fetching all Supabase data for user:', translatedId, '(Clerk:', userId, ')');
     
     try {
-      const [
-        tasksResult,
-        studySessionsResult,
-        gradesResult,
-        notesResult,
-        coursesResult,
-        timetableResult,
-        calendarEventsResult,
-        profileResult
-      ] = await Promise.all([
+      console.log('[dashboardService] Initiating parallel data fetch for:', translatedId);
+      
+      const fetchPromise = Promise.all([
         supabase.from('tasks').select('*').eq('user_id', translatedId).order('created_at', { ascending: false }).limit(50),
         supabase.from('study_sessions').select('*').eq('user_id', translatedId).order('start_time', { ascending: false }).limit(20),
         supabase.from('grades').select('*').eq('user_id', translatedId).order('created_at', { ascending: false }).limit(20),
@@ -112,6 +111,24 @@ export const dashboardService = {
         (supabase.rpc('get_my_calendar_events' as any) as any),
         supabase.from('profiles').select('*').eq('id', translatedId).maybeSingle()
       ]);
+
+      // 🚨 EMERGENCY DATA TIMEOUT: If Supabase hangs, don't kill the dashboard
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Supabase request timeout')), 15000)
+      );
+
+      const [
+        tasksResult,
+        studySessionsResult,
+        gradesResult,
+        notesResult,
+        coursesResult,
+        timetableResult,
+        calendarEventsResult,
+        profileResult
+      ] = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+      console.log('[dashboardService] Data fetch complete.');
 
       // Map RPC result to the expected format
       const calendarEventsData = (calendarEventsResult as any).data || [];

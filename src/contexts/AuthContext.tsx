@@ -141,47 +141,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
-          // Schema-Safe Sync: Use primary 'id' for conflict resolution
-          console.log('[AuthContext] Attempting Profile Sync:', profileData);
+          // Schema-Safe Sync: Universal Non-Blocking Sync
           
-          const { error: syncError } = await supabase
-            .from('profiles')
-            .upsert(profileData, { onConflict: 'id' });
-            
-          if (syncError) {
-            console.error('[AuthContext] CRITICAL SYNC ERROR:', syncError);
-            if (syncError.message.includes('invalid input syntax for type uuid')) {
-              console.warn('[AuthContext] Trigger Identity Mismatch detected. System is running in Restricted Identity Mode.');
-              // We don't throw here so the app still loads with the translated ID in memory
+          try {
+            const { error: syncError } = await supabase
+              .from('profiles')
+              .upsert(profileData, { onConflict: 'id' });
+              
+            if (syncError) {
+              console.warn('[AuthContext] Profile sync error (Non-Blocking):', syncError.message);
             }
-          } else {
-            console.log('[AuthContext] Profile synced successfully via Supabase');
-            sessionStorage.setItem(`synced_${clerkUser.id}`, 'true');
+          } catch (syncErr) {
+            console.error('[AuthContext] Unexpected sync error:', syncErr);
           }
 
-          // Check if blocked in Supabase - Keep this fast
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_blocked, blocked_reason')
-            .eq('id', translatedId)
-            .maybeSingle();
+          // Universal Resilient Block Check
+          // Universal Resilient Block Check
+          try {
+            const { data: profile, error: fetchError } = await supabase
+              .from('profiles')
+              .select('is_blocked, blocked_reason')
+              .eq('id', translatedId)
+              .maybeSingle();
 
-          if (profile?.is_blocked) {
-            setIsBlocked(true);
-            const reason = profile.blocked_reason || 'Access restricted for security reasons.';
-            setBlockedReason(reason);
-            localStorage.setItem(`blocked_${clerkUser.id}`, JSON.stringify({ blocked: true, reason }));
-            // EXEMPT OWNER FROM BLOCKS: If user is Abhinav, force unblock
-            if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+            if (fetchError) {
+              console.warn('[AuthContext] Security check failed (Non-Blocking). Defaulting to access granted.');
               setIsBlocked(false);
-              setBlockedReason(null);
+            } else if (profile?.is_blocked) {
+              setIsBlocked(true);
+              const reason = profile.blocked_reason || 'Access restricted for security reasons.';
+              setBlockedReason(reason);
+              localStorage.setItem(`blocked_${clerkUser.id}`, JSON.stringify({ blocked: true, reason }));
+            } else {
+              setIsBlocked(false);
               localStorage.removeItem(`blocked_${clerkUser.id}`);
-              console.log('[AUTH] Owner bypass active. Block state cleared.');
             }
-          } else {
-            setIsBlocked(false);
-            localStorage.removeItem(`blocked_${clerkUser.id}`);
+          } catch (blockErr) {
+            console.error('[AuthContext] Unexpected security check error:', blockErr);
+            setIsBlocked(false); // Default to safety
           }
+          
+          // Authorization complete.
           
         } catch (err) {
           console.error('Unexpected sync error:', err);

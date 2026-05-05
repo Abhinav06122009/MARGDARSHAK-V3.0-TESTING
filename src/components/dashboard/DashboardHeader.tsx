@@ -81,7 +81,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -30 }}
+      initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 18 }}
       className="relative flex items-center justify-between px-5 py-3.5 rounded-2xl overflow-hidden"

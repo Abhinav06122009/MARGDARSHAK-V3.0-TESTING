@@ -17,42 +17,44 @@ const DashboardSkeleton = () => (
       @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
     `}</style>
 
-    <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="relative z-10 max-w-[1600px] 2xl:max-w-[2000px] 4xl:max-w-[3200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-zinc-900/50 border border-white/[0.06] backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-white/[0.04] relative overflow-hidden">
-            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+      <header className="flex flex-col gap-4">
+        <div className="flex items-center justify-between px-5 py-3.5 rounded-2xl bg-zinc-900/50 border border-white/[0.06] backdrop-blur-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-white/[0.04] relative overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+            </div>
+            <div className="space-y-2">
+              <ShimmerBar w="w-32" h="h-4" />
+              <ShimmerBar w="w-20" h="h-3" />
+            </div>
+            <div className="h-7 w-20 rounded-full bg-emerald-500/10 border border-emerald-500/20" />
           </div>
-          <div className="space-y-2">
-            <ShimmerBar w="w-32" h="h-4" />
-            <ShimmerBar w="w-20" h="h-3" />
-          </div>
-          <div className="h-7 w-20 rounded-full bg-emerald-500/10 border border-emerald-500/20" />
-        </div>
-        <div className="flex items-center gap-3">
-          <ShimmerBar w="w-24" h="h-9" rounded="rounded-xl" />
-          <ShimmerBar w="w-9" h="h-9" rounded="rounded-xl" />
-          <ShimmerBar w="w-44" h="h-12" rounded="rounded-2xl" />
-        </div>
-      </div>
-
-      {/* Welcome Hero Skeleton */}
-      <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-zinc-900/50 p-8 md:p-12 overflow-hidden">
-        <div className="absolute -top-32 -left-20 w-[400px] h-[400px] rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/[0.06]" />
-            <ShimmerBar w="w-36" h="h-4" />
-          </div>
-          <ShimmerBar w="w-3/4" h="h-16" rounded="rounded-2xl" />
-          <ShimmerBar w="w-1/2" h="h-10" rounded="rounded-2xl" />
-          <div className="flex gap-3 pt-2">
-            {[1,2,3].map(i => <ShimmerBar key={i} w="w-28" h="h-12" rounded="rounded-2xl" />)}
+            <ShimmerBar w="w-24" h="h-9" rounded="rounded-xl" />
+            <ShimmerBar w="w-9" h="h-9" rounded="rounded-xl" />
+            <ShimmerBar w="w-44" h="h-12" rounded="rounded-2xl" />
           </div>
         </div>
-      </div>
+        
+        {/* Welcome Hero Skeleton */}
+        <div className="relative rounded-[2.5rem] border border-white/[0.06] bg-zinc-900/50 p-8 md:p-12 overflow-hidden">
+          <div className="absolute -top-32 -left-20 w-[400px] h-[400px] rounded-full bg-indigo-600/10 blur-3xl" />
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/[0.06]" />
+              <ShimmerBar w="w-36" h="h-4" />
+            </div>
+            <ShimmerBar w="w-3/4" h="h-16" rounded="rounded-2xl" />
+            <ShimmerBar w="w-1/2" h="h-10" rounded="rounded-2xl" />
+            <div className="flex gap-3 pt-2">
+              {[1,2,3].map(i => <ShimmerBar key={i} w="w-28" h="h-12" rounded="rounded-2xl" />)}
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Stats Grid Skeleton */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -74,7 +76,7 @@ const DashboardSkeleton = () => (
       </div>
 
       {/* Main Grid Skeleton */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
         {/* Main column */}
         <div className="xl:col-span-8 space-y-5">
           {/* Briefing */}
@@ -104,7 +106,7 @@ const DashboardSkeleton = () => (
         </div>
 
         {/* Aside */}
-        <div className="xl:col-span-4 space-y-5">
+      <div className="xl:col-span-4 space-y-8">
           {/* Quick Actions */}
           <div className="rounded-[2rem] bg-zinc-900/50 border border-white/[0.06] p-4 space-y-2 relative overflow-hidden">
             <ShimmerBar w="w-28" h="h-4" rounded="rounded" />

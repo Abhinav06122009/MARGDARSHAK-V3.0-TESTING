@@ -170,12 +170,18 @@
   }
 
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground;
     font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
     padding-top: var(--safe-top);
     padding-bottom: var(--safe-bottom);
     padding-left: var(--safe-left);
     padding-right: var(--safe-right);
+    
+    /* Layout Stability: Prevent 'Up and Down' and Horizontal shifts */
+    min-height: 101vh; /* Force vertical scroll to avoid jumping */
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    
     /* Performance: Optimize rendering */
     content-visibility: auto;
     -webkit-backface-visibility: hidden;
