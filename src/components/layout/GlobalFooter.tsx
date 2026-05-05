@@ -57,16 +57,10 @@ const GlobalFooter = () => {
   };
 
   return (
-    <footer className="w-full relative mt-32 pb-12 px-6 overflow-hidden border-t border-white/5 bg-[#050505]">
-      {/* Precision Aesthetic Underlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent blur-sm" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.03),transparent_70%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
-
-        {/* Distant Orbs */}
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]" />
+    <footer className="w-full relative mt-20 md:mt-32 pb-12 px-6 overflow-hidden border-t border-white/5 bg-[#050505]">
+      {/* Precision Aesthetic Underlay - Optimized with lower opacity and blur */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.02),transparent_70%)]" />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10 pt-24">

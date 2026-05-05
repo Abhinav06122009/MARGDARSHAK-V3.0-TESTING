@@ -10,7 +10,7 @@ import logo from '@/components/logo/logo.png';
  * Responsive navigation header for the landing page.
  * Adapts styling on scroll and includes a mobile menu.
  */
-export const LandingHeader: React.FC = () => {
+export const LandingHeader = React.memo(() => {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { soundEnabled, toggleSound, playSound } = useSound();
@@ -18,9 +18,9 @@ export const LandingHeader: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
+      setScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -51,11 +51,10 @@ export const LandingHeader: React.FC = () => {
 
   return (
     <motion.nav
-      initial={{ y: -100, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
       className={`text-white sticky top-0 z-50 transition-all duration-300 ${scrolled
-          ? 'py-3 bg-gray-900/60 backdrop-blur-xl border-b border-blue-600/30 shadow-2xl'
+          ? 'py-2 bg-gray-900/80 backdrop-blur-md border-b border-white/5 shadow-2xl'
           : 'py-4 bg-transparent border-transparent'
         }`}
     >
@@ -63,34 +62,30 @@ export const LandingHeader: React.FC = () => {
         {/* Brand */}
         <div className="flex items-center gap-4 cursor-pointer group" onClick={() => handleLinkClick('home')}>
           <div className="relative">
-            {/* Logo Glow */}
-            <div className="absolute -inset-2 bg-blue-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-            
-            {/* Logo Glass Container */}
-            <div className="p-1 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 relative z-10 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+            <div className="p-1 rounded-xl bg-white/5 border border-white/10 relative z-10 group-hover:scale-105 transition-transform duration-300">
               <img src={logo} alt="Margdarshak Logo" className="h-10 w-10 rounded-lg object-contain" />
             </div>
           </div>
           
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
+            <span className="text-xl md:text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none uppercase">
               MARGDARSHAK
             </span>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered Educational Suite</span>
+            <span className="text-[8px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered Educational Suite</span>
           </div>
         </div>
 
         {/* Desktop Nav */}
-        <ul className="hidden md:flex items-center space-x-8 font-medium">
+        <ul className="hidden lg:flex items-center space-x-8 font-medium">
           {navItems.map(item => (
             <li key={item.name}>
               <button
                 onClick={() => handleLinkClick(item.name, item.path)}
                 onMouseEnter={() => playSound('hover')}
-                className="capitalize text-gray-300 hover:text-blue-400 transition-colors relative group"
+                className="capitalize text-xs md:text-sm text-gray-300 hover:text-blue-400 transition-colors relative group tracking-widest font-bold"
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-emerald-400 group-hover:w-full transition-all duration-300" />
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-300" />
               </button>
             </li>
           ))}
@@ -101,23 +96,21 @@ export const LandingHeader: React.FC = () => {
           <button
             onClick={toggleSound}
             className="p-2 text-gray-400 hover:text-white transition-colors"
-            title={soundEnabled ? "Mute sounds" : "Unmute sounds"}
           >
             {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
           <MagneticButton>
             <button
               onClick={() => navigate('/auth')}
-              className="bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 group relative overflow-hidden flex items-center justify-center min-w-[160px]"
+              className="bg-blue-600 text-white font-black text-xs uppercase tracking-widest py-3 px-8 rounded-xl transition-all duration-300 hover:bg-blue-500 shadow-lg shadow-blue-600/20 active:scale-95"
             >
-              <span className="relative z-10">Get Started</span>
-              <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              Get Started
             </button>
           </MagneticButton>
         </div>
 
         {/* Mobile Toggle */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2">
           <button onClick={toggleSound} className="p-2 text-gray-400">
             {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
@@ -134,26 +127,26 @@ export const LandingHeader: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden bg-gray-900/95 backdrop-blur-xl border-t border-blue-600/10 overflow-hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="lg:hidden bg-gray-900 border-t border-white/5 overflow-hidden"
           >
             <ul className="flex flex-col p-6 space-y-4">
               {navItems.map(item => (
                 <li key={item.name}>
                   <button
                     onClick={() => handleLinkClick(item.name, item.path)}
-                    className="text-lg text-gray-300 hover:text-blue-400 w-full text-left"
+                    className="text-sm font-bold tracking-widest uppercase text-gray-300 hover:text-blue-400 w-full text-left"
                   >
                     {item.label}
                   </button>
                 </li>
               ))}
-              <li className="pt-4">
+              <li className="pt-4 border-t border-white/5">
                 <button
                   onClick={() => navigate('/auth')}
-                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 rounded-xl"
+                  className="block w-full text-center bg-blue-600 text-white font-black text-xs uppercase tracking-widest py-4 rounded-xl"
                 >
                   Launch Console
                 </button>
@@ -164,4 +157,6 @@ export const LandingHeader: React.FC = () => {
       </AnimatePresence>
     </motion.nav>
   );
-};
+});
+
+LandingHeader.displayName = 'LandingHeader';
