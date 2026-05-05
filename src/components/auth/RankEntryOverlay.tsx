@@ -446,26 +446,3 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 };
 
 export default RankEntryOverlay;
-
-                {/* TECH DECORATIONS */}
-                <div className="absolute -left-40 top-1/2 -translate-y-1/2 space-y-16 opacity-30 pointer-events-none">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex flex-col gap-2">
-                      <div className="h-px w-32 bg-gradient-to-r from-white to-transparent" />
-                      <span className="text-[8px] font-mono text-white tracking-[0.4em]">SEC_LINK_0{i}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Luxury Ambient Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] z-[60] pointer-events-none opacity-60" />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-export default RankEntryOverlay;
