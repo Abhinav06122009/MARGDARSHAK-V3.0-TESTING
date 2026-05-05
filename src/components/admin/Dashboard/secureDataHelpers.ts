@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { translateClerkIdToUUID } from '@/lib/id-translator';
 import { 
   SecureUser, 
   RealTask, 
@@ -9,7 +10,8 @@ import {
 export const secureDataHelpers = {
 
   fetchAllUserData: async (userId: string) => {
-    console.log('Fetching data for user:', userId);
+    const translatedId = await translateClerkIdToUUID(userId);
+    console.log('Fetching data for translated user:', translatedId, '(Clerk:', userId, ')');
     
     try {
       const [
@@ -23,31 +25,31 @@ export const secureDataHelpers = {
         supabase
           .from('tasks')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', translatedId)
           .order('created_at', { ascending: false }),
 
         supabase
           .from('study_sessions')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', translatedId)
           .order('start_time', { ascending: false }),
 
         supabase
           .from('grades')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', translatedId)
           .order('date_recorded', { ascending: false }),
 
         supabase
           .from('notes')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', translatedId)
           .order('created_at', { ascending: false }),
 
         supabase
           .from('courses')
           .select('*')
-          .eq('user_id', userId)
+          .eq('user_id', translatedId)
           .order('name'),
 
         secureDataHelpers.fetchTimetableData(userId)
@@ -84,18 +86,19 @@ export const secureDataHelpers = {
   },
 
   fetchTimetableData: async (userId: string) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     try {
       const { data, error } = await supabase
         .from('timetable_events')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', translatedId);
 
       if (error) {
         try {
           const fallback = await supabase
-            .from('timetables')
+            .from('timetables' as any)
             .select('*')
-            .eq('user_id', userId);
+            .eq('user_id', translatedId);
           return fallback;
         } catch (fallbackError) {
           return { data: [], error: null };
@@ -111,8 +114,6 @@ export const secureDataHelpers = {
     const { tasks, studySessions, grades, notes, courses, timetable } = data;
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const totalTasks = Array.isArray(tasks) ? tasks.length : 0;
     const completedTasks = Array.isArray(tasks) ? tasks.filter((t: any) => t.status === 'completed').length : 0;
@@ -184,43 +185,47 @@ export const secureDataHelpers = {
   },
 
   calculateSecureAnalytics: async (userId: string): Promise<RealAnalytics> => {
-    // simplified for brevity, following the logic in Dashboard.tsx
     return {
       dailyStudyTime: [], subjectBreakdown: [], weeklyProgress: [], monthlyTrends: [],
       gradeDistribution: [], sessionTypes: [], incompleteTasksCount: 0, topGrades: [], totalClasses: 0
     };
   },
 
-  setupSecureRealTimeSubscription: (userId: string, callbacks: any) => {
+  setupSecureRealTimeSubscription: async (userId: string, callbacks: any) => {
+    const translatedId = await translateClerkIdToUUID(userId);
     const channels = [
-      supabase.channel('secure_tasks_updates').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${userId}` }, callbacks.onTaskUpdate).subscribe(),
-      supabase.channel('secure_sessions_updates').on('postgres_changes', { event: '*', schema: 'public', table: 'study_sessions', filter: `user_id=eq.${userId}` }, callbacks.onSessionUpdate).subscribe(),
-      supabase.channel('secure_grades_updates').on('postgres_changes', { event: '*', schema: 'public', table: 'grades', filter: `user_id=eq.${userId}` }, callbacks.onGradeUpdate).subscribe(),
-      supabase.channel('secure_notes_updates').on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: `user_id=eq.${userId}` }, callbacks.onNoteUpdate).subscribe()
+      supabase.channel(`secure_tasks_${translatedId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${translatedId}` }, callbacks.onTaskUpdate).subscribe(),
+      supabase.channel(`secure_sessions_${translatedId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'study_sessions', filter: `user_id=eq.${translatedId}` }, callbacks.onSessionUpdate).subscribe(),
+      supabase.channel(`secure_grades_${translatedId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'grades', filter: `user_id=eq.${translatedId}` }, callbacks.onGradeUpdate).subscribe(),
+      supabase.channel(`secure_notes_${translatedId}`).on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: `user_id=eq.${translatedId}` }, callbacks.onNoteUpdate).subscribe()
     ];
     return () => channels.forEach(channel => supabase.removeChannel(channel));
   },
 
   updateTaskStatus: async (taskId: string, status: string, userId: string) => {
-    const { data, error } = await supabase.from('tasks').update({ status, updated_at: new Date().toISOString() }).eq('id', taskId).eq('user_id', userId).select().single();
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { data, error } = await supabase.from('tasks').update({ status, updated_at: new Date().toISOString() }).eq('id', taskId).eq('user_id', translatedId).select().single();
     if (error) throw error;
     return data;
   },
 
   deleteTask: async (taskId: string, userId: string) => {
-    const { error } = await supabase.from('tasks').delete().eq('id', taskId).eq('user_id', userId);
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId).eq('user_id', translatedId);
     if (error) throw error;
     return true;
   },
 
   createQuickTask: async (userId: string) => {
-    const { data, error } = await supabase.from('tasks').insert([{ title: 'New Task', description: 'Add description here', status: 'pending', priority: 'medium', user_id: userId }]).select().single();
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { data, error } = await supabase.from('tasks').insert([{ title: 'New Task', description: 'Add description here', status: 'pending', priority: 'medium', user_id: translatedId }]).select().single();
     if (error) throw error;
     return data;
   },
 
   bulkUpdateTasks: async (taskIds: string[], updates: any, userId: string) => {
-    const { data, error } = await supabase.from('tasks').update({ ...updates, updated_at: new Date().toISOString() }).in('id', taskIds).eq('user_id', userId).select();
+    const translatedId = await translateClerkIdToUUID(userId);
+    const { data, error } = await supabase.from('tasks').update({ ...updates, updated_at: new Date().toISOString() }).in('id', taskIds).eq('user_id', translatedId).select();
     if (error) throw error;
     return data;
   },
@@ -246,3 +251,4 @@ export const secureDataHelpers = {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   }
 };
+

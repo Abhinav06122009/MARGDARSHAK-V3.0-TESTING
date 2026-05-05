@@ -190,7 +190,7 @@ export const useAdmin = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, stats]);
+  }, []); // Remove loading and stats to break the dependency cycle
 
   useEffect(() => {
     fetchAdminData();
