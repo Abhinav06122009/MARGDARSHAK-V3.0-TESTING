@@ -14,6 +14,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   const [scanStep, setScanStep] = useState(0);
   const [rankInfo, setRankInfo] = useState<{
     tier: 'A+' | 'A' | 'B-' | 'STANDARD';
+    grade: string;
     title: string;
     style: any;
     icon: any;

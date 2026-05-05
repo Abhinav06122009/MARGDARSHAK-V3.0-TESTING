@@ -176,7 +176,6 @@ const GlobalQuickActions: React.FC = React.memo(() => {
       {/* ─── Floating Trigger ─────────────────────────────────────────────── */}
       <motion.button
         drag dragMomentum={false}
-        initial={false} style={{ x: dragX, y: dragY }}
         whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         className="fixed top-0 left-0 z-[100] w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 cursor-grab active:cursor-grabbing group"

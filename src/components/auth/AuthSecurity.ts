@@ -19,7 +19,7 @@ export interface DeviceFingerprint extends BaseDeviceFingerprint {
   webgl: {
     vendor: string;
     renderer: string;
-  } | 'no_webgl' | 'webgl_error';
+  } | 'no_webgl' | 'webgl_error' | 'no_webgl_debug';
   audio: string;
   plugins: number;
 }
