@@ -101,8 +101,12 @@ export const useDashboardData = () => {
       setCurrentUser(user);
       setSecurityVerified(true);
       
-      const userData = await dashboardService.fetchAllUserData(user.id);
-      const analyticsData = await dashboardService.calculateSecureAnalytics(user.id);
+      // Parallelize all data fetching
+      const [userData, analyticsData] = await Promise.all([
+        dashboardService.fetchAllUserData(user.id),
+        dashboardService.calculateSecureAnalytics(user.id)
+      ]);
+
       const secureStats = dashboardService.calculateSecureStats(userData);
       
       if (userData.profile) {

@@ -23,7 +23,7 @@ import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
-import Dashboard from "@/components/dashboard/Dashboard";
+const Dashboard = lazy(() => import("@/components/dashboard/Dashboard"));
 // Features - lazy loaded
 const Tasks = lazy(() => import("@/components/tasks/Tasks"));
 const Grades = lazy(() => import("@/components/grades/Grades"));

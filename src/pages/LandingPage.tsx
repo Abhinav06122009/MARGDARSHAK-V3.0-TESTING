@@ -32,6 +32,15 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     if (!loading && session) {
       navigate('/dashboard', { replace: true });
+    } else {
+      // PRELOAD: Silently fetch main app chunks while user browses landing
+      const preloadApp = () => {
+        const dashboard = import('@/components/dashboard/Dashboard');
+        const index = import('@/pages/Index');
+      };
+      // Delay preload to not compete with landing page assets
+      const timer = setTimeout(preloadApp, 2000);
+      return () => clearTimeout(timer);
     }
   }, [session, loading, navigate]);
 

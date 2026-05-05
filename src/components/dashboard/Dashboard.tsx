@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useUser } from '@clerk/react';
 import { 
   LayoutDashboard, Calendar, FileText, Settings, BookOpen, 
@@ -22,17 +22,17 @@ import { SmartTutorCard } from './SmartTutorCard';
 import DashboardSkeleton from './DashboardSkeleton';
 import DashboardHeader from './DashboardHeader';
 import WelcomeHeader from './WelcomeHeader';
-import StatsGrid from './StatsGrid'; 
-import TasksPanel from './TasksPanel';
-import AnalyticsPanel from './AnalyticsPanel';
-import QuickActions from './QuickActions';
-import SecurityPanel from './SecurityPanel';
-import AIBriefingWidget from './AIBriefingWidget';
+const StatsGrid = lazy(() => import('./StatsGrid'));
+const TasksPanel = lazy(() => import('./TasksPanel'));
+const AnalyticsPanel = lazy(() => import('./AnalyticsPanel'));
+const QuickActions = lazy(() => import('./QuickActions'));
+const SecurityPanel = lazy(() => import('./SecurityPanel'));
+const AIBriefingWidget = lazy(() => import('./AIBriefingWidget'));
 import UpgradeCard from '@/components/dashboard/UpgradeCard';
 import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
-import { VirtualPet } from './VirtualPet';
-import { LeaderboardWidget } from './LeaderboardWidget';
-import { BurnoutPredictorWidget } from './BurnoutPredictorWidget';
+const VirtualPet = lazy(() => import('./VirtualPet').then(m => ({ default: m.VirtualPet })));
+const LeaderboardWidget = lazy(() => import('./LeaderboardWidget').then(m => ({ default: m.LeaderboardWidget })));
+const BurnoutPredictorWidget = lazy(() => import('./BurnoutPredictorWidget').then(m => ({ default: m.BurnoutPredictorWidget })));
 // UPDATED: Using the better chart component for Productivity Flow
 import { TrendChart } from '@/components/ai/QuantumGraph'; 
 // Unified Footer is handled by GlobalFooter in App.tsx
@@ -202,6 +202,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  
+  const WidgetSkeleton = () => (
+    <div className="w-full min-h-[100px] animate-pulse bg-white/5 rounded-[2rem] border border-white/10 flex flex-col items-center justify-center p-8 gap-4">
+      <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_15px_rgba(99,102,241,0.3)]" />
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 animate-pulse">Synchronizing Core...</p>
+    </div>
+  );
   
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   
@@ -429,29 +436,33 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
             >
-              {hasPremiumAccess ? (
-                <AIBriefingWidget 
-                  user={currentUser} 
-                  tasks={activeTasks}
-                  notes={recentNotes}
-                  courses={courses}
-                  grades={recentGrades}
-                  timetable={timetable}
-                  sessions={recentSessions}
-                  analytics={realAnalytics} 
-                  stats={{
-                    studyStreak: stats?.study_streak || 0,
-                    tasksCompleted: dashboardStats.completedTasks,
-                    hoursStudied: Math.round((stats?.minutes_today || 0) / 60),
-                  }}
-                />
-              ) : (
-                <LockedBriefingWidget />
-              )}
+              <Suspense fallback={<WidgetSkeleton />}>
+                {hasPremiumAccess ? (
+                  <AIBriefingWidget 
+                    user={currentUser} 
+                    tasks={activeTasks}
+                    notes={recentNotes}
+                    courses={courses}
+                    grades={recentGrades}
+                    timetable={timetable}
+                    sessions={recentSessions}
+                    analytics={realAnalytics} 
+                    stats={{
+                      studyStreak: stats?.study_streak || 0,
+                      tasksCompleted: dashboardStats.completedTasks,
+                      hoursStudied: Math.round((stats?.minutes_today || 0) / 60),
+                    }}
+                  />
+                ) : (
+                  <LockedBriefingWidget />
+                )}
+              </Suspense>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <StatsGrid stats={dashboardStats} />
+              <Suspense fallback={<WidgetSkeleton />}>
+                <StatsGrid stats={dashboardStats} />
+              </Suspense>
             </motion.div>
             
             <motion.div className="h-[320px]" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
@@ -467,11 +478,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
             </motion.div>
             
             <motion.div className="w-full" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-               {hasPremiumAccess ? (
-                 <BurnoutPredictorWidget stats={dashboardStats} />
-               ) : (
-                 <LockedBurnoutWidget />
-               )}
+               <Suspense fallback={<WidgetSkeleton />}>
+                 {hasPremiumAccess ? (
+                   <BurnoutPredictorWidget stats={dashboardStats} />
+                 ) : (
+                   <LockedBurnoutWidget />
+                 )}
+               </Suspense>
             </motion.div>
 
 
@@ -485,68 +498,78 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="w-full">
-               <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
+               <Suspense fallback={<WidgetSkeleton />}>
+                 <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
+               </Suspense>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }} className="h-48 w-full">
-              <VirtualPet stats={stats} tasks={activeTasks} />
+              <Suspense fallback={<WidgetSkeleton />}>
+                <VirtualPet stats={stats} tasks={activeTasks} />
+              </Suspense>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="flex-1 min-h-[500px] flex flex-col">
                 <GlassContainer glow className="flex-1 flex flex-col p-1 h-full">
-                  <TasksPanel
-                    tasks={activeTasks}
-                    filteredTasks={filteredTasks}
-                    selectedTasks={selectedTasks}
-                    taskFilter={taskFilter}
-                    searchTerm={searchTerm}
-                    sortBy={sortBy}
-                    onTaskFilterChange={setTaskFilter}
-                    onSearchTermChange={setSearchTerm}
-                    onSortByChange={setSortBy}
-                    onSelectTask={(id) => setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]))}
-                    onStatusUpdate={handleTaskStatusUpdate}
-                    onDelete={handleDeleteTask}
-                    onCreateQuickTask={handleCreateQuickTask}
-                    onSelectAllTasks={() => setSelectedTasks(filteredTasks.map(t => t.id))}
-                    onClearSelection={() => setSelectedTasks([])}
-                    onBulkAction={async (action) => { 
-                      if (action === 'delete') {
-                        await handleBulkDelete(selectedTasks);
-                        setSelectedTasks([]);
-                      } else if (action === 'complete') {
-                        selectedTasks.forEach(id => handleTaskStatusUpdate(id, 'completed'));
-                        setSelectedTasks([]);
-                      } else if (action === 'export') {
-                        const selectedData = activeTasks.filter(t => selectedTasks.includes(t.id));
-                        handleExportData(selectedData, {}, {});
-                        setSelectedTasks([]);
-                      }
-                    }}
-                    onNavigateToTasks={() => navigate('/tasks')}
-                  />
+                  <Suspense fallback={<WidgetSkeleton />}>
+                    <TasksPanel
+                      tasks={activeTasks}
+                      filteredTasks={filteredTasks}
+                      selectedTasks={selectedTasks}
+                      taskFilter={taskFilter}
+                      searchTerm={searchTerm}
+                      sortBy={sortBy}
+                      onTaskFilterChange={setTaskFilter}
+                      onSearchTermChange={setSearchTerm}
+                      onSortByChange={setSortBy}
+                      onSelectTask={(id) => setSelectedTasks(prev => (prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]))}
+                      onStatusUpdate={handleTaskStatusUpdate}
+                      onDelete={handleDeleteTask}
+                      onCreateQuickTask={handleCreateQuickTask}
+                      onSelectAllTasks={() => setSelectedTasks(filteredTasks.map(t => t.id))}
+                      onClearSelection={() => setSelectedTasks([])}
+                      onBulkAction={async (action) => { 
+                        if (action === 'delete') {
+                          await handleBulkDelete(selectedTasks);
+                          setSelectedTasks([]);
+                        } else if (action === 'complete') {
+                          selectedTasks.forEach(id => handleTaskStatusUpdate(id, 'completed'));
+                          setSelectedTasks([]);
+                        } else if (action === 'export') {
+                          const selectedData = activeTasks.filter(t => selectedTasks.includes(t.id));
+                          handleExportData(selectedData, {}, {});
+                          setSelectedTasks([]);
+                        }
+                      }}
+                      onNavigateToTasks={() => navigate('/tasks')}
+                    />
+                  </Suspense>
                 </GlassContainer>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }} className="w-full">
               <GlassContainer glow className="bg-gradient-to-br from-white/[0.03] to-transparent">
-                <AnalyticsPanel 
-                  analytics={realAnalytics} 
-                  tasks={activeTasks} 
-                  taskPriorityAnalytics={taskPriorityAnalytics} 
-                  taskCompletionTrend={taskCompletionTrend} 
-                  categoryAnalytics={categoryAnalytics} 
-                />
+                <Suspense fallback={<WidgetSkeleton />}>
+                  <AnalyticsPanel 
+                    analytics={realAnalytics} 
+                    tasks={activeTasks} 
+                    taskPriorityAnalytics={taskPriorityAnalytics} 
+                    taskCompletionTrend={taskCompletionTrend} 
+                    categoryAnalytics={categoryAnalytics} 
+                  />
+                </Suspense>
               </GlassContainer>
             </motion.div>
             
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="w-full">
               <GlassContainer glow className="p-6">
-                <LeaderboardWidget 
-                  currentUser={currentUser} 
-                  stats={stats} 
-                  recentTasks={activeTasks} 
-                />
+                <Suspense fallback={<WidgetSkeleton />}>
+                  <LeaderboardWidget 
+                    currentUser={currentUser} 
+                    stats={stats} 
+                    recentTasks={activeTasks} 
+                  />
+                </Suspense>
               </GlassContainer>
             </motion.div>
 
