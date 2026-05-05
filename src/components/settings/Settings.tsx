@@ -30,12 +30,17 @@ const NexusCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
+    let lastUpdate = 0;
     const updatePosition = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      const target = e.target as HTMLElement;
-      setIsHovering(!!target.closest('button, input, [role="button"], .group, a'));
+      const now = Date.now();
+      if (now - lastUpdate > 16) {
+        setPosition({ x: e.clientX, y: e.clientY });
+        const target = e.target as HTMLElement;
+        setIsHovering(!!target.closest('button, input, [role="button"], .group, a'));
+        lastUpdate = now;
+      }
     };
-    window.addEventListener('mousemove', updatePosition);
+    window.addEventListener('mousemove', updatePosition, { passive: true });
     return () => window.removeEventListener('mousemove', updatePosition);
   }, []);
 
@@ -68,8 +73,15 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
-    window.addEventListener('mousemove', handleMouseMove);
+    let lastUpdate = 0;
+    const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate > 16) {
+        setMousePos({ x: e.clientX, y: e.clientY });
+        lastUpdate = now;
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 

@@ -25,12 +25,12 @@ export const startBioTracker = () => {
   let lastSample = 0;
   window.addEventListener('mousemove', (e) => {
     const now = Date.now();
-    if (now - lastSample > 50) { // Sample every 50ms
+    if (now - lastSample > 100) { // Sample every 100ms (was 50ms)
       mousePositions.push({ x: e.clientX, y: e.clientY });
       if (mousePositions.length > HISTORY_LIMIT) mousePositions.shift();
       lastSample = now;
     }
-  });
+  }, { passive: true });
 };
 
 export const analyzeUserBehavior = () => {

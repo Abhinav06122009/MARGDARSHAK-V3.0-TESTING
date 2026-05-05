@@ -47,7 +47,7 @@ const EnhancedFooter = () => {
         setShowBackToTop(false);
       }
     };
-    window.addEventListener('scroll', checkScrollTop);
+    window.addEventListener('scroll', checkScrollTop, { passive: true });
     return () => window.removeEventListener('scroll', checkScrollTop);
   }, []);
 
@@ -87,7 +87,7 @@ const EnhancedFooter = () => {
               <div key={key}>
                 <h4 className="font-bold text-base text-white mb-4 capitalize">{key}</h4>
                 <ul className="space-y-3">
-                  {section.links.map(link => (
+                  {section.map(link => (
                     <li key={link.name}>
                       <Link to={link.href} className="hover:text-white hover:underline transition-colors duration-200">
                         {link.name}

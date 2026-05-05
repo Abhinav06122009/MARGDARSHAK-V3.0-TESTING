@@ -18,9 +18,14 @@ export const CustomCursor: React.FC = () => {
 
     if (isTouch) return;
 
+    let lastUpdate = 0;
     const moveCursor = (e: MouseEvent) => {
-      if (cursorDotRef.current) {
-        cursorDotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      const now = Date.now();
+      if (now - lastUpdate > 16) {
+        if (cursorDotRef.current) {
+          cursorDotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+        }
+        lastUpdate = now;
       }
     };
 

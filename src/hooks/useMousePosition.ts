@@ -6,11 +6,16 @@ export const useMousePosition = () => {
   const y = useMotionValue(0);
 
   useEffect(() => {
+    let lastUpdate = 0;
     const updateMousePosition = (ev: MouseEvent) => {
-      x.set(ev.clientX);
-      y.set(ev.clientY);
+      const now = Date.now();
+      if (now - lastUpdate > 16) { // ~60fps throttle
+        x.set(ev.clientX);
+        y.set(ev.clientY);
+        lastUpdate = now;
+      }
     };
-    window.addEventListener('mousemove', updateMousePosition);
+    window.addEventListener('mousemove', updateMousePosition, { passive: true });
     return () => window.removeEventListener('mousemove', updateMousePosition);
   }, [x, y]);
 

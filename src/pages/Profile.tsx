@@ -29,8 +29,15 @@ const ProfilePage = ({ onBack }: { onBack?: () => void }) => {
   const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
-    window.addEventListener('mousemove', handleMouseMove);
+    let lastUpdate = 0;
+    const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate > 16) {
+        setMousePos({ x: e.clientX, y: e.clientY });
+        lastUpdate = now;
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 

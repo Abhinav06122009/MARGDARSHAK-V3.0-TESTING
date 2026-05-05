@@ -44,19 +44,8 @@ export const initConsoleGuard = () => {
   const blockConsole = () => {
     if (isDebug) return;
 
-    // 1. Heavy Debugger Trap: Multi-threaded infinite loops to freeze the console
-    const trap = () => {
-      try {
-        const x = function() {
-          debugger;
-        };
-        const y = function() {
-          x();
-        };
-        setInterval(y, 50); // High frequency trap
-      } catch (e) {}
-    };
-
+    // 1. Removed debugger trap to prevent browser freezing.
+    
     // 2. Overwrite all methods with empty stubs + track attempts
     const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'group', 'groupCollapsed', 'groupEnd', 'clear', 'time', 'timeEnd', 'count', 'assert'];
     
@@ -89,8 +78,7 @@ export const initConsoleGuard = () => {
       });
     }
 
-    // 4. Start the trap
-    trap();
+    // 4. Removed the trap to prevent performance degradation
   };
 
   // Run immediately

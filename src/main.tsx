@@ -15,19 +15,31 @@ initConsoleGuard();
 initSecurityHardening();
 
 // GLOBAL CHUNK RECOVERY: Handle "Failed to fetch dynamically imported module"
-// This happens after a new deployment when the browser tries to load old assets.
 window.addEventListener('error', (e) => {
-  if (e.message?.includes('Failed to fetch dynamically imported module') || 
-      e.message?.includes('Importing a module script failed')) {
-    console.warn('🛡️ Chunk load failure detected. Attempting recovery...');
-    window.location.reload();
+  const isChunkError = e.message?.includes('Failed to fetch dynamically imported module') || 
+                       e.message?.includes('Importing a module script failed');
+  
+  if (isChunkError) {
+    const reloadCount = parseInt(sessionStorage.getItem('chunk_reload_count') || '0');
+    if (reloadCount < 3) {
+      sessionStorage.setItem('chunk_reload_count', (reloadCount + 1).toString());
+      console.warn(`🛡️ Chunk load failure detected. Attempting recovery (${reloadCount + 1}/3)...`);
+      window.location.reload();
+    } else {
+      console.error('🛡️ Recovery failed. Please check your internet connection or clear browser cache.');
+      sessionStorage.removeItem('chunk_reload_count');
+    }
   }
 }, true);
 
 window.addEventListener('unhandledrejection', (e) => {
-  if (e.reason?.message?.includes('Failed to fetch dynamically imported module')) {
-    console.warn('🛡️ Async chunk load failure detected. Attempting recovery...');
-    window.location.reload();
+  const isChunkError = e.reason?.message?.includes('Failed to fetch dynamically imported module');
+  if (isChunkError) {
+    const reloadCount = parseInt(sessionStorage.getItem('chunk_reload_count') || '0');
+    if (reloadCount < 3) {
+      sessionStorage.setItem('chunk_reload_count', (reloadCount + 1).toString());
+      window.location.reload();
+    }
   }
 });
 

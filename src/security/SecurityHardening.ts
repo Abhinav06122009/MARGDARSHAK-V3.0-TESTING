@@ -214,12 +214,7 @@ export const initSecurityHardening = () => {
         devtoolsOpen = true;
         logViolation('DevTools Opened', { state: 'detected', screen: `${window.outerWidth}x${window.outerHeight}`, inner: `${window.innerWidth}x${window.innerHeight}` });
       }
-      // AGGRESSIVE: Freeze the browser if devtools remains open
-      (function freeze() {
-        while(devtoolsOpen) {
-          debugger;
-        }
-      })();
+      // Security violation is logged, but avoid destructive browser freezing
     } else {
       devtoolsOpen = false;
     }

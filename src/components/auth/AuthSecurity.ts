@@ -121,8 +121,12 @@ export const advancedSecurity = {
     const lastKeyPressTime = useRef(Date.now());
 
     const handleActivity = useCallback(() => {
-      lastActivity.current = Date.now();
-      if (!isBehaviorNormal) setIsBehaviorNormal(true);
+      const now = Date.now();
+      // Only update if it's been at least 2 seconds since last update
+      if (now - lastActivity.current > 2000) {
+        lastActivity.current = now;
+        if (!isBehaviorNormal) setIsBehaviorNormal(true);
+      }
     }, [isBehaviorNormal]);
 
     const handleKeyDown = useCallback(() => {
@@ -246,10 +250,11 @@ export const securityFeatures = {
 
   // --- UNHACKABLE PROTOCOL V3 ---
   initZeroThreatShield: () => {
-    // 1. Debugger Trap
+    // 1. Debugger Trap Removed for performance stability
+    /*
     setInterval(() => {
       const start = performance.now();
-      debugger; // This will pause execution if DevTools is open
+      debugger; 
       const end = performance.now();
       if (end - start > 100) {
         securityFeatures.logSecurityEvent('PENETRATION_ATTEMPT', {
@@ -258,6 +263,7 @@ export const securityFeatures = {
         });
       }
     }, 5000);
+    */
 
     // 2. Honeypot Monitor
     const honeypot = document.createElement('div');
