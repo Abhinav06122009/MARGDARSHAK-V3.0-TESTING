@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { dashboardService } from '@/lib/dashboardService';
 import { handleDeleteTask as deleteUtil, handleBulkDeleteTasks as bulkDeleteUtil } from '@/lib/dashboardUtils';
@@ -12,10 +12,12 @@ import type {
   RealCourse,
   RealTimetableEntry,
   RealAnalytics,
-} from '@/types/dashboard';
+} from '@/lib/dashboard';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useDashboardData = () => {
+  const { user: authUser, loading: authLoading } = useAuth();
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
   const [stats, setStats] = useState<RealDashboardStats>({
     totalTasks: 0, completedTasks: 0, pendingTasks: 0, inProgressTasks: 0, overdueTasks: 0,
@@ -90,30 +92,45 @@ export const useDashboardData = () => {
   }, []);
 
   const initializeDashboard = useCallback(async () => {
+    // Prevent multiple simultaneous initializations or initializing while auth is loading
+    if (retryCountRef.current > 0 || authLoading) return;
+    
     try {
       setLoading(true);
+      
+      if (!authUser) {
+        setSecurityVerified(true);
+        setLoading(false);
+        return;
+      }
+
+      // If we already have this user and we're not refreshing, skip expensive fetch
+      if (currentUser?.clerk_id === authUser.id && !refreshing) {
+        setLoading(false);
+        return;
+      }
+
+      // We still use dashboardService.getCurrentUser() to get the translated UUID and full profile
+      // but we could also just use fetchAllUserData directly if we had the UUID.
       const user = await dashboardService.getCurrentUser();
       if (!user) {
         setSecurityVerified(true);
         setLoading(false);
         return;
       }
+
       setCurrentUser(user);
       setSecurityVerified(true);
       
       // Consolidated data fetching
-      const userData = await dashboardService.fetchAllUserData(user.id);
+      const userData = await dashboardService.fetchAllUserData(user.id, refreshing);
       const analyticsData = dashboardService.calculateSecureAnalytics(userData);
-
       const secureStats = dashboardService.calculateSecureStats(userData);
       
       if (userData.profile) {
         setCurrentUser(prev => prev ? {
           ...prev,
-          profile: {
-            ...prev.profile,
-            ...userData.profile
-          }
+          profile: { ...prev.profile, ...userData.profile }
         } : prev);
       }
 
@@ -126,29 +143,37 @@ export const useDashboardData = () => {
       setTimetable(Array.isArray(userData.timetable) ? userData.timetable : []);
       setAnalytics(analyticsData);
 
-      if (unsubscribeRef.current) unsubscribeRef.current();
+      // Clean up previous subscription before setting up new one
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
       
-      const setupSub = async () => {
-        const unsubscribeFn = await dashboardService.setupSecureRealTimeSubscription(
-          user.id,
-          {
-            onTaskUpdate: handleSecureTaskUpdate,
-            onSessionUpdate: handleSecureSessionUpdate,
-            onGradeUpdate: handleSecureGradeUpdate,
-            onNoteUpdate: handleSecureNoteUpdate
-          }
-        );
-        unsubscribeRef.current = unsubscribeFn;
-      };
+      const unsubscribeFn = await dashboardService.setupSecureRealTimeSubscription(
+        user.id,
+        (payload: any) => {
+          // Dispatch to appropriate handler based on table
+          const table = payload.table;
+          if (table === 'tasks') handleSecureTaskUpdate(payload);
+          else if (table === 'study_sessions') handleSecureSessionUpdate(payload);
+          else if (table === 'grades') handleSecureGradeUpdate(payload);
+          else if (table === 'notes') handleSecureNoteUpdate(payload);
+        }
+      );
+      unsubscribeRef.current = unsubscribeFn;
       
-      setupSub();
     } catch (error) {
       console.error('Error initializing dashboard:', error);
+      retryCountRef.current++;
+      if (retryCountRef.current < maxRetries) {
+        setTimeout(initializeDashboard, 2000);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
+      retryCountRef.current = 0;
     }
-  }, [handleSecureTaskUpdate, handleSecureSessionUpdate, handleSecureGradeUpdate, handleSecureNoteUpdate]);
+  }, [authUser, authLoading, currentUser?.clerk_id, refreshing, handleSecureTaskUpdate, handleSecureSessionUpdate, handleSecureGradeUpdate, handleSecureNoteUpdate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -156,14 +181,18 @@ export const useDashboardData = () => {
     const handleOfflineStatus = () => setIsOnline(false);
     window.addEventListener('online', handleOnlineStatus);
     window.addEventListener('offline', handleOfflineStatus);
-    if (isMounted) initializeDashboard();
+    
+    if (isMounted && !authLoading) {
+      initializeDashboard();
+    }
+
     return () => {
       isMounted = false;
       if (unsubscribeRef.current) unsubscribeRef.current();
       window.removeEventListener('online', handleOnlineStatus);
       window.removeEventListener('offline', handleOfflineStatus);
     };
-  }, [initializeDashboard]);
+  }, [initializeDashboard, authLoading]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -173,7 +202,7 @@ export const useDashboardData = () => {
   const handleCreateQuickTask = useCallback(async () => {
     if (!currentUser) return;
     try {
-      const newTask = await dashboardService.createQuickTask(currentUser.id);
+      const newTask = await dashboardService.createQuickTask(currentUser.id) as RealTask;
       setRecentTasks(prev => [newTask, ...prev]);
       toast({ title: "Task Created ✅", description: "New task added." });
     } catch (error) {
@@ -206,12 +235,12 @@ export const useDashboardData = () => {
     }
   }, [toast]);
 
-  const handleBulkDelete = useCallback(async (taskIds: string[]) => {
+  const deleteTasks = useCallback(async (taskIds: string[]) => {
     setRecentTasks(prev => prev.filter(t => !taskIds.includes(t.id)));
     await bulkDeleteUtil(taskIds);
   }, []);
 
-  return {
+  const value = useMemo(() => ({
     currentUser,
     stats,
     recentTasks,
@@ -230,8 +259,15 @@ export const useDashboardData = () => {
     handleCreateQuickTask,
     handleTaskStatusUpdate,
     handleDeleteTask,
-    handleBulkDelete,
+    handleBulkDelete: deleteTasks,
     ultimateSecurityData: null,
     activeThreats: [] 
-  };
+  }), [
+    currentUser, stats, recentTasks, recentSessions, recentGrades, 
+    recentNotes, courses, timetable, analytics, loading, 
+    securityVerified, isOnline, refreshing, handleRefresh, 
+    handleCreateQuickTask, handleTaskStatusUpdate, handleDeleteTask, deleteTasks
+  ]);
+
+  return value;
 };

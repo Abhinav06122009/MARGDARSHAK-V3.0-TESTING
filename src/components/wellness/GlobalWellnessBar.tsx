@@ -75,7 +75,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastFetchRef = useRef<number>(0);
-  const { user: authUser, isLoggedIn } = useAuth();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -137,7 +137,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
 
   // ─── AI Burnout Detection (Throttled) ─────────────────────────────────────
   const checkBurnout = useCallback(async () => {
-    if (!isLoggedIn || !authUser) return;
+    if (!authUser) return;
     
     const now = Date.now();
     if (now - lastFetchRef.current < 300000) return; // 5 minute throttle
@@ -169,7 +169,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
         });
       }
     } catch (e) { /* silent */ }
-  }, [isLoggedIn, authUser, toast]);
+  }, [authUser, toast]);
 
   useEffect(() => {
     checkBurnout();
@@ -179,6 +179,10 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
 
   // ─── Custom Track Logic ───────────────────────────────────────────────────
   const addTrack = (name: string, url: string) => {
+    if (!authUser) {
+      toast({ title: "Premium Access Required", description: "Please log in to customize your soundscape.", variant: "destructive" });
+      return;
+    }
     if (!isPremium) {
       toast({ title: "Premium Required", description: "Custom tracks are an Elite feature", variant: "destructive" });
       return;
@@ -199,7 +203,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
     toast({ title: "Track Added", description: "Custom station integrated successfully" });
   };
 
-  if (!isLoggedIn) return null;
+  if (!authUser) return null;
 
   return (
     <>
@@ -448,6 +452,11 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
       <AnimatePresence>
         {showAddTrack && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+            {!authUser && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-xl">
+                <p className="text-white font-bold">Please log in</p>
+              </div>
+            )}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowAddTrack(false)}

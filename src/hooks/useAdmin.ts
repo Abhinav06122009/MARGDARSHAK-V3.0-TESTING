@@ -103,15 +103,15 @@ export const useAdmin = () => {
         moderationRes, 
         analyticsRes
       ] = await Promise.all([
-        supabase.from('profiles').select('*').limit(100),
-        supabase.from('security_threats').select('*').order('created_at', { ascending: false }).limit(20),
-        supabase.from('admin_reports').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('blocked_users').select('*').limit(50),
-        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle(),
-        supabase.from('moderation_queue').select('*').order('created_at', { ascending: false }).limit(20),
-        supabase.from('daily_metrics').select('*').order('date', { ascending: false }).limit(7)
+        (supabase.from('profiles' as any).select('*').limit(100) as any),
+        (supabase.from('security_threats' as any).select('*').order('created_at', { ascending: false }).limit(20) as any),
+        (supabase.from('admin_reports' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
+        (supabase.from('blocked_users' as any).select('*').limit(50) as any),
+        (supabase.from('contact_messages' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
+        (supabase.from('support_tickets' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
+        (supabase.from('security_settings' as any).select('*').eq('id', 'global').maybeSingle() as any),
+        (supabase.from('moderation_queue' as any).select('*').order('created_at', { ascending: false }).limit(20) as any),
+        (supabase.from('daily_metrics' as any).select('*').order('date', { ascending: false }).limit(7) as any)
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
@@ -147,7 +147,11 @@ export const useAdmin = () => {
       if (settingsRes.data) setSettings(settingsRes.data as any);
 
       if (moderationRes.data) {
-        setModerationQueue(moderationRes.data);
+        setModerationQueue((moderationRes.data as any[]).map(item => ({
+          ...item,
+          summary: item.summary || item.description || '',
+          level: item.level || 'medium'
+        })));
       }
 
       if (analyticsRes.data && analyticsRes.data.length > 0) {
@@ -234,17 +238,17 @@ export const useAdmin = () => {
     loading,
     refresh: fetchAdminData,
     createInvestigation: async (data: any) => {
-      const { error } = await supabase.from('admin_reports').insert([data]);
+      const { error } = await supabase.from('admin_reports' as any).insert([data]);
       if (error) throw error;
       fetchAdminData();
     },
     updateInvestigation: async (id: string, data: any) => {
-      const { error } = await supabase.from('admin_reports').update(data).eq('id', id);
+      const { error } = await supabase.from('admin_reports' as any).update(data as any).eq('id', id);
       if (error) throw error;
       fetchAdminData();
     },
     deleteInvestigation: async (id: string) => {
-      const { error } = await supabase.from('admin_reports').delete().eq('id', id);
+      const { error } = await supabase.from('admin_reports' as any).delete().eq('id', id);
       if (error) throw error;
       fetchAdminData();
     },
@@ -262,22 +266,22 @@ export const useAdmin = () => {
       });
  
       // 1. Update Database Status & Resolution Metadata
-      let { error } = await supabase.from(table).update({ 
+      let { error } = await supabase.from(table as any).update({ 
         status: 'resolved',
         resolution_text: resolutionText,
         resolved_at: new Date().toISOString(),
         resolved_by: resolvedBy
-      }).eq('id', id);
+      } as any).eq('id', id);
 
       // 🛡️ Safe-Dispatch Fallback: If FK violation (profile doesn't exist yet), resolve as system
       if (error && error.message.includes('foreign key constraint')) {
         console.warn('[useAdmin] Identity Sync Pending. Falling back to System Resolution.');
-        const { error: retryError } = await supabase.from(table).update({ 
+        const { error: retryError } = await supabase.from(table as any).update({ 
           status: 'resolved',
           resolution_text: resolutionText,
           resolved_at: new Date().toISOString()
           // Omit resolved_by to bypass FK check
-        }).eq('id', id);
+        } as any).eq('id', id);
         error = retryError;
       }
       
@@ -294,10 +298,10 @@ export const useAdmin = () => {
       setTickets(prev => prev.map(t => 
         t.id === id ? { ...t, status: 'escalated', resolution_text: escalationNote } : t
       ));
-      const { error } = await supabase.from(table).update({ 
+      const { error } = await supabase.from(table as any).update({ 
         status: 'escalated',
         resolution_text: escalationNote 
-      }).eq('id', id);
+      } as any).eq('id', id);
       if (error) {
         fetchAdminData();
         throw new Error(`DATABASE PERSISTENCE FAILURE: ${error.message}`);
@@ -306,7 +310,7 @@ export const useAdmin = () => {
     },
     saveResolution: async (id: string, type: 'contact' | 'ticket', resolutionText: string) => {
       const table = type === 'contact' ? 'contact_messages' : 'support_tickets';
-      const { error } = await supabase.from(table).update({ resolution_text: resolutionText }).eq('id', id);
+      const { error } = await supabase.from(table as any).update({ resolution_text: resolutionText } as any).eq('id', id);
       if (error) throw new Error(`DRAFT SAVING FAILURE: ${error.message}`);
       fetchAdminData();
     }

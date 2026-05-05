@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, lazy, Suspense } from 'react';
+import React, { useContext, useEffect, useState, lazy, Suspense, useCallback } from 'react';
 import * as Sentry from "@sentry/react";
 import { BrowserRouter, HashRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
@@ -203,16 +203,18 @@ const NavigationTracker = () => {
 
 const DashboardRouteWrapper = () => {
   const navigate = useNavigate();
+  const handleNavigate = useCallback((page: string) => {
+    if (page === 'dashboard') navigate('/dashboard');
+    else if (page === 'progress') navigate('/progress');
+    else if (page === 'settings') navigate('/settings');
+    else if (page === 'profile') navigate('/profile');
+    else navigate(`/${page}`);
+  }, [navigate]);
+
   return (
     <>
       <SEO title="Dashboard | MARGDARSHAK" description="Your AI-powered command center." />
-      <Dashboard onNavigate={(page) => {
-        if (page === 'dashboard') navigate('/dashboard');
-        else if (page === 'progress') navigate('/progress');
-        else if (page === 'settings') navigate('/settings');
-        else if (page === 'profile') navigate('/profile');
-        else navigate(`/${page}`);
-      }} />
+      <Dashboard onNavigate={handleNavigate} />
     </>
   );
 };

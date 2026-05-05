@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   SecureUser, 
   RealDashboardStats, 
@@ -14,6 +15,7 @@ import {
 import { secureDataHelpers } from './secureDataHelpers';
 
 export const useDashboardData = () => {
+  const { user: authUser, loading: authLoading } = useAuth();
   const [currentUser, setCurrentUser] = useState<SecureUser | null>(null);
   const [stats, setStats] = useState<RealDashboardStats>({
     totalTasks: 0, completedTasks: 0, pendingTasks: 0, inProgressTasks: 0, overdueTasks: 0,
@@ -48,9 +50,15 @@ export const useDashboardData = () => {
     setRecentTasks(prev => {
       let updated = [...prev];
       const index = updated.findIndex(task => task.id === (newData?.id || oldData?.id));
+      const mappedNewData = newData ? {
+        ...newData,
+        priority: newData.priority || 'medium',
+        status: newData.status || 'pending'
+      } : null;
+
       switch (eventType) {
-        case 'INSERT': if (newData && index === -1) updated.unshift(newData); break;
-        case 'UPDATE': if (index !== -1 && newData) updated[index] = newData; break;
+        case 'INSERT': if (mappedNewData && index === -1) updated.unshift(mappedNewData); break;
+        case 'UPDATE': if (index !== -1 && mappedNewData) updated[index] = mappedNewData; break;
         case 'DELETE': if (index !== -1) updated.splice(index, 1); break;
       }
       return updated.slice(0, 20);
@@ -59,46 +67,93 @@ export const useDashboardData = () => {
 
   const handleSecureSessionUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (eventType === 'INSERT' && newData) setRecentSessions(prev => [newData, ...prev].slice(0, 10));
+    if (eventType === 'INSERT' && newData) {
+      const mapped = {
+        ...newData,
+        session_type: ['study', 'review', 'practice', 'exam'].includes(newData.session_type) ? newData.session_type : 'study'
+      };
+      setRecentSessions(prev => [mapped, ...prev].slice(0, 10));
+    }
   }, []);
 
   const handleSecureGradeUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (eventType === 'INSERT' && newData) setRecentGrades(prev => [newData, ...prev].slice(0, 10));
+    if (eventType === 'INSERT' && newData) {
+      const mapped = {
+        ...newData,
+        percentage: newData.percentage || (newData.total_points ? (newData.grade / newData.total_points) * 100 : 0)
+      };
+      setRecentGrades(prev => [mapped, ...prev].slice(0, 10));
+    }
   }, []);
 
   const handleSecureNoteUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (eventType === 'INSERT' && newData) setRecentNotes(prev => [newData, ...prev].slice(0, 10));
+    if (eventType === 'INSERT' && newData) {
+      const mapped = {
+        ...newData,
+        is_favorite: newData.is_favorite || false
+      };
+      setRecentNotes(prev => [mapped, ...prev].slice(0, 10));
+    }
   }, []);
 
   const initializeDashboard = useCallback(async () => {
+    if (authLoading) return;
+    
     try {
       setLoading(true);
-      const user = await secureDataHelpers.getCurrentUser();
-      if (!user) {
+      if (!authUser) {
         setSecurityVerified(true);
         setLoading(false);
         return;
       }
-      setCurrentUser(user);
+
+      const secureUser: SecureUser = {
+        id: authUser.id,
+        email: authUser.email || '',
+        profile: authUser.profile ? {
+          full_name: authUser.profile.full_name || 'User',
+          user_type: authUser.profile.user_type || 'student',
+          student_id: authUser.profile.student_id
+        } : undefined
+      };
+
+      setCurrentUser(secureUser);
       setSecurityVerified(true);
       
-      const userData = await secureDataHelpers.fetchAllUserData(user.id);
-      const analyticsData = await secureDataHelpers.calculateSecureAnalytics(user.id);
+      const userData = await secureDataHelpers.fetchAllUserData(authUser.id);
+      const analyticsData = await secureDataHelpers.calculateSecureAnalytics(authUser.id);
       const secureStats = secureDataHelpers.calculateSecureStats(userData);
       
       setStats(secureStats);
-      setRecentTasks(Array.isArray(userData.tasks) ? userData.tasks.slice(0, 20) : []);
-      setRecentSessions(Array.isArray(userData.studySessions) ? userData.studySessions.slice(0, 10) : []);
-      setRecentGrades(Array.isArray(userData.grades) ? userData.grades.slice(0, 10) : []);
-      setRecentNotes(Array.isArray(userData.notes) ? userData.notes.slice(0, 10) : []);
+      setRecentTasks(Array.isArray(userData.tasks) ? (userData.tasks as any[]).map(t => ({
+        ...t,
+        priority: t.priority || 'medium',
+        status: t.status || 'pending'
+      })) : []);
+      
+      setRecentSessions(Array.isArray(userData.studySessions) ? (userData.studySessions as any[]).map(s => ({
+        ...s,
+        session_type: ['study', 'review', 'practice', 'exam'].includes(s.session_type) ? s.session_type : 'study'
+      })) : []);
+      
+      setRecentGrades(Array.isArray(userData.grades) ? (userData.grades as any[]).map(g => ({
+        ...g,
+        percentage: g.percentage || (g.total_points ? (g.grade / g.total_points) * 100 : 0)
+      })) : []);
+      
+      setRecentNotes(Array.isArray(userData.notes) ? (userData.notes as any[]).map(n => ({
+        ...n,
+        is_favorite: n.is_favorite || false
+      })) : []);
+
       setCourses(Array.isArray(userData.courses) ? userData.courses : []);
       setTimetable(Array.isArray(userData.timetable) ? userData.timetable : []);
       setAnalytics(analyticsData);
 
       if (unsubscribeRef.current) unsubscribeRef.current();
-      unsubscribeRef.current = secureDataHelpers.setupSecureRealTimeSubscription(user.id, {
+      unsubscribeRef.current = secureDataHelpers.setupSecureRealTimeSubscription(authUser.id, {
         onTaskUpdate: handleSecureTaskUpdate,
         onSessionUpdate: handleSecureSessionUpdate,
         onGradeUpdate: handleSecureGradeUpdate,
@@ -114,7 +169,7 @@ export const useDashboardData = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [handleSecureTaskUpdate, handleSecureSessionUpdate, handleSecureGradeUpdate, handleSecureNoteUpdate]);
+  }, [authUser, authLoading, handleSecureTaskUpdate, handleSecureSessionUpdate, handleSecureGradeUpdate, handleSecureNoteUpdate]);
 
   useEffect(() => {
     const handleOnlineStatus = () => setIsOnline(true);
@@ -137,8 +192,13 @@ export const useDashboardData = () => {
   const handleCreateQuickTask = async () => {
     if (!currentUser) return;
     try {
-      const newTask = await secureDataHelpers.createQuickTask(currentUser.id);
-      setRecentTasks(prev => [newTask, ...prev]);
+      const newTask = await secureDataHelpers.createQuickTask(currentUser.id) as any;
+      const mappedTask: RealTask = {
+        ...newTask,
+        priority: newTask.priority || 'medium',
+        status: (['pending', 'in_progress', 'completed'].includes(newTask.status) ? newTask.status : 'pending') as any
+      };
+      setRecentTasks(prev => [mappedTask, ...prev]);
       toast({ title: "Task Created ✅", description: "New task added." });
     } catch (error) {
       toast({ title: "Creation Failed", variant: "destructive" });

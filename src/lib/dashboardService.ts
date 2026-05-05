@@ -421,13 +421,32 @@ export const dashboardService = {
 
   setupSecureRealTimeSubscription: async (userId: string, callback: (payload: any) => void) => {
     const translatedId = await translateClerkIdToUUID(userId);
-    const subscription = supabase
+    
+    const taskSub = supabase
       .channel(`public:tasks:user_id=eq.${translatedId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${translatedId}` }, callback)
       .subscribe();
       
+    const sessionSub = supabase
+      .channel(`public:study_sessions:user_id=eq.${translatedId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'study_sessions', filter: `user_id=eq.${translatedId}` }, callback)
+      .subscribe();
+
+    const gradeSub = supabase
+      .channel(`public:grades:user_id=eq.${translatedId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'grades', filter: `user_id=eq.${translatedId}` }, callback)
+      .subscribe();
+
+    const noteSub = supabase
+      .channel(`public:notes:user_id=eq.${translatedId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: `user_id=eq.${translatedId}` }, callback)
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(taskSub);
+      supabase.removeChannel(sessionSub);
+      supabase.removeChannel(gradeSub);
+      supabase.removeChannel(noteSub);
     };
   },
 

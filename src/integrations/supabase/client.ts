@@ -9,6 +9,8 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY |
 // Clerk integration
 let getClerkToken: () => Promise<string | null> = async () => null;
 let clerkUser: any = null;
+let cachedToken: string | null = null;
+let lastTokenFetch = 0;
 
 export const setClerkTokenProvider = (provider: () => Promise<string | null>) => {
   getClerkToken = provider;
@@ -56,8 +58,15 @@ const customStorageAdapter = {
 // Create the supabase client with enhanced configuration
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   global: {
-    fetch: async (url, options = {}) => {
-      const token = await getClerkToken();
+    fetch: async (url, options: any = {}) => {
+      // Internal Token Caching to prevent redundant Clerk network calls during parallel fetches
+      const now = Date.now();
+      if (!cachedToken || (now - lastTokenFetch > 10000)) { // 10s cache
+        cachedToken = await getClerkToken();
+        lastTokenFetch = now;
+      }
+      
+      const token = cachedToken;
       const headers = new Headers(options.headers);
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
