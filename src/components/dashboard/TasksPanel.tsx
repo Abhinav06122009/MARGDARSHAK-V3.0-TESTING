@@ -257,6 +257,6 @@ const TasksPanel: React.FC<TasksPanelProps> = React.memo(({
 
     </motion.div>
   );
-};
+});
 
 export default TasksPanel;

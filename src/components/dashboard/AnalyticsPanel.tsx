@@ -331,6 +331,6 @@ const AnalyticsPanel: React.FC<AnalyticsPanelProps> = React.memo(({ analytics, t
       </div>
     </motion.div>
   );
-};
+});
 
 export default AnalyticsPanel;

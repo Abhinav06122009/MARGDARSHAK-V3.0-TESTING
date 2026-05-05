@@ -305,6 +305,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
         </div>
     </motion.div>
   );
-};
+});
 
 export default DashboardHeader;

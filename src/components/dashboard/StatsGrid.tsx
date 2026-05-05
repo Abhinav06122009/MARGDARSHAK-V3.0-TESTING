@@ -169,6 +169,6 @@ const StatsGrid: React.FC<StatsGridProps> = React.memo(({ stats }) => {
       })}
     </div>
   );
-};
+});
 
 export default StatsGrid;

@@ -499,6 +499,6 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
       </AnimatePresence>
     </>
   );
-};
+});
 
 export default GlobalWellnessBar;

@@ -213,4 +213,4 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = React.mem
       </div>
     </div>
   );
-};
+});

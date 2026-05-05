@@ -163,4 +163,4 @@ export const VirtualPet: React.FC<VirtualPetProps> = React.memo(({ stats, tasks 
       </AnimatePresence>
     </div>
   );
-};
+});

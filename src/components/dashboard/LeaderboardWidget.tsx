@@ -144,4 +144,4 @@ export const LeaderboardWidget: React.FC<LeaderboardWidgetProps> = React.memo(({
       </div>
     </div>
   );
-};
+});
