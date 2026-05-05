@@ -132,12 +132,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           const profileData: any = {
             id: translatedId,
+            clerk_id: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
             user_type: role,
             updated_at: new Date().toISOString()
           };
+
+          console.log('⚡ [AUTH] Final Sync Payload:', JSON.stringify({ ...profileData, email: '***' }));
 
           const token = clerkSession ? await clerkSession.getToken() : null;
           
@@ -190,7 +193,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    if (sessionLoaded && userLoaded && clerkUser && clerkSession) {
+    if (sessionLoaded && userLoaded && clerkUser?.id && clerkSession?.id) {
       // 🚨 EMERGENCY TIMEOUT: Force-resolve loading after 10s even if sync hangs
       const emergencyTimeout = setTimeout(() => {
         if (loading) {
@@ -201,7 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       syncProfile().finally(() => clearTimeout(emergencyTimeout));
     }
-  }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
+  }, [sessionLoaded, userLoaded, clerkUser?.id, clerkSession?.id]);
 
   const value = useMemo(() => ({
     session: clerkSession || null,

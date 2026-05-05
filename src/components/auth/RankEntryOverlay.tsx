@@ -12,6 +12,8 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   const [show, setShow] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
   const [scanStep, setScanStep] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
   const [rankInfo, setRankInfo] = useState<{
     tier: 'A+' | 'A' | 'B-' | 'STANDARD';
     grade: string;
@@ -208,9 +210,6 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
   const scanLabels = ['INITIALIZING BIOMETRIC SCAN...', 'ESTABLISHING NEURAL HANDSHAKE...', 'VSAV ENCRYPTION VERIFIED', 'OFFICER IDENTITY CONFIRMED'];
 
-  const [isHovering, setIsHovering] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
-
   return (
     <AnimatePresence>
       {show && (
@@ -233,7 +232,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               scale: isClicked ? 0.8 : 1,
               backgroundColor: isHovering ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0)'
             }}
-            style={{ x: mouseX, y: mouseY, left: '50%', top: '50%', x: mouseX, y: mouseY }}
+            style={{ translateX: mouseX, translateY: mouseY, left: '50%', top: '50%' }}
           >
             <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${isHovering ? 'bg-emerald-400' : 'bg-emerald-500'}`} />
             <motion.div 
