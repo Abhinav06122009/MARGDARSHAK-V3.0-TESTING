@@ -320,114 +320,111 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 </div>
               </motion.div>
             ) : (
-              <motion.div
-                key="rank-reveal"
-                style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
-                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="relative z-[10] group w-[90vw] max-w-[440px] flex flex-col items-center justify-center"
-              >
+          <motion.div
+            key="rank-reveal"
+            style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-[10] group w-[100vw] h-[100dvh] flex flex-col items-center justify-center touch-none"
+          >
                 {/* DYNAMIC AMBIENT SHADOW */}
                 <div className={`absolute -inset-24 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[100px] pointer-events-none transition-all duration-1000`} />
 
-                {/* THE HIGH-COMMAND ASSET */}
-                <div className={`relative w-full h-auto min-h-[500px] max-h-[90vh] bg-[#050505] rounded-[3rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-12 shadow-2xl backdrop-blur-3xl`}>
-                  
-                  {/* HOLOGRAPHIC SHIMMER & GLARE */}
-                  <motion.div
-                    animate={{ x: ['-200%', '200%'] }}
-                    transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
-                    className={`absolute inset-0 bg-gradient-to-r ${rankInfo.style.shimmer} skew-x-[-20deg] opacity-10 pointer-events-none`}
-                  />
-                  <div className="absolute inset-0 z-30 pointer-events-none opacity-20 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
+          {/* THE HIGH-COMMAND ASSET */}
+          <div className={`relative w-[95vw] max-w-[420px] h-auto max-h-[92vh] bg-[#050505] rounded-[2.5rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-6 sm:p-10 shadow-2xl backdrop-blur-3xl`}>
+            
+            {/* HOLOGRAPHIC SHIMMER & GLARE */}
+            <motion.div
+              animate={{ x: ['-200%', '200%'] }}
+              transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+              className={`absolute inset-0 bg-gradient-to-r ${rankInfo.style.shimmer} skew-x-[-20deg] opacity-10 pointer-events-none`}
+            />
+            <div className="absolute inset-0 z-30 pointer-events-none opacity-20 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
 
-                  {/* HEADER BRANDING */}
-                  <div className="flex items-center justify-between mb-8 sm:mb-12">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 sm:p-2.5 bg-white rounded-xl border border-white/20 shadow-2xl">
-                          <img src="/logo.png" alt="M" className="w-4 h-4 sm:w-6 sm:h-6 object-contain" />
-                        </div>
-                        <h2 className="text-base sm:text-xl font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
-                      </div>
-                      <span className="text-[5px] sm:text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.6em] ml-8 sm:ml-14">VSAV GYANTAPA FAMILY</span>
-                    </div>
+            {/* HEADER BRANDING */}
+            <div className="flex items-center justify-between mb-6 sm:mb-10">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 sm:p-2 bg-white rounded-lg border border-white/20 shadow-xl">
+                    <img src="/logo.png" alt="M" className="w-4 h-4 sm:w-5 sm:h-5 object-contain" />
                   </div>
-
-                  {/* RANK RIBBON */}
-                  <div className={`absolute top-16 sm:top-24 left-0 px-4 sm:px-10 py-2 sm:py-4 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20`}>
-                    <div className="flex items-center gap-1.5 sm:gap-3">
-                      <Sparkles size={12} className="text-black/70 sm:size-16" />
-                      <div className="flex flex-col">
-                        <span className="text-[7px] sm:text-[9px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
-                        <span className="text-[9px] sm:text-[12px] font-black text-black uppercase tracking-[0.2em] italic">{rankInfo.grade}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 flex flex-col items-center justify-center gap-8 sm:gap-14 text-center">
-                    {/* ICON CONSTRUCT */}
-                    <div className="relative">
-                      <motion.div
-                        initial={{ scale: 0, rotate: -45 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
-                        className={`p-6 sm:p-12 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-110 transition-all duration-500`}
-                        style={{ transform: "translateZ(50px)" }}
-                      >
-                        <rankInfo.icon size={50} className="text-black sm:size-[90px]" strokeWidth={1.5} />
-                        <motion.div
-                          animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
-                          transition={{ repeat: Infinity, duration: 4 }}
-                          className="absolute inset-0 border-4 border-white/30 rounded-[2.5rem]"
-                        />
-                      </motion.div>
-                      
-                      {/* Orbiting Text (Prestige Detail) */}
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                        className="absolute -inset-12 sm:-inset-16 pointer-events-none opacity-20"
-                      >
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
-                          <text className="text-[4px] font-black uppercase tracking-[1em] fill-white">
-                            <textPath href="#circlePath">
-                              • VSAV HIGH COMMAND • AUTHORIZED PERSONNEL ONLY •
-                            </textPath>
-                          </text>
-                        </svg>
-                      </motion.div>
-                    </div>
-
-                    <div className="space-y-4 sm:space-y-6" style={{ transform: "translateZ(30px)" }}>
-                      <div className="flex flex-col gap-1 sm:gap-2">
-                        <span className="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[1em]">IDENTITY_RECOGNIZED</span>
-                        <h2 className={`text-3xl sm:text-5xl font-black italic tracking-tighter uppercase leading-tight bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-4`}>
-                          {rankInfo.title}
-                        </h2>
-                      </div>
-                      
-                      <div className="h-px w-24 sm:w-32 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent mx-auto" />
-                      
-                      <div className="space-y-1">
-                        <p className="text-zinc-500 text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.25em] max-w-[280px] sm:max-w-[320px] leading-relaxed mx-auto">
-                          Visionary of the VSAV Ecosystem.<br />
-                          <span className="text-zinc-400">Node Session V4.0 Initialized.</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PREMIUM ACTION BUTTON */}
-                  <button
-                    onClick={handleClose}
-                    className="relative mt-auto mb-2 sm:mb-0 py-4 sm:py-7 rounded-2xl sm:rounded-[2rem] bg-white text-black font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-[10px] sm:text-[11px] hover:scale-[1.02] sm:hover:scale-105 active:scale-95 transition-all overflow-hidden group/btn shadow-[0_15px_40px_rgba(255,255,255,0.1)]"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                    <span className="relative z-10">ENTER_DASHBOARD</span>
-                  </button>
+                  <h2 className="text-sm sm:text-lg font-black text-white tracking-tighter uppercase italic leading-none">Margdarshak</h2>
                 </div>
+                <span className="text-[5px] sm:text-[6px] font-black text-emerald-500/40 uppercase tracking-[0.5em] ml-10 sm:ml-12">VSAV GYANTAPA FAMILY</span>
+              </div>
+            </div>
+
+            {/* RANK RIBBON */}
+            <div className={`absolute top-14 sm:top-20 left-0 px-4 sm:px-8 py-2 sm:py-3 bg-gradient-to-r ${rankInfo.style.gradient} rounded-r-full shadow-lg z-20`}>
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <Sparkles size={10} className="text-black/70 sm:size-12" />
+                <div className="flex flex-col">
+                  <span className="text-[6px] sm:text-[8px] font-black text-black/40 uppercase tracking-widest leading-none">OFFICER GRADE</span>
+                  <span className="text-[8px] sm:text-[10px] font-black text-black uppercase tracking-[0.15em] italic">{rankInfo.grade}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-10 text-center py-4 sm:py-8">
+              {/* ICON CONSTRUCT */}
+              <div className="relative">
+                <motion.div
+                  initial={{ scale: 0, rotate: -45 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
+                  className={`p-5 sm:p-10 rounded-2xl sm:rounded-[2rem] bg-gradient-to-br ${rankInfo.style.gradient} shadow-2xl relative group-hover:scale-105 transition-all duration-500`}
+                  style={{ transform: "translateZ(50px)" }}
+                >
+                  <rankInfo.icon size={40} className="text-black sm:size-[70px]" strokeWidth={1.5} />
+                  <motion.div
+                    animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 4 }}
+                    className="absolute inset-0 border-4 border-white/30 rounded-2xl sm:rounded-[2rem]"
+                  />
+                </motion.div>
+                
+                {/* Orbiting Text */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-10 sm:-inset-14 pointer-events-none opacity-20"
+                >
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
+                    <text className="text-[3.5px] font-black uppercase tracking-[1em] fill-white">
+                      <textPath href="#circlePath">
+                        • VSAV HIGH COMMAND • AUTHORIZED PERSONNEL ONLY •
+                      </textPath>
+                    </text>
+                  </svg>
+                </motion.div>
+              </div>
+
+              <div className="space-y-3 sm:space-y-5" style={{ transform: "translateZ(30px)" }}>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[7px] sm:text-[9px] font-black text-white/20 uppercase tracking-[0.8em]">IDENTITY_RECOGNIZED</span>
+                  <h2 className={`text-2xl sm:text-4xl font-black italic tracking-tighter uppercase leading-tight bg-gradient-to-b ${rankInfo.style.gradient} bg-clip-text text-transparent px-2`}>
+                    {rankInfo.title}
+                  </h2>
+                </div>
+                
+                <div className="h-px w-20 sm:w-28 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent mx-auto" />
+                
+                <p className="text-zinc-500 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] max-w-[240px] sm:max-w-[300px] leading-relaxed mx-auto">
+                  Visionary of the VSAV Ecosystem.<br />
+                  <span className="text-zinc-400">Node Session V4.0 Initialized.</span>
+                </p>
+              </div>
+            </div>
+
+            {/* PREMIUM ACTION BUTTON */}
+            <button
+              onClick={handleClose}
+              className="relative mt-auto py-4 sm:py-6 rounded-xl sm:rounded-[1.5rem] bg-white text-black font-black uppercase tracking-[0.4em] text-[9px] sm:text-[10px] hover:bg-emerald-400 active:scale-95 transition-all overflow-hidden group/btn shadow-xl"
+            >
+              <span className="relative z-10">ENTER_DASHBOARD</span>
+            </button>
+          </div>
 
                 {/* TECH DECORATIONS */}
                 <div className="absolute -left-40 top-1/2 -translate-y-1/2 space-y-16 opacity-30 pointer-events-none">
