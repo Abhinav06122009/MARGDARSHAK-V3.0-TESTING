@@ -415,7 +415,7 @@ const AppContent = () => {
           </AdminProvider>
         </AuthProvider>
       </TooltipProvider>
-    </ClerkSupabaseBridge>
+
   );
 };
 
