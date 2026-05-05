@@ -150,9 +150,19 @@ const authHandler: ProxyHandler<any> = {
 
 (supabase as any).auth = new Proxy(originalAuth, authHandler);
 
+// Caching for getCurrentUser to prevent redundant calculations
+let cachedUser: any = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 2000; // 2 seconds
+
 // Helper functions for common operations
 export const supabaseHelpers = {
-  getCurrentUser: async () => {
+  getCurrentUser: async (forceRefresh = false) => {
+    const now = Date.now();
+    if (!forceRefresh && cachedUser && (now - lastCacheTime < CACHE_TTL)) {
+      return cachedUser;
+    }
+
     try {
       if (!clerkUser) return null;
       
@@ -221,6 +231,10 @@ export const supabaseHelpers = {
           subscription_status: subscription.status || 'inactive'
         }
       } as any;
+      
+      cachedUser = userData;
+      lastCacheTime = Date.now();
+      return userData;
     } catch (error) {
       console.error('Error getting current user:', error);
       return null;

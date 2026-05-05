@@ -10,9 +10,6 @@ coverage/
 dist/
 build/
 out/
-public/downloads/
-public/download/
-dist/download/
 .netlify/
 
 # Misc
@@ -44,4 +41,17 @@ yarn-error.log*
 # Mobile
 android/
 ios/
-capacitor.config.ts
+# capacitor.config.ts
+
+# Large Binaries & Installers
+public/downloads/*.exe
+public/downloads/*.zip
+public/downloads/*.apk
+public/downloads/*.msi
+public/downloads/*.dmg
+!public/downloads/.gitkeep
+
+# Electron / Desktop builds
+out/
+dist-electron/
+release/

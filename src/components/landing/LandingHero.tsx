@@ -1,14 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Rocket, Users, Award, TrendingUp } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
 import { useSound } from './SoundContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * The main Hero section of the landing page.
  * Includes scroll-driven scaling and parallax depth.
  */
 export const LandingHero: React.FC = () => {
+  const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll();
   const { playSound } = useSound();
@@ -69,13 +71,13 @@ export const LandingHero: React.FC = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-6"
         >
           <MagneticButton>
-            <a 
-              href="/auth" 
+            <button 
+              onClick={() => navigate('/auth')}
               className="group flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 px-10 rounded-2xl text-xl shadow-2xl shadow-blue-600/30 transition-all duration-300"
               onMouseEnter={() => playSound('hover')}
             >
               Get Started Free <Rocket className="w-6 h-6 transition-transform group-hover:translate-x-1" />
-            </a>
+            </button>
           </MagneticButton>
 
           <button 

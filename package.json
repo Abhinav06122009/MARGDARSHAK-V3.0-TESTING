@@ -12,6 +12,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:apk": "cd android && .\\gradlew assembleDebug",
+    "distribute:apk": "copy android\\app\\build\\outputs\\apk\\debug\\app-debug.apk public\\downloads\\Margdarshak.apk",
+    "rebuild:android": "npm run build && (if exist dist\\downloads del /q dist\\downloads\\*.exe dist\\downloads\\*.zip) && npx cap sync android && npm run build:apk && npm run distribute:apk",
+    "build:exe": "electron-builder build --win",
+    "distribute:exe": "copy out\\MARGDARSHAK.exe public\\downloads\\MARGDARSHAK.exe",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

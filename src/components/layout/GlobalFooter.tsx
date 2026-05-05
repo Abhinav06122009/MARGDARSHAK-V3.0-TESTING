@@ -195,16 +195,22 @@ const GlobalFooter = () => {
             {/* Subtle Asset Attribution */}
             <div className="opacity-[0.01] hover:opacity-100 transition-opacity duration-[3000ms] text-[7px] font-mono flex flex-wrap gap-4 grayscale max-w-xl justify-center lg:justify-end">
               <span>
-                <a href="https://iconscout.com/icons/clerk" className="hover:underline" target="_blank">Clerk</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline">Icon Mafia</a> on <a href="https://iconscout.com" className="hover:underline">IconScout</a>
+                1.<a href="https://iconscout.com/3d-icons/android" className="hover:underline" target="_blank">Android Logo</a> by <a href="https://iconscout.com/contributors/iconscout" className="hover:underline">IconScout Store</a> on <a href="https://iconscout.com" className="hover:underline">IconScout</a>
               </span>
               <span>
-                2.<a href="https://iconscout.com/icons/supabase" className="hover:underline" target="_blank">Supabase</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
+                2.<a href="https://iconscout.com/3d-icons/windows" className="hover:underline" target="_blank">Windows</a> by <a href="https://iconscout.com/contributors/iconscout" className="hover:underline" target="_blank">IconScout Store</a>
               </span>
               <span>
-                3.<a href="https://iconscout.com/icons/framer" className="hover:underline" target="_blank">Framer</a> by <a href="https://iconscout.com/contributors/icon-54" className="hover:underline" target="_blank">Icon 54</a>
+                3.<a href="https://iconscout.com/icons/clerk" className="hover:underline" target="_blank">Clerk</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline">Icon Mafia</a> on <a href="https://iconscout.com" className="hover:underline">IconScout</a>
               </span>
               <span>
-                4.<a href="https://iconscout.com/icons/vitejs" className="hover:underline" target="_blank">Vite</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
+                4.<a href="https://iconscout.com/icons/supabase" className="hover:underline" target="_blank">Supabase</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
+              </span>
+              <span>
+                5.<a href="https://iconscout.com/icons/framer" className="hover:underline" target="_blank">Framer</a> by <a href="https://iconscout.com/contributors/icon-54" className="hover:underline" target="_blank">Icon 54</a>
+              </span>
+              <span>
+                6.<a href="https://iconscout.com/icons/vitejs" className="hover:underline" target="_blank">Vite</a> by <a href="https://iconscout.com/contributors/icon-mafia" className="hover:underline" target="_blank">Icon Mafia</a>
               </span>
             </div>
           </div>

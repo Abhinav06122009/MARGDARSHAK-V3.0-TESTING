@@ -412,7 +412,10 @@ export default defineConfig(async ({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ["react", "react-dom", "react-router-dom"],
+            'react-core': ['react', 'react-dom', 'react-router-dom'],
+            'ui-libs': ['framer-motion', 'lucide-react', 'clsx', 'tailwind-merge'],
+            'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip', '@radix-ui/react-tabs'],
+            'query-infra': ['@tanstack/react-query', '@supabase/supabase-js'],
           },
         },
       },

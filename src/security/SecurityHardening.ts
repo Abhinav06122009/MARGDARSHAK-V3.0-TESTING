@@ -119,6 +119,7 @@ export const initSecurityHardening = () => {
         });
         window.dispatchEvent(new CustomEvent('security-warning', { detail: { type, ip: currentIP } }));
       } else {
+        // STRIKE 2+: HARD BLOCK
         await supabase.from('security_threats').insert({
           event_type: type,
           user_id: userId,
@@ -128,9 +129,19 @@ export const initSecurityHardening = () => {
           summary: `STRIKE 2: Persistent ${type}. PERMANENT BAN. Forensic ID: ${persistentId}`,
           metadata: { ...metadata, ...fingerprint, persistent_id: persistentId, strikes: 2 }
         });
+
+        // 2. Update profile status to blocked if user is authenticated
         if (userId) {
-          // Client-side block attempt removed: Handled server-side via log-security-event
+          await supabase
+            .from('profiles')
+            .update({ 
+              is_blocked: true, 
+              blocked_reason: `Permanent Ban: 2 Security Strikes (${type})` 
+            })
+            .eq('id', userId);
         }
+
+        // 3. Dispatch ban event to UI
         window.dispatchEvent(new CustomEvent('security-ban', { detail: { type, ip: currentIP } }));
       }
     } catch (err) { if (isDev) console.error('Tracing error:', err); }
@@ -194,25 +205,46 @@ export const initSecurityHardening = () => {
     const isOfficer = await isEliteOfficer();
     if (isOfficer) return;
 
-    const threshold = 250;
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
-
+    const threshold = 160;
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
 
     if (widthThreshold || heightThreshold) {
       if (!devtoolsOpen) {
         devtoolsOpen = true;
-        // logViolation('DevTools Opened', { state: 'detected' }); // DEACTIVATED FOR DIAGNOSTIC RECORDING
+        logViolation('DevTools Opened', { state: 'detected', screen: `${window.outerWidth}x${window.outerHeight}`, inner: `${window.innerWidth}x${window.innerHeight}` });
       }
+      // AGGRESSIVE: Freeze the browser if devtools remains open
+      (function freeze() {
+        while(devtoolsOpen) {
+          debugger;
+        }
+      })();
     } else {
       devtoolsOpen = false;
     }
   };
 
+  // --- NETWORK PROBE DETECTION ---
+  const detectNetworkProbe = () => {
+    const start = Date.now();
+    // Perform a tiny internal fetch to check for interceptors/proxies
+    fetch('/favicon.ico', { cache: 'no-store' }).then(() => {
+      const duration = Date.now() - start;
+      if (duration > 500) { // Unusually slow internal fetch might indicate a proxy/interceptor
+        logViolation('Network Proxy Detected', { latency: duration });
+      }
+    }).catch(() => {});
+  };
+
   window.addEventListener('resize', checkDevTools);
-  setInterval(checkDevTools, 5000);
+  setInterval(checkDevTools, 2000); // More frequent checks
+  setInterval(detectNetworkProbe, 15000); 
+
+  // Global violation listener (from ConsoleGuard)
+  window.addEventListener('security-violation', (e: any) => {
+    logViolation(e.detail.type, e.detail.metadata);
+  });
 
 
   // --- 6. VISUAL LOCKDOWN (TOTAL SHIELD) ---

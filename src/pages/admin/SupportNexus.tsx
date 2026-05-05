@@ -54,13 +54,41 @@ const SupportNexus = () => {
       // 2. Dispatch Email
       const subject = `EXECUTIVE RESOLUTION: ${ticket.subject}`;
       const htmlBody = `
-        <div style="font-family: sans-serif; padding: 40px; background: #fafafa; border-radius: 24px; color: #111827;">
-          <h1 style="color: #059669;">Executive Resolution</h1>
-          <p>Your query regarding <strong>"${ticket.subject}"</strong> has been resolved by High-Command.</p>
-          <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; margin: 20px 0;">
-            <p style="margin: 0; font-weight: 600;">${resolutionText}</p>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 24px; overflow: hidden; color: #111827;">
+          <div style="padding: 40px 20px; text-align: center; background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+            <img src="https://margdarshan.tech/logo.png" alt="Margdarshak" width="120" style="display: block; margin: 0 auto 16px auto; border: none; outline: none; text-decoration: none;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #059669; text-transform: uppercase;">Executive Resolution</h1>
           </div>
-          <p style="font-size: 12px; color: #6b7280;">Signed by: ${officialName} [${rank}]</p>
+          
+          <div style="padding: 40px; line-height: 1.6;">
+            <p style="margin-top: 0; font-size: 15px; color: #4b5563;">Hello,</p>
+            
+            <div style="margin: 24px 0; padding: 20px; background: #f9fafb; border-radius: 16px; border: 1px solid #f3f4f6;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Incident Context</p>
+              <p style="margin: 0; font-size: 14px; color: #4b5563; font-style: italic;">"${ticket.message || 'No message provided'}"</p>
+            </div>
+
+            <div style="margin: 24px 0; padding: 20px; background: #ecfdf5; border-radius: 16px; border: 1px solid #d1fae5;">
+              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">High-Command Decision</p>
+              <p style="margin: 0; font-size: 15px; color: #064e3b; font-weight: 500;">${resolutionText}</p>
+            </div>
+
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 24px; margin-top: 32px;">
+              <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827;">${officialName}</p>
+              <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.025em;">${rank}</p>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">VSAV GYANTAPA EXECUTIVE NEXUS</p>
+            </div>
+          </div>
+
+          <div style="padding: 40px 20px; background: #050505; text-align: center; color: #9ca3af;">
+            <div style="margin-bottom: 24px;">
+              <a href="https://www.instagram.com/vsavgyantapa/" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Instagram</a>
+              <a href="https://x.com/gyantappas" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Twitter</a>
+              <a href="https://www.facebook.com/profile.php?id=61584618795158" style="display: inline-block; margin: 0 12px; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600;">Facebook</a>
+            </div>
+            <p style="margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">© 2026 MARGDARSHAK</p>
+            <p style="margin: 4px 0 0 0; font-size: 9px; color: #4b5563;">POWERED BY VSAV GYANTAPA</p>
+          </div>
         </div>
       `;
 

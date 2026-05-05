@@ -68,8 +68,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Background Sync Profile
   useEffect(() => {
     const syncProfile = async () => {
-      if (sessionLoaded && userLoaded && clerkUser) {
+      if (!clerkUser) return;
         try {
+          // Check if already synced in this session to avoid redundant network calls
+          const sessionSyncKey = `synced_${clerkUser.id}`;
+          if (sessionStorage.getItem(sessionSyncKey)) {
+            console.log('⚡ Background Sync: Profile already synced for this session.');
+            
+            // Still resolve identity for the local state
+            const translatedId = await translateClerkIdToUUID(clerkUser.id);
+            const metadata = clerkUser.publicMetadata || {};
+            const subscription = (metadata.subscription as any) || {};
+            let tier = (subscription.tier || 'free').toLowerCase();
+            const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
+            const role = roleArray.map(r => String(r).trim().toLowerCase()).join(', ');
+            if (role.includes('ceo') || role.includes('admin')) tier = 'premium_elite';
+
+            setUser({
+              ...clerkUser,
+              id: translatedId,
+              clerk_id: clerkUser.id,
+              profile: { id: translatedId, clerk_id: clerkUser.id, subscription_tier: tier, role: role, user_type: role }
+            });
+            setLoading(false);
+            return;
+          }
+
           console.log('⚡ Background Sync: Syncing profile for', clerkUser.id);
           
           const translatedId = await translateClerkIdToUUID(clerkUser.id);
@@ -133,6 +157,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           } else {
             console.log('[AuthContext] Profile synced successfully via Supabase');
+            sessionStorage.setItem(`synced_${clerkUser.id}`, 'true');
           }
 
           // Check if blocked in Supabase - Keep this fast
@@ -155,7 +180,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (err) {
           console.error('Unexpected sync error:', err);
         }
-      }
     };
 
     if (sessionLoaded && userLoaded && clerkUser) {

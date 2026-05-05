@@ -7,9 +7,14 @@
 @layer utilities {
   .glass-morphism {
     @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    /* Performance: Backdrop filter is expensive, hint to GPU */
+    will-change: backdrop-filter;
   }
   .premium-card {
     @apply rounded-[2rem] border border-white/5 bg-zinc-900/40 backdrop-blur-2xl transition-all duration-500 hover:border-indigo-500/30 hover:bg-zinc-900/60;
+    /* Optimize for smooth scaling/moving */
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
@@ -117,6 +122,10 @@
     /* Prevent overscroll bounce on mobile */
     overscroll-behavior-y: none;
     height: var(--system-height);
+    /* Optimization: Better text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* TV & Ultra-Wide Scaling (Universal View) */
@@ -170,6 +179,11 @@
     padding-bottom: var(--safe-bottom);
     padding-left: var(--safe-left);
     padding-right: var(--safe-right);
+    /* Performance: Optimize rendering of long lists */
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 5000px;
+    /* Hardware acceleration across the board */
+    transform: translate3d(0, 0, 0);
   }
 
   /* Universal Screen Layout Utilities */
@@ -344,22 +358,24 @@
   opacity: 0.5;
 }
 
-/* Hover effects */
+/* Hover effects - Using transform: translateZ for better perf */
 .hover-lift {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateZ(0);
 }
 
 .hover-lift:hover {
-  transform: translateY(-8px);
+  transform: translateY(-8px) translateZ(0);
   box-shadow: 0 20px 40px hsla(0 0% 0% / 0.1);
 }
 
 .hover-scale {
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateZ(0);
 }
 
 .hover-scale:hover {
-  transform: scale(1.05);
+  transform: scale(1.05) translateZ(0);
 }
 
 .hover-glow {

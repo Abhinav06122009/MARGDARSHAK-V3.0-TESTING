@@ -44,24 +44,30 @@ export const initConsoleGuard = () => {
   const blockConsole = () => {
     if (isDebug) return;
 
-    // 1. Infinite Debugger Trap: Crashes/Freezes the debugger if opened
+    // 1. Heavy Debugger Trap: Multi-threaded infinite loops to freeze the console
     const trap = () => {
       try {
-        (function() {
-          (function a() {
-            debugger;
-            a();
-          }());
-        }());
+        const x = function() {
+          debugger;
+        };
+        const y = function() {
+          x();
+        };
+        setInterval(y, 50); // High frequency trap
       } catch (e) {}
     };
 
-    // 2. Overwrite all methods with empty stubs
+    // 2. Overwrite all methods with empty stubs + track attempts
     const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'group', 'groupCollapsed', 'groupEnd', 'clear', 'time', 'timeEnd', 'count', 'assert'];
     
     const silentConsole: any = {};
     methods.forEach(m => {
-      silentConsole[m] = () => {};
+      silentConsole[m] = () => {
+        // Trigger a strike if they try to call console methods in production
+        if (!isDebug) {
+          window.dispatchEvent(new CustomEvent('security-violation', { detail: { type: 'Console Probe', metadata: { method: m } } }));
+        }
+      };
     });
 
     // 3. Force console object to be immutable
@@ -72,7 +78,6 @@ export const initConsoleGuard = () => {
         configurable: false
       });
     } catch (e) {
-      // Fallback for browsers that don't allow console overwrite
       methods.forEach(m => {
         try {
           Object.defineProperty(console, m, {
@@ -85,22 +90,25 @@ export const initConsoleGuard = () => {
     }
 
     // 4. Start the trap
-    setInterval(trap, 500);
+    trap();
   };
 
   // Run immediately
-  // blockConsole(); // DEACTIVATED FOR DIAGNOSTIC RECORDING
+  blockConsole(); 
 
   const showWarning = () => {
     if (isDebug) {
-      originalLog.call(console, '🛠️ DEBUG MODE ACTIVE: Console Guard Bypassed.');
+      originalLog.call(console, '🛡️ DEBUG MODE ACTIVE: Console Guard Bypassed.');
       return;
     }
-    // We can't log the warning if we've blocked the console, 
-    // so we use the original log one last time before blocking.
+    
+    // Use the original log methods one last time before complete blackout
     originalClear.call(console);
     originalLog.call(console, `%c${warningTitle}`, titleStyle);
     originalLog.call(console, `%c${warningText}`, textStyle);
+    
+    // Add a final "F*** OFF" message for potential attackers
+    originalLog.call(console, '%cACCESS DENIED: All activity is being logged and traced to your IP.', 'color: red; font-weight: bold;');
   };
 
   if (!isDebug) showWarning();

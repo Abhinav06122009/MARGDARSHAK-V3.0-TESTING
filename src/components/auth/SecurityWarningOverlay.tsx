@@ -53,20 +53,20 @@ export const SecurityWarningOverlay = () => {
 
               <div className="flex-1">
                 <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">
-                  SECURITY <span className="text-amber-500">STRIKE 1</span>
+                  UNAUTHORIZED <span className="text-amber-500">PROBE DETECTED</span>
                 </h3>
                 <p className="text-zinc-400 text-sm leading-relaxed mb-4 font-medium">
-                  Unauthorized inspection detected from <span className="text-amber-500 font-bold">{warning.ip}</span>. 
-                  Your activity has been logged in our security forensic database.
+                  Protocol <span className="text-amber-500 font-bold">VSAV_GYANTAPA</span> has flagged your session for unauthorized inspection. 
+                  Your IP <span className="text-white font-bold">{warning.ip}</span> has been logged and assigned <span className="text-amber-500 font-black">STRIKE 1</span>.
                 </p>
                 
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-1">
                     <ShieldAlert className="w-3 h-3 text-red-500" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Warning</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Security Enforcement</span>
                   </div>
                   <p className="text-[11px] font-bold text-red-200 leading-tight">
-                    ANY FURTHER ATTEMPT TO INSPECT OR TAMPER WITH THE CODE WILL RESULT IN AN IMMEDIATE PERMANENT BAN.
+                    THIS IS YOUR ONLY WARNING. A SECOND ATTEMPT WILL TRIGGER A PERMANENT HARDWARE AND IP BAN FROM THIS PLATFORM.
                   </p>
                 </div>
               </div>

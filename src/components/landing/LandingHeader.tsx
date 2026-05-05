@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useSound } from './SoundContext';
 import { MagneticButton } from './MagneticButton';
 import logo from '@/components/logo/logo.png';
@@ -13,6 +14,7 @@ export const LandingHeader: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { soundEnabled, toggleSound, playSound } = useSound();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,7 +37,8 @@ export const LandingHeader: React.FC = () => {
 
   const handleLinkClick = (id: string, path?: string) => {
     if (path) {
-      window.location.href = path;
+      navigate(path);
+      setIsMobileMenuOpen(false);
       return;
     }
     const element = document.getElementById(id);
@@ -45,7 +48,6 @@ export const LandingHeader: React.FC = () => {
     setIsMobileMenuOpen(false);
     playSound('click');
   };
-
 
   return (
     <motion.nav
@@ -104,13 +106,13 @@ export const LandingHeader: React.FC = () => {
             {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
           <MagneticButton>
-            <a
-              href="/auth"
+            <button
+              onClick={() => navigate('/auth')}
               className="bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 group relative overflow-hidden flex items-center justify-center min-w-[160px]"
             >
               <span className="relative z-10">Get Started</span>
               <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
+            </button>
           </MagneticButton>
         </div>
 
@@ -149,12 +151,12 @@ export const LandingHeader: React.FC = () => {
                 </li>
               ))}
               <li className="pt-4">
-                <a
-                  href="/auth"
+                <button
+                  onClick={() => navigate('/auth')}
                   className="block w-full text-center bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-bold py-3 rounded-xl"
                 >
                   Launch Console
-                </a>
+                </button>
               </li>
             </ul>
           </motion.div>

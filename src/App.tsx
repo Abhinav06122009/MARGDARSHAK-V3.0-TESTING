@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, lazy, Suspense } from 'react';
 import * as Sentry from "@sentry/react";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
@@ -127,6 +127,24 @@ import GlobalFooter from '@/components/layout/GlobalFooter';
 
 const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
   const { isBlocked, blockedReason } = useContext(AuthContext);
+  const [isPermanentlyBanned, setIsPermanentlyBanned] = useState(false);
+  const [banReason, setBanReason] = useState('');
+
+  useEffect(() => {
+    const handleBan = (e: any) => {
+      setIsPermanentlyBanned(true);
+      setBanReason(e.detail?.type || 'Security Policy Violation');
+      // Force immediate session storage lock
+      sessionStorage.setItem('mg_session_locked', 'true');
+    };
+
+    if (sessionStorage.getItem('mg_session_locked') === 'true') {
+      setIsPermanentlyBanned(true);
+    }
+
+    window.addEventListener('security-ban', handleBan);
+    return () => window.removeEventListener('security-ban', handleBan);
+  }, []);
   
   // WHITE-LIST GOOGLE BOTS FROM GLOBAL BLOCK
   const isGoogleBot = () => {
@@ -139,6 +157,22 @@ const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
       ua.includes('adsense')
     );
   };
+
+  if (isPermanentlyBanned && !isGoogleBot()) {
+    return (
+      <div className="fixed inset-0 z-[99999999] bg-black flex flex-center items-center justify-center p-12 text-center">
+        <div className="max-w-2xl">
+          <h1 className="text-6xl font-black text-red-600 italic uppercase mb-6">Access Terminated</h1>
+          <p className="text-zinc-500 font-bold tracking-widest mb-8">VIOLATION DETECTED: {banReason}</p>
+          <div className="h-px w-full bg-red-900/50 mb-8" />
+          <p className="text-zinc-400 text-sm mb-12">Your IP address and hardware fingerprint have been blacklisted. Any further attempts to access this platform will be reported to network authorities.</p>
+          <div className="inline-block p-4 border border-red-600/30 rounded-xl bg-red-600/5">
+             <p className="text-red-500 font-black text-xs uppercase tracking-widest">Protocol: BRAND_VSAV_GYANTAPA_LOCKDOWN</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isBlocked && !isGoogleBot()) {
     return (
@@ -202,7 +236,6 @@ const AppContent = () => {
               <AIProvider>
                 <div className="bg-[#050505] min-h-screen text-white">
                   <GlobalSecurityGuard>
-                    <RankEntryOverlay />
                     <NavigationTracker />
                     <SecurityWarningOverlay />
                     <AnimatePresence mode="wait">
@@ -399,14 +432,16 @@ const App = () => {
     }
   }, []);
 
+  const Router = (window as any).Capacitor ? HashRouter : BrowserRouter;
+
   return (
     <HelmetProvider>
       <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
         <QueryClientProvider client={queryClient}>
         <CursorProvider>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AppContent />
-          </BrowserRouter>
+          </Router>
         </CursorProvider>
         </QueryClientProvider>
       </Sentry.ErrorBoundary>

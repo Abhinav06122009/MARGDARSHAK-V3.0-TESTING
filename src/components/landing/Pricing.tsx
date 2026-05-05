@@ -4,6 +4,8 @@ import { SectionWrapper, SectionHeader } from './Section';
 import { TiltCard } from './TiltCard';
 import { MagneticButton } from './MagneticButton';
 
+import { useNavigate } from 'react-router-dom';
+
 interface PricingProps {
   onPlanClick?: (planName: string) => void;
 }
@@ -13,6 +15,7 @@ interface PricingProps {
  * Uses TiltCards for a dynamic selection experience.
  */
 export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
+  const navigate = useNavigate();
   const plans = [
     {
       name: 'Explorer',
@@ -93,16 +96,18 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
                 ))}
               </ul>
               <MagneticButton className="w-full">
-                <a
-                  href="/auth"
-                  onClick={() => onPlanClick?.(plan.name)}
+                <button
+                  onClick={() => {
+                    onPlanClick?.(plan.name);
+                    navigate('/auth');
+                  }}
                   className={`w-full inline-block text-center font-bold py-3 px-8 rounded-xl text-lg transition-all duration-300 ${plan.popular
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-blue-600/20 hover:bg-blue-600/40 text-blue-300'
                     }`}
                 >
                   Get Started
-                </a>
+                </button>
               </MagneticButton>
             </TiltCard>
           ))}
@@ -115,35 +120,38 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanClick }) => {
 /**
  * Final Call to Action section.
  */
-export const CTA: React.FC = () => (
-  <SectionWrapper id="cta" className="bg-gradient-to-br from-gray-950 to-blue-900/10 border-t border-blue-600/30">
-    <div className="max-w-4xl mx-auto text-center">
-      <h2 className="text-5xl font-bold mb-4 text-white">
-        Ready to Achieve Your Best?
-      </h2>
-      <p className="text-xl text-gray-300 mb-10">
-        Join thousands of students who are using MARGDARSHAK to master their studies.
-      </p>
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-        <MagneticButton>
-          <a
-            href="/auth"
-            className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl shadow-blue-500/40 transition-all duration-300 group"
-          >
-            Get Started for Free
-            <Rocket className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-          </a>
-        </MagneticButton>
-        <MagneticButton>
-          <a
-            href="/blog"
-            className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-4 px-12 rounded-full text-lg transition-all duration-300"
-          >
-            Read Our Blog
-          </a>
-        </MagneticButton>
-      </div>
+export const CTA: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <SectionWrapper id="cta" className="bg-gradient-to-br from-gray-950 to-blue-900/10 border-t border-blue-600/30">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-5xl font-bold mb-4 text-white">
+          Ready to Achieve Your Best?
+        </h2>
+        <p className="text-xl text-gray-300 mb-10">
+          Join thousands of students who are using MARGDARSHAK to master their studies.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <MagneticButton>
+            <button
+              onClick={() => navigate('/auth')}
+              className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl shadow-blue-500/40 transition-all duration-300 group"
+            >
+              Get Started for Free
+              <Rocket className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+            </button>
+          </MagneticButton>
+          <MagneticButton>
+            <button
+              onClick={() => navigate('/blog')}
+              className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-4 px-12 rounded-full text-lg transition-all duration-300"
+            >
+              Read Our Blog
+            </button>
+          </MagneticButton>
+        </div>
 
-    </div>
-  </SectionWrapper>
-);
+      </div>
+    </SectionWrapper>
+  );
+};
