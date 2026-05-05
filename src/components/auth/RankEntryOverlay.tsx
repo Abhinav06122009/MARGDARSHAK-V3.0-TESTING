@@ -255,16 +255,17 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           </div>
 
           <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
             {isScanning ? (
               <motion.div
                 key="scanning"
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                className="relative z-[10] flex flex-col items-center gap-6 sm:gap-12 w-full px-4"
+                exit={{ opacity: 0, scale: 1.05, filter: 'blur(20px)' }}
+                className="relative z-[10] flex flex-col items-center justify-center gap-8 w-full max-w-md px-6"
               >
                 {/* Biometric Circle - Responsive */}
-                <div className="relative w-[65vw] h-[65vw] max-w-[320px] max-h-[320px] flex items-center justify-center">
+                <div className="relative w-64 h-64 flex items-center justify-center">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
@@ -273,7 +274,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                   <motion.div
                     animate={{ rotate: -360 }}
                     transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                    className="absolute inset-4 sm:inset-6 border border-emerald-500/10 border-dashed rounded-full"
+                    className="absolute inset-6 border border-emerald-500/10 border-dashed rounded-full"
                   />
                   
                   {/* Fingerprint / Scanner */}
@@ -282,7 +283,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                     transition={{ repeat: Infinity, duration: 2 }}
                     className="relative z-10 text-emerald-500"
                   >
-                    <Fingerprint className="w-[12vw] h-[12vw] sm:size-[100px]" strokeWidth={1} />
+                    <Fingerprint className="size-20" strokeWidth={1} />
                   </motion.div>
 
                   {/* Scan Line */}
@@ -294,21 +295,21 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 </div>
 
                 {/* Status Readouts */}
-                <div className="text-center space-y-4 sm:space-y-6">
+                <div className="text-center space-y-4">
                   <div className="flex flex-col gap-1">
                     <motion.p
                       key={scanStep}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-emerald-400 font-mono text-[10px] sm:text-sm tracking-[0.4em] font-black uppercase"
+                      className="text-emerald-400 font-mono text-xs sm:text-sm tracking-[0.4em] font-black uppercase"
                     >
                       {scanLabels[scanStep]}
                     </motion.p>
-                    <span className="text-white/20 font-mono text-[6px] sm:text-[8px] tracking-[1em] uppercase">SYSTEM_ENCRYPTION_V4.0</span>
+                    <span className="text-white/20 font-mono text-[8px] tracking-[1em] uppercase">SYSTEM_ENCRYPTION_V4.0</span>
                   </div>
-                  <div className="flex gap-1 sm:gap-2 justify-center">
+                  <div className="flex gap-2 justify-center">
                     {[0, 1, 2, 3].map((s) => (
-                      <div key={s} className="h-1 w-8 sm:w-12 rounded-full overflow-hidden bg-zinc-900 border border-white/5">
+                      <div key={s} className="h-1 w-10 rounded-full overflow-hidden bg-zinc-900 border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: s <= scanStep ? '100%' : '0%' }}
@@ -323,15 +324,15 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               <motion.div
                 key="rank-reveal"
                 style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
-                initial={{ opacity: 0, scale: 0.5, rotateX: 30 }}
-                animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                className="relative z-[10] group w-[92vw] sm:w-[90vw] max-w-[500px]"
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="relative z-[10] group w-[90vw] max-w-[440px] flex flex-col items-center justify-center"
               >
                 {/* DYNAMIC AMBIENT SHADOW */}
-                <div className={`absolute -inset-16 sm:-inset-32 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none transition-all duration-1000`} />
+                <div className={`absolute -inset-24 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[100px] pointer-events-none transition-all duration-1000`} />
 
                 {/* THE HIGH-COMMAND ASSET */}
-                <div className={`relative w-full aspect-[1/1.55] sm:aspect-[1/1.45] max-h-[85vh] bg-[#050505] rounded-[2.5rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-6 sm:p-14 shadow-2xl backdrop-blur-3xl`}>
+                <div className={`relative w-full h-auto min-h-[580px] max-h-[82vh] bg-[#050505] rounded-[3rem] sm:rounded-[4rem] border-2 ${rankInfo.style.border} overflow-hidden flex flex-col p-8 sm:p-12 shadow-2xl backdrop-blur-3xl`}>
                   
                   {/* HOLOGRAPHIC SHIMMER & GLARE */}
                   <motion.div
