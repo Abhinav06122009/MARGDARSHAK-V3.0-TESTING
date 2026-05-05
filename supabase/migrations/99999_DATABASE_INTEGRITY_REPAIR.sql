@@ -35,24 +35,33 @@ END;
 $$;
 
 DROP FUNCTION IF EXISTS public.requesting_user_id() CASCADE;
+-- 2. IDENTITY GATEWAYS
+-- Standard version for RLS policies (Returns TEXT)
+-- This MUST return TEXT to avoid breaking string-based RLS policies (clerk_id = sub)
 CREATE OR REPLACE FUNCTION public.requesting_user_id()
+RETURNS TEXT AS $$
+BEGIN
+    RETURN (current_setting('request.jwt.claims', true)::jsonb ->> 'sub');
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN NULL;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- Salted UUID version for Audit Logs & Foreign Keys
+-- Translates the raw Clerk string to a deterministic UUID
+CREATE OR REPLACE FUNCTION public.requesting_user_id_uuid()
 RETURNS UUID AS $$
 DECLARE
     v_raw_id TEXT;
 BEGIN
-    -- Extract the 'sub' from the JWT claim
-    v_raw_id := (current_setting('request.jwt.claims', true)::jsonb ->> 'sub');
+    v_raw_id := public.requesting_user_id();
+    IF v_raw_id IS NULL THEN RETURN NULL; END IF;
     
-    IF v_raw_id IS NULL THEN
-        RETURN NULL;
-    END IF;
-
-    -- If it's already a valid UUID, return it
     IF v_raw_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
         RETURN v_raw_id::UUID;
     END IF;
-
-    -- Otherwise, translate it using the deterministic salt protocol
+    
     RETURN public.translate_clerk_id_to_uuid(v_raw_id)::UUID;
 EXCEPTION
     WHEN OTHERS THEN
@@ -121,6 +130,16 @@ END $$;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 
+-- Baseline: Self-Access
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+CREATE POLICY "Users can view own profile" ON public.profiles
+FOR SELECT USING (clerk_id = public.requesting_user_id());
+
+DROP POLICY IF EXISTS "Users can view own tickets" ON public.support_tickets;
+CREATE POLICY "Users can view own tickets" ON public.support_tickets
+FOR SELECT USING (user_id::text = public.requesting_user_id() OR user_id::text = public.requesting_user_id_uuid()::text);
+
+-- High-Command: Admin Override
 DROP POLICY IF EXISTS "Admins can manage support tickets" ON public.support_tickets;
 CREATE POLICY "Admins can manage support tickets" ON public.support_tickets 
-FOR ALL USING (public.is_admin_staff(nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')));
+FOR ALL USING (public.is_admin_staff(public.requesting_user_id()));

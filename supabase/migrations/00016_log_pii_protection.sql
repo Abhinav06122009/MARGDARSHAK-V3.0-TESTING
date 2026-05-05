@@ -22,24 +22,28 @@ BEGIN
         v_new_data := v_new_data - v_col;
     END LOOP;
 
-    INSERT INTO public.security_logs (
-        user_id,
-        event_type,
-        risk_level,
-        summary,
-        metadata
-    ) VALUES (
-        public.requesting_user_id(),
-        'DATA_MUTATION',
-        'low',
-        format('User modified table %s (ID: %s)', TG_TABLE_NAME, OLD.id),
-        jsonb_build_object(
-            'table', TG_TABLE_NAME,
-            'operation', TG_OP,
-            'old_data_scrubbed', v_old_data,
-            'new_data_scrubbed', v_new_data
-        )
-    );
+    BEGIN
+        INSERT INTO public.security_logs (
+            user_id,
+            event_type,
+            risk_level,
+            summary,
+            metadata
+        ) VALUES (
+            public.requesting_user_id_uuid(),
+            'DATA_MUTATION',
+            'low',
+            format('User modified table %s (ID: %s)', TG_TABLE_NAME, OLD.id),
+            jsonb_build_object(
+                'table', TG_TABLE_NAME,
+                'operation', TG_OP,
+                'old_data_scrubbed', v_old_data,
+                'new_data_scrubbed', v_new_data
+            )
+        );
+    EXCEPTION WHEN OTHERS THEN
+        NULL;
+    END;
     RETURN NEW;
 END;
 $$;

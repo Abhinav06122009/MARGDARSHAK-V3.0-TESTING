@@ -21,9 +21,9 @@ SET search_path = public
 AS $$
 DECLARE
     v_role text;
-    v_user_id text;
+    v_user_id UUID;
 BEGIN
-    v_user_id := public.requesting_user_id();
+    v_user_id := public.requesting_user_id_uuid();
     IF v_user_id IS NULL THEN
         RETURN 'guest';
     END IF;
@@ -45,24 +45,28 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-    INSERT INTO public.security_logs (
-        user_id,
-        event_type,
-        risk_level,
-        summary,
-        metadata
-    ) VALUES (
-        public.requesting_user_id(),
-        'DATA_MUTATION',
-        'low',
-        format('User modified table %s (ID: %s)', TG_TABLE_NAME, OLD.id),
-        jsonb_build_object(
-            'table', TG_TABLE_NAME,
-            'operation', TG_OP,
-            'old_data', to_jsonb(OLD) - 'email' - 'full_name' - 'phone_number',
-            'new_data', to_jsonb(NEW) - 'email' - 'full_name' - 'phone_number'
-        )
-    );
+    BEGIN
+        INSERT INTO public.security_logs (
+            user_id,
+            event_type,
+            risk_level,
+            summary,
+            metadata
+        ) VALUES (
+            public.requesting_user_id_uuid(),
+            'DATA_MUTATION',
+            'low',
+            format('User modified table %s (ID: %s)', TG_TABLE_NAME, OLD.id),
+            jsonb_build_object(
+                'table', TG_TABLE_NAME,
+                'operation', TG_OP,
+                'old_data', to_jsonb(OLD) - 'email' - 'full_name' - 'phone_number',
+                'new_data', to_jsonb(NEW) - 'email' - 'full_name' - 'phone_number'
+            )
+        );
+    EXCEPTION WHEN OTHERS THEN
+        NULL;
+    END;
     RETURN NEW;
 END;
 $$;
