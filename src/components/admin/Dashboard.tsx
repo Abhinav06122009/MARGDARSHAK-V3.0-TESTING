@@ -453,19 +453,19 @@ const secureDataHelpers = {
     }).length : 0;
 
     // Completion rate
-    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    const completionRate = (totalTasks as number) > 0 ? ((completedTasks as number) / (totalTasks as number)) * 100 : 0;
 
     // Productivity score with fallback calculation
-    const onTimeCompletionRate = completedTasks > 0 && Array.isArray(tasks)
+    const onTimeCompletionRate = (completedTasks as number) > 0 && Array.isArray(tasks)
       ? tasks.filter((t: any) => 
           t.status === 'completed' && 
           t.due_date && 
           t.updated_at && 
           new Date(t.updated_at) <= new Date(t.due_date)
-        ).length / completedTasks * 100 
+        ).length / (completedTasks as number) * 100 
       : 0;
 
-    const studyConsistency = Math.min(studyStreak * 10, 100); // Max 100 for 10+ day streak
+    const studyConsistency = Math.min((studyStreak as number) * 10, 100); // Max 100 for 10+ day streak
     const productivityScore = Math.round(
       (completionRate * 0.4 + onTimeCompletionRate * 0.3 + studyConsistency * 0.3)
     );
@@ -565,12 +565,12 @@ const secureDataHelpers = {
         return acc;
       }, {}) : {};
 
-      const totalMinutes = Object.values(subjectData).reduce((sum: number, data: any) => sum + data.minutes, 0);
+      const totalMinutes = Object.values(subjectData).reduce((sum: number, data: any) => sum + (data.minutes || 0), 0) as number;
       const subjectBreakdown = Object.keys(subjectData).map(subject => ({
         subject,
-        minutes: subjectData[subject].minutes,
-        sessions: subjectData[subject].sessions,
-        percentage: totalMinutes > 0 ? (subjectData[subject].minutes / totalMinutes) * 100 : 0
+        minutes: subjectData[subject].minutes as number,
+        sessions: subjectData[subject].sessions as number,
+        percentage: totalMinutes > 0 ? ((subjectData[subject].minutes as number) / totalMinutes) * 100 : 0
       }));
 
       // Session types with safety
@@ -862,11 +862,18 @@ const useDashboardData = () => {
   const maxRetries = 3;
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
+  const currentUserRef = useRef<SecureUser | null>(null);
+
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
   const handleSecureTaskUpdate = useCallback((data: any) => {
     const { eventType, new: newData, old: oldData } = data;
     
-    if (newData && newData.user_id !== currentUser?.id) return;
-    if (oldData && oldData.user_id !== currentUser?.id) return;
+    const currUser = currentUserRef.current;
+    if (newData && newData.user_id !== currUser?.id) return;
+    if (oldData && oldData.user_id !== currUser?.id) return;
     
     setRecentTasks(prev => {
       let updated = [...prev];
@@ -900,11 +907,12 @@ const useDashboardData = () => {
         className: "bg-gray-900/50 backdrop-blur-md border border-emerald-500/60 shadow-lg rounded-xl p-4 text-emerald-300 font-semibold"
       });
     }
-  }, [toast, currentUser]);
+  }, [toast]);
 
   const handleSecureSessionUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (newData && newData.user_id !== currentUser?.id) return;
+    const currUser = currentUserRef.current;
+    if (newData && newData.user_id !== currUser?.id) return;
     if (eventType === 'INSERT' && newData) {
       setRecentSessions(prev => [newData, ...prev].slice(0, 10));
       toast({
@@ -913,11 +921,12 @@ const useDashboardData = () => {
         className: "bg-gray-900/50 backdrop-blur-md border border-blue-500/60 shadow-lg rounded-xl p-4 text-blue-300 font-semibold",
       });
     }
-  }, [toast, currentUser]);
+  }, [toast]);
 
   const handleSecureGradeUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (newData && newData.user_id !== currentUser?.id) return;
+    const currUser = currentUserRef.current;
+    if (newData && newData.user_id !== currUser?.id) return;
     if (eventType === 'INSERT' && newData) {
       setRecentGrades(prev => [newData, ...prev].slice(0, 10));
       toast({
@@ -930,15 +939,16 @@ const useDashboardData = () => {
         }`,
       });
     }
-  }, [toast, currentUser]);
+  }, [toast]);
 
   const handleSecureNoteUpdate = useCallback((data: any) => {
     const { eventType, new: newData } = data;
-    if (newData && newData.user_id !== currentUser?.id) return;
+    const currUser = currentUserRef.current;
+    if (newData && newData.user_id !== currUser?.id) return;
     if (eventType === 'INSERT' && newData) {
       setRecentNotes(prev => [newData, ...prev].slice(0, 10));
     }
-  }, [currentUser]);
+  }, []);
 
   const initializeDashboard = useCallback(async () => {
     try {
@@ -1038,7 +1048,8 @@ const useDashboardData = () => {
       window.removeEventListener('online', handleOnlineStatus);
       window.removeEventListener('offline', handleOfflineStatus);
     };
-  }, [initializeDashboard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -1173,14 +1184,14 @@ const useMousePosition = () => {
   return { x, y };
 };
 
-const useDebounce = <T>(value: T, delay: number): T => {
+function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedValue(value), delay);
     return () => clearTimeout(handler);
   }, [value, delay]);
   return debouncedValue;
-};
+}
 
 // Modern "Aurora" background component for 2026
 const AuroraBackground = () => {
@@ -1486,6 +1497,244 @@ const TaskItem: React.FC<TaskItemProps> = React.memo(({
   );
 });
 
+// --- MODULAR DASHBOARD COMPONENTS FOR 2026 ---
+
+const DashboardHeader = React.memo(({ 
+  logo, refreshing, isOnline, currentUser, handleRefresh, handleExportData, toast 
+}: { 
+  logo: string, refreshing: boolean, isOnline: boolean, currentUser: SecureUser, 
+  handleRefresh: () => void, handleExportData: (type: 'csv' | 'json') => void, toast: any 
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: -30 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex items-center justify-between mb-8"
+  >
+    <div className="flex items-center space-x-6">
+      <motion.div className="relative" whileHover={{ scale: 1.05 }}>
+        <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl shadow-lg flex items-center justify-center">
+          <img src={logo} alt="Logo" className="h-12 object-contain" draggable={false} />
+        </div>
+      </motion.div>
+
+      <div className="flex items-center space-x-4">
+        <MagneticButton
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="p-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-200 disabled:opacity-50 shadow-soft-light active:shadow-inner-soft hover:border-emerald-400/50"
+          title="Refresh Data"
+        >
+          <RefreshCw className={`w-5 h-5 text-emerald-400 ${refreshing ? 'animate-spin' : ''}`} />
+        </MagneticButton>
+
+        <div className="flex items-center space-x-2">
+          {isOnline ? <Wifi className="w-4 h-4 text-emerald-400" /> : <WifiOff className="w-4 h-4 text-red-400" />}
+          <span className={`text-sm font-medium ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
+            {isOnline ? 'Live Sync' : 'Offline'}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex items-center space-x-4">
+      <div className="relative group">
+        <MagneticButton className="p-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-200 shadow-soft-light active:shadow-inner-soft hover:border-blue-400/50">
+          <Download className="w-5 h-5 text-blue-400" />
+        </MagneticButton>
+        <div className="absolute right-0 top-full mt-2 w-48 bg-black/50 backdrop-blur-xl rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-2xl">
+          <div className="p-2">
+            <button onClick={() => handleExportData('json')} className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg transition-colors">Export JSON</button>
+          </div>
+        </div>
+      </div>
+
+      <motion.div className="flex items-center space-x-4 bg-black/20 backdrop-blur-sm rounded-2xl px-6 py-3 border border-emerald-400/30 shadow-soft-light" whileHover={{ scale: 1.03, y: -2 }}>
+        <div className="relative">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+            <UserIcon className="w-6 h-6 text-white" />
+          </div>
+          <motion.div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black/50" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+        </div>
+        <div>
+          <div className="text-white font-semibold text-sm">{currentUser.profile?.full_name || "User"}</div>
+          <div className="text-emerald-400 text-xs font-bold uppercase flex items-center gap-1"><Shield className="w-3 h-3" /> SECURE • {currentUser.profile?.user_type || "STUDENT"}</div>
+        </div>
+      </motion.div>
+
+      <motion.button
+        onClick={async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) toast({ title: "Logout Failed", variant: "destructive" });
+        }}
+        className="p-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl text-red-400 transition-all duration-300 shadow-soft-light active:shadow-inner-soft hover:border-red-500/50 hover:text-red-300"
+        whileHover={{ scale: 1.1 }}
+      >
+        <LogOut className="w-6 h-6" />
+      </motion.button>
+    </div>
+  </motion.div>
+));
+
+const DashboardTitle = React.memo(({ stats }: { stats: RealDashboardStats }) => (
+  <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-12">
+    <div className="flex-1">
+      <motion.div className="flex items-center gap-4 mb-4" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+        <h1 className="text-xl font-medium text-white/80 uppercase tracking-wider">YOUR LIVE DASHBOARD</h1>
+        <motion.div animate={{ rotate: [0, 360], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}><Shield className="w-6 h-6 text-emerald-400" /></motion.div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-400/30">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+          <span className="text-emerald-400 text-xs font-bold">LIVE SYNC</span>
+        </div>
+      </motion.div>
+      <motion.h2 className="text-6xl font-black mb-4 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>DASHBOARD</motion.h2>
+      <motion.p className="text-white/70 text-xl" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+        YOUR DATA: <span className="text-blue-400 font-semibold">{stats.totalTasks} tasks</span>, 
+        <span className="text-purple-400 font-semibold"> {stats.totalCourses} courses</span>, and
+        <span className="text-emerald-400 font-semibold"> {stats.totalStudySessions} study sessions</span>
+      </motion.p>
+    </div>
+  </motion.div>
+));
+
+const StatisticsGrid = React.memo(({ stats, formatTime }: { stats: RealDashboardStats, formatTime: (m: number) => string }) => (
+  <motion.div
+    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } }}
+    initial="hidden" animate="show"
+    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12"
+  >
+    {[
+      { label: 'Total Tasks', value: stats.totalTasks.toString(), icon: CheckSquare, color: 'from-blue-500 to-cyan-600', subtitle: `${stats.completedTasks} completed` },
+      { label: 'Study Streak', value: `${stats.studyStreak} days`, icon: Flame, color: 'from-orange-500 to-red-600', subtitle: 'consecutive days' },
+      { label: 'Today\'s Study', value: formatTime(stats.todayStudyTime), icon: ClockIcon, color: 'from-green-500 to-emerald-600', subtitle: 'minutes today' },
+      { label: 'Productivity', value: `${stats.productivityScore}%`, icon: TrendingUp, color: 'from-purple-500 to-pink-600', subtitle: 'completion rate' },
+      { label: 'Active Courses', value: stats.activeCourses.toString(), icon: GraduationCap, color: 'from-indigo-500 to-purple-600', subtitle: `of ${stats.totalCourses} total` },
+      { label: 'Average Grade', value: stats.totalGrades > 0 ? `${stats.averageGrade}%` : 'N/A', icon: Trophy, color: 'from-yellow-500 to-orange-600', subtitle: `from ${stats.totalGrades} grades` }
+    ].map((stat, index) => (
+      <TiltCard key={stat.label} className="w-full h-full">
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 50 }, show: { opacity: 1, y: 0 } }}
+          className="bg-black/20 backdrop-blur-md p-6 rounded-3xl border border-white/10 transition-all duration-300 group relative overflow-hidden shadow-soft-light hover:border-white/20 h-full"
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          <div className="relative z-10" style={{ transform: 'translateZ(20px)' }}>
+            <motion.div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg mb-4`} transition={{ duration: 0.6, type: "spring" }}><stat.icon className="w-6 h-6 text-white" /></motion.div>
+            <motion.div className="text-2xl font-bold text-white mb-1" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + index * 0.05, type: "spring" }}>{stat.value}</motion.div>
+            <div className="text-white/70 text-sm font-medium">{stat.label}</div>
+            {stat.subtitle && <div className="text-white/50 text-xs mt-1">{stat.subtitle}</div>}
+          </div>
+          <GlareEffect />
+        </motion.div>
+      </TiltCard>
+    ))}
+  </motion.div>
+));
+
+const TasksPanel = React.memo(({ 
+  filteredTasks, selectedTasks, handleBulkAction, handleRefresh, refreshing, currentUser, searchTerm, setSearchTerm, taskFilter, setTaskFilter, sortBy, setSortBy, taskStats, handleTaskStatusUpdate, handleDeleteTask, getPriorityClasses, getStatusBorderColor, formatDate, toast, onNavigate 
+}: any) => (
+  <motion.div className="lg:col-span-2 bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+        <CheckSquare className="w-7 h-7 text-emerald-400" />
+        Your Tasks <span className="text-lg text-white/60">({filteredTasks.length})</span>
+      </h3>
+      <div className="flex items-center space-x-2">
+        {selectedTasks.length > 0 && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center space-x-2">
+            <span className="text-sm text-white/60">{selectedTasks.length} selected</span>
+            <button onClick={() => handleBulkAction('complete')} className="p-2 bg-black/20 text-emerald-400 rounded-lg border border-white/10 hover:bg-emerald-500/20"><CheckSquare className="w-4 h-4" /></button>
+            <button onClick={() => handleBulkAction('delete')} className="p-2 bg-black/20 text-red-400 rounded-lg border border-white/10 hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></button>
+          </motion.div>
+        )}
+        <button onClick={async () => {
+          if (!currentUser) return;
+          try {
+            await secureDataHelpers.createQuickTask(currentUser.id);
+            toast({ title: "Task Created ✅", className: "bg-gray-900/50 backdrop-blur-md border border-emerald-500/60 shadow-lg rounded-xl p-4 text-emerald-300 font-semibold" });
+          } catch (e) { toast({ title: "Failed", variant: "destructive" }); }
+        }} className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30"><Plus className="w-5 h-5" /></button>
+      </div>
+    </div>
+
+    <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div className="relative flex-1 min-w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+        <input type="text" placeholder="Search tasks..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/50" />
+      </div>
+      <select value={taskFilter} onChange={(e) => setTaskFilter(e.target.value as any)} className="pl-4 pr-10 py-3 bg-black/20 border border-white/10 rounded-xl text-white appearance-none"><option value="all">All</option><option value="pending">Pending</option><option value="completed">Completed</option></select>
+    </div>
+
+    <div className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
+      <AnimatePresence>
+        {filteredTasks.slice(0, 10).map((task: any) => (
+          <TaskItem key={task.id} task={task} isSelected={selectedTasks.includes(task.id)} onSelect={(id) => onNavigate('task-select', id)} onStatusUpdate={handleTaskStatusUpdate} onDelete={handleDeleteTask} getPriorityClasses={getPriorityClasses} getStatusBorderColor={getStatusBorderColor} formatDate={formatDate} />
+        ))}
+      </AnimatePresence>
+    </div>
+  </motion.div>
+));
+
+const AnalyticsPanel = React.memo(({ analytics, formatTime }: any) => (
+  <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
+    <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3"><BarChart3 className="w-7 h-7 text-purple-400" /> Analytics</h3>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="bg-black/20 rounded-xl p-4 border border-white/10 flex items-center justify-between"><div><h4 className="text-white font-semibold">Incomplete</h4><p className="text-2xl font-bold text-red-400">{analytics.incompleteTasksCount}</p></div><AlertCircle className="w-8 h-8 text-red-400" /></div>
+        <div className="bg-black/20 rounded-xl p-4 border border-white/10 flex items-center justify-between"><div><h4 className="text-white font-semibold">Top Grade</h4><p className="text-2xl font-bold text-emerald-400">{analytics.topGrades[0]?.percentage || 'N/A'}%</p></div><Trophy className="w-8 h-8 text-emerald-400" /></div>
+      </div>
+      <div>
+        <h4 className="text-white font-semibold mb-4">Study (7 Days)</h4>
+        <div className="space-y-2">
+          {analytics.dailyStudyTime.slice(-7).map((day: any) => (
+            <div key={day.date} className="flex items-center gap-3">
+              <div className="text-xs text-white/60 w-12">{new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}</div>
+              <div className="flex-1 bg-black/30 rounded-full h-3 overflow-hidden"><motion.div className="h-full bg-emerald-500" initial={{ width: 0 }} animate={{ width: `${(day.minutes / 240) * 100}%` }} /></div>
+              <div className="text-xs text-white/70 w-16 text-right">{formatTime(day.minutes)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </motion.div>
+));
+
+const QuickActionsGrid = React.memo(({ stats, onNavigate }: any) => (
+  <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+    {[
+      { page: 'timetable', icon: CalendarIcon, title: 'Schedule', desc: `${stats.upcomingClasses} upcoming`, color: 'from-indigo-500 to-purple-600', count: stats.totalClassesCount },
+      { page: 'notes', icon: BookOpen, title: 'Notes', desc: `${stats.totalNotes} notes`, color: 'from-emerald-500 to-teal-600', count: stats.totalNotes },
+      { page: 'courses', icon: GraduationCap, title: 'Courses', desc: `${stats.activeCourses} active`, color: 'from-blue-500 to-cyan-600', count: stats.activeCourses },
+      { page: 'calculator', icon: CalculatorIcon, title: 'Tools', desc: 'Study Tools', color: 'from-orange-500 to-red-600', count: null }
+    ].map((item: any) => (
+      <TiltCard key={item.page} className="w-full h-full">
+        <motion.button onClick={() => onNavigate(item.page)} className="w-full h-full bg-black/20 backdrop-blur-md p-8 rounded-3xl text-left border border-white/10 group relative overflow-hidden shadow-soft-light hover:border-emerald-400/50">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6"><div className="p-5 rounded-2xl bg-emerald-500/10"><item.icon className="w-8 h-8 text-white" /></div>{item.count !== null && <div className="bg-white/20 rounded-full px-4 py-2 text-sm text-white font-bold">{item.count}</div>}</div>
+            <h3 className="font-bold text-white mb-3 text-xl group-hover:text-emerald-300">{item.title}</h3>
+            <p className="text-white/70">{item.desc}</p>
+          </div>
+          <GlareEffect />
+        </motion.button>
+      </TiltCard>
+    ))}
+  </motion.div>
+));
+
+const DataSummary = React.memo(({ stats }: any) => (
+  <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-emerald-400/20 bg-gradient-to-r from-emerald-900/10 to-blue-900/10 mb-12">
+    <div className="flex items-center gap-4 mb-6">
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}><Shield className="w-8 h-8 text-emerald-400" /></motion.div>
+      <div><h3 className="text-2xl font-bold text-emerald-300">Real-time Node</h3><p className="text-emerald-400/80">Encrypted user-isolated data stream active</p></div>
+    </div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-emerald-200/90">
+      <div className="text-center"><div className="text-2xl font-bold text-emerald-300">{stats.totalTasks}</div><div className="text-sm">Tasks</div></div>
+      <div className="text-center"><div className="text-2xl font-bold text-emerald-300">{stats.totalStudySessions}</div><div className="text-sm">Sessions</div></div>
+      <div className="text-center"><div className="text-2xl font-bold text-emerald-300">{stats.totalGrades}</div><div className="text-sm">Grades</div></div>
+      <div className="text-center"><div className="text-2xl font-bold text-emerald-300">{stats.totalNotes}</div><div className="text-sm">Notes</div></div>
+    </div>
+  </motion.div>
+));
+
 // Main Dashboard Component with Fixed Queries
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const {
@@ -1788,788 +2037,80 @@ toast({
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-gray-300 relative overflow-hidden transition-colors duration-300 [transform-style:preserve-3d]">
-      {/* Advanced Background Effects */}
+    <div className="min-h-screen bg-[#050505] text-gray-300 relative overflow-hidden selection:bg-emerald-500/30 selection:text-white">
       <ParallaxBackground />
+      
+      <div className="relative z-10 p-6" style={{ transform: 'perspective(2000px)' }}>
+        <div className="max-w-7xl mx-auto">
+          <DashboardHeader 
+            logo={logo} refreshing={refreshing} isOnline={isOnline} currentUser={currentUser} 
+            handleRefresh={handleRefresh} handleExportData={handleExportData} toast={toast} 
+          />
 
-      {/* Command Palette */}
+          <DashboardTitle stats={stats} />
+
+          <StatisticsGrid stats={stats} formatTime={formatTime} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <TasksPanel 
+              filteredTasks={filteredTasks} selectedTasks={selectedTasks} handleBulkAction={handleBulkAction}
+              handleRefresh={handleRefresh} refreshing={refreshing} currentUser={currentUser}
+              searchTerm={searchTerm} setSearchTerm={setSearchTerm} taskFilter={taskFilter}
+              setTaskFilter={setTaskFilter} sortBy={sortBy} setSortBy={setSortBy}
+              taskStats={taskStats} handleTaskStatusUpdate={handleTaskStatusUpdate}
+              handleDeleteTask={handleDeleteTask} getPriorityClasses={getPriorityClasses}
+              getStatusBorderColor={getStatusBorderColor} formatDate={formatDate}
+              toast={toast} onNavigate={onNavigate}
+            />
+            <AnalyticsPanel analytics={analytics} formatTime={formatTime} />
+          </div>
+
+          <QuickActionsGrid stats={stats} onNavigate={onNavigate} />
+
+          <DataSummary stats={stats} />
+
+          <footer className="mt-12 py-6 border-t border-white/10 text-sm flex items-center justify-between text-white/70 bg-black/10 backdrop-blur-sm rounded-t-2xl px-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 backdrop-blur-sm p-1 rounded-lg flex items-center justify-center">
+                <img src={logo} alt="Logo" className="h-8 object-contain" draggable={false} />
+              </div>
+              <div>
+                <p className="font-bold text-white tracking-widest uppercase">MARGDARSHAK SECURE</p>
+                <p className="text-[10px] uppercase font-bold text-emerald-400">Quantum Isolation Node • v3.0</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p>© 2026 VSAV GYANTA • UNIVERSAL ACADEMIC PROTOCOL</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-[0.2em]">All Rights Reserved • Secured by Clerk + Supabase</p>
+            </div>
+          </footer>
+        </div>
+      </div>
+
       <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         onNavigate={onNavigate}
         onAction={async (action) => {
           if (action === 'logout') {
-            supabase.auth.signOut();
+            await supabase.auth.signOut();
           } else if (action === 'createTask') {
             await handleCreateQuickTask();
           }
         }}
       />
-      <ConfirmationModal
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ ...modalState, isOpen: false })}
-        onConfirm={modalState.onConfirm}
-        title={modalState.title}
-        message={modalState.message}
-      />
-      <div className="relative z-10 p-6" style={{ transform: 'perspective(2000px)' }}>
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between mb-8"
-          >
-            <div className="flex items-center space-x-6">
-              <motion.div className="relative" whileHover={{ scale: 1.05 }}>
-                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl shadow-lg flex items-center justify-center">
-                  <img
-                    src={logo}
-                    alt="VSAV GyanVedu Logo"
-                    className="h-12 object-contain"
-                    draggable={false}
-                  />
-                </div>
-              </motion.div>
 
-              <div className="flex items-center space-x-4">
-                <MagneticButton
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  className="p-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-200 disabled:opacity-50 shadow-soft-light active:shadow-inner-soft hover:border-emerald-400/50"
-                  title="Refresh Data"
-                >
-                  <RefreshCw className={`w-5 h-5 text-emerald-400 ${refreshing ? 'animate-spin' : ''}`} />
-                </MagneticButton>
-
-                <div className="flex items-center space-x-2">
-                  {isOnline ? (
-                    <Wifi className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <WifiOff className="w-4 h-4 text-red-400" />
-                  )}
-                  <span className={`text-sm font-medium ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {isOnline ? 'Live Sync' : 'Offline'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {/* Export dropdown */}
-              <div className="relative group">
-                <MagneticButton
-                  className="p-3 bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-200 shadow-soft-light active:shadow-inner-soft hover:border-blue-400/50"
-                >
-                  <Download className="w-5 h-5 text-blue-400" />
-                </MagneticButton>
-                
-                <div className="absolute right-0 top-full mt-2 w-48 bg-black/50 backdrop-blur-xl rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-2xl">
-                  <div className="p-2">
-                    <button
-                      onClick={() => handleExportData('json')}
-                      className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                      Export Data as JSON
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* User info */}
-              <motion.div
-                className="flex items-center space-x-4 bg-black/20 backdrop-blur-sm rounded-2xl px-6 py-3 border border-emerald-400/30 shadow-soft-light"
-                whileHover={{ scale: 1.03, y: -2 }}
-              >
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-white" />
-                  </div>
-                  <motion.div
-                    className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black/50"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
-
-                <div>
-                  <div className="text-white font-semibold text-sm">
-                    {currentUser.profile?.full_name || "User"}
-                  </div>
-                  <div className="text-emerald-400 text-xs font-bold uppercase flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    SECURE • {currentUser.profile?.user_type || "STUDENT"}
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.button
-                onClick={async () => {
-                  const { error } = await supabase.auth.signOut();
-                  if (error) {
-                    toast({
-                      title: "Logout Failed",
-                      description: "Failed to logout",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                className="p-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl text-red-400 transition-all duration-300 shadow-soft-light active:shadow-inner-soft hover:border-red-500/50 hover:text-red-300"
-                whileHover={{ scale: 1.1 }}
-              >
-                <LogOut className="w-6 h-6" />
-              </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Title Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between mb-12"
-          >
-            <div className="flex-1">
-              <motion.div
-                className="flex items-center gap-4 mb-4"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h1 className="text-xl font-medium text-white/80 uppercase tracking-wider">
-                  YOUR LIVE DASHBOARD
-                </h1>
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 360],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                >
-                  <Shield className="w-6 h-6 text-emerald-400" />
-                </motion.div>
-                <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-400/30">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <span className="text-emerald-400 text-xs font-bold">LIVE SYNC</span>
-                </div>
-              </motion.div>
-              
-              <motion.h2 
-                className="text-6xl font-black mb-4 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent"
-                initial={{ opacity: 0, x: -50, textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                DASHBOARD
-              </motion.h2>
-              
-              <motion.p 
-                className="text-white/70 text-xl"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                YOUR DATA: <span className="text-blue-400 font-semibold">{stats.totalTasks} tasks</span>, 
-                <span className="text-purple-400 font-semibold"> {stats.totalCourses} courses</span>, and
-                <span className="text-emerald-400 font-semibold"> {stats.totalStudySessions} study sessions</span>
-              </motion.p>
-            </div>
-          </motion.div>
-
-          {/* Statistics Grid */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.07 }
-              }
-            }}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12"
-          >
-            {[
-              { 
-                label: 'Total Tasks', 
-                value: stats.totalTasks.toString(), 
-                icon: CheckSquare, 
-                color: 'from-blue-500 to-cyan-600',
-                subtitle: `${stats.completedTasks} completed`
-              },
-              { 
-                label: 'Study Streak', 
-                value: `${stats.studyStreak} days`, 
-                icon: Flame, 
-                color: 'from-orange-500 to-red-600',
-                subtitle: 'consecutive days'
-              },
-              { 
-                label: 'Today\'s Study', 
-                value: formatTime(stats.todayStudyTime),
-                icon: ClockIcon, 
-                color: 'from-green-500 to-emerald-600',
-                subtitle: 'minutes today'
-              },
-              { 
-                label: 'Productivity', 
-                value: `${stats.productivityScore}%`, 
-                icon: TrendingUp, 
-                color: 'from-purple-500 to-pink-600',
-                subtitle: 'completion rate'
-              },
-              { 
-                label: 'Active Courses', 
-                value: stats.activeCourses.toString(), 
-                icon: GraduationCap, 
-                color: 'from-indigo-500 to-purple-600',
-                subtitle: `of ${stats.totalCourses} total`
-              },
-              { 
-                label: 'Average Grade', 
-                value: stats.totalGrades > 0 ? `${stats.averageGrade}%` : 'N/A', 
-                icon: Trophy, 
-                color: 'from-yellow-500 to-orange-600',
-                subtitle: `from ${stats.totalGrades} grades`
-              }
-            ].map((stat, index) => (
-              <TiltCard
-                key={stat.label}
-                className="w-full h-full"
-              >
-                <motion.div
-                  variants={{ hidden: { opacity: 0, y: 50 }, show: { opacity: 1, y: 0 } }}
-                  className="bg-black/20 backdrop-blur-md p-6 rounded-3xl border border-white/10 transition-all duration-300 group relative overflow-hidden shadow-soft-light hover:border-white/20 h-full"
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  <div className="relative z-10" style={{ transform: 'translateZ(20px)' }}>
-                  <motion.div 
-                    className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-lg mb-4`}
-                    transition={{ duration: 0.6, type: "spring" }}
-                  >
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="text-2xl font-bold text-white mb-1"
-                    initial={{ opacity: 0, scale: 0.5, transform: 'translateZ(0px)' }}
-                    animate={{ opacity: 1, scale: 1, transform: 'translateZ(40px)' }}
-                    transition={{ delay: 0.2 + index * 0.05, type: "spring" }}
-                  >
-                    {stat.value}
-                  </motion.div>
-                  
-                  <div className="text-white/70 text-sm font-medium">{stat.label}</div>
-                  {stat.subtitle && (
-                    <div className="text-white/50 text-xs mt-1">{stat.subtitle}</div>
-                  )}
-                  </div>
-                  <GlareEffect />
-                </motion.div>
-              </TiltCard>
-            ))}
-          </motion.div>
-
-          {/* Main Content Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12"
-          >
-            {/* Tasks Panel */}
-            <motion.div className="lg:col-span-2 bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <CheckSquare className="w-7 h-7 text-emerald-400" />
-                  Your Tasks
-                  <span className="text-lg text-white/60">({filteredTasks.length})</span>
-                </h3>
-                
-                <div className="flex items-center space-x-2">
-                  {selectedTasks.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center space-x-2"
-                    >
-                      <span className="text-sm text-white/60">
-                        {selectedTasks.length} selected
-                      </span>
-                      <button
-                        onClick={() => handleBulkAction('complete')}
-                        className="p-2 bg-black/20 text-emerald-400 rounded-lg hover:bg-emerald-500/20 transition-colors border border-white/10 shadow-soft-light active:shadow-inner-soft"
-                        title="Mark as Complete"
-                      >
-                        <CheckSquare className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleBulkAction('export')}
-                        className="p-2 bg-black/20 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors border border-white/10 shadow-soft-light active:shadow-inner-soft"
-                        title="Export Selected"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleBulkAction('delete')}
-                        className="p-2 bg-black/20 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors border border-white/10 shadow-soft-light active:shadow-inner-soft"
-                        title="Delete Selected"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </motion.div>
-                  )}
-                  
-                  <button
-                    onClick={async () => {
-                      if (!currentUser) return;
-                      try {
-                        await secureDataHelpers.createQuickTask(currentUser.id);
-toast({
-  title: "Task Created ✅",
-  description: "New task added",
-  className: "bg-gray-900/50 backdrop-blur-md border border-emerald-500/60 shadow-lg rounded-xl p-4 text-emerald-300 font-semibold flex items-center space-x-3",
-  icon: <Plus className="w-5 h-5 text-emerald-400" />,
-});
-
-                      } catch (error) {
-                        toast({
-                          title: "Creation Failed",
-                          description: "Failed to create task",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-300 shadow-soft-light active:shadow-inner-soft"
-                    title="Add Task"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Search and filter controls */}
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <div className="relative flex-1 min-w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
-                  <input
-                    type="text"
-                    placeholder="Search your tasks..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-emerald-400/50 transition-colors shadow-inner-soft"
-                  />
-                </div>
-                
-                <div className="relative">
-                  <select
-                    value={taskFilter}
-                    onChange={(e) => setTaskFilter(e.target.value as any)}
-                    className="pl-4 pr-10 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-400/50 transition-colors appearance-none shadow-soft-light active:shadow-inner-soft"
-                  >
-                    <option value="all">All Tasks</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="overdue">Overdue</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 pointer-events-none" />
-                </div>
-                
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="pl-4 pr-10 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-400/50 transition-colors appearance-none shadow-soft-light active:shadow-inner-soft"
-                  >
-                    <option value="date">Sort by Date</option>
-                    <option value="priority">Sort by Priority</option>
-                    <option value="name">Sort by Name</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Task alerts */}
-              {(taskStats.overdueTasks > 0 || taskStats.highPriorityTasks > 0) && (
-                <div className="flex items-center gap-4 mb-6 p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-xl border border-red-400/20">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  <div className="text-sm text-white">
-                    {taskStats.overdueTasks > 0 && (
-                      <span className="text-red-400 font-medium">
-                        {taskStats.overdueTasks} overdue task{taskStats.overdueTasks > 1 ? 's' : ''}
-                      </span>
-                    )}
-                    {taskStats.overdueTasks > 0 && taskStats.highPriorityTasks > 0 && ', '}
-                    {taskStats.highPriorityTasks > 0 && (
-                      <span className="text-orange-400 font-medium">
-                        {taskStats.highPriorityTasks} high priority task{taskStats.highPriorityTasks > 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Tasks List */}
-              <div className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
-                <AnimatePresence>
-                  {filteredTasks.length > 0 ? (
-                    filteredTasks.slice(0, 10).map((task) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        isSelected={selectedTasks.includes(task.id)}
-                        onSelect={() => setSelectedTasks(prev => prev.includes(task.id) ? prev.filter(id => id !== task.id) : [...prev, task.id])}
-                        onStatusUpdate={handleTaskStatusUpdate}
-                        onDelete={handleDeleteTask}
-                        getPriorityClasses={getPriorityClasses}
-                        getStatusBorderColor={getStatusBorderColor}
-                        formatDate={formatDate}
-                      />
-                    ))
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-center py-16"
-                    >
-                      <CheckSquare className="w-16 h-16 mx-auto mb-6 text-white/20" />
-                      <p className="text-white/50 mb-4 text-lg">
-                        {searchTerm || taskFilter !== 'all' ? 'No tasks match your filters' : 'No Tasks Here Yet'}
-                      </p>
-                      {(!searchTerm && taskFilter === 'all') && (
-                        <motion.button 
-                          onClick={async () => {
-                            if (!currentUser) return;
-                            try {
-                              await secureDataHelpers.createQuickTask(currentUser.id);
-                              toast({
-                                title: "Task Created ✅",
-                                description: "First task added",
-                                className: "bg-gray-900/50 backdrop-blur-md border border-emerald-500/60 shadow-lg rounded-xl p-4 text-emerald-300 font-semibold flex items-center space-x-3",
-                                icon: <Plus className="w-5 h-5 text-emerald-400" />,
-                              });
-
-                            } catch (error) {
-                              toast({
-                                title: "Creation Failed",
-                                description: "Failed to create task",
-                                variant: "destructive",
-                              });
-                            }
-                          }}
-                          className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors px-6 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Create Your First Quick Task
-                        </motion.button>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {filteredTasks.length > 10 && (
-                <motion.button 
-                  onClick={() => onNavigate('tasks')}
-                  className="w-full mt-6 text-center text-emerald-400 font-semibold py-4 hover:bg-emerald-500/10 rounded-2xl transition-all duration-300 border border-dashed border-emerald-400/30 hover:border-emerald-400/50"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Eye className="w-5 h-5" />
-                    View All {filteredTasks.length} Secure Tasks
-                  </div>
-                </motion.button>
-              )}
-            </motion.div>
-
-            {/* Analytics Panel */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-white/10"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <BarChart3 className="w-7 h-7 text-purple-400" />
-                  Your Analytics
-                  <div className="px-2 py-1 bg-purple-500/20 rounded-full text-xs text-purple-400 font-bold">
-                    LIVE
-                  </div>
-                </h3>
-              </div>
-
-              <div className="space-y-6">
-                {/* Key Analytics Cards */}
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/10 shadow-inner-soft">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-white font-semibold mb-1">Incomplete Tasks</h4>
-                        <p className="text-2xl font-bold text-red-400">{analytics.incompleteTasksCount}</p>
-                      </div>
-                      <AlertCircle className="w-8 h-8 text-red-400" />
-                    </div>
-                  </div>
-
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/10 shadow-inner-soft">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-white font-semibold mb-1">Top Grade</h4>
-                        <p className="text-2xl font-bold text-emerald-400">
-                          {analytics.topGrades.length > 0 ? `${analytics.topGrades[0].percentage}%` : 'N/A'}
-                        </p>
-                      </div>
-                      <Trophy className="w-8 h-8 text-emerald-400" />
-                    </div>
-                  </div>
-
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/10 shadow-inner-soft">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-white font-semibold mb-1">Total Classes</h4>
-                        <p className="text-2xl font-bold text-blue-400">{analytics.totalClasses}</p>
-                      </div>
-                      <CalendarIcon className="w-8 h-8 text-blue-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Study Time Chart */}
-                <div>
-                  <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-400" />
-                    Study Sessions (Last 7 Days)
-                  </h4>
-                  <div className="space-y-2">
-                    {analytics.dailyStudyTime.slice(-7).map((day, index) => {
-                      const maxMinutes = Math.max(...analytics.dailyStudyTime.slice(-7).map(d => d.minutes), 1);
-                      const percentage = (day.minutes / maxMinutes) * 100;
-                      
-                      return (
-                        <div key={day.date} className="flex items-center gap-3">
-                          <div className="text-xs text-white/60 w-12 font-medium">
-                            {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
-                          </div>
-                          <div className="flex-1 bg-black/30 rounded-full h-3 relative overflow-hidden shadow-inner-soft">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ delay: index * 0.1, duration: 0.8 }}
-                            />
-                          </div>
-                          <div className="text-xs text-white/70 w-16 text-right">
-                            {formatTime(day.minutes)}
-                            <div className="text-white/50 text-xs">
-                              {day.sessions} sessions
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Top Grades List */}
-                {analytics.topGrades.length > 0 && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                      <Award className="w-4 h-4 text-yellow-400" />
-                      Top Grades
-                    </h4>
-                    <div className="space-y-3">
-                      {analytics.topGrades.map((grade, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="flex items-center justify-between p-3 bg-black/20 border border-white/10 rounded-xl shadow-inner-soft"
-                        >
-                          <div>
-                            <div className="text-sm text-white/80 font-medium">{grade.subject}</div>
-                            <div className="text-xs text-white/50">{grade.assignment_name}</div>
-                          </div>
-                          <div className="text-lg font-bold text-yellow-400">
-                            {grade.percentage}%
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Quick Actions Grid */}
-          <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12"
-          >
-            {[
-              { 
-                page: 'timetable', 
-                icon: CalendarIcon, 
-                title: 'Schedule', 
-                desc: `${stats.upcomingClasses} upcoming classes`, 
-                color: 'from-indigo-500 to-purple-600',
-                count: stats.totalClassesCount
-              },
-              { 
-                page: 'notes', 
-                icon: BookOpen, 
-                title: 'Notes', 
-                desc: `${stats.totalNotes} notes`, 
-                color: 'from-emerald-500 to-teal-600',
-                count: stats.totalNotes
-              },
-              { 
-                page: 'courses', 
-                icon: GraduationCap, 
-                title: 'Courses', 
-                desc: `${stats.activeCourses} active courses`, 
-                color: 'from-blue-500 to-cyan-600',
-                count: stats.activeCourses
-              },
-              { 
-                page: 'calculator',
-                icon: CalculatorIcon, 
-                title: 'Calculator', 
-                desc: 'Scientific Calculator', 
-                color: 'from-orange-500 to-red-600',
-                count: null
-              }
-            ].map((item, index) => (
-              <TiltCard
-                key={item.page}
-                className="w-full h-full"
-              >
-                <motion.button
-                  variants={{ hidden: { opacity: 0, y: 50 }, show: { opacity: 1, y: 0 } }}
-                  onClick={() => onNavigate(item.page)}
-                  className="w-full h-full bg-black/20 backdrop-blur-md p-8 rounded-3xl text-left transition-all duration-300 border border-white/10 group relative overflow-hidden shadow-soft-light hover:border-emerald-400/50"
-                  style={{ transformStyle: 'preserve-3d' }}
-                  whileTap={{ scale: 0.98, transform: 'translateZ(-20px)' }}
-                >
-                  <div className="relative z-10" style={{ transform: 'translateZ(20px)' }}>
-                  <div className="flex items-center justify-between mb-6">
-                    <motion.div 
-                      className="inline-flex p-5 rounded-2xl bg-emerald-500/10 shadow-xl"
-                      transition={{ duration: 0.8, type: "spring" }}
-                    >
-                      <item.icon className="w-8 h-8 text-white" />
-                    </motion.div>
-                    
-                    {item.count !== null && (
-                      <motion.div
-                        className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-white font-bold border border-white/30"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        {item.count}
-                      </motion.div>
-                    )}
-                  </div>
-                  
-                  <h3 className="font-bold text-white mb-3 text-xl group-hover:text-emerald-300 transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-white/70 group-hover:text-white/90 transition-colors">
-                    {item.desc}
-                  </p>
-                  </div>
-
-                  <GlareEffect />
-                </motion.button>
-              </TiltCard>
-            ))}
-          </motion.div>
-
-          {/* Data Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-black/20 backdrop-blur-xl p-8 rounded-3xl border border-emerald-400/20 bg-gradient-to-r from-emerald-900/10 to-blue-900/10 mb-12 shadow-lg"
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              >
-                <Shield className="w-8 h-8 text-emerald-400" />
-              </motion.div>
-              <div>
-                <h3 className="text-2xl font-bold text-emerald-300">Real-time Dashboard</h3>
-                <p className="text-emerald-400/80">All data is authenticated, encrypted, and isolated to your user account</p>
-              </div>
-              <div className="ml-auto flex items-center gap-2 px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-400/30">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-emerald-400 font-bold text-sm">LIVE DATABASE</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-emerald-200/90">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-300">{stats.totalTasks}</div>
-                <div className="text-sm">Tasks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-300">{stats.totalStudySessions}</div>
-                <div className="text-sm">Study Sessions</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-300">{stats.totalGrades}</div>
-                <div className="text-sm">Grades Tracked</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-300">{stats.totalNotes}</div>
-                <div className="text-sm">Notes</div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Footer */}
-          <footer className="mt-12 py-6 border-t border-white/10 text-sm flex items-center justify-between text-white/70 bg-black/10 backdrop-blur-sm rounded-t-2xl px-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/10 backdrop-blur-sm p-1 rounded-lg flex items-center justify-center">
-                <img
-                  src={logo}
-                  alt="VSAV GyanVedu Logo"
-                  className="h-8 object-contain"
-                  draggable={false}
-                />
-              </div>
-              <div>
-                <div className="font-semibold text-emerald-400">VSAV GYANTAPAS</div>
-                <div className="text-xs">Dashboard V2.1</div>
-              </div>
-            </div>
-            
-            <div className="text-right">
-              <button onClick={() => setCommandPaletteOpen(true)} className="text-sm text-white/50 hover:text-white transition-colors mb-1 flex items-center gap-2 justify-end">
-                <Command size={14} />
-                <span>Command Menu</span>
-                <span className="ml-2 text-xs border border-white/20 rounded px-1.5 py-0.5">Ctrl+K</span>
-              </button>
-              <div className="text-xs flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                Secure Database • User Isolated • Live Sync • Real-Data
-              </div>
-              <div className="text-xs mt-1">© 2025 VSAV GYANTAPAS - All Rights Reserved</div>
-            </div>
-          </footer>
-        </div>
-      </div>
+      <AnimatePresence>
+        {modalState.isOpen && (
+          <ConfirmationModal
+            isOpen={modalState.isOpen}
+            title={modalState.title}
+            message={modalState.message}
+            onConfirm={modalState.onConfirm}
+            onClose={() => setModalState({ ...modalState, isOpen: false })}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

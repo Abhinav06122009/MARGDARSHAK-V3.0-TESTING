@@ -31,7 +31,7 @@ const PAGE_CONTEXT: Record<string, string> = {
   '/ai-assistant': 'AI tutor chat',
 };
 
-const GlobalAIAssistant: React.FC = () => {
+const GlobalAIAssistant: React.FC = React.memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -221,6 +221,8 @@ const GlobalAIAssistant: React.FC = () => {
 
     </>
   );
-};
+});
+
+GlobalAIAssistant.displayName = 'GlobalAIAssistant';
 
 export default GlobalAIAssistant;

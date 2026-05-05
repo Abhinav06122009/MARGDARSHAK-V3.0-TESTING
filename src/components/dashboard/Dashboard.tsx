@@ -172,7 +172,7 @@ const getLast7Days = () => {
   });
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
   const {
     currentUser,
     stats,
@@ -558,6 +558,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     )}
     </AnimatePresence>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;

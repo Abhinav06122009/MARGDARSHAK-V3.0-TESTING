@@ -109,7 +109,7 @@ const DownloadPageContent = () => {
   ], []);
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 ${!isTouch ? 'cursor-none' : ''} overflow-x-hidden scroll-smooth`}>
+    <div className={`min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 overflow-x-hidden scroll-smooth`}>
       {!isTouch && <CustomCursor />}
       <ScrollProgressBar />
       <LandingHeader />

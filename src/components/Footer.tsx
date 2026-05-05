@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logo from "@/components/logo/logo.png"; 
 import { Instagram, Youtube } from 'lucide-react';
 
-const Footer = () => {
-
+const Footer = React.memo(() => {
   return (
     <footer className="relative w-full bg-[#050505] border-t border-white/10 pt-16 pb-8 overflow-hidden font-sans z-50">
       {/* AdSense Requirement: Privacy & Terms must be visible */}
@@ -131,6 +130,8 @@ const Footer = () => {
 
     </footer>
   );
-};
+});
+
+Footer.displayName = 'Footer';
 
 export default Footer;

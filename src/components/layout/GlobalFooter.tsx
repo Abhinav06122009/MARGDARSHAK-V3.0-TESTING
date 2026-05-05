@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import logo from "@/components/logo/logo.png";
 
-const GlobalFooter = () => {
+const GlobalFooter = React.memo(() => {
   const socialLinks = [
     { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/vsavgyantapa/', color: 'hover:text-pink-500', glow: 'group-hover:shadow-[0_0_30px_rgba(236,72,153,0.4)]' },
     { icon: <Twitter size={18} />, label: 'Twitter', href: 'https://x.com/gyantappas', color: 'hover:text-blue-400', glow: 'group-hover:shadow-[0_0_30px_rgba(56,189,248,0.4)]' },
@@ -212,6 +212,8 @@ const GlobalFooter = () => {
       </div>
     </footer>
   );
-};
+});
+
+GlobalFooter.displayName = 'GlobalFooter';
 
 export default GlobalFooter;

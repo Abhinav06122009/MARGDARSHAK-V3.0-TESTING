@@ -4,14 +4,13 @@ import {
   Home, 
   BrainCircuit, 
   CheckSquare, 
-  Book, 
   Settings,
   Sparkles,
   Calendar
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const MobileNavbar = () => {
+const MobileNavbar = React.memo(() => {
   const location = useLocation();
   
   // Only show on mobile (md:hidden)
@@ -74,6 +73,6 @@ const MobileNavbar = () => {
       </div>
     </div>
   );
-};
+});
 
 export default MobileNavbar;

@@ -250,6 +250,9 @@ export const securityFeatures = {
 
   // --- UNHACKABLE PROTOCOL V3 ---
   initZeroThreatShield: () => {
+    // Prevent multiple initializations
+    if (document.getElementById('mg-honeypot-v3')) return;
+
     // 1. Debugger Trap Removed for performance stability
     /*
     setInterval(() => {
@@ -267,6 +270,7 @@ export const securityFeatures = {
 
     // 2. Honeypot Monitor
     const honeypot = document.createElement('div');
+    honeypot.id = 'mg-honeypot-v3';
     honeypot.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0.01;z-index:-1;';
     honeypot.innerHTML = '<a href="/.netlify/functions/admin-debug" tabIndex="-1" aria-hidden="true">System Debug Core</a>';
     document.body.appendChild(honeypot);

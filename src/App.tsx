@@ -24,40 +24,38 @@ import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
 import Dashboard from "@/components/dashboard/Dashboard";
-import AIPage from "@/pages/AIPage";
-import Upgrade from "@/pages/Upgrade";
-import NotFound from "@/pages/NotFound";
-import ResetPasswordPage from '@/pages/reset-password';
-import AboutUsPage from '@/pages/AboutUsPage';
-import ContactUsPage from '@/pages/ContactUsPage';
-import HelpPage from '@/pages/HelpPage';
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import TermsAndConditions from "@/pages/TermsAndConditions";
-import CookiePolicy from "@/pages/CookiePolicy";
-import GDPRCompliance from "@/pages/GDPRCompliance";
-import BlogPage from "@/pages/BlogPage";
-import AchievementsPage from "@/pages/Achievements"; // Added Achievements
-import AdminMessages from "@/pages/AdminMessages";
-import AdminAuthPage from '@/components/auth/AdminAuthPage';
-// Admin pages are lazy loaded below
-
-// Features - eagerly loaded
-import Tasks from "@/components/tasks/Tasks";
-import Grades from "@/components/grades/Grades";
-import Notes from "@/components/notes/Notes";
-import StudyTimer from "@/components/timer/StudyTimer";
-import Calculator from "@/components/calculator/Calculator";
-import Calendar from "@/components/calendar/CalendarPage";
-import Timetable from "@/components/timetable/Timetable";
-import CourseManagement from "@/components/courses/CourseManagement";
-import Syllabus from "@/components/syllabus/Syllabus";
-import Settings from "@/components/settings/Settings";
-import ProgressTracker from "@/components/progress/ProgressTracker";
-import Wellness from "@/components/wellness/Wellness";
-import Profile from "@/pages/Profile";
-import Status from "@/pages/Status";
-import Sitemap from "@/pages/Sitemap";
+// Features - lazy loaded
+const Tasks = lazy(() => import("@/components/tasks/Tasks"));
+const Grades = lazy(() => import("@/components/grades/Grades"));
+const Notes = lazy(() => import("@/components/notes/Notes"));
+const StudyTimer = lazy(() => import("@/components/timer/StudyTimer"));
+const Calculator = lazy(() => import("@/components/calculator/Calculator"));
+const Calendar = lazy(() => import("@/components/calendar/CalendarPage"));
+const Timetable = lazy(() => import("@/components/timetable/Timetable"));
+const CourseManagement = lazy(() => import("@/components/courses/CourseManagement"));
+const Syllabus = lazy(() => import("@/components/syllabus/Syllabus"));
+const Settings = lazy(() => import("@/components/settings/Settings"));
+const ProgressTracker = lazy(() => import("@/components/progress/ProgressTracker"));
+const Wellness = lazy(() => import("@/components/wellness/Wellness"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Status = lazy(() => import("@/pages/Status"));
+const Sitemap = lazy(() => import("@/pages/Sitemap"));
+const AIPage = lazy(() => import("@/pages/AIPage"));
+const Upgrade = lazy(() => import("@/pages/Upgrade"));
+const AboutUsPage = lazy(() => import("@/pages/AboutUsPage"));
+const ContactUsPage = lazy(() => import("@/pages/ContactUsPage"));
+const HelpPage = lazy(() => import("@/pages/HelpPage"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
+const CookiePolicy = lazy(() => import("@/pages/CookiePolicy"));
+const GDPRCompliance = lazy(() => import("@/pages/GDPRCompliance"));
+const BlogPage = lazy(() => import("@/pages/BlogPage"));
+const AchievementsPage = lazy(() => import("@/pages/Achievements"));
+const AdminMessages = lazy(() => import("@/pages/AdminMessages"));
 const DownloadPage = lazy(() => import("@/pages/DownloadPage"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
+const AdminAuthPage = lazy(() => import("@/components/auth/AdminAuthPage"));
 
 
 
@@ -220,11 +218,22 @@ const DashboardRouteWrapper = () => {
 const AppContent = () => {
   const location = useLocation();
 
+  // Initialize security and tracking only once
   useEffect(() => {
-    // INITIALIZE UNHACKABLE PROTOCOL V3 (Zero-Threat Shield)
     import('@/components/auth/AuthSecurity').then(({ securityFeatures }) => {
       securityFeatures.initZeroThreatShield();
     });
+    
+    // Performance monitor for high-traffic sessions
+    const checkPerformance = () => {
+      const memory = (performance as any).memory;
+      if (memory && memory.usedJSHeapSize > 500 * 1024 * 1024) { // 500MB
+        console.warn('🛡️ HIGH MEMORY USAGE DETECTED. OPTIMIZING...');
+      }
+    };
+    const perfInterval = setInterval(checkPerformance, 30000);
+    
+    return () => clearInterval(perfInterval);
   }, []);
 
   return (
@@ -239,7 +248,8 @@ const AppContent = () => {
                     <NavigationTracker />
                     <SecurityWarningOverlay />
                     <AnimatePresence mode="wait">
-                      <Routes location={location} key={location.pathname}>
+                      <Suspense fallback={<PageLoader />}>
+                        <Routes location={location}>
                         {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
                         <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform. Use our smart tutoring, quiz generator, study planner, and grade tracker for academic excellence." /><LandingPage /></>} />
                         <Route path="/auth" element={<Index />} />
@@ -258,7 +268,7 @@ const AppContent = () => {
                         <Route path="/terms" element={<><SEO title="Terms & Conditions | MARGDARSHAK" description="The legal agreement for using the MARGDARSHAK platform." /><TermsAndConditions /></>} />
                         <Route path="/cookies" element={<><SEO title="Cookie Policy | MARGDARSHAK" description="Information about how we use cookies to improve your experience." /><CookiePolicy /></>} />
                         <Route path="/gdpr" element={<><SEO title="GDPR Compliance | MARGDARSHAK" description="Our commitment to GDPR and data protection standards." /><GDPRCompliance /></>} />
-                        <Route path="/download" element={<Suspense fallback={<PageLoader />}><SEO title="Download MARGDARSHAK | Desktop & Mobile Apps" description="Get the official MARGDARSHAK application for Windows and Android. Premium AI-powered educational tools on all your devices." /><DownloadPage /></Suspense>} />
+                        <Route path="/download" element={<><SEO title="Download MARGDARSHAK | Desktop & Mobile Apps" description="Get the official MARGDARSHAK application for Windows and Android. Premium AI-powered educational tools on all your devices." /><DownloadPage /></>} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
 
@@ -314,49 +324,37 @@ const AppContent = () => {
                         <Route path="/quiz" element={
                           <PremiumEliteRoute>
                             <SEO title="Quiz Generator | MARGDARSHAK" description="AI-powered quiz generator for any subject." />
-                            <Suspense fallback={<PageLoader />}>
-                              <QuizGenerator />
-                            </Suspense>
+                            <QuizGenerator />
                           </PremiumEliteRoute>
                         } />
                         <Route path="/essay-helper" element={
                           <PremiumEliteRoute>
                             <SEO title="Essay Helper | MARGDARSHAK" description="AI writing assistant for essays and academic papers." />
-                            <Suspense fallback={<PageLoader />}>
-                              <EssayHelper />
-                            </Suspense>
+                            <EssayHelper />
                           </PremiumEliteRoute>
                         } />
                         <Route path="/study-planner" element={
                           <PremiumEliteRoute>
                             <SEO title="Smart Study Planner | MARGDARSHAK" description="AI-generated personalized study schedules." />
-                            <Suspense fallback={<PageLoader />}>
-                              <StudyPlanner />
-                            </Suspense>
+                            <StudyPlanner />
                           </PremiumEliteRoute>
                         } />
                         <Route path="/ai-analytics" element={
                           <PremiumEliteRoute>
                             <SEO title="AI Analytics | MARGDARSHAK" description="AI-powered insights into your academic performance." />
-                            <Suspense fallback={<PageLoader />}>
-                              <AIAnalytics />
-                            </Suspense>
+                            <AIAnalytics />
                           </PremiumEliteRoute>
                         } />
                         <Route path="/flashcards" element={
                           <PremiumEliteRoute>
                             <SEO title="AI Flashcards | MARGDARSHAK" description="AI generated flashcards with Spaced Repetition." />
-                            <Suspense fallback={<PageLoader />}>
-                              <Flashcards />
-                            </Suspense>
+                            <Flashcards />
                           </PremiumEliteRoute>
                         } />
                         <Route path="/doubt-solver" element={
                           <PremiumEliteRoute>
                             <SEO title="AI Doubt Solver | MARGDARSHAK" description="Step-by-step solutions for complex problems." />
-                            <Suspense fallback={<PageLoader />}>
-                              <DoubtSolver />
-                            </Suspense>
+                            <DoubtSolver />
                           </PremiumEliteRoute>
                         } />
 
@@ -364,43 +362,41 @@ const AppContent = () => {
                         <Route path="/smart-notes" element={
                           <PremiumRoute>
                             <SEO title="Smart Notes | MARGDARSHAK" description="Take notes and listen to them with Text-to-Speech." />
-                            <Suspense fallback={<PageLoader />}>
-                              <SmartNotes />
-                            </Suspense>
+                            <SmartNotes />
                           </PremiumRoute>
                         } />
                         <Route path="/portfolio" element={
                           <PremiumRoute>
                             <SEO title="Portfolio Builder | MARGDARSHAK" description="Auto-generate a resume from your real academic data." />
-                            <Suspense fallback={<PageLoader />}>
-                              <PortfolioBuilder />
-                            </Suspense>
+                            <PortfolioBuilder />
                           </PremiumRoute>
                         } />
                         <Route path="/deadlines" element={
                           <PremiumRoute>
                             <SEO title="Exam Deadline Tracker | MARGDARSHAK" description="Track JEE, NEET, SAT and university application deadlines." />
-                            <Suspense fallback={<PageLoader />}>
-                              <DeadlineTracker />
-                            </Suspense>
+                            <DeadlineTracker />
                           </PremiumRoute>
                         } />
 
 
                         <Route path="*" element={<NotFound />} />
                       </Routes>
-                    </AnimatePresence>
+                    </Suspense>
+                  </AnimatePresence>
                     
 
-                    <AIWidgetWrapper />
                     <RankEntryOverlay />
                     <DevVerificationGuard />
-                    <GlobalQuickActions />
-                    <MobileNavbar />
-                    <ShortcutsOverlay />
+             {/* Global persistent layers - Memoized for stability */}
+      <CursorProvider>
+        <AIWidgetWrapper />
+        <GlobalQuickActions />
+        <MobileNavbar />
+        <GlobalWellnessBar />
+        <GlobalFooter />
+      </CursorProvider>
+             <ShortcutsOverlay />
 
-                    <GlobalWellnessBar />
-                    <GlobalFooter />
                     <Toaster />
                     <Sonner />
                     <CookieConsent />
@@ -438,11 +434,9 @@ const App = () => {
     <HelmetProvider>
       <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
         <QueryClientProvider client={queryClient}>
-        <CursorProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AppContent />
           </Router>
-        </CursorProvider>
         </QueryClientProvider>
       </Sentry.ErrorBoundary>
     </HelmetProvider>

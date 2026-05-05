@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useContext, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import {
   Zap, X, Command, Search, Star,
   ChevronRight, BrainCircuit, Library, ImageIcon,
@@ -22,7 +22,6 @@ interface Action {
   keywords: string[];
 }
 
-// ─── Master Action Registry ───────────────────────────────────────────────────
 // ─── Master Action Registry ───────────────────────────────────────────────────
 const ALL_ACTIONS: Action[] = [
   // --- IDENTITY & ACCESS ---
@@ -73,11 +72,10 @@ const ALL_ACTIONS: Action[] = [
   { icon: Zap, title: 'Landing Page', subtitle: 'Global Platform entry and overview', color: 'from-zinc-700 to-zinc-900', path: '/', category: 'Legal & Operational', keywords: ['landing', 'home', 'start'] },
 ];
 
-
 const RECENT_KEY = 'mgs_recent_actions';
 
 // ─── Component ────────────────────────────────────────────────────────────────
-const GlobalQuickActions: React.FC = () => {
+const GlobalQuickActions: React.FC = React.memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
@@ -85,14 +83,13 @@ const GlobalQuickActions: React.FC = () => {
     try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
   });
   const navigate = useNavigate();
-  const { session, user } = useContext(AuthContext);
+  const { session } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const [position, setPosition] = useState({ x: 32, y: typeof window !== 'undefined' ? window.innerHeight - 200 : 400 });
-
-  const handleDrag = (_: any, info: any) =>
-    setPosition(prev => ({ x: prev.x + info.delta.x, y: prev.y + info.delta.y }));
+  // Use MotionValues for non-rendering drag
+  const dragX = useMotionValue(32);
+  const dragY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 200 : 400);
 
   // Ctrl+K shortcut
   useEffect(() => {
@@ -109,46 +106,38 @@ const GlobalQuickActions: React.FC = () => {
     if (isOpen) { setQuery(''); setSelected(0); setTimeout(() => inputRef.current?.focus(), 80); }
   }, [isOpen]);
 
-  // Filtered results
-  const filteredActions = query.trim()
-    ? ALL_ACTIONS.filter(a => {
-      const q = query.toLowerCase();
-      return (
-        a.title.toLowerCase().includes(q) ||
-        a.subtitle.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q) ||
-        a.keywords.some(k => k.includes(q))
-      );
-    })
-    : ALL_ACTIONS;
+  // Filtered results (Memoized)
+  const filteredActions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return ALL_ACTIONS;
+    return ALL_ACTIONS.filter(a => 
+      a.title.toLowerCase().includes(q) ||
+      a.subtitle.toLowerCase().includes(q) ||
+      a.category.toLowerCase().includes(q) ||
+      a.keywords.some(k => k.includes(q))
+    );
+  }, [query]);
 
-  // Recent actions
-  const recentActions = recentPaths
-    .map(p => ALL_ACTIONS.find(a => a.path === p))
-    .filter(Boolean) as Action[];
+  // Recent actions (Memoized)
+  const recentActions = useMemo(() => 
+    recentPaths
+      .map(p => ALL_ACTIONS.find(a => a.path === p))
+      .filter(Boolean) as Action[]
+  , [recentPaths]);
 
-  const displayList = query.trim() ? filteredActions : ALL_ACTIONS;
+  const displayList = filteredActions;
 
-  // Group by category when no query
-  const grouped = query.trim()
-    ? null
-    : (() => {
-      const groups: Record<string, Action[]> = {};
-
-      // Add Recents first if they exist
-      if (recentActions.length > 0) {
-        groups['Recent'] = recentActions.slice(0, 4);
-      }
-
-      // Add all other categories
-      ALL_ACTIONS.forEach(a => {
-        if (!groups[a.category]) groups[a.category] = [];
-        groups[a.category].push(a);
-      });
-
-      return groups;
-    })();
-
+  // Group by category when no query (Memoized)
+  const grouped = useMemo(() => {
+    if (query.trim()) return null;
+    const groups: Record<string, Action[]> = {};
+    if (recentActions.length > 0) groups['Recent'] = recentActions.slice(0, 4);
+    ALL_ACTIONS.forEach(a => {
+      if (!groups[a.category]) groups[a.category] = [];
+      groups[a.category].push(a);
+    });
+    return groups;
+  }, [query, recentActions]);
 
   // Keyboard nav
   useEffect(() => {
@@ -180,29 +169,23 @@ const GlobalQuickActions: React.FC = () => {
 
   if (!session) return null;
 
-  // Flat list for keyboard indexing
-  const flatList = query.trim()
-    ? filteredActions
-    : (() => {
-      const list = [...recentActions.slice(0, 4)];
-      ALL_ACTIONS.forEach(a => {
-        if (!list.some(r => r.path === a.path)) list.push(a);
-      });
-      return list;
-    })();
   let flatIdx = 0;
-
 
   return (
     <>
       {/* ─── Floating Trigger ─────────────────────────────────────────────── */}
       <motion.button
-        drag dragMomentum={false} onDrag={handleDrag}
-        initial={false} animate={{ x: position.x, y: position.y }}
+        drag dragMomentum={false}
+        initial={false} style={{ x: dragX, y: dragY }}
         whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         className="fixed top-0 left-0 z-[100] w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 cursor-grab active:cursor-grabbing group"
-        style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 20px 50px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.05)' }}
+        style={{ 
+          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', 
+          boxShadow: '0 20px 50px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
+          x: dragX,
+          y: dragY
+        }}
       >
         <Zap className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
         <motion.div
@@ -210,7 +193,6 @@ const GlobalQuickActions: React.FC = () => {
           transition={{ repeat: Infinity, duration: 2 }}
           className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-[#050505]"
         />
-        {/* Tooltip */}
         <div className="absolute left-full ml-3 px-3 py-1.5 bg-zinc-900 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
           Quick Access <kbd className="ml-1 px-1 py-0.5 bg-white/10 rounded text-[8px]">⌘K</kbd>
         </div>
@@ -220,14 +202,12 @@ const GlobalQuickActions: React.FC = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
               className="fixed inset-0 bg-black/70 backdrop-blur-md z-[1000]"
             />
 
-            {/* Panel Container */}
             <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -241,8 +221,6 @@ const GlobalQuickActions: React.FC = () => {
                   boxShadow: '0 60px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.06)'
                 }}
               >
-
-                {/* ── Search Header ── */}
                 <div className="p-5 border-b border-white/[0.06]">
                   <div className="relative flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.04] border border-white/[0.06] focus-within:border-indigo-500/40 focus-within:bg-indigo-500/[0.04] transition-all">
                     <Search className="w-5 h-5 text-zinc-500 flex-shrink-0" />
@@ -266,7 +244,6 @@ const GlobalQuickActions: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ── Results List ── */}
                 <div ref={listRef} className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {displayList.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -287,8 +264,7 @@ const GlobalQuickActions: React.FC = () => {
                         />
                       );
                     })
-                    : Object.entries(grouped!).map(([cat, actions]) => (
-
+                    : grouped && Object.entries(grouped).map(([cat, actions]) => (
                       <div key={cat}>
                         <div className="flex items-center gap-2 px-3 py-1.5">
                           {cat === 'Recent' ? <Clock className="w-3 h-3 text-zinc-600" /> : <Hash className="w-3 h-3 text-zinc-700" />}
@@ -310,7 +286,6 @@ const GlobalQuickActions: React.FC = () => {
                   }
                 </div>
 
-                {/* ── Footer ── */}
                 <div className="px-5 py-3.5 border-t border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">
@@ -330,16 +305,16 @@ const GlobalQuickActions: React.FC = () => {
       </AnimatePresence>
     </>
   );
-};
+});
 
-// ─── Action Row ───────────────────────────────────────────────────────────────
+// ─── Action Row (Memoized) ──────────────────────────────────────────────────
 const ActionRow: React.FC<{
   action: Action;
   isSelected: boolean;
   dataIdx: number;
   onClick: () => void;
   onHover: () => void;
-}> = ({ action, isSelected, dataIdx, onClick, onHover }) => (
+}> = React.memo(({ action, isSelected, dataIdx, onClick, onHover }) => (
   <motion.button
     data-idx={dataIdx}
     onClick={onClick}
@@ -361,6 +336,6 @@ const ActionRow: React.FC<{
       <ChevronRight size={14} className="text-zinc-400" />
     </div>
   </motion.button>
-);
+));
 
 export default GlobalQuickActions;
