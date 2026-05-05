@@ -59,11 +59,16 @@ const customStorageAdapter = {
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   global: {
     fetch: async (url, options: any = {}) => {
-      // Internal Token Caching to prevent redundant Clerk network calls during parallel fetches
+      // Internal Token Caching: Prevents redundant Clerk network calls
       const now = Date.now();
-      if (!cachedToken || (now - lastTokenFetch > 10000)) { // 10s cache
-        cachedToken = await getClerkToken();
-        lastTokenFetch = now;
+      const needsRefresh = !cachedToken || (now - lastTokenFetch > 10000);
+      
+      if (needsRefresh) {
+        const token = await getClerkToken();
+        if (token) {
+          cachedToken = token;
+          lastTokenFetch = now;
+        }
       }
       
       const token = cachedToken;

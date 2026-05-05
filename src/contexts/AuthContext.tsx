@@ -172,6 +172,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const reason = profile.blocked_reason || 'Access restricted for security reasons.';
             setBlockedReason(reason);
             localStorage.setItem(`blocked_${clerkUser.id}`, JSON.stringify({ blocked: true, reason }));
+            // EXEMPT OWNER FROM BLOCKS: If user is Abhinav, force unblock
+            if (clerkUser.id === 'user_3CwM4tADcqKhELg4ZX9r2xIRC4L') {
+              setIsBlocked(false);
+              setBlockedReason(null);
+              localStorage.removeItem(`blocked_${clerkUser.id}`);
+              console.log('[AUTH] Owner bypass active. Block state cleared.');
+            }
           } else {
             setIsBlocked(false);
             localStorage.removeItem(`blocked_${clerkUser.id}`);
@@ -184,8 +191,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    if (sessionLoaded && userLoaded && clerkUser) {
-      syncProfile();
+    if (sessionLoaded && userLoaded && clerkUser && clerkSession) {
+      // 🚨 EMERGENCY TIMEOUT: Force-resolve loading after 10s even if sync hangs
+      const emergencyTimeout = setTimeout(() => {
+        if (loading) {
+          console.warn('⚠️ [AUTH] Synchronization timeout. Force-resolving loading state...');
+          setLoading(false);
+        }
+      }, 10000);
+
+      syncProfile().finally(() => clearTimeout(emergencyTimeout));
     }
   }, [sessionLoaded, userLoaded, clerkUser, clerkSession]);
 
