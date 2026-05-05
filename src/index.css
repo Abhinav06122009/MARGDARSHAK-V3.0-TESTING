@@ -6,15 +6,12 @@
 
 @layer utilities {
   .glass-morphism {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
-    /* Performance: Backdrop filter is expensive, hint to GPU */
-    will-change: backdrop-filter;
+    @apply bg-white/5 border border-white/10 shadow-[0_4px_16px_0_rgba(0,0,0,0.2)];
+    backdrop-filter: blur(8px);
   }
   .premium-card {
-    @apply rounded-[2rem] border border-white/5 bg-zinc-900/40 backdrop-blur-2xl transition-all duration-500 hover:border-indigo-500/30 hover:bg-zinc-900/60;
-    /* Optimize for smooth scaling/moving */
+    @apply rounded-[2rem] border border-white/5 bg-zinc-900/40 transition-all duration-300 hover:border-indigo-500/30 hover:bg-zinc-900/60;
     transform: translateZ(0);
-    backface-visibility: hidden;
   }
 }
 

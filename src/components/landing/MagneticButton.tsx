@@ -10,7 +10,7 @@ interface MagneticButtonProps {
 
 /**
  * A button that physically pulls toward the user's cursor on desktop.
- * Optimized to disable on touch devices for maximum performance.
+ * Optimized with localized event handlers to prevent global listener overhead.
  */
 export const MagneticButton: React.FC<MagneticButtonProps> = ({ children, className = '', ...props }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,39 +33,38 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({ children, classN
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-    if (isMobile) return;
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !ref.current || !isHovering) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (ref.current && isHovering) {
-        const button = ref.current.getBoundingClientRect();
-        const centerX = button.left + button.width / 2;
-        const centerY = button.top + button.height / 2;
+    const button = ref.current.getBoundingClientRect();
+    const centerX = button.left + button.width / 2;
+    const centerY = button.top + button.height / 2;
 
-        const deltaX = e.clientX - centerX;
-        const deltaY = e.clientY - centerY;
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
 
-        const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-        const maxDistance = 150;
-        const strength = 0.3;
+    const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+    const maxDistance = 120;
+    const strength = 0.25;
 
-        if (distance < maxDistance) {
-          const factor = 1 - distance / maxDistance;
-          mouseX.set(deltaX * factor * strength * 2);
-          mouseY.set(deltaY * factor * strength * 2);
-        } else {
-          mouseX.set(0);
-          mouseY.set(0);
-        }
-      }
-    };
+    if (distance < maxDistance) {
+      const factor = 1 - distance / maxDistance;
+      mouseX.set(deltaX * factor * strength);
+      mouseY.set(deltaY * factor * strength);
+    } else {
+      mouseX.set(0);
+      mouseY.set(0);
+    }
+  };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, [isHovering, isMobile, mouseX, mouseY]);
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   return (
     <motion.div
@@ -78,18 +77,15 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({ children, classN
         transformStyle: 'preserve-3d',
         perspective: '1000px'
       }}
+      onMouseMove={handleMouseMove}
       onMouseEnter={() => {
         setIsHovering(true);
         playSound('hover');
       }}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        mouseX.set(0);
-        mouseY.set(0);
-      }}
+      onMouseLeave={handleMouseLeave}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={className}
+      className={`${className} will-change-transform`}
       {...props}
     >
       {children}

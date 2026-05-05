@@ -231,7 +231,7 @@ export const GlobalWellnessBar: React.FC = () => {
     if (calculatedStats.totalTasks === 0) return;
 
     const pendingCount = calculatedStats.totalTasks - calculatedStats.completedTasks;
-    const overdueCount = calculatedStats.overdueTasksCount;
+    const overdueCount = calculatedStats.overdueTasks;
     const completionRate = calculatedStats.totalTasks > 0 ? Math.round((calculatedStats.completedTasks / calculatedStats.totalTasks) * 100) : 0;
 
     let score = 0;
@@ -242,8 +242,8 @@ export const GlobalWellnessBar: React.FC = () => {
 
     if (score >= 45) {
       const aiResult = await aiService.predictBurnout({
-        todayStudyTime: calculatedStats.totalStudyTime, 
-        studyStreak: calculatedStats.currentStreak,
+        todayStudyTime: calculatedStats.todayStudyTime, 
+        studyStreak: calculatedStats.studyStreak,
         inProgressTasks: pendingCount, 
         pendingTasks: pendingCount,
         overdueTasks: overdueCount, 
@@ -302,7 +302,7 @@ export const GlobalWellnessBar: React.FC = () => {
       >
         <motion.div
           layout
-          className="bg-zinc-900/96 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden"
+          className="bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden"
           style={{ minWidth: 260, maxWidth: 320 }}
         >
           {/* ── Expanded Panel ── */}

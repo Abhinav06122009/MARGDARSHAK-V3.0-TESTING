@@ -81,14 +81,16 @@ const GlobalAIAssistant: React.FC = () => {
     setLoading(true);
 
     try {
-      const systemPrompt = `You are MARGDARSHAK, a helpful AI assistant for students. The user is currently on the ${currentPageContext} page. Keep responses concise (2-4 sentences max) and focused on academic help. Be encouraging and practical.`;
+      const systemMessage: Message = { 
+        role: 'user', 
+        content: `[SYSTEM CONTEXT: You are MARGDARSHAK, a helpful AI assistant. User is on ${currentPageContext} page. Keep responses 2-4 sentences max.]`
+      };
 
       const history = messages.slice(-6).map(m => ({ role: m.role, content: m.content }));
-      const allMessages = [...history, { role: 'user', content: text }];
+      const allMessages = [systemMessage, ...history, { role: 'user', content: text }];
 
       const userTier = authUser?.publicMetadata?.subscription?.tier || authUser?.publicMetadata?.subscription_tier || 'free';
       const response = await modelRouter.chat(allMessages, { 
-        systemPrompt,
         tier: userTier
       });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
@@ -119,7 +121,7 @@ const GlobalAIAssistant: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[500px] flex flex-col bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-[360px] max-h-[500px] flex flex-col bg-zinc-900 border border-white/10 rounded-[1.5rem] shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gradient-to-r from-amber-500/10 to-transparent">
               <div className="flex items-center gap-2">

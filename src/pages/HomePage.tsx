@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useClerk } from '@clerk/react';
 import { supabase } from '@/integrations/supabase/client';
-import { Clock, Calendar, CheckSquare, BookOpen, Trophy, Timer, Calculator, LogOut, User, TrendingUp, Target, Zap, Star, Bell, Sparkles, Search, Plus, MoreHorizontal, Edit, Trash2, Database, Shield, LayoutGrid } from 'lucide-react';
+import { Clock, Calendar, CheckSquare, BookOpen, Trophy, Timer, Calculator, LogOut, User, TrendingUp, Target, Zap, Star, Bell, Sparkles, Search, Plus, MoreHorizontal, Edit, Trash2, Database, Shield, LayoutGrid, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -158,33 +158,25 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
       {/* Zenith Background Aesthetics */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,20,15,1)_0%,rgba(5,5,5,1)_100%)]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-emerald-500/10" />
         
-        {/* Animated Neural Orbs */}
-        <motion.div 
-          animate={{ opacity: [0.1, 0.15, 0.1], scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, 30, 0] }}
-          transition={{ repeat: Infinity, duration: 15, ease: 'easeInOut' }}
-          className="absolute top-0 -left-40 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[150px]"
-        />
-        <motion.div 
-          animate={{ opacity: [0.05, 0.1, 0.05], scale: [1, 1.3, 1], x: [0, -40, 0], y: [0, -20, 0] }}
-          transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut', delay: 2 }}
-          className="absolute bottom-0 -right-40 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px]"
-        />
+        {/* Optimized Neural Orbs */}
+        <div className="absolute top-0 -left-40 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 -right-40 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[100px]" />
         
-        {/* Neural Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* Static Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:80px_80px]" />
       </div>
 
       <ScrollArea className="h-screen w-full relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-10">
           
           {/* Header Architecture */}
-          <header className="flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.8rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-2xl relative overflow-hidden group">
+          <header className="flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.8rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm shadow-2xl relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.05] to-transparent pointer-events-none" />
             
             <div className="flex items-center gap-6">
-              <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-all duration-700">
+              <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-105 transition-all duration-700">
                 <img src={logo} alt="Margdarshak" className="h-8 w-8 object-contain" />
               </div>
               <div>
@@ -200,7 +192,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
 
             <div className="flex items-center gap-4 mt-8 md:mt-0">
               <div className="flex items-center gap-3 bg-white/[0.02] px-6 py-3 rounded-2xl border border-white/10 shadow-xl group/profile transition-all hover:border-emerald-500/30">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-lg group-hover/profile:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-lg group-hover/profile:scale-105 transition-transform">
                   <User className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div className="text-left">
@@ -228,8 +220,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             </div>
             
             <div className="relative w-full md:w-96 group">
-              <div className="absolute inset-0 bg-emerald-500/10 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-2xl px-5 py-4 backdrop-blur-3xl shadow-2xl transition-all hover:border-emerald-500/20">
+              <div className="absolute inset-0 bg-emerald-500/5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative flex items-center bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 backdrop-blur-sm shadow-2xl transition-all hover:border-emerald-500/20">
                 <Search className="w-4 h-4 text-zinc-500 mr-3" />
                 <input 
                   type="text" 
@@ -246,7 +238,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             {/* Task Matrix */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white/[0.01] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group"
+              className="bg-white/[0.02] border border-white/5 backdrop-blur-sm rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent pointer-events-none" />
               <div className="flex items-center justify-between mb-8 relative z-10">
@@ -300,7 +292,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             {/* Neural Progress */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="bg-white/[0.01] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-center group"
+              className="bg-white/[0.02] border border-white/5 backdrop-blur-sm rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-center group"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-blue-500/[0.02] to-transparent pointer-events-none" />
               <div className="flex items-center gap-4 mb-10 w-full">
@@ -309,7 +301,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               </div>
 
               <div className="relative mb-10 group/progress">
-                <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-0 group-hover/progress:opacity-20 transition-opacity duration-1000" />
+                <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-0 group-hover/progress:opacity-10 transition-opacity duration-1000" />
                 <svg className="w-48 h-48 transform -rotate-90 relative z-10">
                   <circle cx="96" cy="96" r="80" stroke="rgba(255,255,255,0.02)" strokeWidth="12" fill="none" />
                   <motion.circle
@@ -346,7 +338,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             {/* Neural Sessions */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="bg-white/[0.01] border border-white/5 backdrop-blur-3xl rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group"
+              className="bg-white/[0.02] border border-white/5 backdrop-blur-sm rounded-[3rem] p-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent pointer-events-none" />
               <div className="flex items-center justify-between mb-8 relative z-10">
@@ -364,7 +356,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                   recentSessions.map((session, index) => (
                     <div key={session.id} className="flex items-center justify-between p-5 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all duration-500 group/session shadow-xl">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center border border-white/5 group-hover/session:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center border border-white/5 group-hover/session:scale-105 transition-transform">
                           <BookOpen className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div>
@@ -415,13 +407,13 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                     key={item.page}
                     onClick={() => onNavigate(item.page)}
                     className="p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 text-left hover:border-emerald-500/30 transition-all duration-700 group relative overflow-hidden shadow-2xl"
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + (index * 0.05), duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 0.1 + (index * 0.05), duration: 0.5 }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${item.color} mb-6 shadow-xl group-hover:scale-110 transition-transform duration-700`}>
+                    <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${item.color} mb-6 shadow-xl group-hover:scale-105 transition-transform duration-700`}>
                       <item.icon className="w-5 h-5 text-white" />
                     </div>
                     <h3 className="text-[11px] font-black text-white uppercase italic tracking-tighter mb-1 relative z-10">{item.title}</h3>
@@ -434,8 +426,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
           {/* Tactical Diagnostic Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <motion.div 
-              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }}
-              className="p-10 rounded-[3.5rem] bg-white/[0.01] border border-white/5 backdrop-blur-3xl shadow-2xl relative overflow-hidden group"
+              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+              className="p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-sm shadow-2xl relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent pointer-events-none" />
               <div className="flex items-center gap-6 mb-8 relative z-10">
@@ -452,15 +444,15 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               </p>
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest italic">RSA-4096 Secured</span>
                  </div>
               </div>
             </motion.div>
 
             <motion.div 
-              initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 }}
-              className="p-10 rounded-[3.5rem] bg-white/[0.01] border border-white/5 backdrop-blur-3xl shadow-2xl relative overflow-hidden group"
+              initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}
+              className="p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-sm shadow-2xl relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.02] to-transparent pointer-events-none" />
               <div className="flex items-center gap-6 mb-8 relative z-10">
@@ -477,7 +469,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               </p>
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
-                    <span className="w-1 h-1 rounded-full bg-blue-500 animate-ping" />
+                    <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                     <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest italic">Signal Strength: 100%</span>
                  </div>
               </div>

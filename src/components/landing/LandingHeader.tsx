@@ -54,7 +54,7 @@ export const LandingHeader = React.memo(() => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={`text-white sticky top-0 z-50 transition-all duration-300 ${scrolled
-          ? 'py-2 bg-gray-900/80 backdrop-blur-md border-b border-white/5 shadow-2xl'
+          ? 'py-2 bg-gray-900/80 backdrop-blur-sm border-b border-white/5 shadow-2xl'
           : 'py-4 bg-transparent border-transparent'
         }`}
     >

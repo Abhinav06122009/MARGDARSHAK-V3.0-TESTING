@@ -65,7 +65,7 @@ const LandingPage: React.FC = () => {
           /* Universal sizing fixes */
           body {
             overflow-x: hidden;
-            width: 100vw;
+            width: 100%;
           }
           
           .button-interactive {
