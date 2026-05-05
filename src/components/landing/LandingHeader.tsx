@@ -149,6 +149,14 @@ export const LandingHeader = React.memo(() => {
                   </button>
                 </li>
               ))}
+              <li>
+                <button
+                  onClick={() => navigate('/download')}
+                  className="text-sm font-bold tracking-widest uppercase text-gray-300 hover:text-blue-400 w-full text-left"
+                >
+                  Download
+                </button>
+              </li>
               <li className="pt-4 border-t border-white/5">
                 <button
                   onClick={() => navigate('/auth')}

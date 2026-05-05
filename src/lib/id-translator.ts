@@ -9,9 +9,13 @@
  * Translates a Clerk ID string to a valid UUID format.
  * Uses a deterministic SHA-256 hash to ensure the same Clerk ID always produces the same UUID.
  */
+const idCache = new Map<string, string>();
+
 export const translateClerkIdToUUID = async (clerkId: string): Promise<string> => {
   if (!clerkId) return '';
   const cleanId = clerkId.trim();
+  
+  if (idCache.has(cleanId)) return idCache.get(cleanId)!;
   
   // If it's already a valid UUID, return it as-is
   if (cleanId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
@@ -43,6 +47,7 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
       ].join('-');
       
       console.log('[ID-Translator] SHA-256 Translation Success:', uuid);
+      idCache.set(cleanId, uuid);
       return uuid;
     } else {
       throw new Error('Crypto Subtle unavailable');
@@ -61,6 +66,7 @@ export const translateClerkIdToUUID = async (clerkId: string): Promise<string> =
     const fallbackUuid = `${hash}-0000-4000-8000-${cleanId.replace(/[^a-f0-9]/gi, '').padEnd(12, '0').slice(0, 12)}`;
     
     console.log('[ID-Translator] Fallback Translation:', fallbackUuid);
+    idCache.set(cleanId, fallbackUuid);
     return fallbackUuid;
   }
 };

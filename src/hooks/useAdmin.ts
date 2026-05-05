@@ -85,8 +85,8 @@ export const useAdmin = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchAdminData = useCallback(async () => {
-    // Prevent redundant fetches
-    if (!loading && stats) return; 
+    // Prevent concurrent fetches but allow subsequent refreshes
+    if (loading && stats) return; 
 
     setLoading(true);
 
