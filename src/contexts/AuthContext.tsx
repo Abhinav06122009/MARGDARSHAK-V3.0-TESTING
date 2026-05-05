@@ -179,6 +179,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
         } catch (err) {
           console.error('Unexpected sync error:', err);
+        } finally {
+          setLoading(false);
         }
     };
 

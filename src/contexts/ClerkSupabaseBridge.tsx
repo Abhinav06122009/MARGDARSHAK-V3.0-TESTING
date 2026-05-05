@@ -31,26 +31,19 @@ const ClerkSupabaseBridgeContent: React.FC<{ children: React.ReactNode }> = ({ c
     if (session) {
       setClerkTokenProvider(async () => {
         try {
-          // Try custom template first
           const token = await session.getToken({ template: 'supabase' });
           if (token) return token;
-          
-          // Fallback to default if template not found or returns null
-          console.warn('⚠️ Clerk "supabase" template not found. Falling back to default token.');
           return await session.getToken();
         } catch (err) {
           console.error('❌ Clerk token retrieval failed:', err);
           return await session.getToken();
         }
       });
-    } else {
-      setClerkTokenProvider(async () => null);
+      setClerkUser(user);
     }
-  }, [session]);
+  }, [session, user]);
 
-  useEffect(() => {
-    setClerkUser(user);
-  }, [user]);
+
 
   return <>{children}</>;
 };

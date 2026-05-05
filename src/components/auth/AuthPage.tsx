@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SignIn, SignUp, useUser } from '@clerk/react';
 import { motion } from 'framer-motion';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import logo from "@/components/logo/logo.png";
 
 interface AuthPageProps {
@@ -23,15 +23,18 @@ const AuthPage: React.FC<AuthPageProps> = () => {
     setIsLogin(mode !== 'signup');
   }, [mode]);
 
+  const navigate = useNavigate();
+
   // BREAK RELOAD LOOP: Escape if authenticated
   useEffect(() => {
     if (userLoaded && isSignedIn && user && isMounted) {
-      if (window.location.pathname.includes('/auth')) {
-        console.log('🛡️ Identity confirmed. Escaping auth loop...');
-        window.location.href = '/dashboard';
+      const path = window.location.pathname;
+      if (path.includes('/auth') || path === '/') {
+        console.log('🛡️ Identity confirmed. Transitioning to dashboard...');
+        navigate('/dashboard', { replace: true });
       }
     }
-  }, [userLoaded, isSignedIn, user, isMounted]);
+  }, [userLoaded, isSignedIn, user, isMounted, navigate]);
 
   if (!isMounted) return <div className="min-h-screen bg-[#050505]" />;
 

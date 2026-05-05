@@ -244,12 +244,11 @@ const AppContent = () => {
   }, []);
 
   return (
-    <ClerkSupabaseBridge>
-      <TooltipProvider>
-        <AuthProvider>
-          <AdminProvider>
-            <SecurityProvider>
-              <AIProvider>
+    <TooltipProvider>
+      <AuthProvider>
+        <AdminProvider>
+          <SecurityProvider>
+            <AIProvider>
                 <div className="bg-[#050505] min-h-screen text-white">
                   <GlobalSecurityGuard>
                     <NavigationTracker />
@@ -444,7 +443,9 @@ const App = () => {
       <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
         <QueryClientProvider client={queryClient}>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <AppContent />
+            <ClerkSupabaseBridge>
+              <AppContent />
+            </ClerkSupabaseBridge>
           </Router>
         </QueryClientProvider>
       </Sentry.ErrorBoundary>
