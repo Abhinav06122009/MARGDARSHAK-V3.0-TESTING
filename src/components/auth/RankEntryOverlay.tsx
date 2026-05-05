@@ -208,6 +208,9 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
   const scanLabels = ['INITIALIZING BIOMETRIC SCAN...', 'ESTABLISHING NEURAL HANDSHAKE...', 'VSAV ENCRYPTION VERIFIED', 'OFFICER IDENTITY CONFIRMED'];
 
+  const [isHovering, setIsHovering] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+
   return (
     <AnimatePresence>
       {show && (
@@ -216,26 +219,43 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onMouseMove={handleMouseMove}
+          onMouseDown={() => setIsClicked(true)}
+          onMouseUp={() => setIsClicked(false)}
           className="fixed inset-0 z-[9999] w-screen h-[100dvh] bg-[#020202] grid place-items-center overflow-hidden cursor-none select-none touch-none"
         >
 
-          {/* Custom Cursor Reticle */}
+          {/* Custom Cursor Reticle - Interactive */}
           <motion.div 
-            className="fixed w-8 h-8 border border-emerald-500/50 rounded-full z-[10000] pointer-events-none mix-blend-difference flex items-center justify-center"
-            style={{ x: mouseX, y: mouseY, left: '50%', top: '50%' }}
+            className="fixed z-[10000] pointer-events-none mix-blend-difference flex items-center justify-center"
+            animate={{ 
+              width: isHovering ? 64 : 32, 
+              height: isHovering ? 64 : 32,
+              scale: isClicked ? 0.8 : 1,
+              backgroundColor: isHovering ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0)'
+            }}
+            style={{ x: mouseX, y: mouseY, left: '50%', top: '50%', x: mouseX, y: mouseY }}
           >
-            <div className="w-1 h-1 bg-emerald-500 rounded-full" />
+            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${isHovering ? 'bg-emerald-400' : 'bg-emerald-500'}`} />
             <motion.div 
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-              className="absolute inset-0 border-t border-emerald-500 rounded-full"
+              className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${isHovering ? 'border-emerald-400 border-t-transparent' : 'border-emerald-500/30 border-t-emerald-500'}`}
             />
+            {isHovering && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1.5 }}
+                className="absolute inset-0 border border-emerald-400/50 rounded-full blur-sm"
+              />
+            )}
           </motion.div>
 
           {/* QUICK CLOSE BUTTON FOR OFFICIALS */}
           <button 
             onClick={handleClose}
-            className="fixed top-6 right-6 sm:top-10 sm:right-10 z-[10001] p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all group cursor-auto"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            className="fixed top-6 right-6 sm:top-10 sm:right-10 z-[10001] p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all group cursor-none"
             title="Dismiss Overlay"
           >
             <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
@@ -418,7 +438,9 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             {/* PREMIUM ACTION BUTTON */}
             <button
               onClick={handleClose}
-              className="relative mt-auto py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] bg-white text-black font-black uppercase tracking-[0.4em] text-[8px] sm:text-[9px] hover:bg-emerald-400 active:scale-95 transition-all overflow-hidden group/btn shadow-xl"
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+              className="relative mt-auto py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] bg-white text-black font-black uppercase tracking-[0.4em] text-[8px] sm:text-[9px] hover:bg-emerald-400 active:scale-95 transition-all overflow-hidden group/btn shadow-xl cursor-none"
             >
               <span className="relative z-10">ENTER_DASHBOARD</span>
             </button>
