@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState, lazy, Suspense, useCallback } from 'react';
+import React, { useContext, useEffect, useState, Suspense, useCallback } from 'react';
+import { safeLazy as lazy } from '@/lib/lazy-load';
 import * as Sentry from "@sentry/react";
 import { BrowserRouter, HashRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";

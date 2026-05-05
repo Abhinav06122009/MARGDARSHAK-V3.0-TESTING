@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
+import { safeLazy as lazy } from '@/lib/lazy-load';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

@@ -29,9 +29,16 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   useEffect(() => {
     // Session Lock: Only show once per session/tab
     const sessionShown = sessionStorage.getItem('margdarshak_rank_shown');
-    if (sessionShown) return;
-
+    
     if (isLoaded && clerkUser) {
+      console.log('🛡️ [RankOverlay] Analyzing Identity:', { 
+        id: clerkUser.id, 
+        role: clerkUser.publicMetadata.role,
+        alreadyShown: sessionShown
+      });
+
+      if (sessionShown === 'true') return;
+
       const metadata = clerkUser.publicMetadata || {};
       const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
       const normalizedRoles = roles.map((r: string) => r.toLowerCase().replace(/\s+/g, '_'));
@@ -80,7 +87,12 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
       let info: any = null;
       const primaryRole = normalizedRoles.find(r => [...aPlusRoles, ...aRoles, ...bRoles, ...cRoles].includes(r));
 
-      if (!primaryRole) return; 
+      if (!primaryRole) {
+        console.log('🛡️ [RankOverlay] No matching officer role found. Bailing.');
+        return; 
+      }
+
+      console.log('🛡️ [RankOverlay] Officer Identity Confirmed:', primaryRole);
 
       if (aPlusRoles.includes(primaryRole)) {
         info = {
