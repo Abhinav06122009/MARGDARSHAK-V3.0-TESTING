@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
 import { useUser } from '@clerk/react';
 import { 
   LayoutDashboard, Calendar, FileText, Settings, BookOpen, 
