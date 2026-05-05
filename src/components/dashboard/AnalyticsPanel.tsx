@@ -52,7 +52,7 @@ const TaskCompletionTooltip = ({ active, payload, label }: any) => {
 
 const COLORS = ['#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884d8', '#ff4d4d'];
 
-const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ analytics, tasks, taskPriorityAnalytics, taskCompletionTrend, categoryAnalytics, className }) => {
+const AnalyticsPanel: React.FC<AnalyticsPanelProps> = React.memo(({ analytics, tasks, taskPriorityAnalytics, taskCompletionTrend, categoryAnalytics, className }) => {
   const dailyStudyData = analytics.dailyStudyTime.slice(-7).map(d => ({
     name: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
     time: d.minutes,

@@ -91,7 +91,7 @@ const CARD_CONFIGS = [
   },
 ];
 
-const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
+const StatsGrid: React.FC<StatsGridProps> = React.memo(({ stats }) => {
   if (!stats) return null;
 
   const hoursStudied = stats.minutes_today ? Math.round(stats.minutes_today / 60 * 10) / 10 : 0;

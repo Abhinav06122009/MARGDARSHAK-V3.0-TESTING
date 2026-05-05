@@ -23,7 +23,7 @@ interface DashboardHeaderProps {
   extraActions?: React.ReactNode;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
+const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ 
   currentUser, realRole, isOnline, refreshing, onRefresh, onExport, extraActions 
 }) => {
   const { toast } = useToast();

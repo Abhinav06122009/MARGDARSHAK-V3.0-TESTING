@@ -37,7 +37,7 @@ import { BurnoutPredictorWidget } from './BurnoutPredictorWidget';
 import { TrendChart } from '@/components/ai/QuantumGraph'; 
 // Unified Footer is handled by GlobalFooter in App.tsx
 
-const GlassContainer = ({ children, className = "", glow = false }: { children: React.ReactNode, className?: string, glow?: boolean }) => (
+const GlassContainer = React.memo(({ children, className = "", glow = false }: { children: React.ReactNode, className?: string, glow?: boolean }) => (
   <motion.div
     whileHover={{ scale: 1.002 }}
     transition={{ duration: 0.2 }}
@@ -48,7 +48,7 @@ const GlassContainer = ({ children, className = "", glow = false }: { children: 
     )}
     {children}
   </motion.div>
-);
+));
 
 // --- LOCKED COMPONENTS ---
 
@@ -542,7 +542,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
             
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="w-full">
               <GlassContainer glow className="p-6">
-                <LeaderboardWidget />
+                <LeaderboardWidget 
+                  currentUser={currentUser} 
+                  stats={stats} 
+                  recentTasks={activeTasks} 
+                />
               </GlassContainer>
             </motion.div>
 

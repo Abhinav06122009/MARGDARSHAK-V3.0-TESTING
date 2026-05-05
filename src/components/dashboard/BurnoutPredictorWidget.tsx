@@ -17,7 +17,7 @@ interface BurnoutAnalysis {
   action: string;
 }
 
-export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = ({ stats }) => {
+export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = React.memo(({ stats }) => {
   const [analysis, setAnalysis] = useState<BurnoutAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState<boolean | null>(null);

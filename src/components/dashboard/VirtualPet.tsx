@@ -16,7 +16,7 @@ const PET_STATES = {
   galaxy: { emoji: '🌌', color: 'text-purple-400', message: 'Ascended intelligence!', glow: 'bg-purple-600/40' }
 };
 
-export const VirtualPet: React.FC<VirtualPetProps> = ({ stats, tasks }) => {
+export const VirtualPet: React.FC<VirtualPetProps> = React.memo(({ stats, tasks }) => {
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
   const minutes = stats?.minutes_today || 0;
   

@@ -63,7 +63,7 @@ const BUILT_IN_STATIONS: Station[] = [
   }
 ];
 
-export const GlobalWellnessBar: React.FC = () => {
+export const GlobalWellnessBar: React.FC = React.memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeId, setActiveId] = useState('lofi-focus');

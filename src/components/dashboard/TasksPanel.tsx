@@ -50,7 +50,7 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-const TasksPanel: React.FC<TasksPanelProps> = ({
+const TasksPanel: React.FC<TasksPanelProps> = React.memo(({
   tasks,
   filteredTasks,
   selectedTasks,

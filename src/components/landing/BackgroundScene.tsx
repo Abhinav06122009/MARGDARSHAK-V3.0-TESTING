@@ -67,33 +67,34 @@ export const BackgroundScene: React.FC = () => {
       const maxDist = isMobile ? 50 : 80;
       const maxDistSq = maxDist * maxDist;
 
+      // 1. Batch Line Drawing
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.04)';
+      ctx.lineWidth = 0.2;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < maxDistSq) {
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+          }
+        }
+      }
+      ctx.stroke();
+
+      // 2. Batch Particle Drawing (by color if possible, but here we just draw)
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
 
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Optimized line drawing
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.04)';
-        ctx.lineWidth = 0.2;
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const distSq = dx * dx + dy * dy;
-
-          if (distSq < maxDistSq) {
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-          }
-        }
-        ctx.stroke();
-
-        // Optimized particle drawing
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;

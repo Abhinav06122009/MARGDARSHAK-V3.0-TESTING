@@ -4,8 +4,13 @@ import { Trophy, Medal, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
-export const LeaderboardWidget: React.FC = () => {
-  const { currentUser, stats, recentTasks } = useDashboardData();
+interface LeaderboardWidgetProps {
+  currentUser: any;
+  stats: any;
+  recentTasks: any[];
+}
+
+export const LeaderboardWidget: React.FC<LeaderboardWidgetProps> = React.memo(({ currentUser, stats, recentTasks }) => {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -163,12 +163,12 @@ export const useDashboardData = () => {
     };
   }, [initializeDashboard]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await initializeDashboard();
-  };
+  }, [initializeDashboard]);
 
-  const handleCreateQuickTask = async () => {
+  const handleCreateQuickTask = useCallback(async () => {
     if (!currentUser) return;
     try {
       const newTask = await dashboardService.createQuickTask(currentUser.id);
@@ -177,9 +177,9 @@ export const useDashboardData = () => {
     } catch (error) {
       toast({ title: "Creation Failed", variant: "destructive" });
     }
-  };
+  }, [currentUser, toast]);
 
-  const handleTaskStatusUpdate = async (taskId: string, newStatus: string) => {
+  const handleTaskStatusUpdate = useCallback(async (taskId: string, newStatus: string) => {
     if (!currentUser) return;
     setRecentTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus as any } : t));
     try {
@@ -187,9 +187,9 @@ export const useDashboardData = () => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [currentUser]);
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = useCallback(async (taskId: string) => {
     setRecentTasks(prev => prev.filter(t => t.id !== taskId));
     
     const success = await deleteUtil(taskId);
@@ -202,12 +202,12 @@ export const useDashboardData = () => {
     } else {
       toast({ title: "Error", description: "Could not delete task", variant: "destructive" });
     }
-  };
+  }, [toast]);
 
-  const handleBulkDelete = async (taskIds: string[]) => {
+  const handleBulkDelete = useCallback(async (taskIds: string[]) => {
     setRecentTasks(prev => prev.filter(t => !taskIds.includes(t.id)));
     await bulkDeleteUtil(taskIds);
-  };
+  }, []);
 
   return {
     currentUser,
