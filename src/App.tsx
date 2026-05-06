@@ -322,16 +322,16 @@ const AppRoutes = () => {
             <AppRoutes />
           </Suspense>
 
-          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
+          {/* PERSISTENT VIEWPORT INTERFACE - STACKED BOTTOM LEFT */}
           {showContent && (
-            <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
-              <div className="pointer-events-auto">
-                <AIWidgetWrapper />
-                <GlobalQuickActions />
-                <AmbientSoundPlayer />
-                <MobileNavbar />
+            <>
+              <div className="fixed bottom-6 left-6 z-[999999] flex flex-col items-start gap-4 pointer-events-none">
+                  <AmbientSoundPlayer />
+                  <GlobalQuickActions />
               </div>
-            </div>
+              <AIWidgetWrapper />
+              <MobileNavbar />
+            </>
           )}
         </GlobalSecurityGuard>
       </div>
