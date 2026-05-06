@@ -3,12 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Music, CloudRain, Coffee, Headphones, Play, Pause,
   Volume2, VolumeX, ChevronUp, ChevronDown, X, Brain,
-  AlertTriangle, CheckCircle, Sunrise, Wind, Upload, Trash2, FolderOpen,
-  Sparkles, Lock
+  Upload, Trash2, FolderOpen, Sparkles, Lock, Command
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import aiService from '@/lib/aiService';
-import { useNavigate } from 'react-router-dom';
 import { courseService } from '@/components/dashboard/courseService';
 import { useToast } from '@/hooks/use-toast';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -23,7 +21,6 @@ interface Station {
   isCustom?: boolean;
 }
 
-// ─── Built-in Stations ────────────────────────────────────────────────────────
 const BUILT_IN_STATIONS: Station[] = [
   { id: 'lofi',       label: 'Lofi Focus',    Icon: Music,       color: 'text-purple-400', url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3' },
   { id: 'rain',       label: 'Heavy Rain',    Icon: CloudRain,   color: 'text-blue-400',   url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_dc39bde808.mp3?filename=heavy-rain-nature-sounds-8186.mp3' },
@@ -33,7 +30,6 @@ const BUILT_IN_STATIONS: Station[] = [
   { id: 'whitenoise', label: 'White Noise',   Icon: Wind,        color: 'text-zinc-500',   url: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_a47ef2cba8.mp3?filename=white-noise-10-minutes-39874.mp3' },
 ];
 
-// ─── Burnout Modal ────────────────────────────────────────────────────────────
 interface BurnoutAlert {
   score: number;
   message: string;
@@ -84,82 +80,43 @@ const BurnoutModal: React.FC<{ alert: BurnoutAlert; onDismiss: () => void }> = (
           </div>
           <div>
             <p className="text-zinc-700 text-sm leading-relaxed font-medium">{alert.message}</p>
-            <div className="flex gap-3 mt-3 text-xs text-zinc-500">
-              <span className="bg-zinc-100 px-2 py-1 rounded-lg">{alert.tasks_count} active tasks</span>
-              <span className="bg-red-500/10 text-red-600 px-2 py-1 rounded-lg">{alert.overdue} overdue</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-start gap-3 p-4 bg-zinc-50 rounded-2xl border border-zinc-200 mb-6">
-          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-1">AI Recommendation</p>
-            <p className="text-zinc-600 text-sm leading-relaxed">{alert.action}</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <button onClick={onDismiss} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-colors text-sm flex items-center justify-center gap-2">
-            <CheckCircle className="w-4 h-4" /> I'll Take a Break
-          </button>
-          <button onClick={onDismiss} className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-xl font-semibold transition-colors text-sm">Dismiss</button>
+          <button onClick={onDismiss} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-colors text-sm">Dismiss</button>
         </div>
       </div>
     </motion.div>
   </motion.div>
 );
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-interface AmbientSoundPlayerProps {
-  isWidget?: boolean;
-}
-
-export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget = false }) => {
-  const [expanded, setExpanded] = useState(true);
+export const AmbientSoundPlayer: React.FC<{ isWidget?: boolean }> = ({ isWidget = false }) => {
+  const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeId, setActiveId] = useState('lofi');
   const [volume, setVolume] = useState(0.45);
   const [isMuted, setIsMuted] = useState(false);
   const [customTracks, setCustomTracks] = useState<Station[]>([]);
-  const [isMinimized, setIsMinimized] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Burnout
+  const { user } = useContext(AuthContext);
   const [burnoutAlert, setBurnoutAlert] = useState<BurnoutAlert | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const { user } = useContext(AuthContext);
-  const [isPremium, setIsPremium] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
-  useEffect(() => {
-    courseService.getCurrentUser().then(userData => {
-      const tier = userData?.profile?.subscription_tier;
-      if (tier === 'premium' || tier === 'premium_elite') setIsPremium(true);
-    });
-  }, []);
-
-  // All stations = built-in + custom
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
 
-  // ── Volume / mute sync ───────────────────────────────────────────────────
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // ── Switch track: update src and resume if was playing ──────────────────
   useEffect(() => {
     if (!audioRef.current) return;
     const wasPlaying = isPlaying;
     audioRef.current.pause();
     audioRef.current.load();
-    if (wasPlaying) {
-      audioRef.current.play().catch(() => setIsPlaying(false));
-    }
+    if (wasPlaying) audioRef.current.play().catch(() => setIsPlaying(false));
   }, [activeId]);
 
   const togglePlay = () => {
@@ -169,31 +126,23 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
     setIsPlaying(p => !p);
   };
 
-  const selectStation = (id: string) => {
-    setActiveId(id);
-  };
-
-  // ── MP3 import ──────────────────────────────────────────────────────────
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-
     const newTracks: Station[] = files
-      .filter(f => f.type.startsWith('audio/') || f.name.endsWith('.mp3') || f.name.endsWith('.ogg') || f.name.endsWith('.wav') || f.name.endsWith('.flac'))
+      .filter(f => f.type.startsWith('audio/'))
       .map(f => ({
         id: `custom-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        label: f.name.replace(/\.[^.]+$/, '').slice(0, 20),
+        label: f.name.replace(/\.[^.]+$/, '').slice(0, 15),
         Icon: Music,
-        color: 'text-pink-400',
+        color: 'text-indigo-400',
         url: URL.createObjectURL(f),
         isCustom: true,
       }));
-
-    if (newTracks.length === 0) return;
-
-    setCustomTracks(prev => [...prev, ...newTracks]);
-    setActiveId(newTracks[0].id);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (newTracks.length) {
+      setCustomTracks(prev => [...prev, ...newTracks]);
+      setActiveId(newTracks[0].id);
+    }
   };
 
   const removeCustomTrack = (id: string, e: React.MouseEvent) => {
@@ -204,238 +153,125 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
     if (activeId === id) setActiveId('lofi');
   };
 
-  // ── Burnout check ────────────────────────────────────────────────────────
   const checkBurnout = useCallback(async () => {
     if (!user?.id) return;
-
-    const currentUser = await courseService.getCurrentUser();
-    const tier = currentUser?.profile?.subscription_tier;
-    if (tier !== 'premium' && tier !== 'premium_elite') return;
-
-    const { data: tasks } = await supabase
-      .from('tasks').select('status, due_date').eq('user_id', user.id);
-    if (!tasks || tasks.length === 0) return;
-
+    const { data: tasks } = await supabase.from('tasks').select('status, due_date').eq('user_id', user.id);
+    if (!tasks?.length) return;
     const pending = tasks.filter(t => t.status !== 'completed');
     const overdue = tasks.filter(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) < new Date());
-    const done = tasks.filter(t => t.status === 'completed');
-    const completionRate = Math.round((done.length / tasks.length) * 100);
-
-    let score = 0;
-    if (pending.length > 15) score += 30; else if (pending.length > 8) score += 15;
-    if (overdue.length > 5) score += 25;   else if (overdue.length > 2) score += 10;
-    if (completionRate < 40 && tasks.length > 5) score += 20;
-    score = Math.min(100, score);
-
-    if (score >= 45) {
-      const aiResult = await aiService.predictBurnout({
-        todayStudyTime: 0, studyStreak: 0,
-        inProgressTasks: pending.length, pendingTasks: pending.length,
-        overdueTasks: overdue.length, completionRate
+    if (pending.length > 8) {
+      setBurnoutAlert({
+        score: Math.min(100, pending.length * 8),
+        message: 'High workload detected.',
+        action: 'Take a short break.',
+        tasks_count: pending.length,
+        overdue: overdue.length
       });
-      const finalScore = aiResult?.score ?? score;
-      if (finalScore >= 45) {
-        setBurnoutAlert({
-          score: finalScore,
-          message: aiResult?.message ?? `You have ${pending.length} pending tasks, ${overdue.length} of which are overdue.`,
-          action: aiResult?.action ?? 'Consider taking a short break.',
-          tasks_count: pending.length, overdue: overdue.length
-        });
-      }
     }
   }, [user?.id]);
 
   useEffect(() => { checkBurnout(); }, [checkBurnout]);
 
-  const Icon = station.Icon;
-  const isCustomStation = station.isCustom;
-
   return (
     <>
-      <AnimatePresence>
-        {showModal && burnoutAlert && (
-          <BurnoutModal alert={burnoutAlert} onDismiss={() => setShowModal(false)} />
-        )}
-      </AnimatePresence>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="audio/*"
-        multiple
-        className="hidden"
-        onChange={handleFileImport}
-      />
+      <AnimatePresence>{showModal && burnoutAlert && <BurnoutModal alert={burnoutAlert} onDismiss={() => setShowModal(false)} />}</AnimatePresence>
+      <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={isWidget ? "relative w-full h-full" : "relative w-full max-w-6xl mx-auto px-4 mb-12 z-[10]"}
+        drag dragMomentum={false}
+        initial={isWidget ? { opacity: 0 } : { x: 32, y: typeof window !== 'undefined' ? window.innerHeight - 100 : 600 }}
+        className={isWidget ? "relative w-full h-full" : "fixed z-[9999] cursor-grab active:cursor-grabbing"}
       >
         <motion.div
           layout
-          className={`${isWidget ? 'w-full h-full' : 'w-full'} bg-zinc-100/70 backdrop-blur-[60px] border border-white/80 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] overflow-hidden text-zinc-900`}
+          className={`flex flex-col bg-[#111111]/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden text-white transition-all ${expanded ? 'w-80 p-6' : 'w-auto px-2 py-2 items-center'}`}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
-                <Sparkles className="text-indigo-600" size={20} />
-              </div>
-              <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-zinc-800">Built-in Station</h3>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">VSAV EDUKEEDA</p>
-              </div>
-            </div>
-            {!isWidget && (
+          {!expanded ? (
+            // PILL MODE (Compact like user image)
+            <div className="flex items-center gap-4 pl-1 pr-3">
               <button 
-                onClick={() => setExpanded(!expanded)}
-                className="p-2 hover:bg-black/5 rounded-full text-zinc-400 hover:text-zinc-600 transition-all"
+                onClick={togglePlay}
+                className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all text-white shadow-xl"
               >
-                {expanded ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
               </button>
-            )}
-          </div>
-
-          <AnimatePresence>
-            {expanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="px-5 pb-5 overflow-hidden"
-              >
-                {/* Mini Player Row */}
-                <div className="flex items-center gap-4 mb-6 p-4 bg-black/5 rounded-[1.5rem] border border-black/[0.03]">
-                  <button
-                    onClick={togglePlay}
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105 ${isPlaying ? 'bg-indigo-600 shadow-indigo-600/20' : 'bg-zinc-400'}`}
-                  >
-                    {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black truncate text-zinc-800 uppercase tracking-wide">{station.label}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Icon size={12} className={isPlaying ? 'text-indigo-600' : 'text-zinc-400'} />
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                        {isPlaying ? 'Playing' : 'Paused'}
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-2 hover:bg-black/5 rounded-full text-zinc-400 hover:text-indigo-600 transition-all"
-                    title="Import MP3"
-                  >
-                    <Upload size={14} />
-                  </button>
-                </div>
-
-                {/* Stations Grid */}
-                <div className="grid grid-cols-3 md:grid-cols-7 gap-3 mb-6">
-                  {BUILT_IN_STATIONS.map(s => {
-                    const SI = s.Icon;
-                    const isActive = activeId === s.id;
-                    return (
-                      <button 
-                        key={s.id} 
-                        onClick={() => selectStation(s.id)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg scale-105' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.08]'}`}
-                      >
-                        <SI className={`w-5 h-5 ${isActive ? 'text-white' : 'text-indigo-400'}`} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter truncate w-full text-center leading-tight">{s.label}</span>
-                      </button>
-                    );
-                  })}
-                  {/* Dedicated Upload Button in Grid */}
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border bg-indigo-50/50 border-indigo-100 text-indigo-600 hover:bg-indigo-100 transition-all border-dashed"
-                  >
-                    <FolderOpen className="w-5 h-5" />
-                    <span className="text-[10px] font-black uppercase tracking-tighter">Add MP3</span>
-                  </button>
-                </div>
-
-                {/* My Music Section (Enhanced) */}
-                {customTracks.length > 0 && (
-                  <div className="mb-6 animate-in slide-in-from-bottom-2 duration-300">
-                    <div className="flex items-center justify-between px-1 mb-2">
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Local Music Library</p>
-                      <span className="text-[8px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">
-                        {customTracks.length} tracks
-                      </span>
-                    </div>
-                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                      {customTracks.map(t => (
-                        <div key={t.id} 
-                          onClick={() => selectStation(t.id)}
-                          className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${activeId === t.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.05]'}`}
-                        >
-                          <Music size={12} className={activeId === t.id ? 'text-white' : 'text-indigo-400'} />
-                          <span className="flex-1 text-[10px] font-bold truncate uppercase tracking-tight">{t.label}</span>
-                          <button 
-                            onClick={(e) => removeCustomTrack(t.id, e)} 
-                            className={`p-1 transition-colors ${activeId === t.id ? 'text-white/70 hover:text-white' : 'text-zinc-300 hover:text-red-500'}`}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Volume & Burnout */}
-                <div className="mt-auto space-y-4">
-                  <div className="flex items-center gap-3 bg-black/5 p-2 rounded-xl border border-black/[0.03]">
-                    <button onClick={() => setIsMuted(!isMuted)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
-                      {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                    </button>
-                    <input
-                      type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume}
-                      onChange={e => setVolume(parseFloat(e.target.value))}
-                      className="flex-1 h-1 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-indigo-600"
-                    />
-                    <span className="text-[10px] font-black text-zinc-500 w-8 text-right tabular-nums">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
-                  </div>
-
-                  {burnoutAlert && (
-                    <button 
-                      onClick={() => setShowModal(true)}
-                      className="w-full flex items-center gap-2 p-3 bg-red-500/5 border border-red-500/10 rounded-2xl hover:bg-red-500/10 transition-colors group"
-                    >
-                      <Brain className="w-4 h-4 text-red-500 group-hover:animate-pulse" />
-                      <p className="text-[9px] font-black text-red-600 uppercase tracking-widest">Burnout Risk: {Math.round(burnoutAlert.score)}%</p>
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {!expanded && (
-            <div className="px-5 pb-5">
-               <div className="flex items-center gap-4 p-3 bg-black/5 rounded-2xl border border-black/[0.03] cursor-pointer hover:bg-black/[0.08] transition-colors" onClick={() => setExpanded(true)}>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm transition-all ${isPlaying ? 'bg-indigo-600 shadow-indigo-600/20' : 'bg-zinc-400'}`}
-                  >
-                    {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black truncate text-zinc-800 uppercase tracking-wider">{station.label}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <div className={`w-1 h-1 rounded-full ${isPlaying ? 'bg-indigo-600 animate-pulse' : 'bg-zinc-400'}`} />
-                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{isPlaying ? 'On Air' : 'Standby'}</p>
-                    </div>
-                  </div>
-               </div>
+              <div className="flex items-center gap-2 pr-2">
+                <Music size={14} className="text-zinc-500" />
+                <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">{station.label}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                 <button onClick={() => fileInputRef.current?.click()} className="text-zinc-500 hover:text-white transition-colors">
+                   <Upload size={14} />
+                 </button>
+                 {burnoutAlert && (
+                   <button onClick={() => setShowModal(true)} className="text-amber-500 hover:text-amber-400">
+                     <Lock size={14} />
+                   </button>
+                 )}
+                 <button onClick={() => setExpanded(true)} className="text-zinc-500 hover:text-white">
+                   <ChevronUp size={14} />
+                 </button>
+              </div>
             </div>
+          ) : (
+            // EXPANDED MODE
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                     <Sparkles size={20} className="text-white" />
+                   </div>
+                   <div>
+                     <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Sanctuary</h3>
+                     <p className="text-sm font-bold">{station.label}</p>
+                   </div>
+                </div>
+                <button onClick={() => setExpanded(false)} className="p-2 hover:bg-white/5 rounded-full text-zinc-500">
+                  <ChevronDown size={20} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-3xl border border-white/[0.05]">
+                <button onClick={togglePlay} className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all ${isPlaying ? 'bg-indigo-600' : 'bg-zinc-700'}`}>
+                  {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={e => setVolume(parseFloat(e.target.value))} className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500" />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[10px] font-black text-zinc-500 uppercase">Volume</span>
+                    <span className="text-[10px] font-black text-indigo-400">{Math.round(volume * 100)}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2 mb-6">
+                {BUILT_IN_STATIONS.map(s => (
+                  <button key={s.id} onClick={() => setActiveId(s.id)} className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${activeId === s.id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white/5 border-transparent text-zinc-500 hover:bg-white/10'}`}>
+                    <s.Icon size={14} />
+                    <span className="text-[8px] font-black uppercase tracking-tighter truncate w-full text-center">{s.label}</span>
+                  </button>
+                ))}
+                <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-dashed border-white/20 text-zinc-500 hover:bg-white/5">
+                   <FolderOpen size={14} />
+                   <span className="text-[8px] font-black uppercase">Add</span>
+                </button>
+              </div>
+
+              {customTracks.length > 0 && (
+                <div className="space-y-1 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                  {customTracks.map(t => (
+                    <div key={t.id} onClick={() => setActiveId(t.id)} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${activeId === t.id ? 'bg-indigo-600/20 border-indigo-600 text-indigo-400' : 'bg-white/5 border-transparent text-zinc-500'}`}>
+                      <Music size={12} />
+                      <span className="flex-1 text-[10px] font-black uppercase truncate">{t.label}</span>
+                      <button onClick={(e) => removeCustomTrack(t.id, e)} className="hover:text-red-500"><Trash2 size={12} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </motion.div>
       </motion.div>
-
       <audio ref={audioRef} src={station.url} loop className="hidden" />
     </>
   );
