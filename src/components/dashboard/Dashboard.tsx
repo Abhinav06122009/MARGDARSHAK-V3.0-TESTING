@@ -519,6 +519,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
 
 
 
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+               <Suspense fallback={<WidgetSkeleton />}>
+                 <AmbientSoundPlayer isWidget />
+               </Suspense>
+            </motion.div>
           </main>
 
           <aside className="xl:col-span-4 flex flex-col gap-6 h-full xl:sticky xl:top-6">

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Play, Pause, Volume2, VolumeX, Music, 
   CloudRain, Coffee, Headphones, ChevronUp, 
-  ChevronDown, X, Minimize2, Maximize2, Upload, Trash2
+  ChevronDown, X, Minimize2, Maximize2, Upload, Trash2,
+  Sparkles
 } from 'lucide-react';
 
 interface Station {
@@ -21,13 +22,17 @@ const DEFAULT_STATIONS: Station[] = [
   { id: 'binaural', name: 'Binaural', icon: Headphones, url: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3?filename=binaural-beats-focus-55618.mp3' }
 ];
 
-export const AmbientSoundPlayer = () => {
+interface AmbientSoundPlayerProps {
+  isWidget?: boolean;
+}
+
+export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [stations, setStations] = useState<Station[]>(DEFAULT_STATIONS);
   const [activeStation, setActiveStation] = useState<Station>(DEFAULT_STATIONS[0]);
   const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(!isWidget);
   const [isVisible, setIsVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,23 +90,21 @@ export const AmbientSoundPlayer = () => {
 
   return (
     <motion.div 
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className={`fixed bottom-24 left-6 z-[60] transition-all duration-500 ease-in-out ${
-        isMinimized ? 'w-14 h-14' : 'w-72'
-      }`}
+      initial={isWidget ? { opacity: 0, y: 20 } : { x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1, y: 0 }}
+      className={isWidget ? "relative w-full" : "fixed bottom-24 left-6 z-[60] transition-all duration-500 ease-in-out"}
     >
-      <div className="relative group">
+      <div className={`relative group ${isWidget ? 'h-full w-full' : ''}`}>
         <AnimatePresence mode="wait">
-          {isMinimized ? (
+          {isMinimized && !isWidget ? (
             <motion.button
               key="minimized"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               onClick={() => setIsMinimized(false)}
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl backdrop-blur-xl border border-white/40 transition-all ${
-                isPlaying ? 'bg-indigo-600 text-white shadow-indigo-500/20' : 'bg-white/80 text-indigo-600'
+              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl backdrop-blur-xl border border-white/60 transition-all ${
+                isPlaying ? 'bg-indigo-600 text-white shadow-indigo-500/20' : 'bg-white/90 text-indigo-600'
               }`}
             >
               {isPlaying ? (
@@ -115,10 +118,10 @@ export const AmbientSoundPlayer = () => {
           ) : (
             <motion.div
               key="maximized"
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={isWidget ? { opacity: 1 } : { scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white/90 backdrop-blur-3xl border border-white/50 rounded-[2rem] p-5 shadow-2xl overflow-hidden text-zinc-900"
+              className={`${isWidget ? 'w-full h-full' : 'w-72'} bg-white/95 backdrop-blur-[40px] border border-white/60 rounded-[2.5rem] p-5 shadow-[0_32px_64px_rgba(0,0,0,0.1)] overflow-hidden text-zinc-900`}
             >
               {/* Decorative Background */}
               <div className="absolute top-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
@@ -130,23 +133,27 @@ export const AmbientSoundPlayer = () => {
                   </div>
                   <div>
                     <h3 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Built-in Station</h3>
-                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest italic">A.I. Neural Focus</p>
+                    <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest italic flex items-center gap-1">
+                      <Sparkles size={8} /> A.I. Neural Hub
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
                    <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 hover:bg-black/5 rounded-full text-zinc-500 hover:text-indigo-600 transition-all"
+                    className="p-2 hover:bg-black/5 rounded-full text-zinc-400 hover:text-indigo-600 transition-all"
                     title="Upload Custom MP3"
                   >
                     <Upload size={14} />
                   </button>
-                  <button 
-                    onClick={() => setIsMinimized(true)}
-                    className="p-2 hover:bg-black/5 rounded-full text-zinc-500 hover:text-zinc-800 transition-all"
-                  >
-                    <Minimize2 size={14} />
-                  </button>
+                  {!isWidget && (
+                    <button 
+                      onClick={() => setIsMinimized(true)}
+                      className="p-2 hover:bg-black/5 rounded-full text-zinc-400 hover:text-zinc-800 transition-all"
+                    >
+                      <Minimize2 size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -158,7 +165,7 @@ export const AmbientSoundPlayer = () => {
                 className="hidden" 
               />
 
-              <div className="bg-zinc-100/50 border border-black/5 rounded-2xl p-4 mb-6 relative z-10">
+              <div className="bg-zinc-50/80 border border-black/5 rounded-2xl p-4 mb-6 relative z-10">
                 <div className="flex items-center gap-4 mb-4">
                   <button
                     onClick={togglePlay}
@@ -194,12 +201,12 @@ export const AmbientSoundPlayer = () => {
                     step="0.01"
                     value={volume}
                     onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="flex-1 h-1 bg-zinc-300 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                    className="flex-1 h-1 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-indigo-600"
                   />
                 </div>
               </div>
 
-              <div className="max-h-48 overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 gap-2 relative z-10">
+              <div className={`${isWidget ? 'max-h-32' : 'max-h-48'} overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 gap-2 relative z-10`}>
                 {stations.map(station => (
                   <div key={station.id} className="relative group/item">
                     <button
@@ -207,7 +214,7 @@ export const AmbientSoundPlayer = () => {
                       className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                         activeStation.id === station.id 
                         ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20' 
-                        : 'bg-zinc-100/50 border-black/5 text-zinc-600 hover:border-black/10 hover:text-zinc-900'
+                        : 'bg-white border-black/5 text-zinc-500 hover:border-black/10 hover:text-zinc-900'
                       }`}
                     >
                       <station.icon size={14} />
@@ -228,7 +235,6 @@ export const AmbientSoundPlayer = () => {
           )}
         </AnimatePresence>
       </div>
-
       <audio 
         ref={audioRef} 
         src={activeStation.url} 

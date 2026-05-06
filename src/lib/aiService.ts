@@ -316,7 +316,7 @@ export const aiService = {
    */
   predictBurnout: async (stats: any): Promise<any> => {
     try {
-      const systemPrompt = `Analyze stats for burnout. JSON: {"status": "...", "score": 0, "message": "...", "action": "..."} Stats: ${JSON.stringify(stats)}`;
+      const systemPrompt = `Analyze stats for burnout. Return JSON: {"status": "critical"|"warning"|"healthy", "score": integer 0-100, "message": "short summary", "action": "one specific recommendation"} Stats: ${JSON.stringify(stats)}`;
       const raw = await callPollinationsText([{ role: "user", content: systemPrompt }], true);
       return cleanAndParseJSON(raw) || null;
     } catch (e) {
