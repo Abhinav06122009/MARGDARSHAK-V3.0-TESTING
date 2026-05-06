@@ -196,9 +196,9 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
           >
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 text-xl text-white font-bold">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
                   <Palette className="w-6 h-6 text-white" />
@@ -215,8 +215,8 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
               </Button>
             </div>
             
-            <div className="overflow-y-auto px-4 pt-4 pb-2">
-              <form onSubmit={handleSubmit} className="space-y-4 p-1">
+            <div className="flex-grow overflow-y-auto p-6">
+              <form id="event-form" onSubmit={handleSubmit} className="space-y-6 p-1">
                 {/* Basic Event Information */}
                 <div className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
                   <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
@@ -315,16 +315,19 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
                   </div>
                 </div>
                 
-                {/* Form Actions */}
-                <div className="flex justify-end gap-3 pt-2 pb-2 px-6 border-t border-white/10">
-                  <Button type="button" variant="ghost" onClick={onClose} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl">
-                    <Save className="w-5 h-5 mr-2" /> {editingEvent ? 'Update' : 'Create'} Event
-                  </Button>
-                </div>
               </form>
+            </div>
+
+            {/* Sticky Footer Action Bar */}
+            <div className="shrink-0 p-6 border-t border-white/10 bg-zinc-950/80 backdrop-blur-md">
+              <div className="flex justify-end gap-4">
+                <Button type="button" variant="ghost" onClick={onClose} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">
+                  Cancel
+                </Button>
+                <Button type="submit" form="event-form" className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20">
+                  <Save className="w-5 h-5 mr-2" /> {editingEvent ? 'Update' : 'Create'} Event
+                </Button>
+              </div>
             </div>
           </motion.div>
         </>
