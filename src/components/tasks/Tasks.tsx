@@ -971,7 +971,7 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         title={modalState.title}
         message={modalState.message}
       />
-      <div className="w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 z-10">
+      <div className="w-full universal-container z-10 pt-12">
         {/* ── Premium Header ── */}
         <motion.div
           initial={{ opacity: 0, y: -24 }}

@@ -1005,7 +1005,7 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] animate-pulse" />
       </div>
 
-      <div className="w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 z-10 pt-12">
+      <div className="w-full universal-container z-10 pt-12">
         {/* Enhanced Header Architecture */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

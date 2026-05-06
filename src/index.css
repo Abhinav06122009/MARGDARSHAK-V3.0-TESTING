@@ -126,24 +126,46 @@
   }
 
   /* TV & Ultra-Wide Scaling (Universal View) */
+  @media (min-width: 1921px) {
+    :root {
+      --base-font-size: 1.15rem;
+      --container-width: 1800px;
+    }
+  }
+
   @media (min-width: 2560px) {
     :root {
-      --base-font-size: 1.75rem; /* Even larger base for TV distance */
-    }
-    .container {
-      max-width: 2000px !important;
-      margin-left: auto;
-      margin-right: auto;
+      --base-font-size: 1.35rem;
+      --container-width: 2200px;
     }
   }
 
   @media (min-width: 3840px) {
     :root {
-      --base-font-size: 2.5rem; /* 4K TV scaling */
+      --base-font-size: 1.75rem;
+      --container-width: 3200px;
     }
-    .container {
-      max-width: 3000px !important;
+  }
+
+  /* Handle Foldable Devices & Dual Screens */
+  @media (screen-spanning: single-fold-vertical) {
+    .universal-grid {
+      grid-template-columns: 1fr 1fr;
     }
+  }
+
+  /* Resolution-Independent Primitives */
+  .aspect-video-adaptive {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+
+  .full-screen-fluid {
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
   }
 
 
@@ -157,12 +179,21 @@
   /* Mobile Small Device Fixes (< 380px) */
   @media (max-width: 380px) {
     :root {
-      --base-font-size: 0.8rem;
+      --base-font-size: 0.85rem;
     }
-    .px-6 { padding-left: 1rem; padding-right: 1rem; }
-    .p-8 { padding: 1rem; }
-    .text-6xl { font-size: 2.5rem; }
-    .text-4xl { font-size: 1.75rem; }
+    .px-6 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .p-8 { padding: 1.25rem; }
+    .text-6xl { font-size: 2.25rem; }
+    .text-4xl { font-size: 1.5rem; }
+    .gap-6 { gap: 1rem; }
+  }
+
+  /* High Resolution / Retina Image Sharpening */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    img {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
   }
 
   * {
@@ -190,11 +221,43 @@
 
   /* Universal Screen Layout Utilities */
   .universal-container {
-    @apply w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: var(--container-width, 1400px); /* Default to 1400 for balance */
+    transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Deep Resolution Intelligence */
+  @media (min-width: 1921px) {
+    :root {
+      --container-width: 1800px;
+      --base-font-size: 1.125rem;
+    }
+  }
+  @media (min-width: 2560px) {
+    :root {
+      --container-width: 2400px;
+      --base-font-size: 1.25rem;
+    }
+  }
+  @media (min-width: 3840px) {
+    :root {
+      --container-width: 3400px;
+      --base-font-size: 1.75rem;
+    }
+  }
+
+  /* Global Override for standard Tailwind max-w to ensure they aren't 'too' small on large screens */
+  .max-w-7xl {
+    max-width: clamp(1280px, 85vw, var(--container-width, 3200px)) !important;
+  }
+  
+  .max-w-screen-2xl {
+    max-width: clamp(1536px, 95vw, var(--container-width, 3840px)) !important;
+  }
+
+  /* Responsive Padding Optimization */
   .universal-padding {
-    padding: clamp(1rem, 5vw, 3rem);
+    padding: clamp(1.25rem, 6vw, 4rem);
   }
 
   .universal-grid {
