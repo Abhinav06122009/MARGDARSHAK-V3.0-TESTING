@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Play, Pause, SkipForward, SkipBack, Volume2, 
+import {
+  Play, Pause, SkipForward, SkipBack, Volume2,
   Wind, Coffee, Moon, Sun, Heart, Flame,
   BrainCircuit, Music, Sliders, ChevronUp, ChevronDown,
   Sparkles, Zap, Shield, Waves, ListMusic, Plus, Trash2,
@@ -25,38 +25,38 @@ interface Station {
 
 // ─── Built-in Lofi/Ambient Stations ──────────────────────────────────────────
 const BUILT_IN_STATIONS: Station[] = [
-  { 
-    id: 'lofi-focus', 
-    name: 'Deep Focus', 
+  {
+    id: 'lofi-focus',
+    name: 'Deep Focus',
     url: 'https://stream.zeno.fm/0r0xa792kwzuv',
-    icon: BrainCircuit, 
+    icon: BrainCircuit,
     color: 'text-amber-400',
     bgGradient: 'from-amber-500/20 to-orange-500/10',
     description: 'Binaural beats & lofi for intense studying'
   },
-  { 
-    id: 'rain-ambient', 
-    name: 'Cyber Rain', 
-    url: 'https://luna.shoutca.st/proxy/lofi?mp=/stream',
-    icon: Waves, 
+  {
+    id: 'rain-ambient',
+    name: 'Cyber Rain',
+    url: 'https://boxradio-edge-00.streamafrica.net/lofi',
+    icon: Waves,
     color: 'text-blue-400',
     bgGradient: 'from-blue-500/20 to-indigo-500/10',
     description: 'Soothing rain with neon-city vibes'
   },
-  { 
-    id: 'zen-garden', 
-    name: 'Zen Garden', 
-    url: 'https://icecast.walmradio.com:8000/lofi',
-    icon: Wind, 
+  {
+    id: 'zen-garden',
+    name: 'Zen Garden',
+    url: 'https://ambient.stream.laut.fm/ambient',
+    icon: Wind,
     color: 'text-emerald-400',
     bgGradient: 'from-emerald-500/20 to-teal-500/10',
     description: 'Traditional instruments & natural echoes'
   },
-  { 
-    id: 'midnight-jazz', 
-    name: 'Night Owl', 
+  {
+    id: 'midnight-jazz',
+    name: 'Night Owl',
     url: 'https://stream.zeno.fm/f3v5u7z61u8uv',
-    icon: Moon, 
+    icon: Moon,
     color: 'text-purple-400',
     bgGradient: 'from-purple-500/20 to-fuchsia-500/10',
     description: 'Smooth jazz for late-night productivity'
@@ -72,7 +72,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
   const [burnoutLevel, setBurnoutLevel] = useState(0);
   const [customTracks, setCustomTracks] = useState<Station[]>([]);
   const [showAddTrack, setShowAddTrack] = useState(false);
-  
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastFetchRef = useRef<number>(0);
   const { user: authUser } = useAuth();
@@ -109,9 +109,9 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
 
   const togglePlay = useCallback(() => {
     if (!isPremium && !station.id.includes('custom')) {
-      toast({ 
-        title: "Premium Required", 
-        description: "Built-in Stations require a Premium subscription.", 
+      toast({
+        title: "Premium Required",
+        description: "Built-in Stations require a Premium subscription.",
         variant: "destructive",
         action: <button onClick={() => navigate('/upgrade')} className="px-3 py-1 bg-white text-black text-xs font-bold rounded">Upgrade</button>
       });
@@ -138,17 +138,17 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
   // ─── AI Burnout Detection (Throttled) ─────────────────────────────────────
   const checkBurnout = useCallback(async () => {
     if (!authUser) return;
-    
+
     const now = Date.now();
     if (now - lastFetchRef.current < 300000) return; // 5 minute throttle
     lastFetchRef.current = now;
 
     try {
       const data = await dashboardService.fetchAllUserData(authUser.id);
-      const overdueCount = (data.tasks || []).filter((t: any) => 
+      const overdueCount = (data.tasks || []).filter((t: any) =>
         t.due_date && new Date(t.due_date) < new Date() && t.status !== 'completed'
       ).length;
-      
+
       const studyTimeToday = (data.studySessions || [])
         .filter((s: any) => s.start_time?.startsWith(new Date().toISOString().split('T')[0]))
         .reduce((sum: number, s: any) => sum + (s.duration || 0), 0);
@@ -158,9 +158,9 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
       if (studyTimeToday > 240) level += 30; // Over 4 hours study
       if (overdueCount > 5) level += 40;     // Many overdue tasks
       if (studyTimeToday > 480) level += 30; // Over 8 hours study
-      
+
       setBurnoutLevel(Math.min(100, level));
-      
+
       if (level > 70) {
         toast({
           title: "High Burnout Detected ⚠️",
@@ -207,10 +207,10 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
 
   return (
     <>
-      <audio 
-        ref={audioRef} 
-        src={station.url} 
-        onPlay={() => setIsPlaying(true)} 
+      <audio
+        ref={audioRef}
+        src={station.url}
+        onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         key={station.id}
         loop
@@ -235,7 +235,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                 <Heart className={`w-4 h-4 ${burnoutLevel > 70 ? 'text-red-500 animate-pulse' : 'text-emerald-500'}`} />
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Wellness</span>
               </div>
-              
+
               <div className="flex items-center gap-1.5 p-1.5 bg-indigo-500/20 rounded-full">
                 {isPlaying ? (
                   <div className="flex gap-0.5 items-end h-3 w-4 px-0.5">
@@ -292,15 +292,15 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                   [...Array(12)].map((_, i) => (
                     <motion.div
                       key={i}
-                      animate={{ 
+                      animate={{
                         height: [
-                          Math.random() * 40 + 20 + '%', 
-                          Math.random() * 60 + 40 + '%', 
+                          Math.random() * 40 + 20 + '%',
+                          Math.random() * 60 + 40 + '%',
                           Math.random() * 40 + 20 + '%'
-                        ] 
+                        ]
                       }}
-                      transition={{ 
-                        repeat: Infinity, 
+                      transition={{
+                        repeat: Infinity,
                         duration: 0.4 + Math.random() * 0.4,
                         ease: "easeInOut"
                       }}
@@ -316,7 +316,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
             {/* Controls */}
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-center gap-8">
-                <button 
+                <button
                   onClick={() => {
                     const idx = allStations.findIndex(s => s.id === activeId);
                     const prev = allStations[(idx - 1 + allStations.length) % allStations.length];
@@ -326,21 +326,20 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                 >
                   <SkipBack className="w-6 h-6" />
                 </button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={togglePlay}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
-                    isPlaying 
-                      ? 'bg-white text-black' 
+                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${isPlaying
+                      ? 'bg-white text-black'
                       : 'bg-indigo-500 text-white shadow-indigo-500/20'
-                  }`}
+                    }`}
                 >
                   {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
                 </motion.button>
 
-                <button 
+                <button
                   onClick={() => {
                     const idx = allStations.findIndex(s => s.id === activeId);
                     const next = allStations[(idx + 1) % allStations.length];
@@ -360,8 +359,8 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                 </div>
                 <div className="flex items-center gap-3">
                   <Volume2 className="w-4 h-4 text-zinc-600" />
-                  <input 
-                    type="range" min="0" max="1" step="0.01" 
+                  <input
+                    type="range" min="0" max="1" step="0.01"
                     value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))}
                     className="w-full h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-indigo-500"
                   />
@@ -379,16 +378,16 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                   </span>
                 </div>
                 <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${burnoutLevel}%` }}
-                    className={`h-full rounded-full ${burnoutLevel > 70 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-emerald-500'}`} 
+                    className={`h-full rounded-full ${burnoutLevel > 70 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-emerald-500'}`}
                   />
                 </div>
               </div>
 
               {/* Station Selection */}
-              <button 
+              <button
                 onClick={() => setShowStations(!showStations)}
                 className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 transition-all"
               >
@@ -411,9 +410,8 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                       <button
                         key={s.id}
                         onClick={() => switchStation(s.id)}
-                        className={`w-full p-3 rounded-xl flex items-center gap-4 transition-all ${
-                          activeId === s.id ? 'bg-indigo-500/20 border border-indigo-500/30' : 'hover:bg-white/5 border border-transparent'
-                        }`}
+                        className={`w-full p-3 rounded-xl flex items-center gap-4 transition-all ${activeId === s.id ? 'bg-indigo-500/20 border border-indigo-500/30' : 'hover:bg-white/5 border border-transparent'
+                          }`}
                       >
                         <div className={`p-2 rounded-lg bg-zinc-900 ${activeId === s.id ? s.color : 'text-zinc-600'}`}>
                           <s.icon className="w-4 h-4" />
@@ -426,7 +424,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                       </button>
                     ))}
 
-                    <button 
+                    <button
                       onClick={() => setShowAddTrack(true)}
                       className="w-full p-3 rounded-xl border border-dashed border-zinc-700 hover:border-indigo-500/50 hover:bg-indigo-500/5 flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-500 transition-all"
                     >
@@ -457,7 +455,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
                 <p className="text-white font-bold">Please log in</p>
               </div>
             )}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowAddTrack(false)}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
@@ -491,7 +489,7 @@ export const GlobalWellnessBar: React.FC = React.memo(() => {
 
               <div className="flex gap-3">
                 <button onClick={() => setShowAddTrack(false)} className="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:bg-white/5 rounded-xl transition-all">Cancel</button>
-                <button 
+                <button
                   onClick={() => {
                     const name = (document.getElementById('track-name') as HTMLInputElement).value;
                     const url = (document.getElementById('track-url') as HTMLInputElement).value;
