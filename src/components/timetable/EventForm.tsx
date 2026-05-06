@@ -127,8 +127,8 @@ const EventForm: React.FC<EventFormProps> = ({
         </div>
         
         {/* Scrollable Command Body */}
-        <div className="overflow-y-auto p-8 custom-scrollbar space-y-12">
-          <form onSubmit={handleSubmit} className="space-y-12">
+        <div className="overflow-y-auto p-6 custom-scrollbar space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
             
             {/* --- PRIMARY INTEL --- */}
             <motion.section variants={itemVariants} className="space-y-6">
@@ -266,11 +266,11 @@ const EventForm: React.FC<EventFormProps> = ({
         </div>
 
         {/* Footer Action Bar */}
-        <div className="p-8 border-t border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0 flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0 flex items-center justify-between gap-4">
           <Button
             variant="ghost"
             onClick={onClose}
-            className="px-6 h-14 text-xs font-black text-zinc-500 uppercase tracking-widest hover:text-white transition-colors"
+            className="px-6 h-12 text-xs font-black text-zinc-500 uppercase tracking-widest hover:text-white transition-colors"
           >
             Cancel
           </Button>
@@ -278,7 +278,7 @@ const EventForm: React.FC<EventFormProps> = ({
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={(e: any) => handleSubmit(e)}
-            className="px-8 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-indigo-500/20 transition-all duration-300 flex items-center gap-3"
+            className="px-8 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-indigo-500/20 transition-all duration-300 flex items-center gap-3"
           >
             <Save size={18} />
             {editingEvent ? 'Update Record' : 'Create Record'}
