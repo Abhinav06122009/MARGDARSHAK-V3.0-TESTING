@@ -117,7 +117,7 @@ export const AmbientSoundPlayer: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
   return (
-    <div className="fixed z-[99999999] bottom-52 left-12" style={{ position: 'fixed', bottom: '208px', left: '48px', zIndex: 99999999 }}>
+    <div className="relative pointer-events-auto">
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div

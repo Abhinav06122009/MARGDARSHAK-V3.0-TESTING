@@ -133,7 +133,7 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
   const dockWidthClass = isDocked ? 'w-[min(92vw,700px)] max-w-[700px]' : '';
 
   return (
-    <div className="fixed z-[99999999] bottom-20 left-12" style={{ position: 'fixed', bottom: '80px', left: '48px', zIndex: 99999999 }}>
+    <div className="relative pointer-events-auto">
       <motion.div
         drag={!isDocked}
         dragMomentum={false}

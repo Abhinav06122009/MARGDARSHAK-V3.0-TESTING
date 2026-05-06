@@ -323,19 +323,20 @@ const AppRoutes = () => {
 
         </GlobalSecurityGuard>
 
-        {/* PERSISTENT UI OVERLAYS - Moved outside guard for stability */}
+        {/* CENTRALIZED PERSISTENT UI LAYER - ANCHORED TO VIEWPORT */}
         {showContent && (
-          <>
+          <div className="fixed bottom-24 left-8 z-[99999999] pointer-events-none flex flex-col items-start gap-6">
             <AmbientSoundPlayer />
             <GlobalQuickActions />
             
+            {/* Auxiliary fixed elements */}
             <div className="fixed bottom-0 left-0 z-[99999998] pointer-events-none">
               <div className="pointer-events-auto">
                 <AIWidgetWrapper />
                 <MobileNavbar />
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
 
