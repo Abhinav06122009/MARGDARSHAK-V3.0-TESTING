@@ -109,6 +109,13 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
     return groups;
   }, [filteredActions]);
 
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const activeActionTitle = useMemo(() => {
     if (activeSection && SECTION_TO_ACTION[activeSection]) return SECTION_TO_ACTION[activeSection];
 
@@ -136,7 +143,10 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
         drag={!isDocked}
         dragMomentum={false}
         initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ 
+          opacity: 1, 
+          y: scrollY * 0.05 
+        }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className={`pointer-events-auto ${isDocked ? '' : 'cursor-grab active:cursor-grabbing'}`}
       >
