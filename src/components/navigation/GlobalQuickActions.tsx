@@ -100,7 +100,7 @@ export const GlobalQuickActions: React.FC = () => {
   if (!session) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+    <div className="fixed bottom-6 left-6 z-[9999] pointer-events-none">
       <motion.div
         drag dragMomentum={false}
         animate={{ y: Math.sin(scrollY * 0.01) * 4 }}
