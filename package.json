@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.1.0",
   "description": "MARGDARSHAK - The Ultimate Student Platform",
-  "author": "VSAV GYANTA",
+  "author": "VSAV GYANTAPA",
   "type": "module",
   "main": "electron-main.cjs",
   "engines": {
@@ -154,13 +154,16 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/logo.png"
+      "icon": "public/logo.png",
+      "publisherName": "VSAV GYANTAPA",
+      "legalCopyright": "Copyright © 2026 VSAV GYANTAPA"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "MARGDARSHAK"
+      "shortcutName": "MARGDARSHAK",
+      "publisherName": "VSAV GYANTAPA"
     }
   }
 }
