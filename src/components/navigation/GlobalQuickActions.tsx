@@ -39,9 +39,23 @@ const DOCK_ACTIONS: Action[] = [
 export const GlobalQuickActions: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
   const { session } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { scrollY } = useScroll();
+  const lastScrollY = useRef(0);
+
+  // Auto hide/show on scroll
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const diff = latest - lastScrollY.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && latest > 100) setIsVisible(false);
+      else setIsVisible(true);
+      lastScrollY.current = latest;
+    }
+  });
 
   if (!session) return null;
 
@@ -49,6 +63,8 @@ export const GlobalQuickActions: React.FC = () => {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
       <motion.div
         drag dragMomentum={false}
+        animate={{ y: isVisible ? 0 : 150, opacity: isVisible ? 1 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div

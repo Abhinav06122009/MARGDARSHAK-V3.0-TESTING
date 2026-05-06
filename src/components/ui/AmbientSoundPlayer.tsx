@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import {
   Music, CloudRain, Coffee, Headphones, Play, Pause,
   Volume2, VolumeX, ChevronUp, ChevronDown, X, Brain,
@@ -27,6 +27,11 @@ const BUILT_IN_STATIONS: Station[] = [
   { id: 'whitenoise', label: 'White Noise',   Icon: Wind,        url: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_a47ef2cba8.mp3?filename=white-noise-10-minutes-39874.mp3' },
 ];
 
+interface BurnoutAlert {
+  score: number;
+  message: string;
+}
+
 export const AmbientSoundPlayer: React.FC = () => {
   const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,10 +39,25 @@ export const AmbientSoundPlayer: React.FC = () => {
   const [volume, setVolume] = useState(0.45);
   const [isMuted, setIsMuted] = useState(false);
   const [customTracks, setCustomTracks] = useState<Station[]>([]);
+  const [isVisible, setIsVisible] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(AuthContext);
+  const [burnout, setBurnout] = useState<BurnoutAlert | null>(null);
+
+  const { scrollY } = useScroll();
+  const lastScrollY = useRef(0);
+
+  // Auto hide/show on scroll
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const diff = latest - lastScrollY.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && latest > 100) setIsVisible(false);
+      else setIsVisible(true);
+      lastScrollY.current = latest;
+    }
+  });
 
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
@@ -79,12 +99,42 @@ export const AmbientSoundPlayer: React.FC = () => {
     }
   };
 
+  // Real Burnout Logic
+  const syncBurnout = useCallback(async () => {
+    if (!user?.id) return;
+    const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id).neq('status', 'completed');
+    if (!tasks) return;
+    
+    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date());
+    const highPrio = tasks.filter(t => t.priority === 'high');
+    
+    const score = Math.min(100, (tasks.length * 5) + (overdue.length * 15) + (highPrio.length * 10));
+    
+    let message = "Mind is clear. Ready to focus.";
+    if (score > 80) message = "Extreme Burnout Risk. Stop and Rest.";
+    else if (score > 50) message = "High Stress. Take a breather.";
+    else if (score > 30) message = "Moderate Load. Stay steady.";
+
+    setBurnout({ score, message });
+  }, [user?.id]);
+
+  useEffect(() => {
+    syncBurnout();
+    // Realtime sync for tasks
+    const channel = supabase.channel('tasks_burnout')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${user?.id}` }, syncBurnout)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, syncBurnout]);
+
   return (
     <div className="fixed z-[9999] bottom-6 left-6 pointer-events-none">
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
         drag dragMomentum={false}
+        animate={{ y: isVisible ? 0 : 150, opacity: isVisible ? 1 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
@@ -92,9 +142,7 @@ export const AmbientSoundPlayer: React.FC = () => {
           className={`flex flex-col bg-[#1A1A1A] border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[360px]' : 'w-auto'}`}
         >
           {expanded ? (
-            // ─── EXPANDED UI (Matches Second Image) ──────────────────────────
             <div className="p-6 space-y-6">
-              {/* Header */}
               <div className="flex items-center justify-between">
                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Built-in Stations</span>
                  <button onClick={() => setExpanded(false)} className="text-zinc-500 hover:text-white transition-colors">
@@ -102,16 +150,11 @@ export const AmbientSoundPlayer: React.FC = () => {
                  </button>
               </div>
 
-              {/* Stations Grid */}
               <div className="grid grid-cols-3 gap-3">
                 {BUILT_IN_STATIONS.map(s => {
                   const isActive = activeId === s.id;
                   return (
-                    <button 
-                      key={s.id} 
-                      onClick={() => setActiveId(s.id)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${isActive ? 'bg-[#2A2A2A] border-purple-500/50 text-white shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'bg-[#222222] border-transparent text-zinc-500 hover:bg-[#252525]'}`}
-                    >
+                    <button key={s.id} onClick={() => setActiveId(s.id)} className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${isActive ? 'bg-[#2A2A2A] border-purple-500/50 text-white shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'bg-[#222222] border-transparent text-zinc-500 hover:bg-[#252525]'}`}>
                       <s.Icon size={20} className={isActive ? 'text-purple-400' : 'text-zinc-500'} />
                       <span className="text-[10px] font-bold tracking-tight">{s.label}</span>
                     </button>
@@ -119,30 +162,21 @@ export const AmbientSoundPlayer: React.FC = () => {
                 })}
               </div>
 
-              {/* My Music Header */}
               <div className="flex items-center justify-between">
                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">My Music</span>
-                 <button 
-                   onClick={() => fileInputRef.current?.click()}
-                   className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg text-[10px] font-bold hover:bg-indigo-600/30 transition-all border border-indigo-500/20"
-                 >
+                 <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg text-[10px] font-bold hover:bg-indigo-600/30 transition-all border border-indigo-500/20">
                    <Upload size={12} />
                    Import MP3
                  </button>
               </div>
 
-              {/* Upload Box */}
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="group relative flex flex-col items-center justify-center py-10 border-2 border-dashed border-zinc-800 rounded-2xl cursor-pointer hover:border-indigo-500/50 transition-all bg-[#222222]/50 overflow-hidden"
-              >
+              <div onClick={() => fileInputRef.current?.click()} className="group relative flex flex-col items-center justify-center py-10 border-2 border-dashed border-zinc-800 rounded-2xl cursor-pointer hover:border-indigo-500/50 transition-all bg-[#222222]/50 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <FolderOpen size={32} className="text-zinc-700 group-hover:text-indigo-400 transition-colors mb-3" />
                 <p className="text-[11px] font-bold text-zinc-500 group-hover:text-zinc-300">Click to import MP3, WAV, FLAC files</p>
                 <p className="text-[9px] text-zinc-600 mt-1">Files stay local — nothing is uploaded</p>
               </div>
 
-              {/* Custom Tracks List (If any) */}
               {customTracks.length > 0 && (
                 <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
                    {customTracks.map(t => (
@@ -155,27 +189,25 @@ export const AmbientSoundPlayer: React.FC = () => {
                 </div>
               )}
 
-              {/* Volume Slider */}
               <div className="flex items-center gap-4 pt-2">
                 <button onClick={() => setIsMuted(!isMuted)} className="text-zinc-500 hover:text-white transition-colors">
                   {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
-                <input 
-                  type="range" min="0" max="1" step="0.01" 
-                  value={isMuted ? 0 : volume} 
-                  onChange={e => setVolume(parseFloat(e.target.value))} 
-                  className="flex-1 h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-indigo-500"
-                />
+                <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={e => setVolume(parseFloat(e.target.value))} className="flex-1 h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-indigo-500" />
                 <span className="text-[10px] font-black text-zinc-600 tabular-nums w-8 text-right">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
               </div>
 
-              {/* Premium Predictor Row */}
-              <div className="flex items-center gap-3 py-3 px-4 bg-[#2A1F00]/30 border border-amber-500/20 rounded-xl">
-                 <Lock size={16} className="text-amber-500" />
-                 <span className="text-[11px] font-bold text-amber-500/90 tracking-tight">AI Burnout Predictor (Premium)</span>
-              </div>
+              {/* Real Burnout Section */}
+              {burnout && (
+                <div className={`flex flex-col gap-2 py-3 px-4 rounded-xl border ${burnout.score > 50 ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
+                   <div className="flex items-center gap-3">
+                      <Brain size={16} />
+                      <span className="text-[11px] font-bold tracking-tight">AI Burnout Predictor: {Math.round(burnout.score)}%</span>
+                   </div>
+                   <p className="text-[9px] font-medium opacity-80 pl-7 uppercase tracking-wider">{burnout.message}</p>
+                </div>
+              )}
 
-              {/* Bottom Mini Bar (Integrated in Expanded) */}
               <div className="flex items-center gap-4 bg-[#0A0A0A] p-2 rounded-2xl border border-white/5">
                 <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black shadow-lg">
                   {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-1" />}
@@ -186,17 +218,13 @@ export const AmbientSoundPlayer: React.FC = () => {
                 </div>
                 <div className="ml-auto flex items-center gap-3 px-2">
                    <Upload size={14} className="text-zinc-500 hover:text-white cursor-pointer" onClick={() => fileInputRef.current?.click()} />
-                   <Lock size={14} className="text-amber-500 cursor-pointer" />
+                   <Sparkles size={14} className="text-indigo-400 cursor-pointer" />
                 </div>
               </div>
             </div>
           ) : (
-            // ─── COMPACT PILL MODE (Matches Bottom-Left of First Image) ──────
             <div className="flex items-center gap-4 p-2 pl-2 pr-4 bg-[#1A1A1A] border border-white/5 rounded-full shadow-2xl">
-              <button 
-                onClick={togglePlay}
-                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-all text-white shadow-xl"
-              >
+              <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-all text-white shadow-xl">
                 {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-1" />}
               </button>
               <div className="flex items-center gap-2.5">
@@ -205,7 +233,7 @@ export const AmbientSoundPlayer: React.FC = () => {
               </div>
               <div className="flex items-center gap-4 pl-2 border-l border-white/5">
                  <Upload size={14} className="text-zinc-600 hover:text-white transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()} />
-                 <Lock size={14} className="text-amber-500/80 hover:text-amber-400 transition-colors cursor-pointer" />
+                 {burnout && burnout.score > 30 && <Brain size={14} className={burnout.score > 70 ? "text-red-500 animate-pulse" : "text-amber-500"} />}
                  <button onClick={() => setExpanded(true)} className="text-zinc-600 hover:text-white transition-colors">
                    <ChevronUp size={16} />
                  </button>
