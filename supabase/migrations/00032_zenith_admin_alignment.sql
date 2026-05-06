@@ -43,7 +43,24 @@ BEGIN
 END;
 $$;
 
--- 2. RE-SYNCHRONIZE MASTER OVERRIDE POLICIES
+-- 2. HARMONIZE ADDITIONAL SECURITY HELPERS
+-- Function to check if a user is a "High Ranked Official" (Admin, Superadmin, Owner, or Elite Tier)
+CREATE OR REPLACE FUNCTION public.is_high_ranked(p_user_id TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN (public.get_current_user_role() = 'admin');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to check if a user is Admin Staff (Harmonized with Zenith Identity)
+CREATE OR REPLACE FUNCTION public.is_admin_staff(p_user_id TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN (public.get_current_user_role() = 'admin');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. RE-SYNCHRONIZE MASTER OVERRIDE POLICIES
 -- We re-run the stabilization logic to ensure all tables are using the updated role function.
 DO $$
 DECLARE

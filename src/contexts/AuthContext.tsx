@@ -79,6 +79,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
             user_type: role,
+            subscription_tier: tier,
+            subscription_status: subscription.status || 'inactive',
             updated_at: new Date().toISOString()
           };
 
