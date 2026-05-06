@@ -6,7 +6,8 @@ import {
   GraduationCap, FileText, Sparkles, BarChart3,
   Trophy, Calendar, Book, Headphones, Settings,
   Briefcase, Timer, MousePointer2, User, Hash,
-  Clock, ArrowUp
+  Clock, ArrowUp, LayoutGrid, ClipboardCheck,
+  Target, ShieldCheck, FileSearch
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -22,319 +23,132 @@ interface Action {
   keywords: string[];
 }
 
-// ─── Master Action Registry ───────────────────────────────────────────────────
-const ALL_ACTIONS: Action[] = [
-  // --- IDENTITY & ACCESS ---
-  { icon: Command, title: 'Dashboard', subtitle: 'Main command center and framework overview', color: 'from-blue-600 to-indigo-700', path: '/dashboard', category: 'Identity & Access', keywords: ['dash', 'dashboard', 'home', 'main'] },
-  { icon: User, title: 'Profile', subtitle: 'Manage your universal holographic ID', color: 'from-zinc-400 to-zinc-600', path: '/profile', category: 'Identity & Access', keywords: ['profile', 'identity', 'user', 'account', 'bio'] },
-  { icon: Sparkles, title: 'Premium Upgrade', subtitle: 'Ascend to Elite or Multi-core tiers', color: 'from-yellow-400 to-amber-600', path: '/upgrade', category: 'Identity & Access', keywords: ['premium', 'upgrade', 'elite', 'tier'] },
-  { icon: Settings, title: 'Settings', subtitle: 'Configure Margdarshak parameters', color: 'from-zinc-500 to-zinc-700', path: '/settings', category: 'Identity & Access', keywords: ['settings', 'preference', 'config', 'account'] },
-  { icon: Zap, title: 'Profile Settings', subtitle: 'Authentication and session management enclave', color: 'from-zinc-700 to-zinc-900', path: '/auth', category: 'Identity & Access', keywords: ['login', 'auth', 'identity'] },
-
-  // --- COGNITIVE SUITE ---
-  { icon: BrainCircuit, title: 'AI Assistant', subtitle: 'Chat With Margdarshak Saarthi', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'Cognitive Suite', keywords: ['ai', 'tutor', 'question', 'assistant', 'chat', 'saarthi'] },
-  { icon: Sparkles, title: 'Study Planner', subtitle: 'Academic Study Planner', color: 'from-emerald-400 to-teal-500', path: '/study-planner', category: 'Cognitive Suite', keywords: ['plan', 'schedule', 'study', 'planner', 'time'] },
-  { icon: GraduationCap, title: 'Quiz Generator', subtitle: 'Quiz Generator', color: 'from-purple-500 to-violet-600', path: '/quiz', category: 'Cognitive Suite', keywords: ['quiz', 'test', 'exam', 'mcq', 'generate'] },
-  { icon: FileText, title: 'Essay Helper', subtitle: 'AI writing assistance and drafting module', color: 'from-sky-400 to-blue-500', path: '/essay-helper', category: 'Cognitive Suite', keywords: ['essay', 'write', 'writing', 'draft', 'help'] },
-  { icon: Library, title: 'Flashcards', subtitle: 'AI spaced repetition for mastery', color: 'from-lime-400 to-emerald-500', path: '/flashcards', category: 'Cognitive Suite', keywords: ['flash', 'card', 'memory', 'spaced', 'repeat'] },
-  { icon: ImageIcon, title: 'Doubt Solver', subtitle: 'Snap to solve complex problems', color: 'from-pink-500 to-rose-500', path: '/doubt-solver', category: 'Cognitive Suite', keywords: ['doubt', 'solve', 'photo', 'image', 'snap'] },
-  { icon: Sparkles, title: 'Smart Notes', subtitle: 'AI-powered note enhancement', color: 'from-violet-500 to-fuchsia-600', path: '/smart-notes', category: 'Cognitive Suite', keywords: ['note', 'smart', 'ai', 'enhance'] },
-
-  // --- PERFORMANCE & TRACKING ---
-  { icon: BarChart3, title: 'Progress Tracer', subtitle: 'Real-time academic Progress', color: 'from-indigo-400 to-blue-600', path: '/progress', category: 'Performance & Tracking', keywords: ['progress', 'track', 'graph', 'chart', 'improve', 'tracer'] },
-  { icon: BarChart3, title: 'Grade Management', subtitle: 'Monitor academic performance metrics', color: 'from-emerald-500 to-teal-600', path: '/grades', category: 'Performance & Tracking', keywords: ['grade', 'gpa', 'result', 'score', 'marks'] },
-  { icon: GraduationCap, title: 'Course Management', subtitle: 'Universal syllabus and curriculum hub', color: 'from-violet-400 to-purple-600', path: '/courses', category: 'Performance & Tracking', keywords: ['course', 'subject', 'class', 'lecture', 'study'] },
-  { icon: Calendar, title: 'Timetable Hub', subtitle: 'schedule management', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Performance & Tracking', keywords: ['calendar', 'timetable', 'schedule', 'event', 'class'] },
-  { icon: Calendar, title: 'Academic Calendar', subtitle: 'Synchronized events and deadline', color: 'from-blue-500 to-indigo-600', path: '/calendar', category: 'Performance & Tracking', keywords: ['calendar', 'events', 'dates'] },
-  { icon: Book, title: 'Notes', subtitle: 'Note Management', color: 'from-orange-400 to-amber-600', path: '/notes', category: 'Performance & Tracking', keywords: ['note', 'notes', 'write', 'text', 'jot'] },
-  { icon: Briefcase, title: 'Tasks & To-Dos', subtitle: 'Operational workload management', color: 'from-blue-400 to-indigo-600', path: '/tasks', category: 'Performance & Tracking', keywords: ['task', 'todo', 'to-do', 'manage', 'list'] },
-  { icon: BarChart3, title: 'AI Analytics', subtitle: 'Deep performance growth insights', color: 'from-indigo-400 to-purple-500', path: '/ai-analytics', category: 'Performance & Tracking', keywords: ['analytics', 'insight', 'performance', 'stats', 'data'] },
-  { icon: Trophy, title: 'Achievements', subtitle: 'badges and leaderboard rank', color: 'from-amber-400 to-yellow-500', path: '/achievements', category: 'Performance & Tracking', keywords: ['trophy', 'achieve', 'badge', 'leader', 'rank'] },
-  { icon: Briefcase, title: 'Portfolio Builder', subtitle: 'Real-time academic resume generator', color: 'from-indigo-500 to-violet-600', path: '/portfolio', category: 'Performance & Tracking', keywords: ['portfolio', 'resume', 'career', 'cv', 'job'] },
-  { icon: Clock, title: 'Exam Deadlines', subtitle: 'Global academic deadline tracking', color: 'from-amber-500 to-orange-600', path: '/deadlines', category: 'Performance & Tracking', keywords: ['exam', 'deadline', 'jee', 'neet', 'sat', 'date'] },
-  { icon: Book, title: 'Syllabus Tracker', subtitle: 'curriculum completion status', color: 'from-emerald-400 to-green-600', path: '/syllabus', category: 'Performance & Tracking', keywords: ['syllabus', 'curriculum', 'topic', 'chapter'] },
-  { icon: Headphones, title: 'Wellness Sanctuary', subtitle: 'Mental and physical health optimization', color: 'from-teal-400 to-cyan-600', path: '/wellness', category: 'Performance & Tracking', keywords: ['wellness', 'mental', 'health', 'relax', 'mood'] },
-
-  // --- LEGAL & OPERATIONAL ---
-  { icon: ArrowUp, title: 'System Status', subtitle: 'Real-time matrix health and feedback loop', color: 'from-emerald-400 to-green-500', path: '/status', category: 'Legal & Operational', keywords: ['status', 'health', 'uptime', 'server'] },
-  { icon: Star, title: 'Privacy', subtitle: 'Data encryption and security standards', color: 'from-zinc-400 to-zinc-600', path: '/privacy', category: 'Legal & Operational', keywords: ['privacy', 'legal', 'data'] },
-  { icon: Star, title: 'Terms of Accord', subtitle: 'Operational guidelines and legal framework', color: 'from-zinc-400 to-zinc-600', path: '/terms', category: 'Legal & Operational', keywords: ['terms', 'legal', 'tos'] },
-  { icon: Hash, title: 'Sitemap Index', subtitle: 'This navigational matrix', color: 'from-zinc-600 to-zinc-800', path: '/sitemap', category: 'Legal & Operational', keywords: ['sitemap', 'map', 'navigation'] },
-
-  { icon: FileText, title: 'Intelligence Blog', subtitle: 'Latest updates and study tips', color: 'from-blue-400 to-cyan-500', path: '/blog', category: 'Legal & Operational', keywords: ['blog', 'news', 'tips', 'update'] },
-  { icon: Headphones, title: 'Help Center', subtitle: 'Margdarshak direct support', color: 'from-teal-500 to-emerald-600', path: '/help', category: 'Legal & Operational', keywords: ['help', 'support', 'faq', 'contact'] },
-  { icon: User, title: 'Mission Overview', subtitle: 'The vision behind the MARGDARSHAK mission', color: 'from-blue-500 to-indigo-600', path: '/about', category: 'Legal & Operational', keywords: ['about', 'mission', 'team'] },
-  { icon: Headphones, title: 'Direct Contact', subtitle: 'Contact support team', color: 'from-cyan-500 to-blue-600', path: '/contact', category: 'Legal & Operational', keywords: ['contact', 'email', 'support'] },
-  { icon: Star, title: 'Cookie Policy', subtitle: 'Operational tracking and cookie standards', color: 'from-zinc-400 to-zinc-600', path: '/cookies', category: 'Legal & Operational', keywords: ['cookies', 'legal'] },
-  { icon: Star, title: 'GDPR Compliance', subtitle: 'Global data protection regulations', color: 'from-zinc-400 to-zinc-600', path: '/gdpr', category: 'Legal & Operational', keywords: ['gdpr', 'legal', 'europe'] },
-  { icon: MousePointer2, title: 'Calculator', subtitle: 'Scientific calculation engine module', color: 'from-slate-400 to-slate-600', path: '/calculator', category: 'Legal & Operational', keywords: ['calc', 'math', 'calculator', 'formula'] },
-  { icon: Timer, title: 'Focus Timer', subtitle: 'Pomodoro timer', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Legal & Operational', keywords: ['timer', 'pomodoro', 'focus', 'session', 'countdown'] },
-  { icon: Zap, title: 'Landing Page', subtitle: 'Global Platform entry and overview', color: 'from-zinc-700 to-zinc-900', path: '/', category: 'Legal & Operational', keywords: ['landing', 'home', 'start'] },
+const DOCK_ACTIONS: Action[] = [
+  { icon: BrainCircuit, title: 'AI Assistant', subtitle: 'Chat With Saarthi', color: 'from-amber-400 to-orange-500', path: '/ai-assistant', category: 'AI', keywords: ['ai', 'chat'] },
+  { icon: LayoutGrid, title: 'Dashboard', subtitle: 'Main Hub', color: 'from-blue-600 to-indigo-700', path: '/dashboard', category: 'Main', keywords: ['dash'] },
+  { icon: Calendar, title: 'Schedule', subtitle: 'Timetable', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Academic', keywords: ['time'] },
+  { icon: ClipboardCheck, title: 'Tasks', subtitle: 'To-Do List', color: 'from-blue-400 to-indigo-600', path: '/tasks', category: 'Academic', keywords: ['todo'] },
+  { icon: Target, title: 'Focus', subtitle: 'Pomodoro', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Academic', keywords: ['focus'] },
+  { icon: Book, title: 'Notes', subtitle: 'Study Hub', color: 'from-orange-400 to-amber-600', path: '/notes', category: 'Academic', keywords: ['note'] },
+  { icon: Trophy, title: 'Awards', subtitle: 'Achievements', color: 'from-amber-400 to-yellow-500', path: '/achievements', category: 'Academic', keywords: ['rank'] },
+  { icon: GraduationCap, title: 'Courses', subtitle: 'Curriculum', color: 'from-violet-400 to-purple-600', path: '/courses', category: 'Academic', keywords: ['study'] },
+  { icon: ShieldCheck, title: 'Security', subtitle: 'Protection', color: 'from-emerald-400 to-green-500', path: '/status', category: 'System', keywords: ['status'] },
+  { icon: FileSearch, title: 'Logs', subtitle: 'Activity', color: 'from-zinc-500 to-zinc-700', path: '/sitemap', category: 'System', keywords: ['map'] },
 ];
 
-const RECENT_KEY = 'mgs_recent_actions';
-
-// ─── Component ────────────────────────────────────────────────────────────────
-const GlobalQuickActions: React.FC = React.memo(() => {
+export const GlobalQuickActions: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState(0);
-  const [recentPaths, setRecentPaths] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
-  });
   const navigate = useNavigate();
   const { session } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  // Use MotionValues for non-rendering drag
-  const dragX = useMotionValue(32);
-  const dragY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight - 200 : 400);
-
-  // Ctrl+K shortcut
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setIsOpen(p => !p); }
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen) { setQuery(''); setSelected(0); setTimeout(() => inputRef.current?.focus(), 80); }
-  }, [isOpen]);
-
-  // Filtered results (Memoized)
-  const filteredActions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return ALL_ACTIONS;
-    return ALL_ACTIONS.filter(a => 
-      a.title.toLowerCase().includes(q) ||
-      a.subtitle.toLowerCase().includes(q) ||
-      a.category.toLowerCase().includes(q) ||
-      a.keywords.some(k => k.includes(q))
-    );
-  }, [query]);
-
-  // Recent actions (Memoized)
-  const recentActions = useMemo(() => 
-    recentPaths
-      .map(p => ALL_ACTIONS.find(a => a.path === p))
-      .filter(Boolean) as Action[]
-  , [recentPaths]);
-
-  const displayList = filteredActions;
-
-  // Group by category when no query (Memoized)
-  const grouped = useMemo(() => {
-    if (query.trim()) return null;
-    const groups: Record<string, Action[]> = {};
-    if (recentActions.length > 0) groups['Recent'] = recentActions.slice(0, 4);
-    ALL_ACTIONS.forEach(a => {
-      if (!groups[a.category]) groups[a.category] = [];
-      groups[a.category].push(a);
-    });
-    return groups;
-  }, [query, recentActions]);
-
-  // Keyboard nav
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'ArrowDown') { e.preventDefault(); setSelected(p => Math.min(p + 1, displayList.length - 1)); }
-      if (e.key === 'ArrowUp') { e.preventDefault(); setSelected(p => Math.max(p - 1, 0)); }
-      if (e.key === 'Enter') { e.preventDefault(); if (displayList[selected]) goTo(displayList[selected]); }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, selected, displayList]);
-
-  // Auto-scroll selected into view
-  useEffect(() => {
-    const el = listRef.current?.querySelector(`[data-idx="${selected}"]`);
-    el?.scrollIntoView({ block: 'nearest' });
-  }, [selected]);
-
-  const goTo = useCallback((action: Action) => {
-    navigate(action.path);
-    setIsOpen(false);
-    setRecentPaths(prev => {
-      const next = [action.path, ...prev.filter(p => p !== action.path)].slice(0, 5);
-      localStorage.setItem(RECENT_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, [navigate]);
 
   if (!session) return null;
 
-  let flatIdx = 0;
-
   return (
-    <>
-      {/* ─── Floating Trigger ─────────────────────────────────────────────── */}
-      <motion.button
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+      <motion.div
         drag dragMomentum={false}
-        whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(true)}
-        className="fixed top-0 left-0 z-[100] w-14 h-14 rounded-2xl flex items-center justify-center border border-white/20 cursor-grab active:cursor-grabbing group"
-        style={{ 
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', 
-          boxShadow: '0 20px 50px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
-          x: dragX,
-          y: dragY
-        }}
+        className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
-        <Zap className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
         <motion.div
-          animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-[#050505]"
-        />
-        <div className="absolute left-full ml-3 px-3 py-1.5 bg-zinc-900 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
-          Quick Access <kbd className="ml-1 px-1 py-0.5 bg-white/10 rounded text-[8px]">⌘K</kbd>
-        </div>
-      </motion.button>
+          layout
+          className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+        >
+          {/* Main Action Trigger (Glow Effect) */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
+            <motion.button
+              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setIsOpen(true)}
+              className="relative w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg"
+            >
+              <Zap size={20} fill="currentColor" />
+            </motion.button>
+          </div>
 
-      {/* ─── Overlay + Panel ──────────────────────────────────────────────── */}
+          <div className="h-8 w-px bg-white/10 mx-2" />
+
+          {/* Dock Icons */}
+          <div className="flex items-center gap-1 pr-2">
+            {DOCK_ACTIONS.map((action, i) => (
+              <motion.button
+                key={i}
+                whileHover={{ scale: 1.2, y: -4 }} whileTap={{ scale: 0.9 }}
+                onClick={() => navigate(action.path)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-all group relative"
+              >
+                <action.icon size={18} />
+                
+                {/* Tooltip */}
+                <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-black border border-white/10 rounded-lg text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl">
+                  {action.title}
+                </div>
+              </motion.button>
+            ))}
+          </div>
+
+          <div className="h-8 w-px bg-white/10 mx-2" />
+
+          <motion.button
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(true)}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+          >
+            <Search size={16} />
+          </motion.button>
+        </motion.div>
+      </motion.div>
+
+      {/* Full Search Overlay */}
       <AnimatePresence>
         {isOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-[1000]"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000]"
             />
-
-            <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 pointer-events-none">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="w-full max-w-[540px] max-h-[80vh] flex flex-col rounded-[2.5rem] overflow-hidden pointer-events-auto"
-                style={{
-                  background: 'linear-gradient(145deg, rgba(10,10,15,0.98) 0%, rgba(15,15,25,0.96) 100%)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  boxShadow: '0 60px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.06)'
-                }}
-              >
-                <div className="p-5 border-b border-white/[0.06]">
-                  <div className="relative flex items-center gap-4 px-5 py-4 rounded-xl bg-white/[0.04] border border-white/[0.06] focus-within:border-indigo-500/40 focus-within:bg-indigo-500/[0.04] transition-all">
-                    <Search className="w-5 h-5 text-zinc-500 flex-shrink-0" />
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={query}
-                      onChange={e => { setQuery(e.target.value); setSelected(0); }}
-                      placeholder="Search tools, pages, features..."
-                      className="flex-1 bg-transparent text-sm text-white placeholder-zinc-600 font-medium focus:outline-none"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed top-1/4 left-1/2 -translate-x-1/2 w-full max-w-xl z-[10001] p-6"
+            >
+              <div className="bg-[#1A1A1A] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden p-6">
+                 <div className="flex items-center gap-4 px-6 py-5 bg-white/5 rounded-3xl border border-white/10 focus-within:border-indigo-500/50 transition-all">
+                    <Search size={24} className="text-zinc-500" />
+                    <input 
+                      autoFocus
+                      type="text" 
+                      placeholder="Search for tools, courses, settings..." 
+                      className="bg-transparent border-none outline-none text-lg text-white w-full font-bold placeholder:text-zinc-600"
                     />
-                    {query && (
-                      <button onClick={() => setQuery('')} className="text-zinc-600 hover:text-white transition-colors">
-                        <X size={14} />
-                      </button>
-                    )}
-                    <div className="flex-shrink-0 flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] border border-white/10 rounded text-[9px] text-zinc-500 font-mono">↑↓</kbd>
-                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] border border-white/10 rounded text-[9px] text-zinc-500 font-mono">↵</kbd>
-                    </div>
-                  </div>
-                </div>
-
-                <div ref={listRef} className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                  {displayList.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-16 gap-3">
-                      <Search className="w-10 h-10 text-zinc-700" />
-                      <p className="text-zinc-500 text-sm font-medium">No results for <span className="text-white">"{query}"</span></p>
-                    </div>
-                  )}
-
-                  {query.trim()
-                    ? filteredActions.map((action, i) => {
-                      const idx = flatIdx++;
-                      return (
-                        <ActionRow
-                          key={action.path} action={action} isSelected={selected === idx}
-                          dataIdx={idx}
-                          onClick={() => goTo(action)}
-                          onHover={() => setSelected(idx)}
-                        />
-                      );
-                    })
-                    : grouped && Object.entries(grouped).map(([cat, actions]) => (
-                      <div key={cat}>
-                        <div className="flex items-center gap-2 px-3 py-1.5">
-                          {cat === 'Recent' ? <Clock className="w-3 h-3 text-zinc-600" /> : <Hash className="w-3 h-3 text-zinc-700" />}
-                          <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{cat}</span>
+                    <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">
+                      <X size={20} />
+                    </button>
+                 </div>
+                 <div className="mt-8 grid grid-cols-2 gap-4">
+                    <div className="col-span-2 text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2 mb-2">Suggested Hubs</div>
+                    {DOCK_ACTIONS.slice(0, 4).map((a, i) => (
+                      <button key={i} onClick={() => { navigate(a.path); setIsOpen(false); }} className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-transparent hover:border-white/10 hover:bg-white/[0.08] transition-all text-left">
+                        <div className={`p-3 rounded-2xl bg-gradient-to-br ${a.color} shadow-lg shadow-indigo-500/10`}>
+                          <a.icon size={20} className="text-white" />
                         </div>
-                        {actions.map(action => {
-                          const idx = flatIdx++;
-                          return (
-                            <ActionRow
-                              key={action.path} action={action} isSelected={selected === idx}
-                              dataIdx={idx}
-                              onClick={() => goTo(action)}
-                              onHover={() => setSelected(idx)}
-                            />
-                          );
-                        })}
-                      </div>
-                    ))
-                  }
-                </div>
-
-                <div className="px-5 py-3.5 border-t border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Nexus_Active</span>
-                    </div>
-                    <span className="text-[9px] text-zinc-700 font-mono">{ALL_ACTIONS.length} tools indexed</span>
-                  </div>
-                  <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
-                    <X size={12} className="text-zinc-600" />
-                  </button>
-                </div>
-              </motion.div>
-            </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">{a.title}</p>
+                          <p className="text-[10px] text-zinc-500">{a.subtitle}</p>
+                        </div>
+                      </button>
+                    ))}
+                 </div>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
-});
-
-// ─── Action Row (Memoized) ──────────────────────────────────────────────────
-const ActionRow: React.FC<{
-  action: Action;
-  isSelected: boolean;
-  dataIdx: number;
-  onClick: () => void;
-  onHover: () => void;
-}> = React.memo(({ action, isSelected, dataIdx, onClick, onHover }) => (
-  <motion.button
-    data-idx={dataIdx}
-    onClick={onClick}
-    onMouseEnter={onHover}
-    whileTap={{ scale: 0.98 }}
-    className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group ${isSelected
-        ? 'bg-white/[0.07] border border-white/[0.1]'
-        : 'hover:bg-white/[0.04] border border-transparent'
-      }`}
-  >
-    <div className={`flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${action.color} shadow-lg`}>
-      <action.icon size={16} className="text-white" />
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-bold text-zinc-100 group-hover:text-white truncate leading-tight">{action.title}</p>
-      <p className="text-[11px] text-zinc-600 font-medium truncate mt-0.5">{action.subtitle}</p>
-    </div>
-    <div className={`transition-all duration-150 ${isSelected ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1 group-hover:opacity-60 group-hover:translate-x-0'}`}>
-      <ChevronRight size={14} className="text-zinc-400" />
-    </div>
-  </motion.button>
-));
+};
 
 export default GlobalQuickActions;
