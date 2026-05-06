@@ -322,20 +322,18 @@ const AppRoutes = () => {
         </GlobalSecurityGuard>
       </div>
 
-      {/* PORTAL RENDERING TO BODY - GUARANTEES VIEWPORT FIXED POSITIONING */}
-      {showContent && createPortal(
-        <div className="fixed inset-0 pointer-events-none z-[999999]" style={{ position: 'fixed', inset: 0, zIndex: 999999 }}>
+      {/* PERSISTENT VIEWPORT LAYER - FORCED AT ROOT LEVEL */}
+      {showContent && (
+        <div className="viewport-lock">
           <AIWidgetWrapper />
           <GlobalQuickActions />
           <AmbientSoundPlayer />
           <MobileNavbar />
-        </div>,
-        document.body
+        </div>
       )}
 
-      {isOfficer && !isVerified && createPortal(
-        <div className="fixed inset-0 z-[2000000]"><RankEntryOverlay /></div>,
-        document.body
+      {isOfficer && !isVerified && (
+        <div className="fixed inset-0 z-[20000000]"><RankEntryOverlay /></div>
       )}
     </>
   );
