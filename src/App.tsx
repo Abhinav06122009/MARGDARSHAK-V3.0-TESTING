@@ -58,8 +58,6 @@ const AdminAuthPage = lazy(() => import("@/components/auth/AdminAuthPage"));
 // Lazy load heavy global components
 const GlobalAIAssistant = lazy(() => import('@/components/ai/GlobalAIAssistant'));
 
-
-
 // New AI Features - lazy loaded
 const QuizGenerator = lazy(() => import('@/pages/QuizGenerator'));
 const EssayHelper = lazy(() => import('@/pages/EssayHelper'));
@@ -237,6 +235,18 @@ const AppRoutes = () => {
 
   return (
     <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden">
+      {/* Global persistent layers - ALWAYS ON TOP AND OUTSIDE FLOW */}
+      {isOfficer && !isVerified && <RankEntryOverlay />}
+      
+      {showContent && (
+        <div className="fixed inset-0 pointer-events-none z-[9999]">
+          <AIWidgetWrapper />
+          <GlobalQuickActions />
+          <AmbientSoundPlayer />
+          <MobileNavbar />
+        </div>
+      )}
+
       <GlobalSecurityGuard>
         <NavigationTracker />
         <SecurityWarningOverlay />
@@ -310,19 +320,10 @@ const AppRoutes = () => {
           </AnimatePresence>
         </div>
 
-        {/* Global persistent layers - RANK OVERLAY IS ALWAYS TOP */}
-        {isOfficer && !isVerified && <RankEntryOverlay />}
-        
         <DevVerificationGuard />
         <CursorProvider>
           {showContent && (
-            <>
-              <AIWidgetWrapper />
-              <GlobalQuickActions />
-              <AmbientSoundPlayer />
-              <MobileNavbar />
-              <GlobalFooter />
-            </>
+             <GlobalFooter />
           )}
         </CursorProvider>
         <ShortcutsOverlay />
@@ -358,8 +359,6 @@ const App = () => {
     }
 
     // --- SSO HASH REDIRECT FIX ---
-    // If Clerk sends a callback with a hash (e.g. /auth#/sso-callback), 
-    // we redirect to the actual path to prevent routing crashes.
     if (window.location.hash.includes('sso-callback')) {
       const cleanPath = window.location.hash.replace('#', '');
       console.log('🔄 SSO Hash Detected. Redirecting to:', cleanPath);
