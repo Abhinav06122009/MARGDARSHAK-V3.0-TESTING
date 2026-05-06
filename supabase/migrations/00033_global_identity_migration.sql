@@ -39,10 +39,7 @@ DECLARE
     ];
     r RECORD;
 BEGIN
-    -- 1. DISABLE TRIGGERS (To prevent recursion or interference)
-    SET session_replication_role = 'replica';
-
-    -- 2. MIGRATE PROFILES FIRST (Carefully)
+    -- 1. MIGRATE PROFILES FIRST (Carefully)
     -- We need to ensure every profile has its clerk_id preserved and id translated
     FOR r IN (SELECT id, email FROM public.profiles WHERE id::text LIKE 'user_%') LOOP
         BEGIN
@@ -115,9 +112,6 @@ BEGIN
             END IF;
         END IF;
     END LOOP;
-
-    -- 6. RE-ENABLE TRIGGERS
-    SET session_replication_role = 'origin';
 
     RAISE NOTICE 'Global identity migration complete.';
 END $$;
