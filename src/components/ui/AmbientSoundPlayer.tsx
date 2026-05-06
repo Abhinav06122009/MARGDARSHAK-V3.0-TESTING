@@ -32,7 +32,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
   const [activeStation, setActiveStation] = useState<Station>(DEFAULT_STATIONS[0]);
   const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(!isWidget);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +92,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
     <motion.div 
       initial={isWidget ? { opacity: 0, y: 20 } : { x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1, y: 0 }}
-      className={isWidget ? "relative w-full" : "fixed bottom-24 left-6 z-[60] transition-all duration-500 ease-in-out"}
+      className={isWidget ? "relative w-full" : "fixed bottom-24 left-6 z-[9999] transition-all duration-500 ease-in-out"}
     >
       <div className={`relative group ${isWidget ? 'h-full w-full' : ''}`}>
         <AnimatePresence mode="wait">
@@ -121,7 +121,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
               initial={isWidget ? { opacity: 1 } : { scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className={`${isWidget ? 'w-full h-full' : 'w-72'} bg-white/95 backdrop-blur-[40px] border border-white/60 rounded-[2.5rem] p-5 shadow-[0_32px_64px_rgba(0,0,0,0.1)] overflow-hidden text-zinc-900`}
+              className={`${isWidget ? 'w-full h-full' : 'w-72'} bg-zinc-100/70 backdrop-blur-[60px] border border-white/80 rounded-[2.5rem] p-5 shadow-[0_32px_64px_rgba(0,0,0,0.1)] overflow-hidden text-zinc-900`}
             >
               {/* Decorative Background */}
               <div className="absolute top-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
