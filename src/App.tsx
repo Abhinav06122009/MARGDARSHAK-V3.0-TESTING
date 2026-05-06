@@ -321,19 +321,16 @@ const AppRoutes = () => {
           <Sonner />
           <CookieConsent />
 
+          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
           {showContent && (
-            <>
-              <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
-                <div className="pointer-events-auto">
-                  <AIWidgetWrapper />
-                  <MobileNavbar />
-                </div>
-              </div>
-              <div className="fixed bottom-6 left-6 z-[9999] pointer-events-auto">
+            <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
+              <div className="pointer-events-auto">
+                <AIWidgetWrapper />
                 <GlobalQuickActions />
                 <AmbientSoundPlayer />
+                <MobileNavbar />
               </div>
-            </>
+            </div>
           )}
         </GlobalSecurityGuard>
       </div>
