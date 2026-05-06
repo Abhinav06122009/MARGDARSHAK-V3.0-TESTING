@@ -166,69 +166,104 @@ export const initSecurityHardening = () => {
     } catch (err) { if (isDev) console.error('Tracing error:', err); }
   };
 
-  // --- SCREENSHOT & KEYBOARD PROTECTION ---
-  const addScreenshotDefense = () => {
+  // --- MAXIMUM LOCKDOWN: KEYBOARD & SYSTEM INTERCEPT ---
+  const applyKeyboardLockdown = () => {
+    const forbiddenKeys = [
+      'Control', 'Alt', 'Meta', 'Shift', 'Delete', 'F12', 'F11', 'F10', 'F9', 'F8', 'F7', 'F6', 'F5', 'F4', 'F3', 'F2', 'F1',
+      'PrintScreen', 'ScrollLock', 'Pause', 'Insert', 'ContextMenu', 'PageUp', 'PageDown', 'Home', 'End'
+    ];
+
+    const handleKeydown = (e: KeyboardEvent) => {
+      // Allow officers to work
+      if (cachedIsOfficer === true) return;
+
+      const isInput = ['INPUT', 'TEXTAREA'].includes((e.target as any).tagName) || (e.target as any).isContentEditable;
+      
+      // If it's a forbidden key and NOT in an input field, KILL IT
+      if (forbiddenKeys.includes(e.key) || e.ctrlKey || e.metaKey || e.altKey) {
+        // Exception: Allow Shift only in inputs for typing
+        if (e.key === 'Shift' && isInput) return;
+        
+        // Exception: Allow basic typing shortcuts in inputs if absolutely needed, 
+        // but the user asked to block ALL like Ctrl, so we block them.
+        
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        // Log the tamper attempt if it's a high-risk key
+        if (['F12', 'Control', 'Meta', 'Alt'].includes(e.key)) {
+          logViolation('Restricted Key Access', { key: e.key, target: (e.target as any).tagName });
+        }
+        
+        return false;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown, { capture: true, passive: false });
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (forbiddenKeys.includes(e.key) && cachedIsOfficer !== true) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { capture: true, passive: false });
+  };
+
+  // --- SCREENSHOT & CLIPBOARD PROTECTION ---
+  const applyMediaProtection = () => {
     const style = document.createElement('style');
     style.innerHTML = `
-      @media print { body { display: none !important; } }
+      /* Disable all selection and interaction */
       * {
         -webkit-user-select: none !important;
         -moz-user-select: none !important;
         -ms-user-select: none !important;
         user-select: none !important;
-        -webkit-user-drag: none !important;
         -webkit-touch-callout: none !important;
+        -webkit-user-drag: none !important;
+        outline: none !important;
       }
+      
+      /* Allow inputs to function */
       input, textarea, [contenteditable="true"], .selectable {
         -webkit-user-select: text !important;
         -moz-user-select: text !important;
         -ms-user-select: text !important;
         user-select: text !important;
       }
-      img {
+
+      /* Prevent image saving/context menu */
+      img, video, canvas {
         pointer-events: none !important;
-        -webkit-user-drag: none !important;
+        -webkit-touch-callout: none !important;
+        user-select: none !important;
+      }
+
+      /* Anti-Screenshot Print Shield */
+      @media print {
+        body { display: none !important; }
       }
     `;
     document.head.appendChild(style);
 
+    // Clipboard Poisoning
+    document.addEventListener('copy', (e) => {
+      if (cachedIsOfficer === true) return;
+      e.clipboardData?.setData('text/plain', '🛡️ SECURITY ALERT: Data extraction is prohibited. Your IP has been logged.');
+      e.preventDefault();
+      logViolation('Copy Attempt', { type: 'CLIPBOARD_EXTRACT' });
+    });
+
+    // Detect PrintScreen Key
     window.addEventListener('keyup', (e) => {
-      const blockedKeys = ['PrintScreen', 'Snapshot', 'PrtSc'];
-      if (blockedKeys.includes(e.key)) {
-        navigator.clipboard.writeText('🛡️ SECURITY ALERT: Unauthorized data capture prohibited.');
+      if (['PrintScreen', 'Snapshot', 'PrtSc'].includes(e.key)) {
         logViolation('Screenshot Attempt', { key: e.key });
       }
     });
-
-    window.addEventListener('keydown', (e) => {
-      // 1. Block Screen Capture Shortcuts (Win+Shift+S, Cmd+Shift+4, etc.)
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4' || e.key === 's')) {
-        e.preventDefault();
-        window.blur();
-        logViolation('Screen Capture Shortcut', { combo: 'WIN_SHIFT_S' });
-      }
-
-      // 2. Block Inspect & DevTools Shortcuts
-      const forbiddenKeys = ['u', 's', 'p', 'a', 'i', 'j', 'c'];
-      const isForbiddenCombo = (e.ctrlKey || e.metaKey) && forbiddenKeys.includes(e.key.toLowerCase());
-      const isF12 = e.key === 'F12';
-      
-      // 3. Block System Keys (Windows, Alt, Del, etc.)
-      const isSystemKey = ['Meta', 'Alt', 'Delete', 'ContextMenu', 'Control'].includes(e.key) && !['input', 'textarea'].includes((e.target as any).tagName.toLowerCase());
-
-      if (isForbiddenCombo || isF12 || isSystemKey) {
-        if (cachedIsOfficer === true) return;
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if (isForbiddenCombo || isF12) {
-          logViolation('Tamper Attempt', { key: e.key, type: 'DEVT_ACCESS' });
-        }
-        return false;
-      }
-    }, true);
   };
-  addScreenshotDefense();
+
+  applyKeyboardLockdown();
+  applyMediaProtection();
 
   // --- CONTEXT MENU LOCKDOWN ---
   document.addEventListener('contextmenu', (e) => {
