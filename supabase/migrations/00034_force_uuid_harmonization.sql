@@ -8,6 +8,7 @@ DECLARE
     v_correct_id uuid;
     v_table text;
     v_col text;
+    v_pol RECORD;
     v_tables_cols text[][] := ARRAY[
         ['syllabi', 'user_id'],
         ['tasks', 'user_id'],
@@ -37,6 +38,11 @@ DECLARE
         ['announcements', 'author_id']
     ];
 BEGIN
+    -- 0. DROP ALL POLICIES THAT DEPEND ON PROFILES.ID
+    FOR v_pol IN (SELECT policyname FROM pg_policies WHERE tablename = 'profiles') LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON public.profiles', v_pol.policyname);
+    END LOOP;
+
     -- 1. PRE-SYNC CLERK_ID
     -- If 'id' is a Clerk string, move it to 'clerk_id' before we overwrite it
     UPDATE public.profiles SET clerk_id = id::text WHERE id::text LIKE 'user_%' AND clerk_id IS NULL;
@@ -64,24 +70,26 @@ BEGIN
     END LOOP;
 
     -- 3. FORCE COLUMN TYPE TO UUID
-    -- We do this without 'EXCEPTION' to ensure it either works or errors clearly
-    -- But we first cleanup rows that might still have non-UUID format (should be none now)
-    DELETE FROM public.profiles WHERE id::text NOT LIKE '________-____-____-____-____________';
+    -- Cleanup rows that might still have non-UUID format
+    DELETE FROM public.profiles WHERE id::text NOT LIKE '________-____-____-____-____________' AND email NOT IN ('abhinavjha393@gmail.com', 'abhinav.vsavwe4899@gmail.com');
     
+    -- Final fallback: if ID is still not UUID, just generate one (last resort)
+    UPDATE public.profiles SET id = public.translate_clerk_id_to_uuid(clerk_id)::text WHERE id::text NOT LIKE '________-____-____-____-____________';
+
     ALTER TABLE public.profiles ALTER COLUMN id TYPE UUID USING id::UUID;
 
     -- 4. RE-ESTABLISH RLS (Strict UUID)
-    -- This ensures policies use UUID comparison directly
-    DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
     CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated
     USING (id = public.requesting_user_id_uuid());
 
-    DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
     CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT TO authenticated
     WITH CHECK (id = public.requesting_user_id_uuid());
 
-    DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
     CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated
     USING (id = public.requesting_user_id_uuid());
+    
+    -- Add generic "Admins can manage profiles" policy
+    CREATE POLICY "Admins can manage profiles" ON public.profiles FOR ALL TO authenticated
+    USING (public.is_admin_staff(public.requesting_user_id()));
 
 END $$;
