@@ -241,6 +241,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
         </div>
       </motion.div>
       <audio ref={audioRef} src={station.url} loop className="hidden" />
+      </div>
 
       {/* Bottom dock that 'docks' into the corner on page load and stays pinned */}
       <motion.div
