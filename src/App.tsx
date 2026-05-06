@@ -319,8 +319,6 @@ const AppRoutes = () => {
           <Toaster />
           <Sonner />
           <CookieConsent />
-            <AppRoutes />
-          </Suspense>
 
           {/* PERSISTENT VIEWPORT INTERFACE - STACKED BOTTOM LEFT */}
           {showContent && (
