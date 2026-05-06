@@ -1643,7 +1643,8 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 exit={{ opacity: 0 }}
                 onClick={() => setIsAddGoalModalOpen(false)}
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-                            <motion.div
+              />
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
