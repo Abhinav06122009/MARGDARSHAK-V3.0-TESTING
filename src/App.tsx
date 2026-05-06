@@ -319,6 +319,7 @@ const AppRoutes = () => {
             <>
               <AIWidgetWrapper />
               <GlobalQuickActions />
+              <AmbientSoundPlayer />
               <MobileNavbar />
               <Suspense fallback={null}>
                 <GlobalWellnessBar />
