@@ -17,11 +17,9 @@ import { SecurityProvider } from '@/contexts/SecurityContext';
 import ShortcutsOverlay from '@/components/ui/ShortcutsOverlay';
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
 import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
-import { DockProvider } from '@/contexts/DockContext';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
 import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
-import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
@@ -114,7 +112,7 @@ import { trackActivity } from '@/lib/security/activityTracker';
 import SSOCallback from '@/components/auth/SSOCallback';
 import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
 import DevVerificationGuard from './components/security/DevVerificationGuard';
-// GlobalQuickActions and AmbientSoundPlayer are mounted at the root in main.tsx
+import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -314,16 +312,25 @@ const AppRoutes = () => {
           <DevVerificationGuard />
           <CursorProvider>
             {showContent && (
-               <>
-                 {/* PERSISTENT UI LAYER moved to root (main.tsx) to avoid stacking context issues */}
-                 <GlobalFooter />
-               </>
+               <GlobalFooter />
             )}
           </CursorProvider>
           <ShortcutsOverlay />
           <Toaster />
           <Sonner />
           <CookieConsent />
+
+          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
+          {showContent && (
+            <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
+              <div className="pointer-events-auto">
+                <AIWidgetWrapper />
+                <GlobalQuickActions />
+                <AmbientSoundPlayer />
+                <MobileNavbar />
+              </div>
+            </div>
+          )}
         </GlobalSecurityGuard>
       </div>
 
@@ -341,30 +348,12 @@ const AppContent = () => {
         <AdminProvider>
           <SecurityProvider>
             <AIProvider>
-              <>
-                <AppRoutes />
-                <GlobalRootDock />
-              </>
+              <AppRoutes />
             </AIProvider>
           </SecurityProvider>
         </AdminProvider>
       </AuthProvider>
     </TooltipProvider>
-  );
-};
-
-const GlobalRootDock = () => {
-  if (typeof document === 'undefined') return null;
-
-  const host = document.getElementById('app');
-  if (!host) return null;
-
-  return createPortal(
-    <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-4 pointer-events-auto">
-      <GlobalQuickActions isDocked />
-      <AmbientSoundPlayer isWidget />
-    </div>,
-    host
   );
 };
 
@@ -389,13 +378,11 @@ const App = () => {
     <HelmetProvider>
       <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
         <QueryClientProvider client={queryClient}>
-          <DockProvider>
-            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <ClerkSupabaseBridge>
-                <AppContent />
-              </ClerkSupabaseBridge>
-            </Router>
-          </DockProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ClerkSupabaseBridge>
+              <AppContent />
+            </ClerkSupabaseBridge>
+          </Router>
         </QueryClientProvider>
       </Sentry.ErrorBoundary>
     </HelmetProvider>
