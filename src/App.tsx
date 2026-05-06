@@ -324,20 +324,12 @@ const AppRoutes = () => {
         </GlobalSecurityGuard>
       </div>
 
-      {/* PERSISTENT UI LAYER - ANCHORED BOTTOM-LEFT, OUTSIDE ALL CONTAINERS */}
+      {/* PERSISTENT UI OVERLAYS */}
       {showContent && (
         <>
-          {/* Left-Bottom Corner Stack */}
-          <div className="fixed bottom-10 left-10 z-[999999] pointer-events-none flex flex-col gap-5 items-start">
-            <div className="pointer-events-auto">
-              <AmbientSoundPlayer />
-            </div>
-            <div className="pointer-events-auto">
-              <GlobalQuickActions />
-            </div>
-          </div>
-
-          {/* Other Global Overlays */}
+          <AmbientSoundPlayer />
+          <GlobalQuickActions />
+          
           <div className="fixed bottom-0 left-0 z-[999998] pointer-events-none">
             <div className="pointer-events-auto">
               <AIWidgetWrapper />
