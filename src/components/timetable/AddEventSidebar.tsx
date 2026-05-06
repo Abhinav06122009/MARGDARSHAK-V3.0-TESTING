@@ -171,6 +171,13 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
     }));
   };
 
+  const handleSuggestTime = () => {
+    toast({
+      title: "Premium Feature",
+      description: "AI-powered scheduling is coming soon to this view!",
+    });
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -208,8 +215,8 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
               </Button>
             </div>
             
-            <div className="flex-grow overflow-y-auto p-6">
-              <form onSubmit={handleSubmit} className="space-y-8 p-1">
+            <div className="overflow-y-auto px-6 pt-6 pb-4">
+              <form onSubmit={handleSubmit} className="space-y-6 p-1">
                 {/* Basic Event Information */}
                 <div className="space-y-6 p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
                   <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
@@ -309,7 +316,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
                 </div>
                 
                 {/* Form Actions */}
-                <div className="flex justify-end gap-4 pt-6 mt-4 border-t border-white/10">
+                <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-white/10">
                   <Button type="button" variant="ghost" onClick={onClose} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">
                     Cancel
                   </Button>
