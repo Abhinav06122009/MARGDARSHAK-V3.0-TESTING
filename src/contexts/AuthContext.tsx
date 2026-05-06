@@ -94,11 +94,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           // Perform Database Sync
           try {
+            console.log('[AuthContext] Syncing profile for', clerkUser.id, '->', translatedId);
             const { error: syncError } = await supabase
               .from('profiles')
               .upsert(profileData, { onConflict: 'id' });
-              
-            if (syncError) console.warn('[AuthContext] Sync Error:', syncError.message);
+
+            if (syncError) {
+              console.error('[AuthContext] Sync Error:', syncError.message);
+              // Recovery: Match by email if it's a conflict
+              if (syncError.message.includes('unique') || syncError.message.includes('400')) {
+                console.log('[AuthContext] Attempting recovery by email match...');
+                await supabase
+                  .from('profiles')
+                  .update({ id: translatedId, clerk_id: clerkUser.id })
+                  .eq('email', profileData.email);
+              }
+            } else {
+              console.log('[AuthContext] Sync success for', translatedId);
+            }
           } catch (e) {}
 
           // Security check

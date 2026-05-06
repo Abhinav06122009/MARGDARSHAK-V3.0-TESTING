@@ -41,7 +41,10 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
         alreadyShown: sessionShown
       });
 
-      if (sessionShown === 'true') return;
+      if (sessionShown === 'true') {
+        setVerified(true);
+        return;
+      }
 
       const metadata = clerkUser.publicMetadata || {};
       const roles = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];

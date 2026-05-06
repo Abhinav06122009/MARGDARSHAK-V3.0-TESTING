@@ -75,6 +75,11 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
   const monthLabel = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const today = new Date();
 
+  const resetForm = () => {
+    setNewEvent({ title: '', description: '', category: 'personal', priority: 'medium', is_all_day: true });
+    setIsEditing(null);
+  };
+
   const isSameDay = (d1: Date, d2: Date) => 
     d1.getDate() === d2.getDate() && 
     d1.getMonth() === d2.getMonth() && 
