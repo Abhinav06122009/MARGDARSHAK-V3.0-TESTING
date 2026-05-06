@@ -135,9 +135,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             console.log('[AuthContext] Sync success for', translatedId);
           }
-          } catch (e) {
-            console.error('[AuthContext] Profile sync exception:', e);
-          }
 
           // Security check
           try {
@@ -151,10 +148,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setIsBlocked(true);
               setBlockedReason(profile.blocked_reason);
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn('[AuthContext] Security flag check failed:', e);
+          }
           
         } catch (err) {
-          console.error('Unexpected sync error:', err);
+          console.error('[AuthContext] Unexpected sync error:', err);
         } finally {
           setLoading(false);
         }
