@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, StickyNote, Sparkles, BrainCircuit, Loader2, Lock } from 'lucide-react';
+import { X, Save, StickyNote, Sparkles, BrainCircuit, Loader2, Lock, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

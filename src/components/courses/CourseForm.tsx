@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, GraduationCap, TrendingUp, Palette, Zap, 
-  Youtube, FileText, Code, Edit, Plus 
+  Youtube, FileText, Code, Edit, Plus, Sparkles, BookOpen, Save 
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';

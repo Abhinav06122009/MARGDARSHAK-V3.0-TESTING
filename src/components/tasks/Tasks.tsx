@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Edit, Trash2, Book, Users, Calendar, Search, Filter, BookOpen, X, LayoutGrid, List, Kanban, Play, Folder, Download, CheckSquare,
   GraduationCap, Shield, AlertCircle, CheckCircle, Eye, BarChart3,
-  ArrowLeft, Palette, Clock, MapPin, User, Star, TrendingUp, Flag, Target, Loader2
+  ArrowLeft, Palette, Clock, MapPin, User, Star, TrendingUp, Flag, Target, Loader2, Edit3, CalendarPlus, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
