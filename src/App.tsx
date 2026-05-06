@@ -313,29 +313,29 @@ const AppRoutes = () => {
           <DevVerificationGuard />
           <CursorProvider>
             {showContent && (
-               <GlobalFooter />
+               <>
+                 {/* PERSISTENT UI LAYER - RENDER BEFORE FOOTER SO IT APPEARS ON EVERY PAGE */}
+                 <div
+                   className="fixed z-[999999] pointer-events-none"
+                   style={{
+                     left: 'max(0.75rem, env(safe-area-inset-left))',
+                     bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+                   }}
+                 >
+                   <div className="pointer-events-auto flex flex-col items-start gap-3 sm:gap-4">
+                     <GlobalQuickActions isDocked />
+                     <AmbientSoundPlayer isWidget />
+                   </div>
+                 </div>
+
+                 <GlobalFooter />
+               </>
             )}
           </CursorProvider>
           <ShortcutsOverlay />
           <Toaster />
           <Sonner />
           <CookieConsent />
-
-          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
-          {showContent && (
-            <div
-              className="fixed z-[999999] pointer-events-none"
-              style={{
-                left: 'max(0.75rem, env(safe-area-inset-left))',
-                bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
-              }}
-            >
-              <div className="pointer-events-auto flex flex-col items-start gap-3 sm:gap-4">
-                <GlobalQuickActions isDocked />
-                <AmbientSoundPlayer isWidget />
-              </div>
-            </div>
-          )}
         </GlobalSecurityGuard>
       </div>
 

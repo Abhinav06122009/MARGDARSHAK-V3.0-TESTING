@@ -32,7 +32,7 @@ const QuickActions = lazy(() => import('./QuickActions'));
 const SecurityPanel = lazy(() => import('./SecurityPanel'));
 const AIBriefingWidget = lazy(() => import('./AIBriefingWidget'));
 import UpgradeCard from '@/components/dashboard/UpgradeCard';
-import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
+// AmbientSoundPlayer is rendered globally in App.tsx - remove local instance to avoid duplicates
 const VirtualPet = lazy(() => import('./VirtualPet').then(m => ({ default: m.VirtualPet })));
 const LeaderboardWidget = lazy(() => import('./LeaderboardWidget').then(m => ({ default: m.LeaderboardWidget })));
 const BurnoutPredictorWidget = lazy(() => import('./BurnoutPredictorWidget').then(m => ({ default: m.BurnoutPredictorWidget })));
@@ -549,11 +549,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
 
 
 
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-               <Suspense fallback={<WidgetSkeleton />}>
-                 <AmbientSoundPlayer isWidget />
-               </Suspense>
-            </motion.div>
+            {/* AmbientSoundPlayer moved to global app-level to persist across routes */}
           </main>
 
           <aside className="xl:col-span-4 flex flex-col gap-6 h-full xl:sticky xl:top-6">
