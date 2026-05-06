@@ -13,11 +13,20 @@ AS $$
 DECLARE
     v_user_type text;
     v_email text;
+    v_target_id text;
 BEGIN
+    -- 0. Resolve Identity (Standardized Zenith Protocol)
+    -- We attempt to use the salted UUID version if available, otherwise fall back to raw translation.
+    BEGIN
+        v_target_id := public.requesting_user_id_uuid()::text;
+    EXCEPTION WHEN OTHERS THEN
+        v_target_id := public.translate_clerk_id_to_uuid(public.requesting_user_id())::text;
+    END;
+
     -- 1. Get user profile data
     SELECT user_type, email INTO v_user_type, v_email
     FROM public.profiles 
-    WHERE id::text = public.requesting_user_id()::text;
+    WHERE id::text = v_target_id;
 
     -- 2. Handle null profile (default to student)
     IF v_user_type IS NULL THEN
@@ -80,7 +89,8 @@ BEGIN
         IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = v_table AND table_schema = 'public') THEN
             -- Re-apply the Admin Master Override
             -- This policy allows full access if get_current_user_role() returns 'admin'
-            IF v_table NOT IN ('profiles', 'security_logs') THEN
+            -- We now include 'profiles' to ensure admins can see all users.
+            IF v_table != 'security_logs' THEN
                 EXECUTE format('DROP POLICY IF EXISTS "Admin Master Override for %I" ON public.%I', v_table, v_table);
                 EXECUTE format('CREATE POLICY "Admin Master Override for %I" ON public.%I FOR ALL USING (public.get_current_user_role() = ''admin'')', v_table, v_table);
             END IF;
