@@ -322,8 +322,8 @@ const AppRoutes = () => {
 
           {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
           {showContent && (
-            <div className="fixed left-6 top-1/3 z-[999999] pointer-events-none">
-              <div className="pointer-events-auto flex flex-col items-start gap-4">
+            <div className="fixed left-3 sm:left-6 bottom-3 sm:bottom-6 z-[999999] pointer-events-none">
+              <div className="pointer-events-auto flex flex-col items-start gap-3 sm:gap-4">
                 <GlobalQuickActions isDocked />
                 <AmbientSoundPlayer isWidget />
               </div>

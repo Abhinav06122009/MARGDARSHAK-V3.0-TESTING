@@ -108,10 +108,11 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
   return (
     <div className={outerClass} style={isDocked ? {} : { position: 'fixed' }}>
       <motion.div
-        drag dragMomentum={false}
+        drag={!isDocked}
+        dragMomentum={false}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="pointer-events-auto cursor-grab active:cursor-grabbing"
+        className={`pointer-events-auto ${isDocked ? '' : 'cursor-grab active:cursor-grabbing'}`}
       >
         <div className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
           <div className="relative group">
