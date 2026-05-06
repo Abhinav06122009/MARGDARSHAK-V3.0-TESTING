@@ -78,14 +78,14 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-8">
       {/* Dynamic Background Blur */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-[#050505]/60 backdrop-blur-md cursor-pointer"
+        className="fixed inset-0 bg-[#000000]/70 backdrop-blur-md cursor-pointer"
       />
 
       <motion.div

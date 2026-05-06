@@ -737,19 +737,6 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
       {/* Slide-over Panel for Event Creation/Edit - Moved to top for viewport anchoring */}
       <AnimatePresence>
         {isSheetOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                setIsSheetOpen(false);
-                resetForm();
-                setEditingEvent(null);
-              }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-md z-[1000]"
-            />
             <EventForm
               formData={formData}
               setFormData={setFormData}
@@ -763,7 +750,6 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
                 setEditingEvent(null);
               }}
             />
-          </>
         )}
       </AnimatePresence>
 
