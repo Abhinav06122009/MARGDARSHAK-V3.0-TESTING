@@ -129,7 +129,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
   const outerClass = isWidget ? 'relative' : 'fixed z-[999999] bottom-[110px] left-6';
 
   return (
-    <>
+    <React.Fragment>
       {/* Main floating player (draggable) */}
       <div className={outerClass} style={isWidget ? {} : { position: 'fixed' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
@@ -264,7 +264,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
           </div>
         </div>
       </motion.div>
-    </>
+    </React.Fragment>
   );
 };
 
