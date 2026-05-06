@@ -1649,7 +1649,7 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 right-0 h-full w-full max-w-2xl bg-black/80 backdrop-blur-2xl border-l border-white/20 shadow-2xl z-50 flex flex-col"
+                className="relative w-full max-w-2xl h-fit max-h-[90vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
               >
                 <div className="flex items-center justify-between p-10 border-b border-white/5 bg-zinc-950/20">
                   <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
@@ -1662,7 +1662,7 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                     <X className="w-6 h-6" />
                   </Button>
                 </div>
-                <div className="flex-grow overflow-y-auto p-6">
+                <div className="overflow-y-auto p-6">
                   <form onSubmit={handleSubmitGoal} className="space-y-8 p-1">
                     <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
                       <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
@@ -1756,7 +1756,7 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 right-0 h-full w-full max-w-2xl bg-black/80 backdrop-blur-2xl border-l border-white/20 shadow-2xl z-50 flex flex-col"
+                className="relative w-full max-w-2xl h-fit max-h-[90vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
               >
                 <div className="flex items-center justify-between p-10 border-b border-white/5 bg-zinc-950/20">
                   <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
@@ -1769,7 +1769,7 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                     <X className="w-6 h-6" />
                   </Button>
                 </div>
-                <div className="flex-grow overflow-y-auto p-6">
+                <div className="overflow-y-auto p-6">
                   <form onSubmit={handleAddProgress} className="space-y-8 p-1">
                     <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
                       <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">

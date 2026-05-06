@@ -81,7 +81,7 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[999999] overflow-hidden flex justify-end">
+    <div className="fixed inset-0 z-[999999] overflow-hidden flex justify-end items-center p-4">
       {/* Dynamic Background Blur */}
       <motion.div 
         initial={{ opacity: 0 }}
@@ -96,10 +96,10 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="relative w-full max-w-2xl h-full bg-zinc-950/90 backdrop-blur-3xl border-l border-white/10 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.7)] flex flex-col"
+        className="relative w-full max-w-xl h-[fit-content] max-h-[95vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.7)] flex flex-col rounded-[2.5rem] overflow-hidden"
       >
         {/* Animated Glow Border */}
-        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-indigo-500/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
         {/* Floating Header */}
         <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0">
@@ -125,7 +125,7 @@ const EventForm: React.FC<EventFormProps> = ({
         </div>
         
         {/* Scrollable Command Body */}
-        <div className="flex-grow overflow-y-auto p-8 custom-scrollbar space-y-12">
+        <div className="overflow-y-auto p-8 custom-scrollbar space-y-12">
           <form onSubmit={handleSubmit} className="space-y-12">
             
             {/* --- PRIMARY INTEL --- */}
