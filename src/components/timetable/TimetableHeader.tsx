@@ -167,7 +167,7 @@ const TimetableHeader = ({
                   </motion.h1>
 
                   <motion.button
-                    onClick={onAddEvent}
+                    onClick={(e) => onAddEvent(e as any)}
                     className="group relative h-12 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 px-6 py-3 font-black text-white shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all duration-500 hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] active:scale-95"
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.98 }}

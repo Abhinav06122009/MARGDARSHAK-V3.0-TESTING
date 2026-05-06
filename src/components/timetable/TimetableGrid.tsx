@@ -117,7 +117,7 @@ const TimetableGrid: React.FC<TimetableGridProps> = ({
               className={`h-[100px] border-b border-white/[0.03] group relative transition-colors duration-300 ${
                 hasPremiumAccess ? 'hover:bg-white/[0.02] cursor-crosshair' : 'cursor-default'
               }`}
-              onClick={() => hasPremiumAccess && onDayClick(dayIndex)}
+              onClick={(e) => hasPremiumAccess && onDayClick(dayIndex, e as any)}
             >
               {hasPremiumAccess && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">

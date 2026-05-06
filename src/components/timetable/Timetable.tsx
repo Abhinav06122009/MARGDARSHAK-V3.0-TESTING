@@ -55,6 +55,7 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null);
   const [workloadSuggestions, setWorkloadSuggestions] = useState<WorkloadSuggestion[] | null>(null);
+  const [clickPosition, setClickPosition] = useState<{ x: number, y: number } | null>(null);
   const { user: authUser, loading: authLoading } = useAuth();
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
@@ -207,7 +208,8 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
     });
   };
 
-  const handleAddEvent = () => {
+  const handleAddEvent = (e?: React.MouseEvent) => {
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     resetForm();
     setEditingEvent(null);
     setSelectedDay(undefined);
@@ -316,7 +318,8 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
     }
   };
 
-  const handleDayClick = (day: number) => {
+  const handleDayClick = (day: number, e?: React.MouseEvent) => {
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     setSelectedDay(day);
     setEditingEvent(null);
     setFormData({
@@ -744,10 +747,12 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
               editingEvent={editingEvent}
               hasPremiumAccess={hasPremiumAccess}
               onSuggestTime={handleSuggestTime}
+              clickPosition={clickPosition}
               onClose={() => {
                 setIsSheetOpen(false);
                 resetForm();
                 setEditingEvent(null);
+                setClickPosition(null);
               }}
             />
         )}

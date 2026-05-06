@@ -1,13 +1,13 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  BookOpen, Clock, GraduationCap, Save, X, Zap, 
+  Clock, Save, X, Zap, 
   MapPin, Sparkles, CalendarDays
 } from 'lucide-react';
 import { EventFormData, timetableHelpers } from './timetableUtils';
@@ -21,30 +21,8 @@ interface EventFormProps {
   hasPremiumAccess: boolean;
   onSuggestTime: () => void;
   onClose: () => void;
+  clickPosition?: { x: number, y: number } | null;
 }
-
-const sidebarVariants = {
-  hidden: { x: "100%", opacity: 0.5 },
-  visible: { 
-    x: 0, 
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 250,
-      damping: 30,
-      staggerChildren: 0.08
-    }
-  },
-  exit: { 
-    x: "100%", 
-    opacity: 0.5,
-    transition: { 
-        type: "spring",
-        stiffness: 300,
-        damping: 35
-    }
-  }
-};
 
 const itemVariants = {
   hidden: { opacity: 0, x: 20 },
@@ -59,9 +37,42 @@ const EventForm: React.FC<EventFormProps> = ({
   hasPremiumAccess,
   onSuggestTime,
   onClose,
+  clickPosition,
 }) => {
   const { toast } = useToast();
   const categories = timetableHelpers.getEventCategories();
+
+  // Dynamic variants based on click position
+  const sidebarVariants = {
+    hidden: { 
+      x: "100%", 
+      opacity: 0,
+      scale: 0.9,
+      y: clickPosition ? clickPosition.y - (window.innerHeight / 2) : 0 
+    },
+    visible: { 
+      x: 0, 
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        staggerChildren: 0.08
+      }
+    },
+    exit: { 
+      x: "100%", 
+      opacity: 0,
+      scale: 0.9,
+      transition: { 
+          type: "spring",
+          stiffness: 350,
+          damping: 35
+      }
+    }
+  };
 
   const handleSuggestTime = () => {
     if (!hasPremiumAccess) {
@@ -96,7 +107,10 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="relative w-full max-w-xl h-[fit-content] max-h-[95vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.7)] flex flex-col rounded-[2.5rem] overflow-hidden"
+        style={{ 
+          transformOrigin: clickPosition ? `${clickPosition.x}px ${clickPosition.y}px` : 'right center' 
+        }}
+        className="relative w-full max-w-xl h-fit max-h-[95vh] my-auto bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.7)] flex flex-col rounded-[2.5rem] overflow-hidden"
       >
         {/* Animated Glow Border */}
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
