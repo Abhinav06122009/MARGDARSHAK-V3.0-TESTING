@@ -226,12 +226,12 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           onMouseDown={() => setIsClicked(true)}
           onMouseUp={() => setIsClicked(false)}
-          className="fixed inset-0 z-[9999] w-screen h-[100dvh] bg-[#020202] flex items-center justify-center overflow-hidden cursor-none select-none touch-none"
+          className="fixed inset-0 z-[100000] w-screen h-[100dvh] bg-[#020202] flex items-center justify-center overflow-hidden select-none"
         >
 
-          {/* Custom Cursor Reticle - Interactive */}
+          {/* Custom Cursor Reticle - Interactive (Only for non-touch devices) */}
           <motion.div 
-            className="fixed z-[10000] pointer-events-none mix-blend-difference flex items-center justify-center"
+            className="fixed z-[100001] pointer-events-none mix-blend-difference hidden sm:flex items-center justify-center"
             animate={{ 
               width: isHovering ? 80 : 40, 
               height: isHovering ? 80 : 40,
@@ -266,7 +266,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             onClick={handleClose}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            className="fixed top-6 right-6 sm:top-10 sm:right-10 z-[10001] p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all group cursor-none"
+            className="fixed top-6 right-6 sm:top-10 sm:right-10 z-[100001] p-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all group"
             title="Dismiss Overlay"
           >
             <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
@@ -451,7 +451,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
               onClick={handleClose}
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
-              className="relative mt-auto py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] bg-white text-black font-black uppercase tracking-[0.4em] text-[8px] sm:text-[9px] hover:bg-emerald-400 active:scale-95 transition-all overflow-hidden group/btn shadow-xl cursor-none"
+              className="relative mt-auto py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] bg-white text-black font-black uppercase tracking-[0.4em] text-[8px] sm:text-[9px] hover:bg-emerald-400 active:scale-95 transition-all overflow-hidden group/btn shadow-xl"
             >
               <span className="relative z-10">ENTER_DASHBOARD</span>
             </button>

@@ -101,18 +101,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (syncError) {
               console.error('[AuthContext] Sync Error:', syncError.message);
-              // Recovery: Match by email if it's a conflict
-              if (syncError.message.includes('unique') || syncError.message.includes('400')) {
-                console.log('[AuthContext] Attempting recovery by email match...');
-                await supabase
+              // Recovery: If there's an ID mismatch or syntax error, attempt email match
+              const isUuidError = syncError.message.toLowerCase().includes('uuid') || syncError.message.toLowerCase().includes('syntax');
+              const isConflict = syncError.message.toLowerCase().includes('unique') || syncError.message.toLowerCase().includes('conflict');
+              
+              if (isUuidError || isConflict) {
+                console.log('[AuthContext] Identity mismatch detected. Attempting recovery by email match...');
+                const { error: updateError } = await supabase
                   .from('profiles')
                   .update({ id: translatedId, clerk_id: clerkUser.id })
                   .eq('email', profileData.email);
+                
+                if (!updateError) {
+                  console.log('[AuthContext] Recovery success. Identity harmonized.');
+                } else {
+                  console.error('[AuthContext] Recovery failed:', updateError.message);
+                }
               }
             } else {
               console.log('[AuthContext] Sync success for', translatedId);
             }
-          } catch (e) {}
+          } catch (e) {
+            console.error('[AuthContext] Profile sync exception:', e);
+          }
 
           // Security check
           try {
