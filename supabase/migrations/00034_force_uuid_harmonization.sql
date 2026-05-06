@@ -39,7 +39,7 @@ DECLARE
     ];
 BEGIN
     -- 0. DROP ALL POLICIES THAT DEPEND ON PROFILES.ID
-    FOR v_pol IN (SELECT policyname FROM pg_policies WHERE tablename = 'profiles') LOOP
+    FOR v_pol IN (SELECT policyname FROM pg_policies WHERE tablename = 'profiles' AND schemaname = 'public') LOOP
         EXECUTE format('DROP POLICY IF EXISTS %I ON public.profiles', v_pol.policyname);
     END LOOP;
 
@@ -65,7 +65,8 @@ BEGIN
             END LOOP;
             
             -- Finally update the profile itself
-            UPDATE public.profiles SET id = v_correct_id::text WHERE email = r.email;
+            -- We use a dynamic cast to handle both TEXT and UUID columns during transition
+            EXECUTE format('UPDATE public.profiles SET id = %L WHERE email = %L', v_correct_id, r.email);
         END IF;
     END LOOP;
 
@@ -74,9 +75,13 @@ BEGIN
     DELETE FROM public.profiles WHERE id::text NOT LIKE '________-____-____-____-____________' AND email NOT IN ('abhinavjha393@gmail.com', 'abhinav.vsavwe4899@gmail.com');
     
     -- Final fallback: if ID is still not UUID, just generate one (last resort)
-    UPDATE public.profiles SET id = public.translate_clerk_id_to_uuid(clerk_id)::text WHERE id::text NOT LIKE '________-____-____-____-____________';
+    -- Using EXECUTE to avoid type mismatch if already UUID
+    EXECUTE 'UPDATE public.profiles SET id = public.translate_clerk_id_to_uuid(clerk_id)::uuid WHERE id::text NOT LIKE ''________-____-____-____-____________''';
 
-    ALTER TABLE public.profiles ALTER COLUMN id TYPE UUID USING id::UUID;
+    -- Convert to UUID if it's still text
+    IF (SELECT data_type FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'id') = 'text' THEN
+        ALTER TABLE public.profiles ALTER COLUMN id TYPE UUID USING id::UUID;
+    END IF;
 
     -- 4. RE-ESTABLISH RLS (Strict UUID)
     CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated
