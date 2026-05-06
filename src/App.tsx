@@ -315,14 +315,8 @@ const AppRoutes = () => {
             {showContent && (
                <>
                  {/* PERSISTENT UI LAYER - RENDER BEFORE FOOTER SO IT APPEARS ON EVERY PAGE */}
-                 <div
-                   className="fixed z-[999999] pointer-events-none"
-                   style={{
-                     left: 'max(0.75rem, env(safe-area-inset-left))',
-                     bottom: 'max(0.75rem, env(safe-area-inset-bottom))',
-                   }}
-                 >
-                   <div className="pointer-events-auto flex flex-col items-start gap-3 sm:gap-4">
+                 <div className="fixed bottom-6 left-6 z-50 pointer-events-none">
+                   <div className="pointer-events-auto flex flex-col items-start gap-4">
                      <GlobalQuickActions isDocked />
                      <AmbientSoundPlayer isWidget />
                    </div>
