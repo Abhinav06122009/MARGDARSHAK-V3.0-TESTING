@@ -166,49 +166,71 @@ export const initSecurityHardening = () => {
     } catch (err) { if (isDev) console.error('Tracing error:', err); }
   };
 
-  // --- SCREENSHOT PROTECTION ---
+  // --- SCREENSHOT & KEYBOARD PROTECTION ---
   const addScreenshotDefense = () => {
     const style = document.createElement('style');
-    style.innerHTML = `@media print { body { display: none !important; } }`;
+    style.innerHTML = `
+      @media print { body { display: none !important; } }
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-user-drag: none !important;
+        -webkit-touch-callout: none !important;
+      }
+      input, textarea, [contenteditable="true"], .selectable {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+      }
+      img {
+        pointer-events: none !important;
+        -webkit-user-drag: none !important;
+      }
+    `;
     document.head.appendChild(style);
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('Security Policy: Screenshots are prohibited.');
+      const blockedKeys = ['PrintScreen', 'Snapshot', 'PrtSc'];
+      if (blockedKeys.includes(e.key)) {
+        navigator.clipboard.writeText('🛡️ SECURITY ALERT: Unauthorized data capture prohibited.');
+        logViolation('Screenshot Attempt', { key: e.key });
       }
     });
 
     window.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4')) {
+      // 1. Block Screen Capture Shortcuts (Win+Shift+S, Cmd+Shift+4, etc.)
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === '4' || e.key === 's')) {
+        e.preventDefault();
         window.blur();
+        logViolation('Screen Capture Shortcut', { combo: 'WIN_SHIFT_S' });
       }
-    });
+
+      // 2. Block Inspect & DevTools Shortcuts
+      const forbiddenKeys = ['u', 's', 'p', 'a', 'i', 'j', 'c'];
+      const isForbiddenCombo = (e.ctrlKey || e.metaKey) && forbiddenKeys.includes(e.key.toLowerCase());
+      const isF12 = e.key === 'F12';
+      
+      // 3. Block System Keys (Windows, Alt, Del, etc.)
+      const isSystemKey = ['Meta', 'Alt', 'Delete', 'ContextMenu', 'Control'].includes(e.key) && !['input', 'textarea'].includes((e.target as any).tagName.toLowerCase());
+
+      if (isForbiddenCombo || isF12 || isSystemKey) {
+        if (cachedIsOfficer === true) return;
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isForbiddenCombo || isF12) {
+          logViolation('Tamper Attempt', { key: e.key, type: 'DEVT_ACCESS' });
+        }
+        return false;
+      }
+    }, true);
   };
   addScreenshotDefense();
 
-  // --- KEYBOARD LOCKDOWN ---
-  document.addEventListener('keydown', (e) => {
-    const forbiddenKeys = ['u', 's', 'p', 'a']; 
-    const inspectKeys = ['F12', 'i', 'j', 'c']; 
-    
-    const isForbidden = (e.ctrlKey || e.metaKey) && forbiddenKeys.includes(e.key.toLowerCase());
-    const isInspection = e.key === 'F12' || 
-                         ((e.ctrlKey || e.metaKey) && (e.shiftKey || e.key.toLowerCase() === 'u') && inspectKeys.includes(e.key.toLowerCase())) ||
-                         ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'i');
-
-    if (isForbidden || isInspection) {
-      // Use cached status if available for synchronous return
-      if (cachedIsOfficer === true) return;
-
-      e.preventDefault();
-      
-      if (isInspection) {
-        logViolation('Tamper Attempt', { key: e.key, combo: 'DEVT_OPEN' });
-      }
-      return false;
-    }
-  }, false);
-
+  // --- CONTEXT MENU LOCKDOWN ---
   document.addEventListener('contextmenu', (e) => {
     if (cachedIsOfficer === true) return;
     e.preventDefault();
@@ -219,6 +241,7 @@ export const initSecurityHardening = () => {
   const checkDevTools = () => {
     if (cachedIsOfficer === true) return;
 
+    // Detect based on window dimension changes (Side panel open)
     const threshold = 160;
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
@@ -226,60 +249,18 @@ export const initSecurityHardening = () => {
     if (widthThreshold || heightThreshold) {
       if (!devtoolsOpen) {
         devtoolsOpen = true;
-        logViolation('DevTools Opened', { state: 'detected', screen: `${window.outerWidth}x${window.outerHeight}`, inner: `${window.innerWidth}x${window.innerHeight}` });
+        logViolation('DevTools Detected', { dimension_shift: true });
       }
     } else {
       devtoolsOpen = false;
     }
   };
 
-  const detectNetworkProbe = () => {
-    if (cachedIsOfficer === true) return;
-    const start = Date.now();
-    fetch('/favicon.ico', { cache: 'no-store' }).then(() => {
-      const duration = Date.now() - start;
-      if (duration > 1000) { 
-        logViolation('Network Proxy Detected', { latency: duration });
-      }
-    }).catch(() => {});
-  };
-
-  window.addEventListener('resize', checkDevTools);
-  setInterval(checkDevTools, 3000); 
-  setInterval(detectNetworkProbe, 30000); 
+  setInterval(checkDevTools, 2000);
 
   window.addEventListener('security-violation', (e: any) => {
     logViolation(e.detail.type, e.detail.metadata);
   });
-
-  const applyVisualLockdown = () => {
-    if (cachedIsOfficer === true) return;
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-      * {
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        user-select: none !important;
-        -webkit-user-drag: none !important;
-        -webkit-tap-highlight-color: transparent !important;
-      }
-      input, textarea, [contenteditable="true"], .selectable {
-        -webkit-user-select: text !important;
-        -moz-user-select: text !important;
-        -ms-user-select: text !important;
-        user-select: text !important;
-        cursor: text !important;
-      }
-      img {
-        pointer-events: none !important;
-        -webkit-touch-callout: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-  };
-  applyVisualLockdown();
 
   // Periodically refresh officer status
   setInterval(isEliteOfficer, 10000);
