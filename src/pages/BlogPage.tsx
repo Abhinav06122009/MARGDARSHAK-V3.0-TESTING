@@ -261,7 +261,7 @@ const BlogPost = () => {
           <img
             src={post.image}
             alt={post.title}
-            className="w-full h-auto transform group-hover:scale-105 transition-transform duration-[3000ms] ease-out"
+            className="w-full h-auto transform group-hover:scale-105 transition-transform duration-[3s] ease-out"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent pointer-events-none" />
         </motion.div>

@@ -117,15 +117,15 @@ export const useAdmin = () => {
         moderationRes, 
         analyticsRes
       ] = await Promise.all([
-        fetchWithCatch(supabase.from('profiles').select('*').limit(100), 'Users'),
-        fetchWithCatch(supabase.from('security_threats').select('*').order('created_at', { ascending: false }).limit(20), 'Threats'),
-        fetchWithCatch(supabase.from('admin_reports').select('*').order('created_at', { ascending: false }).limit(50), 'Reports'),
-        fetchWithCatch(supabase.from('blocked_users').select('*').limit(50), 'Blocked'),
-        fetchWithCatch(supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(50), 'Contacts'),
-        fetchWithCatch(supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50), 'Tickets'),
-        fetchWithCatch(supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle(), 'Settings'),
-        fetchWithCatch(supabase.from('moderation_queue').select('*').order('created_at', { ascending: false }).limit(20), 'Moderation'),
-        fetchWithCatch(supabase.from('daily_metrics').select('*').order('date', { ascending: false }).limit(7), 'Analytics')
+        fetchWithCatch(supabase.from('profiles' as any).select('*').limit(100), 'Users'),
+        fetchWithCatch(supabase.from('security_threats' as any).select('*').order('created_at', { ascending: false }).limit(20), 'Threats'),
+        fetchWithCatch(supabase.from('admin_reports' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Reports'),
+        fetchWithCatch(supabase.from('blocked_users' as any).select('*').limit(50), 'Blocked'),
+        fetchWithCatch(supabase.from('contact_messages' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Contacts'),
+        fetchWithCatch(supabase.from('support_tickets' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Tickets'),
+        fetchWithCatch(supabase.from('security_settings' as any).select('*').eq('id', 'global').maybeSingle(), 'Settings'),
+        fetchWithCatch(supabase.from('moderation_queue' as any).select('*').order('created_at', { ascending: false }).limit(20), 'Moderation'),
+        fetchWithCatch(supabase.from('daily_metrics' as any).select('*').order('date', { ascending: false }).limit(7), 'Analytics')
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
@@ -135,22 +135,24 @@ export const useAdmin = () => {
       const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ 
         ...m, 
         type: 'contact',
+        status: m.status || 'pending',
         subject: m.subject || 'PUBLIC CONTACT INQUIRY'
       }));
       
       const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ 
         ...m, 
         type: 'ticket', 
+        status: m.status || 'pending',
         first_name: m.first_name || 'Ticket', 
         last_name: m.last_name || `#${m.id.slice(0,4)}`,
         subject: m.subject || 'INTERNAL SUPPORT TICKET'
       }));
       
       setTickets([...contactMsgs, ...supportTkts]
-        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
         .slice(0, 50)
-      );
-
+      ); 
+      
       if (settingsRes.data) setSettings(settingsRes.data as any);
 
       if (moderationRes.data) {

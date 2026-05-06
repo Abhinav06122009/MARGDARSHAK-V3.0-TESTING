@@ -187,7 +187,7 @@ const GlobalFooter = React.memo(() => {
             </p>
             {/* Subtle Asset Attribution */}
             {/* Subtle Asset Attribution */}
-            <div className="opacity-[0.01] hover:opacity-100 transition-opacity duration-[3000ms] text-[7px] font-mono flex flex-wrap gap-4 grayscale max-w-xl justify-center lg:justify-end">
+            <div className="opacity-[0.01] hover:opacity-100 transition-opacity duration-[3s] text-[7px] font-mono flex flex-wrap gap-4 grayscale max-w-xl justify-center lg:justify-end">
               <span>
                 1.<a href="https://iconscout.com/3d-icons/android" className="hover:underline" target="_blank">Android Logo</a> by <a href="https://iconscout.com/contributors/iconscout" className="hover:underline">IconScout Store</a> on <a href="https://iconscout.com" className="hover:underline">IconScout</a>
               </span>
