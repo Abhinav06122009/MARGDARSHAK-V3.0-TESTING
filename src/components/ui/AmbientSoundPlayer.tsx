@@ -32,7 +32,11 @@ interface BurnoutAlert {
   message: string;
 }
 
-export const AmbientSoundPlayer: React.FC = () => {
+interface AmbientSoundPlayerProps {
+  isWidget?: boolean;
+}
+
+export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget = false }) => {
   const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeId, setActiveId] = useState('lofi');
@@ -123,7 +127,9 @@ export const AmbientSoundPlayer: React.FC = () => {
   }, [user?.id, syncBurnout]);
 
   return (
-    <div className="fixed z-[999999] bottom-[110px] left-6" style={{ position: 'fixed' }}>
+    <>
+      {/* Main floating player (draggable) */}
+      <div className="fixed z-[999999] bottom-[110px] left-6" style={{ position: 'fixed' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
@@ -235,7 +241,26 @@ export const AmbientSoundPlayer: React.FC = () => {
         </div>
       </motion.div>
       <audio ref={audioRef} src={station.url} loop className="hidden" />
-    </div>
+
+      {/* Bottom dock that 'docks' into the corner on page load and stays pinned */}
+      <motion.div
+        initial={{ opacity: 0, y: 60, x: -8 }}
+        animate={{ opacity: 1, y: 0, x: 0 }}
+        transition={{ type: 'spring', stiffness: 110, damping: 18, delay: 0.08 }}
+        className="fixed z-[999998] bottom-4 left-6 pointer-events-auto"
+      >
+        <div className="flex items-center gap-3 bg-gradient-to-r from-zinc-900/80 to-zinc-800/60 px-3 py-2 rounded-full border border-white/6 shadow-xl backdrop-blur">
+          <Music size={18} className="text-indigo-400" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[11px] font-black text-white">Lofi Focus</span>
+            <span className="text-[10px] text-zinc-400">Ambient Player</span>
+          </div>
+          <div className="ml-3">
+            <button onClick={() => setExpanded(true)} className="bg-indigo-600/90 hover:bg-indigo-600 px-3 py-1 rounded-full text-[11px] font-bold">Open</button>
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 };
 
