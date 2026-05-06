@@ -324,7 +324,7 @@ const AppRoutes = () => {
 
       {/* PORTAL RENDERING TO BODY - GUARANTEES VIEWPORT FIXED POSITIONING */}
       {showContent && createPortal(
-        <div className="persistent-ui-layer">
+        <div className="fixed inset-0 pointer-events-none z-[999999]" style={{ position: 'fixed', inset: 0, zIndex: 999999 }}>
           <AIWidgetWrapper />
           <GlobalQuickActions />
           <AmbientSoundPlayer />

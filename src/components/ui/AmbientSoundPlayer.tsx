@@ -128,11 +128,8 @@ export const AmbientSoundPlayer: React.FC = () => {
 
       <motion.div
         drag dragMomentum={false}
-        animate={{ 
-          y: scrollY * 0.05, // Dramatic parallax that moves WITH the scroll
-          opacity: 1
-        }}
-        transition={{ type: 'spring', stiffness: 200, damping: 40 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <div className={`flex flex-col bg-[#1A1A1A]/80 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[360px]' : 'w-auto'}`}>
