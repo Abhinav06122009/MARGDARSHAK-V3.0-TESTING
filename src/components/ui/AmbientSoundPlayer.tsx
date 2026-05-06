@@ -52,13 +52,6 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
 
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
@@ -141,7 +134,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
         animate={{ opacity: 1, y: 0 }}
         className={`pointer-events-auto ${isWidget ? '' : 'cursor-grab active:cursor-grabbing'}`}
       >
-        <div className={`flex flex-col bg-[#1A1A1A]/80 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[min(88vw,360px)]' : 'w-auto'}`}>
+        <div className={`flex flex-col bg-[#1A1A1A]/80 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[min(92vw,420px)]' : (isWidget ? 'w-[min(92vw,420px)]' : 'w-auto')}`}>
 
           {expanded ? (
             <div className="p-6 space-y-6">
@@ -224,15 +217,15 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4 p-2 pl-2 pr-4 bg-[#1A1A1A] border border-white/5 rounded-full shadow-2xl">
+            <div className="flex items-center gap-3 p-2 pl-2 pr-3 sm:pr-4 bg-[#1A1A1A] border border-white/5 rounded-full shadow-2xl">
               <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-all text-white shadow-xl">
                 {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-1" />}
               </button>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <Music size={14} className="text-zinc-600" />
-                <span className="text-[11px] font-black uppercase tracking-[0.1em] text-zinc-100 whitespace-nowrap">{station.label}</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.1em] text-zinc-100 whitespace-nowrap truncate">{station.label}</span>
               </div>
-              <div className="flex items-center gap-4 pl-2 border-l border-white/5">
+              <div className="flex items-center gap-3 pl-2 border-l border-white/5 shrink-0">
                  <Upload size={14} className="text-zinc-600 hover:text-white transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()} />
                  {burnout && burnout.score > 30 && <Brain size={14} className={burnout.score > 70 ? "text-red-500 animate-pulse" : "text-amber-500"} />}
                  <button onClick={() => setExpanded(true)} className="text-zinc-600 hover:text-white transition-colors">

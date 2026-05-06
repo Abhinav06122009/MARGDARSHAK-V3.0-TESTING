@@ -85,13 +85,6 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
     );
   }, [query]);
 
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const categories = useMemo(() => {
     const groups: Record<string, Action[]> = {};
     filteredActions.forEach(a => {
@@ -104,6 +97,7 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
   if (!session) return null;
 
   const outerClass = isDocked ? 'relative z-0' : 'fixed bottom-6 left-6 z-[999999]';
+  const dockWidthClass = isDocked ? 'w-[min(92vw,700px)] max-w-[700px]' : '';
 
   return (
     <div className={outerClass} style={isDocked ? {} : { position: 'fixed' }}>
@@ -114,7 +108,7 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
         animate={{ opacity: 1, y: 0 }}
         className={`pointer-events-auto ${isDocked ? '' : 'cursor-grab active:cursor-grabbing'}`}
       >
-        <div className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className={`flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden ${dockWidthClass}`}>
           <div className="relative group">
             <div className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
             <motion.button
@@ -126,17 +120,17 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
             </motion.button>
           </div>
 
-          <div className="h-8 w-px bg-white/10 mx-2" />
+          <div className="h-8 w-px bg-white/10 mx-2 shrink-0" />
 
-          <div className="flex items-center gap-1 pr-2">
+          <div className={`flex items-center gap-1 pr-2 ${isDocked ? 'overflow-x-auto whitespace-nowrap flex-1' : ''}`}>
             {DOCK_ACTIONS.map((action, i) => (
               <motion.button
                 key={i}
                 whileHover={{ scale: 1.2, y: -4 }} whileTap={{ scale: 0.9 }}
                 onClick={() => navigate(action.path)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-all group relative"
+                className={`rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-all group relative shrink-0 ${isDocked ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10'}`}
               >
-                <action.icon size={18} />
+                <action.icon size={isDocked ? 16 : 18} />
                 <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-black border border-white/10 rounded-lg text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl">
                   {action.title}
                 </div>
@@ -144,12 +138,12 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
             ))}
           </div>
 
-          <div className="h-8 w-px bg-white/10 mx-2" />
+          <div className="h-8 w-px bg-white/10 mx-2 shrink-0" />
 
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors shrink-0"
           >
             <Search size={16} />
           </motion.button>
