@@ -13,6 +13,7 @@ import { CursorProvider } from '@/lib/CursorContext';
 import CookieConsent from '@/components/CookieConsent';
 import { AIProvider } from '@/contexts/AIContext';
 import { AdminProvider, AdminContext } from '@/contexts/AdminContext';
+import { DockProvider } from '@/contexts/DockContext';
 import { SecurityProvider } from '@/contexts/SecurityContext';
 import ShortcutsOverlay from '@/components/ui/ShortcutsOverlay';
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
@@ -348,7 +349,9 @@ const AppContent = () => {
         <AdminProvider>
           <SecurityProvider>
             <AIProvider>
-              <AppRoutes />
+              <DockProvider>
+                <AppRoutes />
+              </DockProvider>
             </AIProvider>
           </SecurityProvider>
         </AdminProvider>
