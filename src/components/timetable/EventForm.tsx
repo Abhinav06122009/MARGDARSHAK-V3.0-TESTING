@@ -79,14 +79,12 @@ const EventForm: React.FC<EventFormProps> = ({
     let top = clickPosition.y;
     
     // Horizontal boundary checks
-    const minLeft = (formWidth / 2) + 20;
-    const maxLeft = window.innerWidth - (formWidth / 2) - 20;
+    const minLeft = (formWidth / 2) + 10;
+    const maxLeft = window.innerWidth - (formWidth / 2) - 10;
     left = Math.max(minLeft, Math.min(left, maxLeft));
     
-    // Vertical boundary checks - conservative clamping
-    const minTop = 100;
-    const maxTop = window.innerHeight - 100;
-    top = Math.max(minTop, Math.min(top, maxTop));
+    // Minimal vertical clamping just to keep the top edge on screen
+    top = Math.max(50, Math.min(top, window.innerHeight - 50));
     
     return { 
       position: 'fixed',
