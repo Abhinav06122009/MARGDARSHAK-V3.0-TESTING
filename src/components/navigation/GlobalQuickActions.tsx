@@ -100,16 +100,14 @@ export const GlobalQuickActions: React.FC = () => {
   if (!session) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-[99999] pointer-events-none" style={{ position: 'fixed' }}>
+    <div className="fixed bottom-6 left-6 z-[999999]" style={{ position: 'fixed' }}>
       <motion.div
         drag dragMomentum={false}
-        animate={{ y: Math.sin(scrollY * 0.01) * 4 }}
-        transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
-        <motion.div
-          className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
-        >
+        <div className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
           <div className="relative group">
             <div className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
             <motion.button
