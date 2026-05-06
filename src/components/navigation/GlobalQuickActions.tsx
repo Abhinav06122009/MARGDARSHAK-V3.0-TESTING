@@ -128,11 +128,10 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
 
   if (!session) return null;
 
-  const outerClass = isDocked ? 'relative z-0' : 'fixed bottom-6 left-6 z-[999999]';
   const dockWidthClass = isDocked ? 'w-[min(92vw,700px)] max-w-[700px]' : '';
 
   return (
-    <div className={outerClass} style={isDocked ? {} : { position: 'fixed' }}>
+    <div>
       <motion.div
         drag={!isDocked}
         dragMomentum={false}

@@ -20,7 +20,6 @@ import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
 import { DockProvider } from '@/contexts/DockContext';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
-import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
@@ -113,7 +112,7 @@ import { trackActivity } from '@/lib/security/activityTracker';
 import SSOCallback from '@/components/auth/SSOCallback';
 import RankEntryOverlay from '@/components/auth/RankEntryOverlay';
 import DevVerificationGuard from './components/security/DevVerificationGuard';
-import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
+// GlobalQuickActions and AmbientSoundPlayer are mounted at the root in main.tsx
 
 const AIWidgetWrapper = () => {
   const { session } = useContext(AuthContext);
@@ -314,14 +313,7 @@ const AppRoutes = () => {
           <CursorProvider>
             {showContent && (
                <>
-                 {/* PERSISTENT UI LAYER - RENDER BEFORE FOOTER SO IT APPEARS ON EVERY PAGE */}
-                 <div className="fixed bottom-6 left-6 z-50 pointer-events-none">
-                   <div className="pointer-events-auto flex flex-col items-start gap-4">
-                     <GlobalQuickActions isDocked />
-                     <AmbientSoundPlayer isWidget />
-                   </div>
-                 </div>
-
+                 {/* PERSISTENT UI LAYER moved to root (main.tsx) to avoid stacking context issues */}
                  <GlobalFooter />
                </>
             )}
