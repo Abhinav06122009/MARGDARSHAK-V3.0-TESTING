@@ -209,15 +209,7 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
   };
 
   const handleAddEvent = (e?: React.MouseEvent) => {
-    if (e) {
-      const x = e.clientX || (e as any).nativeEvent?.clientX || 0;
-      const y = e.clientY || (e as any).nativeEvent?.clientY || 0;
-      if (x !== 0 || y !== 0) {
-        setClickPosition({ x, y });
-      } else {
-        setClickPosition(null);
-      }
-    }
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     resetForm();
     setEditingEvent(null);
     setSelectedDay(undefined);
@@ -271,21 +263,13 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
   };
 
   const handleEditEvent = (event: TimetableEvent, e?: React.MouseEvent) => {
-    if (e) {
-      const x = e.clientX || (e as any).nativeEvent?.clientX || 0;
-      const y = e.clientY || (e as any).nativeEvent?.clientY || 0;
-      if (x !== 0 || y !== 0) {
-        setClickPosition({ x, y });
-      } else {
-        setClickPosition(null);
-      }
-    }
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     setEditingEvent(event);
     // Use spread to ensure all existing data is carried over to the form
     setFormData({
-      ...formData, // Keep defaults for fields not in event
+      ...formData,
       ...event,
-      description: event.description || '', // Ensure non-nullable fields have defaults
+      description: event.description || '',
       credits: event.credits ?? undefined,
       tags: event.tags?.join(', ') || '',
       online_meeting_link: event.online_meeting_link || '',
@@ -336,15 +320,7 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
   };
 
   const handleDayClick = (day: number, e?: React.MouseEvent) => {
-    if (e) {
-      const x = e.clientX || (e as any).nativeEvent?.clientX || 0;
-      const y = e.clientY || (e as any).nativeEvent?.clientY || 0;
-      if (x !== 0 || y !== 0) {
-        setClickPosition({ x, y });
-      } else {
-        setClickPosition(null);
-      }
-    }
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     setSelectedDay(day);
     setEditingEvent(null);
     setFormData({

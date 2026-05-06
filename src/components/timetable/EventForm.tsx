@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Clock, Save, X, Zap, 
-  MapPin, Sparkles, CalendarDays
+  MapPin, Sparkles, CalendarDays, CalendarPlus, Edit3
 } from 'lucide-react';
 import { EventFormData, timetableHelpers } from './timetableUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -42,68 +42,39 @@ const EventForm: React.FC<EventFormProps> = ({
   const { toast } = useToast();
   const categories = timetableHelpers.getEventCategories();
 
-  // Dynamic variants based on click position
-  const formVariants = {
+  const sidebarVariants = {
     hidden: { 
-      scale: 0.5,
-      opacity: 0,
+      x: '100%',
+      opacity: 0.5,
+      filter: 'blur(10px)'
     },
     visible: { 
-      scale: 1,
+      x: 0,
       opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 500,
-        damping: 35,
+      filter: 'blur(0px)',
+      transition: { 
+        type: "spring" as const, 
+        damping: 30, 
+        stiffness: 300,
+        mass: 0.8,
         staggerChildren: 0.05
       }
     },
     exit: { 
-      scale: 0.8,
+      x: '100%',
       opacity: 0,
-      transition: { duration: 0.15, ease: "easeOut" }
+      filter: 'blur(10px)',
+      transition: { 
+        duration: 0.3,
+        ease: "easeInOut" as const
+      }
     }
   };
-
-  // Improved positioning logic
-  const getPositionStyle = (): React.CSSProperties => {
-    if (!clickPosition) return { 
-      left: '50%', 
-      top: '50%', 
-      transform: 'translate(-50%, -50%)',
-      position: 'fixed'
-    };
-    
-    const formWidth = 576; // max-w-xl
-    let left = clickPosition.x;
-    let top = clickPosition.y;
-    
-    // Horizontal boundary checks
-    const minLeft = (formWidth / 2) + 10;
-    const maxLeft = window.innerWidth - (formWidth / 2) - 10;
-    left = Math.max(minLeft, Math.min(left, maxLeft));
-    
-    // Minimal vertical clamping just to keep the top edge on screen
-    top = Math.max(50, Math.min(top, window.innerHeight - 50));
-    
-    return { 
-      position: 'fixed',
-      left: `${left}px`, 
-      top: `${top}px`, 
-      transform: 'translate(-50%, -50%)',
-    };
-  };
-
-  const posStyle = getPositionStyle();
 
   const handleSuggestTime = () => {
     if (!hasPremiumAccess) {
         toast({
-            title: (
-              <span className="bg-gradient-to-r from-red-400 to-rose-600 bg-clip-text text-transparent font-bold">
-                Premium Feature
-              </span>
-            ),
+            title: "Premium Feature",
             description: "Upgrade to premium_elite for AI-powered scheduling.",
             className: "bg-[#0A0A0A] border border-white/10",
             variant: "destructive",
@@ -114,28 +85,27 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[999999] overflow-hidden pointer-events-none">
-      {/* Dynamic Background Blur */}
+    <div className="fixed inset-0 z-[999999] flex justify-end overflow-hidden">
+      {/* Backdrop */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-[#000000]/50 backdrop-blur-sm cursor-pointer pointer-events-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
       />
 
       <motion.div
-        variants={formVariants}
+        variants={sidebarVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        style={posStyle}
-        className="relative w-full max-w-xl h-fit max-h-[90vh] bg-zinc-950/95 backdrop-blur-3xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col rounded-[2.5rem] overflow-hidden pointer-events-auto"
+        className="relative w-full max-w-[550px] h-full bg-zinc-950/98 backdrop-blur-3xl border-l border-white/10 shadow-[-20px_0_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden pointer-events-auto"
       >
         {/* Animated Glow Border */}
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
-        {/* Floating Header */}
+        {/* Header */}
         <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
@@ -148,14 +118,12 @@ const EventForm: React.FC<EventFormProps> = ({
               <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Timetable Command Sheet</p>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.1, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all"
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white transition-all hover:bg-white/10"
           >
-            <X size={20} />
-          </motion.button>
+            <X className="w-6 h-6" />
+          </button>
         </div>
         
         {/* Scrollable Command Body */}
