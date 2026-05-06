@@ -162,8 +162,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    if (sessionLoaded && userLoaded && clerkUser?.id) {
-      syncProfile();
+    if (sessionLoaded && userLoaded) {
+      if (clerkUser?.id) {
+        syncProfile();
+      } else {
+        setLoading(false);
+      }
     }
   }, [sessionLoaded, userLoaded, clerkUser?.id]);
 

@@ -60,17 +60,17 @@ export const LandingHeader = React.memo(() => {
       <div className="container mx-auto px-6 flex justify-between items-center">
         {/* Brand */}
         <div className="flex items-center gap-4 cursor-pointer group" onClick={() => handleLinkClick('home')}>
-          <div className="relative">
-            <div className="p-2 rounded-xl bg-white/10 border border-white/20 relative z-10 group-hover:scale-110 transition-transform duration-500 shadow-2xl">
-              <img src="/logo.png" alt="Margdarshak Logo" className="h-12 w-12 rounded-lg object-contain" />
+          <div className="relative flex-shrink-0">
+            <div className="p-2 md:p-3 rounded-xl bg-white/10 border border-white/20 relative z-10 group-hover:scale-110 transition-transform duration-500 shadow-2xl shadow-blue-500/10">
+              <img src="/logo.png" alt="Margdarshak Logo" className="h-10 w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 rounded-lg object-contain" />
             </div>
           </div>
           
           <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none uppercase">
+            <span className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none uppercase">
               MARGDARSHAK
             </span>
-            <span className="text-[8px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered Educational Suite</span>
+            <span className="text-[8px] md:text-[10px] lg:text-xs font-bold text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">AI Powered Educational Suite</span>
           </div>
         </div>
 
