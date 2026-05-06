@@ -188,7 +188,7 @@ export const BurnoutPredictorWidget: React.FC<BurnoutPredictorProps> = React.mem
             </defs>
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-black text-white tracking-tighter">{analysis.score}<span className="text-[10px] text-zinc-500">%</span></span>
+            <span className="text-lg font-black text-white tracking-tighter">{Math.round(analysis.score)}<span className="text-[10px] text-zinc-500">%</span></span>
           </div>
         </div>
 

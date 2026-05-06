@@ -319,7 +319,7 @@ const AppRoutes = () => {
             <>
               <AIWidgetWrapper />
               <GlobalQuickActions />
-              <AmbientSoundPlayer />
+              {location.pathname !== '/dashboard' && <AmbientSoundPlayer />}
               <MobileNavbar />
               <Suspense fallback={null}>
                 <GlobalWellnessBar />
