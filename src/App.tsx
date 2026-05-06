@@ -319,8 +319,6 @@ const AppRoutes = () => {
           <Toaster />
           <Sonner />
           <CookieConsent />
-            <AppRoutes />
-          </Suspense>
 
           {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
           {showContent && (
