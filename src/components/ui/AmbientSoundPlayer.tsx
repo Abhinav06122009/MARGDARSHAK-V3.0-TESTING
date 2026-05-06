@@ -39,29 +39,11 @@ export const AmbientSoundPlayer: React.FC = () => {
   const [volume, setVolume] = useState(0.45);
   const [isMuted, setIsMuted] = useState(false);
   const [customTracks, setCustomTracks] = useState<Station[]>([]);
-  const [isVisible, setIsVisible] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(AuthContext);
   const [burnout, setBurnout] = useState<BurnoutAlert | null>(null);
-
-  const lastScrollY = useRef(0);
-
-  // Auto hide/show on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const latest = window.scrollY;
-      const diff = latest - lastScrollY.current;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && latest > 100) setIsVisible(false);
-        else setIsVisible(true);
-        lastScrollY.current = latest;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
@@ -103,35 +85,35 @@ export const AmbientSoundPlayer: React.FC = () => {
     }
   };
 
-  // Real Burnout Logic
   const syncBurnout = useCallback(async () => {
     if (!user?.id) return;
-    const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id).neq('status', 'completed');
-    if (!tasks) return;
-    
-    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date());
-    const highPrio = tasks.filter(t => t.priority === 'high');
-    
-    const score = Math.min(100, (tasks.length * 5) + (overdue.length * 15) + (highPrio.length * 10));
-    
-    let message = "Mind is clear. Ready to focus.";
-    if (score > 80) message = "Extreme Burnout Risk. Stop and Rest.";
-    else if (score > 50) message = "High Stress. Take a breather.";
-    else if (score > 30) message = "Moderate Load. Stay steady.";
+    try {
+      const { data: tasks } = await supabase.from('tasks').select('*').eq('user_id', user.id).neq('status', 'completed');
+      if (!tasks) return;
+      
+      const overdue = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date());
+      const highPrio = tasks.filter(t => t.priority === 'high');
+      
+      const score = Math.min(100, (tasks.length * 5) + (overdue.length * 15) + (highPrio.length * 10));
+      
+      let message = "Mind is clear. Ready to focus.";
+      if (score > 80) message = "Extreme Burnout Risk. Stop and Rest.";
+      else if (score > 50) message = "High Stress. Take a breather.";
+      else if (score > 30) message = "Moderate Load. Stay steady.";
 
-    setBurnout({ score, message });
+      setBurnout({ score, message });
+    } catch (e) {
+      console.error('Burnout sync failed:', e);
+    }
   }, [user?.id]);
 
   useEffect(() => {
     syncBurnout();
-    // Realtime sync for tasks
     const channel = supabase.channel('tasks_burnout')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `user_id=eq.${user?.id}` }, syncBurnout)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
-
-  console.log('[DEBUG] AmbientSoundPlayer rendered, isVisible:', isVisible);
 
   return (
     <div className="fixed z-[9999] bottom-6 left-6 pointer-events-none">
@@ -139,8 +121,8 @@ export const AmbientSoundPlayer: React.FC = () => {
 
       <motion.div
         drag dragMomentum={false}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
@@ -203,7 +185,6 @@ export const AmbientSoundPlayer: React.FC = () => {
                 <span className="text-[10px] font-black text-zinc-600 tabular-nums w-8 text-right">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
               </div>
 
-              {/* Real Burnout Section */}
               {burnout && (
                 <div className={`flex flex-col gap-2 py-3 px-4 rounded-xl border ${burnout.score > 50 ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
                    <div className="flex items-center gap-3">

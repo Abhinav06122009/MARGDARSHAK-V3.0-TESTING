@@ -8,7 +8,8 @@ import {
   Briefcase, Timer, MousePointer2, User, Hash,
   Clock, ArrowUp, LayoutGrid, ClipboardCheck,
   Target, ShieldCheck, FileSearch, HelpCircle,
-  Shield, Newspaper, Download, Info, Mail
+  Shield, Newspaper, Download, Info, Mail,
+  HeartPulse
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -48,6 +49,7 @@ const ALL_ACTIONS: Action[] = [
   { icon: Calendar, title: 'Timetable', subtitle: 'Daily schedule', color: 'from-cyan-400 to-blue-600', path: '/timetable', category: 'Academic', keywords: ['time'] },
   { icon: Book, title: 'Syllabus', subtitle: 'Completion status', color: 'from-emerald-400 to-green-600', path: '/syllabus', category: 'Academic', keywords: ['syllabi'] },
   { icon: Target, title: 'Focus Timer', subtitle: 'Pomodoro module', color: 'from-rose-400 to-red-500', path: '/timer', category: 'Academic', keywords: ['focus'] },
+  { icon: HeartPulse, title: 'Wellness', subtitle: 'Mind & Body', color: 'from-emerald-400 to-teal-600', path: '/wellness', category: 'Academic', keywords: ['wellness', 'health'] },
 
   // --- SYSTEM & LEGAL ---
   { icon: ShieldCheck, title: 'System Status', subtitle: 'Matrix health', color: 'from-emerald-400 to-green-500', path: '/status', category: 'System', keywords: ['status'] },
@@ -65,26 +67,8 @@ const DOCK_ACTIONS = ALL_ACTIONS.filter(a => ['Dashboard', 'AI Assistant', 'Time
 export const GlobalQuickActions: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [isVisible, setIsVisible] = useState(true);
   const navigate = useNavigate();
   const { session } = useContext(AuthContext);
-
-  const lastScrollY = useRef(0);
-
-  // Manual scroll listener as fallback for problematic framer-motion hooks in this environment
-  useEffect(() => {
-    const handleScroll = () => {
-      const latest = window.scrollY;
-      const diff = latest - lastScrollY.current;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && latest > 100) setIsVisible(false);
-        else setIsVisible(true);
-        lastScrollY.current = latest;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const filteredActions = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -106,15 +90,14 @@ export const GlobalQuickActions: React.FC = () => {
     return groups;
   }, [filteredActions]);
 
-  // Debug visibility
-  console.log('[DEBUG] GlobalQuickActions rendered, isVisible:', isVisible);
+  if (!session) return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
       <motion.div
         drag dragMomentum={false}
+        initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
@@ -177,7 +160,6 @@ export const GlobalQuickActions: React.FC = () => {
               className="fixed inset-x-4 top-12 bottom-12 md:inset-x-24 md:top-24 md:bottom-24 z-[10001] pointer-events-auto"
             >
               <div className="w-full h-full bg-[#111111] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col">
-                 {/* Search Bar Header */}
                  <div className="p-8 border-b border-white/5">
                     <div className="flex items-center gap-6 px-8 py-6 bg-white/5 rounded-[2rem] border border-white/10 focus-within:border-indigo-500/50 transition-all">
                        <Search size={28} className="text-zinc-500" />
@@ -195,7 +177,6 @@ export const GlobalQuickActions: React.FC = () => {
                     </div>
                  </div>
 
-                 {/* Categorized Menu Content */}
                  <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-12 custom-scrollbar">
                     {Object.entries(categories).map(([cat, actions]) => (
                       <div key={cat} className="space-y-6">
@@ -234,7 +215,6 @@ export const GlobalQuickActions: React.FC = () => {
                     )}
                  </div>
 
-                 {/* Footer Status Bar */}
                  <div className="px-12 py-6 bg-black/40 border-t border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                        <div className="flex items-center gap-2">

@@ -276,6 +276,7 @@ const AppRoutes = () => {
                 <Route path="/courses" element={<ProtectedRoute><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
                 <Route path="/syllabus" element={<ProtectedRoute><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
                 <Route path="/progress" element={<ProtectedRoute><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/wellness" element={<ProtectedRoute><Wellness onBack={() => window.history.back()} /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
                 <Route path="/status" element={<OfficerRoute><Status onBack={() => window.history.back()} /></OfficerRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
