@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, Suspense, useCallback, useRef } from 'react';
 import { safeLazy as lazy } from '@/lib/lazy-load';
 import { useUser } from '@clerk/react';
 import { 
@@ -23,6 +23,8 @@ import { SmartTutorCard } from './SmartTutorCard';
 import DashboardSkeleton from './DashboardSkeleton';
 import DashboardHeader from './DashboardHeader';
 import WelcomeHeader from './WelcomeHeader';
+import { useDock } from '@/contexts/DockContext';
+import { useViewportSections, type ObservedSection } from '@/hooks/useViewportSections';
 const StatsGrid = lazy(() => import('./StatsGrid'));
 const TasksPanel = lazy(() => import('./TasksPanel'));
 const AnalyticsPanel = lazy(() => import('./AnalyticsPanel'));
@@ -200,11 +202,35 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
   } = useDashboardData();
   
   const navigate = useNavigate();
+  const { setActiveSection } = useDock();
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'completed' | 'overdue'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const briefingRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const tutorRef = useRef<HTMLDivElement>(null);
+  const tasksRef = useRef<HTMLDivElement>(null);
+  const analyticsRef = useRef<HTMLDivElement>(null);
+  const leaderboardRef = useRef<HTMLDivElement>(null);
+
+  const observedSections = useMemo<ObservedSection[]>(() => ([
+    { id: 'dashboard', ref: briefingRef },
+    { id: 'progress', ref: progressRef },
+    { id: 'courses', ref: tutorRef },
+    { id: 'tasks', ref: tasksRef },
+    { id: 'analytics', ref: analyticsRef },
+    { id: 'achievements', ref: leaderboardRef },
+  ]), []);
+
+  const activeSection = useViewportSections(observedSections);
+
+  useEffect(() => {
+    setActiveSection(activeSection);
+    return () => setActiveSection(null);
+  }, [activeSection, setActiveSection]);
   
   const WidgetSkeleton = () => (
     <div className="w-full min-h-[100px] animate-pulse bg-white/5 rounded-[2rem] border border-white/10 flex flex-col items-center justify-center p-8 gap-4">
@@ -460,6 +486,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
           
           <main className="xl:col-span-8 flex flex-col gap-8 min-w-0">
+            <div ref={briefingRef}>
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -487,6 +514,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
                 )}
               </Suspense>
             </motion.div>
+            </div>
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <Suspense fallback={<WidgetSkeleton />}>
@@ -494,7 +522,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
               </Suspense>
             </motion.div>
             
-            <motion.div className="h-[320px]" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <motion.div ref={progressRef} className="h-[320px]" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               {hasPremiumAccess ? (
                 <TrendChart data={trendChartData} />
               ) : (
@@ -502,9 +530,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
               )}
             </motion.div>
 
+            <div ref={tutorRef}>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
               <SmartTutorCard />
             </motion.div>
+            </div>
             
             <motion.div className="w-full" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                <Suspense fallback={<WidgetSkeleton />}>
@@ -540,6 +570,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
               </Suspense>
             </motion.div>
 
+            <div ref={tasksRef}>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="flex-1 min-h-[500px] flex flex-col">
                 <GlassContainer glow className="flex-1 flex flex-col p-1 h-full">
                   <Suspense fallback={<WidgetSkeleton />}>
@@ -565,7 +596,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
                   </Suspense>
                 </GlassContainer>
             </motion.div>
+            </div>
 
+            <div ref={analyticsRef}>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }} className="w-full">
               <GlassContainer glow className="bg-gradient-to-br from-white/[0.03] to-transparent">
                 <Suspense fallback={<WidgetSkeleton />}>
@@ -579,7 +612,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
                 </Suspense>
               </GlassContainer>
             </motion.div>
+            </div>
             
+            <div ref={leaderboardRef}>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="w-full">
               <GlassContainer glow className="p-6">
                 <Suspense fallback={<WidgetSkeleton />}>
@@ -591,6 +626,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
                 </Suspense>
               </GlassContainer>
             </motion.div>
+            </div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
               <UpgradeCard />

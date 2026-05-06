@@ -17,6 +17,7 @@ import { SecurityProvider } from '@/contexts/SecurityContext';
 import ShortcutsOverlay from '@/components/ui/ShortcutsOverlay';
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
 import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
+import { DockProvider } from '@/contexts/DockContext';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
 import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
@@ -382,11 +383,13 @@ const App = () => {
     <HelmetProvider>
       <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>} showDialog>
         <QueryClientProvider client={queryClient}>
-          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <ClerkSupabaseBridge>
-              <AppContent />
-            </ClerkSupabaseBridge>
-          </Router>
+          <DockProvider>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <ClerkSupabaseBridge>
+                <AppContent />
+              </ClerkSupabaseBridge>
+            </Router>
+          </DockProvider>
         </QueryClientProvider>
       </Sentry.ErrorBoundary>
     </HelmetProvider>

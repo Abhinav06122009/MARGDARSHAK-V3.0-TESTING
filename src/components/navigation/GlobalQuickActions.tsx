@@ -11,8 +11,9 @@ import {
   Shield, Newspaper, Download, Info, Mail,
   HeartPulse
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useDock } from '@/contexts/DockContext';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Action {
@@ -24,6 +25,18 @@ interface Action {
   category: string;
   keywords: string[];
 }
+
+const SECTION_TO_ACTION: Record<string, string> = {
+  dashboard: 'Dashboard',
+  tasks: 'Tasks',
+  analytics: 'AI Analytics',
+  courses: 'Courses',
+  progress: 'Progress',
+  'ai-assistant': 'AI Assistant',
+  'focus-timer': 'Focus Timer',
+  timetable: 'Timetable',
+  notes: 'Notes',
+};
 
 const ALL_ACTIONS: Action[] = [
   // --- CORE & IDENTITY ---
@@ -72,7 +85,9 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { session } = useContext(AuthContext);
+  const { activeSection } = useDock();
 
   const filteredActions = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -93,6 +108,23 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
     });
     return groups;
   }, [filteredActions]);
+
+  const activeActionTitle = useMemo(() => {
+    if (activeSection && SECTION_TO_ACTION[activeSection]) return SECTION_TO_ACTION[activeSection];
+
+    const path = location.pathname;
+    if (path === '/dashboard') return 'Dashboard';
+    if (path === '/tasks') return 'Tasks';
+    if (path === '/progress' || path === '/grades') return 'Progress';
+    if (path === '/courses') return 'Courses';
+    if (path === '/timetable') return 'Timetable';
+    if (path === '/notes') return 'Notes';
+    if (path === '/timer') return 'Focus Timer';
+    if (path === '/ai-assistant') return 'AI Assistant';
+    if (path === '/ai-analytics') return 'AI Analytics';
+
+    return null;
+  }, [activeSection, location.pathname]);
 
   if (!session) return null;
 
@@ -128,9 +160,9 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
                 key={i}
                 whileHover={{ scale: 1.2, y: -4 }} whileTap={{ scale: 0.9 }}
                 onClick={() => navigate(action.path)}
-                className={`rounded-xl flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-all group relative shrink-0 ${isDocked ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10'}`}
+                className={`rounded-xl flex items-center justify-center transition-all group relative shrink-0 ${isDocked ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10'} ${activeActionTitle === action.title ? 'text-white bg-white/10 shadow-[0_0_0_1px_rgba(99,102,241,0.35),0_0_24px_rgba(99,102,241,0.22)]' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               >
-                <action.icon size={isDocked ? 16 : 18} />
+                <action.icon size={isDocked ? 16 : 18} className={activeActionTitle === action.title ? 'text-indigo-300' : ''} />
                 <div className="absolute bottom-full mb-3 px-3 py-1.5 bg-black border border-white/10 rounded-lg text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl">
                   {action.title}
                 </div>
@@ -196,16 +228,16 @@ export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked
                                key={i} 
                                whileHover={{ x: 8 }}
                                onClick={() => { navigate(a.path); setIsOpen(false); }} 
-                               className="flex items-center gap-5 p-5 rounded-[2rem] bg-white/[0.03] border border-transparent hover:border-white/10 hover:bg-white/[0.06] transition-all text-left group"
+                              className={`flex items-center gap-5 p-5 rounded-[2rem] bg-white/[0.03] border transition-all text-left group ${activeActionTitle === a.title ? 'border-indigo-500/30 bg-white/[0.07]' : 'border-transparent hover:border-white/10 hover:bg-white/[0.06]'}`}
                              >
-                               <div className={`p-4 rounded-2xl bg-gradient-to-br ${a.color} shadow-lg shadow-black/50 group-hover:scale-110 transition-transform`}>
-                                 <a.icon size={22} className="text-white" />
+                               <div className={`p-4 rounded-2xl bg-gradient-to-br ${a.color} shadow-lg shadow-black/50 transition-transform ${activeActionTitle === a.title ? 'scale-110 ring-2 ring-indigo-400/30' : 'group-hover:scale-110'}`}>
+                                 <a.icon size={22} className={`text-white ${activeActionTitle === a.title ? 'drop-shadow-[0_0_12px_rgba(165,180,252,0.6)]' : ''}`} />
                                </div>
                                <div className="flex-1">
-                                 <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{a.title}</p>
-                                 <p className="text-[10px] text-zinc-500 font-bold mt-0.5">{a.subtitle}</p>
+                                 <p className={`text-sm font-black uppercase tracking-tight transition-colors ${activeActionTitle === a.title ? 'text-indigo-300' : 'text-white group-hover:text-indigo-400'}`}>{a.title}</p>
+                                 <p className={`text-[10px] font-bold mt-0.5 ${activeActionTitle === a.title ? 'text-zinc-300' : 'text-zinc-500'}`}>{a.subtitle}</p>
                                </div>
-                               <ChevronRight size={16} className="text-zinc-700 group-hover:text-white transition-all" />
+                               <ChevronRight size={16} className={`transition-all ${activeActionTitle === a.title ? 'text-indigo-300' : 'text-zinc-700 group-hover:text-white'}`} />
                              </motion.button>
                            ))}
                         </div>
