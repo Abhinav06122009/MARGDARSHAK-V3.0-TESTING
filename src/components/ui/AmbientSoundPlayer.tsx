@@ -268,13 +268,13 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
       />
 
       <motion.div
-        initial={isWidget ? { opacity: 0, y: 20 } : { x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1, y: 0 }}
-        className={isWidget ? "relative w-full h-full" : "fixed bottom-24 left-6 z-[9999]"}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={isWidget ? "relative w-full h-full" : "relative w-full max-w-6xl mx-auto px-4 mb-12 z-[10]"}
       >
         <motion.div
           layout
-          className={`${isWidget ? 'w-full h-full' : 'w-72'} bg-zinc-100/70 backdrop-blur-[60px] border border-white/80 rounded-[2.5rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] overflow-hidden text-zinc-900`}
+          className={`${isWidget ? 'w-full h-full' : 'w-full'} bg-zinc-100/70 backdrop-blur-[60px] border border-white/80 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] overflow-hidden text-zinc-900`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -332,7 +332,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
                 </div>
 
                 {/* Stations Grid */}
-                <div className="grid grid-cols-3 gap-2 mb-6">
+                <div className="grid grid-cols-3 md:grid-cols-7 gap-3 mb-6">
                   {BUILT_IN_STATIONS.map(s => {
                     const SI = s.Icon;
                     const isActive = activeId === s.id;
@@ -340,20 +340,20 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
                       <button 
                         key={s.id} 
                         onClick={() => selectStation(s.id)}
-                        className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all ${isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.08]'}`}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg scale-105' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.08]'}`}
                       >
-                        <SI className={`w-4 h-4 ${isActive ? 'text-white' : ''}`} />
-                        <span className="text-[9px] font-black uppercase tracking-tighter truncate w-full text-center leading-tight">{s.label}</span>
+                        <SI className={`w-5 h-5 ${isActive ? 'text-white' : 'text-indigo-400'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter truncate w-full text-center leading-tight">{s.label}</span>
                       </button>
                     );
                   })}
                   {/* Dedicated Upload Button in Grid */}
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border bg-indigo-50 border-indigo-100 text-indigo-600 hover:bg-indigo-100 transition-all border-dashed"
+                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border bg-indigo-50/50 border-indigo-100 text-indigo-600 hover:bg-indigo-100 transition-all border-dashed"
                   >
-                    <FolderOpen className="w-4 h-4" />
-                    <span className="text-[9px] font-black uppercase tracking-tighter">Add MP3</span>
+                    <FolderOpen className="w-5 h-5" />
+                    <span className="text-[10px] font-black uppercase tracking-tighter">Add MP3</span>
                   </button>
                 </div>
 
