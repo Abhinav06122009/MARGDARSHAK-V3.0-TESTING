@@ -126,10 +126,12 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
 
+  const outerClass = isWidget ? 'relative' : 'fixed z-[999999] bottom-[110px] left-6';
+
   return (
     <>
       {/* Main floating player (draggable) */}
-      <div className="fixed z-[999999] bottom-[110px] left-6" style={{ position: 'fixed' }}>
+      <div className={outerClass} style={isWidget ? {} : { position: 'fixed' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
@@ -243,8 +245,9 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
       <audio ref={audioRef} src={station.url} loop className="hidden" />
       </div>
 
-      {/* Bottom dock that 'docks' into the corner on page load and stays pinned */}
-      <motion.div
+      {/* Bottom dock that 'docks' into the corner on page load and stays pinned (only when not rendered as a widget/docked) */}
+      {!isWidget && (
+        <motion.div
         initial={{ opacity: 0, y: 60, x: -8 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
         transition={{ type: 'spring', stiffness: 110, damping: 18, delay: 0.08 }}

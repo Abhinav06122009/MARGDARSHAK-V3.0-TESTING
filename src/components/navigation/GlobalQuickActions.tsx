@@ -64,7 +64,11 @@ const ALL_ACTIONS: Action[] = [
 
 const DOCK_ACTIONS = ALL_ACTIONS.filter(a => ['Dashboard', 'AI Assistant', 'Timetable', 'Tasks', 'Focus Timer', 'Notes', 'Courses', 'Progress'].includes(a.title));
 
-export const GlobalQuickActions: React.FC = () => {
+interface GlobalQuickActionsProps {
+  isDocked?: boolean;
+}
+
+export const GlobalQuickActions: React.FC<GlobalQuickActionsProps> = ({ isDocked = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -99,8 +103,10 @@ export const GlobalQuickActions: React.FC = () => {
 
   if (!session) return null;
 
+  const outerClass = isDocked ? 'relative z-0' : 'fixed bottom-6 left-6 z-[999999]';
+
   return (
-    <div className="fixed bottom-6 left-6 z-[999999]" style={{ position: 'fixed' }}>
+    <div className={outerClass} style={isDocked ? {} : { position: 'fixed' }}>
       <motion.div
         drag dragMomentum={false}
         initial={{ opacity: 0, y: 20 }}
