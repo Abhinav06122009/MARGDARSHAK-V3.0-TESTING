@@ -20,6 +20,8 @@ import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
 import { DockProvider } from '@/contexts/DockContext';
 import { courseService } from '@/components/dashboard/courseService';
 import MobileNavbar from '@/components/navigation/MobileNavbar';
+import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
+import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
 import Index from "@/pages/Index";
