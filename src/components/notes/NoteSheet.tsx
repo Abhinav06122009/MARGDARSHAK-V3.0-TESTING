@@ -61,71 +61,84 @@ export const NoteSheet: React.FC<NoteSheetProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-black/80 backdrop-blur-2xl border-l border-white/20 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
+            className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950/20 shrink-0">
-              <div className="flex items-center gap-3 text-xl text-white font-black tracking-tighter uppercase">
-                <div className="p-2 bg-white/10 rounded-xl border border-white/10">
+            {/* Header */}
+            <div className="p-4 border-b border-white/10 shrink-0 flex items-center justify-between bg-zinc-950/20">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
                   <StickyNote className="w-5 h-5 text-white" />
                 </div>
-                {editingNote ? 'Update Note' : 'Add Note'}
+                <h2 className="text-xl font-bold text-white tracking-tight">
+                  {editingNote ? 'Update Note' : 'Initialize Note'}
+                </h2>
               </div>
-              <Button variant="ghost" size="icon" onClick={onClose} className="w-10 h-10 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+              <Button variant="ghost" size="icon" onClick={onClose} className="text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
                 <X className="w-5 h-5" />
               </Button>
             </div>
+
+            {/* Form Body */}
             <div className="p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                    <BookOpen className="w-5 h-5" /> Thought Integration
+                  </h3>
 
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Objective Title *</Label>
-                  <Input id="title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Note Title..." required className="bg-black/40 border-white/5 focus:border-indigo-500/50 text-white rounded-xl h-11 transition-all text-sm" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="folder" className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Folder</Label>
-                  <Select value={formData.folder} onValueChange={(v) => setFormData({ ...formData, folder: v })}>
-                    <SelectTrigger className="bg-black/40 border-white/5 text-white rounded-xl h-11 focus:ring-2 focus:ring-indigo-500/20 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-zinc-900/90 backdrop-blur-2xl border-white/10 text-white rounded-xl">
-                      {folders.map(f => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative space-y-2">
-                  <Label htmlFor="content" className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Content</Label>
-                  <Textarea id="content" value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} placeholder="Write your notes here..." className="min-h-[250px] bg-black/40 border-white/5 focus:border-indigo-500/50 text-white rounded-xl p-4 leading-relaxed transition-all text-sm" />
-                  <div className="absolute top-10 right-3 flex gap-2">
-                    <Button type="button" size="icon" variant="ghost" onClick={handleSummarize} disabled={!hasPremiumAccess || isProcessingAI} className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 hover:border-indigo-500/30 text-zinc-500 hover:text-white transition-all disabled:opacity-30" title={hasPremiumAccess ? "Summarize with AI" : "AI Summary (Premium Only)"}>
-                      {isProcessingAI
-                        ? <Loader2 className="w-3 h-3 animate-spin" />
-                        : hasPremiumAccess
-                          ? <Sparkles className="w-3 h-3 text-yellow-400" />
-                          : <Lock className="w-3 h-3" />}
-                    </Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-sm font-semibold text-white/90">Objective Title *</Label>
+                    <Input id="title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Note Title..." required className="h-11 bg-black/30 border border-white/15 rounded-xl text-white placeholder:text-white/60 focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="folder" className="text-sm font-semibold text-white/90">Folder</Label>
+                    <Select value={formData.folder} onValueChange={(v) => setFormData({ ...formData, folder: v })}>
+                      <SelectTrigger className="h-11 bg-black/30 border border-white/15 rounded-xl text-white"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                        {folders.map(f => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative space-y-2">
+                    <Label htmlFor="content" className="text-sm font-semibold text-white/90">Content</Label>
+                    <Textarea id="content" value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} placeholder="Write your notes here..." className="min-h-[200px] bg-black/30 border border-white/15 rounded-xl p-4 leading-relaxed transition-all text-sm resize-none" />
+                    <div className="absolute top-10 right-3 flex gap-2">
+                      <Button type="button" size="icon" variant="ghost" onClick={handleSummarize} disabled={!hasPremiumAccess || isProcessingAI} className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 hover:border-indigo-500/30 text-zinc-500 hover:text-white transition-all disabled:opacity-30" title={hasPremiumAccess ? "Summarize with AI" : "AI Summary (Premium Only)"}>
+                        {isProcessingAI
+                          ? <Loader2 className="w-3 h-3 animate-spin" />
+                          : hasPremiumAccess
+                            ? <Sparkles className="w-3 h-3 text-yellow-400" />
+                            : <Lock className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tags" className="text-sm font-semibold text-white/90">Data Tags</Label>
+                    <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g. quantum, research, priority" className="h-11 bg-black/30 border border-white/15 rounded-xl text-white placeholder:text-white/60 focus:bg-black/40 focus:border-blue-500/70 transition-all duration-300" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tags" className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Data Tags</Label>
-                  <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g. quantum, research, priority" className="bg-black/40 border-white/5 focus:border-indigo-500/50 text-white rounded-xl h-11 transition-all text-sm" />
-                </div>
+
                 {formData.content && formData.content.length >= 50 && (
-                  <NoteSummarizer
-                    noteContent={formData.content}
-                    noteTitle={formData.title || 'Note'}
-                  />
+                  <div className="p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                    <NoteSummarizer
+                      noteContent={formData.content}
+                      noteTitle={formData.title || 'Note'}
+                    />
+                  </div>
                 )}
 
                 {/* Action Buttons Snapped to Content */}
                 <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
-                  <Button type="button" variant="ghost" onClick={onClose} className="px-6 h-11 text-zinc-500 hover:text-white hover:bg-white/5 rounded-xl font-black uppercase tracking-widest text-[10px]">
+                  <Button type="button" variant="ghost" onClick={onClose} className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl">
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative inline-flex h-11 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 px-8 py-3 font-black text-sm text-white shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-blue-700 active:scale-95 disabled:opacity-50"
+                    className="px-8 h-11 text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95 disabled:opacity-50"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    <span className="uppercase tracking-widest text-xs">{isSubmitting ? 'Syncing...' : (editingNote ? 'Update' : 'Initialize')}</span>
+                    <span>{isSubmitting ? 'Syncing...' : (editingNote ? 'Update' : 'Initialize')}</span>
                   </Button>
                 </div>
               </form>

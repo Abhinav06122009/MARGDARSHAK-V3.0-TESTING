@@ -46,21 +46,21 @@ const CourseForm: React.FC<CourseFormProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 w-full max-w-xl h-fit max-h-screen bg-zinc-950 border-l border-white/10 z-[101] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
+            className="fixed right-0 top-0 w-full max-w-xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 z-[101] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 backdrop-blur-xl shrink-0">
-              <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
-                  {editingCourse ? 'Edit Course' : 'Create New Course'}
+            <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
+                  <Plus className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-white tracking-tight">
+                  {editingCourse ? 'Update Course' : 'Initialize Course'}
                 </h2>
-                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">
-                  {editingCourse ? editingCourse.name : 'Academic Integration'}
-                </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all"
+                className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -69,108 +69,108 @@ const CourseForm: React.FC<CourseFormProps> = ({
             {/* Form Body */}
             <div className="p-6">
               <form id="course-form" onSubmit={onSubmit} className="space-y-4">
-                {/* Basic Info */}
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Course Name</Label>
+                {/* Basic Info Section */}
+                <div className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                    <BookOpen className="w-5 h-5" /> Academic Details
+                  </h3>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-white/90">Course Name *</Label>
                     <Input 
                       required
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g., Advanced Mathematics"
-                      className="h-12 bg-zinc-900/50 border-white/5 rounded-2xl text-white placeholder:text-zinc-700 focus:border-indigo-500/50"
+                      className="h-11 bg-black/30 border border-white/15 rounded-xl text-white placeholder:text-white/60 focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Course Code</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-white/90">Course Code *</Label>
                       <Input 
                         required
                         value={formData.code}
                         onChange={e => setFormData({ ...formData, code: e.target.value })}
                         placeholder="MATH401"
-                        className="h-12 bg-zinc-900/50 border-white/5 rounded-2xl text-white font-mono"
+                        className="h-11 bg-black/30 border border-white/15 rounded-xl text-white font-mono h-11"
                       />
                     </div>
-                    <div className="grid gap-2">
-                      <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Credits</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-white/90">Credits</Label>
                       <Input 
                         type="number"
                         value={formData.credits}
                         onChange={e => setFormData({ ...formData, credits: parseInt(e.target.value) || 3 })}
-                        className="h-12 bg-zinc-900/50 border-white/5 rounded-2xl text-white"
+                        className="h-11 bg-black/30 border border-white/15 rounded-xl text-white h-11"
                       />
                     </div>
                   </div>
-                </div>
 
-                {/* Description */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Description</Label>
-                  <Textarea 
-                    value={formData.description}
-                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="min-h-[100px] bg-zinc-900/50 border-white/5 rounded-2xl text-white resize-none"
-                  />
-                </div>
-
-                {/* Classification */}
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Priority</Label>
-                    <Select value={formData.priority} onValueChange={(v: any) => setFormData({ ...formData, priority: v })}>
-                      <SelectTrigger className="h-12 bg-zinc-900/50 border-white/5 rounded-2xl text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10">
-                        <SelectItem value="low">📝 Low</SelectItem>
-                        <SelectItem value="medium">📋 Medium</SelectItem>
-                        <SelectItem value="high">⚡ High</SelectItem>
-                        <SelectItem value="urgent">🔥 Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Difficulty</Label>
-                    <Select value={formData.difficulty} onValueChange={(v: any) => setFormData({ ...formData, difficulty: v })}>
-                      <SelectTrigger className="h-12 bg-zinc-900/50 border-white/5 rounded-2xl text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10">
-                        <SelectItem value="beginner">🌱 Beginner</SelectItem>
-                        <SelectItem value="intermediate">🚀 Intermediate</SelectItem>
-                        <SelectItem value="advanced">🎯 Advanced</SelectItem>
-                        <SelectItem value="expert">💎 Expert</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Color & Visuals */}
-                <div className="p-4 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
-                  <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                    <Palette className="w-3 h-3" /> Course Identity
-                  </Label>
-                  <div className="flex items-center gap-4">
-                    <Input 
-                      type="color" 
-                      value={formData.color}
-                      onChange={e => setFormData({ ...formData, color: e.target.value })}
-                      className="w-12 h-12 p-1 rounded-xl bg-transparent border-white/10 cursor-pointer"
+                    <Label className="text-sm font-semibold text-white/90">Description</Label>
+                    <Textarea 
+                      value={formData.description}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Course overview..."
+                      className="min-h-[100px] bg-black/30 border border-white/15 rounded-xl text-white resize-none text-sm"
                     />
-                    <div className="flex-1 p-3 rounded-xl border border-white/5 bg-zinc-950 flex items-center justify-between">
-                      <span className="text-xs font-mono text-zinc-500">{formData.color}</span>
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: formData.color }} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-white/90">Priority</Label>
+                      <Select value={formData.priority} onValueChange={(v: any) => setFormData({ ...formData, priority: v })}>
+                        <SelectTrigger className="h-11 bg-black/30 border border-white/15 rounded-xl text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                          <SelectItem value="low">📝 Low</SelectItem>
+                          <SelectItem value="medium">📋 Medium</SelectItem>
+                          <SelectItem value="high">⚡ High</SelectItem>
+                          <SelectItem value="urgent">🔥 Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-white/90">Difficulty</Label>
+                      <Select value={formData.difficulty} onValueChange={(v: any) => setFormData({ ...formData, difficulty: v })}>
+                        <SelectTrigger className="h-11 bg-black/30 border border-white/15 rounded-xl text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/80 backdrop-blur-xl border-white/20 text-white">
+                          <SelectItem value="beginner">🌱 Beginner</SelectItem>
+                          <SelectItem value="intermediate">🚀 Intermediate</SelectItem>
+                          <SelectItem value="advanced">🎯 Advanced</SelectItem>
+                          <SelectItem value="expert">💎 Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-white/90">Course Identity Color</Label>
+                    <div className="flex items-center gap-4">
+                      <Input 
+                        type="color" 
+                        value={formData.color}
+                        onChange={e => setFormData({ ...formData, color: e.target.value })}
+                        className="w-11 h-11 p-1 rounded-xl bg-transparent border-white/10 cursor-pointer"
+                      />
+                      <div className="flex-1 p-2 rounded-xl border border-white/15 bg-black/30 flex items-center justify-between h-11 px-4">
+                        <span className="text-xs font-mono text-white/60">{formData.color}</span>
+                        <div className="w-4 h-4 rounded-full shadow-lg" style={{ backgroundColor: formData.color }} />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* AI Curated Content */}
                 {editingCourse && curatedContent.length > 0 && (
-                  <div className="space-y-4">
-                    <Label className="text-xs font-black text-teal-400 uppercase tracking-widest flex items-center gap-2">
-                      <Zap className="w-3 h-3" /> AI Suggested Resources
-                    </Label>
+                  <div className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                    <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-emerald-400">
+                      <Zap className="w-5 h-5" /> AI Suggested Resources
+                    </h3>
                     <div className="space-y-2">
                       {curatedContent.map((content, idx) => (
                         <a 
@@ -192,20 +192,21 @@ const CourseForm: React.FC<CourseFormProps> = ({
 
                 {/* Action Buttons Snapped to Content */}
                 <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
-                  <button
+                  <Button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 h-12 rounded-2xl text-xs font-black text-zinc-500 hover:text-white transition-all"
+                    variant="ghost"
+                    className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl"
                   >
-                    Discard Changes
-                  </button>
-                  <button
+                    Cancel
+                  </Button>
+                  <Button
                     type="submit"
-                    className="flex-[2] h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm shadow-xl shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
+                    className="px-8 h-11 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
                   >
-                    {editingCourse ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    {editingCourse ? 'Save Changes' : 'Initialize Course'}
-                  </button>
+                    {editingCourse ? <Edit className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    {editingCourse ? 'Save' : 'Initialize'}
+                  </Button>
                 </div>
               </form>
             </div>

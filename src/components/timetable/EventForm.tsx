@@ -100,30 +100,29 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-[550px] bg-zinc-950/98 backdrop-blur-3xl border-l border-white/10 shadow-[-20px_0_80px_rgba(0,0,0,0.8)] flex flex-col overflow-y-auto custom-scrollbar pointer-events-auto"
+        className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-[550px] bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col overflow-y-auto custom-scrollbar pointer-events-auto z-50"
       >
         {/* Animated Glow Border */}
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0 bg-zinc-950/20">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
               <CalendarDays className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h2 className="text-xl font-black text-white tracking-tight">
-                {editingEvent ? 'Edit Event' : 'Create Event'}
-              </h2>
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Timetable Command Sheet</p>
-            </div>
+            <h2 className="text-xl font-bold text-white tracking-tight">
+              {editingEvent ? 'Update Event' : 'Initialize Event'}
+            </h2>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white transition-all hover:bg-white/10"
+            className="text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
         
         {/* Scrollable Command Body */}
@@ -131,11 +130,10 @@ const EventForm: React.FC<EventFormProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* --- PRIMARY INTEL --- */}
-            <motion.section variants={itemVariants} className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-4 h-4 text-indigo-400" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Basic Information</span>
-              </div>
+            <motion.section variants={itemVariants} className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+              <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                <Sparkles className="w-5 h-5" /> Intelligence Details
+              </h3>
               
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -181,11 +179,10 @@ const EventForm: React.FC<EventFormProps> = ({
             </motion.section>
 
             {/* --- TEMPORAL COORDINATES --- */}
-            <motion.section variants={itemVariants} className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-emerald-400" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Schedule Logistics</span>
-              </div>
+            <motion.section variants={itemVariants} className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+              <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
+                <Clock className="w-5 h-5" /> Schedule Logistics
+              </h3>
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
@@ -233,11 +230,10 @@ const EventForm: React.FC<EventFormProps> = ({
             </motion.section>
 
             {/* --- LOCATION & ACADEMICS --- */}
-            <motion.section variants={itemVariants} className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-purple-400" />
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-[0.3em]">Location & Academic</span>
-              </div>
+            <motion.section variants={itemVariants} className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+              <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                <MapPin className="w-5 h-5" /> Location & Academic
+              </h3>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -266,21 +262,20 @@ const EventForm: React.FC<EventFormProps> = ({
             {/* Action Buttons Snapped to Content */}
             <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
               <Button
+                type="button"
                 variant="ghost"
                 onClick={onClose}
-                className="px-6 h-11 text-xs font-black text-zinc-500 uppercase tracking-widest hover:text-white transition-colors"
+                className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl"
               >
                 Cancel
               </Button>
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
                 type="submit"
-                className="px-8 h-11 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-xl shadow-indigo-500/20 transition-all duration-300 flex items-center gap-3"
+                className="px-8 h-11 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
               >
-                <Save size={16} />
-                {editingEvent ? 'Update Record' : 'Create Record'}
-              </motion.button>
+                {editingEvent ? <Edit3 className="w-4 h-4 mr-2" /> : <CalendarPlus className="w-4 h-4 mr-2" />}
+                <span>{editingEvent ? 'Update' : 'Initialize'}</span>
+              </Button>
             </div>
           </form>
         </div>
