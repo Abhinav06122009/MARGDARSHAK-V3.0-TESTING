@@ -86,8 +86,8 @@ const SitemapPage = () => {
                 <ArrowLeft className="w-5 h-5 text-zinc-400" />
               </button>
               <div className="flex items-center gap-4">
-                <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                  <img src="/logo.png" alt="Margdarshak" className="h-6 w-6 object-contain" />
+                <div className="p-3 bg-white rounded-xl shadow-[0_0_25px_rgba(255,255,255,0.15)] group-hover:scale-110 transition-transform duration-500">
+                  <img src="/logo.png" alt="Margdarshak" className="h-8 w-8 object-contain" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-black flex items-center gap-3 tracking-tighter uppercase italic text-white leading-none">

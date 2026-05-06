@@ -61,8 +61,8 @@ export const LandingHeader = React.memo(() => {
         {/* Brand */}
         <div className="flex items-center gap-4 cursor-pointer group" onClick={() => handleLinkClick('home')}>
           <div className="relative">
-            <div className="p-1 rounded-xl bg-white/5 border border-white/10 relative z-10 group-hover:scale-105 transition-transform duration-300">
-              <img src="/logo.png" alt="Margdarshak Logo" className="h-10 w-10 rounded-lg object-contain" />
+            <div className="p-2 rounded-xl bg-white/10 border border-white/20 relative z-10 group-hover:scale-110 transition-transform duration-500 shadow-2xl">
+              <img src="/logo.png" alt="Margdarshak Logo" className="h-12 w-12 rounded-lg object-contain" />
             </div>
           </div>
           
