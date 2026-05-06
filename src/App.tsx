@@ -339,12 +339,30 @@ const AppContent = () => {
         <AdminProvider>
           <SecurityProvider>
             <AIProvider>
-              <AppRoutes />
+              <>
+                <AppRoutes />
+                <GlobalRootDock />
+              </>
             </AIProvider>
           </SecurityProvider>
         </AdminProvider>
       </AuthProvider>
     </TooltipProvider>
+  );
+};
+
+const GlobalRootDock = () => {
+  if (typeof document === 'undefined') return null;
+
+  const host = document.getElementById('app');
+  if (!host) return null;
+
+  return createPortal(
+    <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-4 pointer-events-auto">
+      <GlobalQuickActions isDocked />
+      <AmbientSoundPlayer isWidget />
+    </div>,
+    host
   );
 };
 

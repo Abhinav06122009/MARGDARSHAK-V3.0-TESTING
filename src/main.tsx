@@ -1,7 +1,5 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
-import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
-import { AmbientSoundPlayer } from '@/components/ui/AmbientSoundPlayer';
 import './index.css'
 import { initSentry } from './integrations/SentryConfig'
 import { initConsoleGuard } from './security/ConsoleGuard'
@@ -47,15 +45,7 @@ window.addEventListener('unhandledrejection', (e) => {
 
 const container = document.getElementById("app");
 const root = createRoot(container!);
-root.render(
-  <>
-    <App />
-    <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-4 pointer-events-auto">
-      <GlobalQuickActions isDocked />
-      <AmbientSoundPlayer isWidget />
-    </div>
-  </>
-);
+root.render(<App />);
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
