@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useUser } from '@clerk/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Crown, Shield, Zap, Sparkles, Star, Cpu, Award, Hexagon, Fingerprint, Activity, X } from 'lucide-react';
 
 interface RankEntryOverlayProps {
@@ -9,6 +10,7 @@ interface RankEntryOverlayProps {
 
 const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
   const { user: clerkUser, isLoaded } = useUser();
+  const { setVerified } = useAuth();
   const [show, setShow] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
   const [scanStep, setScanStep] = useState(0);
@@ -195,6 +197,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
 
   const handleClose = () => {
     setShow(false);
+    setVerified(true);
     if (onComplete) onComplete();
   };
 
@@ -220,31 +223,37 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
           onMouseMove={handleMouseMove}
           onMouseDown={() => setIsClicked(true)}
           onMouseUp={() => setIsClicked(false)}
-          className="fixed inset-0 z-[9999] w-screen h-[100dvh] bg-[#020202] grid place-items-center overflow-hidden cursor-none select-none touch-none"
+          className="fixed inset-0 z-[9999] w-screen h-[100dvh] bg-[#020202] flex items-center justify-center overflow-hidden cursor-none select-none touch-none"
         >
 
           {/* Custom Cursor Reticle - Interactive */}
           <motion.div 
             className="fixed z-[10000] pointer-events-none mix-blend-difference flex items-center justify-center"
             animate={{ 
-              width: isHovering ? 64 : 32, 
-              height: isHovering ? 64 : 32,
+              width: isHovering ? 80 : 40, 
+              height: isHovering ? 80 : 40,
               scale: isClicked ? 0.8 : 1,
-              backgroundColor: isHovering ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0)'
+              backgroundColor: isHovering ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0)'
             }}
-            style={{ translateX: mouseX, translateY: mouseY, left: '50%', top: '50%' }}
+            style={{ 
+              translateX: mouseX, 
+              translateY: mouseY, 
+              left: '50%', 
+              top: '50%',
+              boxShadow: isHovering ? '0 0 40px rgba(52, 211, 153, 0.4)' : 'none'
+            }}
           >
-            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${isHovering ? 'bg-emerald-400' : 'bg-emerald-500'}`} />
+            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${isHovering ? 'bg-emerald-400 scale-150' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`} />
             <motion.div 
               animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-              className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${isHovering ? 'border-emerald-400 border-t-transparent' : 'border-emerald-500/30 border-t-emerald-500'}`}
+              transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+              className={`absolute inset-0 border-2 rounded-full transition-all duration-500 ${isHovering ? 'border-emerald-400 border-t-transparent border-b-transparent' : 'border-emerald-500/30 border-t-emerald-500'}`}
             />
             {isHovering && (
               <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1.5 }}
-                className="absolute inset-0 border border-emerald-400/50 rounded-full blur-sm"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1.2 }}
+                className="absolute inset-0 border border-emerald-400/30 rounded-full blur-md animate-pulse"
               />
             )}
           </motion.div>
@@ -280,7 +289,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05, filter: 'blur(20px)' }}
-                className="relative z-[10] flex flex-col items-center justify-center gap-6 sm:gap-10 w-full max-w-md px-6 h-full"
+                className="relative z-[10] flex flex-col items-center justify-center gap-6 sm:gap-10 w-full max-w-md px-6 h-auto"
               >
                 {/* Biometric Circle - Scaled for Viewport */}
                 <div className="relative w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
@@ -342,7 +351,7 @@ const RankEntryOverlay: React.FC<RankEntryOverlayProps> = ({ onComplete }) => {
             style={{ rotateX, rotateY, perspective: 2000, transformStyle: "preserve-3d" }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-[10] group w-full h-full flex items-center justify-center p-4 sm:p-0"
+            className="relative z-[10] group w-full h-auto flex items-center justify-center p-4 sm:p-0"
           >
             {/* DYNAMIC AMBIENT SHADOW */}
             <div className={`absolute -inset-24 ${rankInfo.style.shadow} opacity-60 rounded-full blur-[100px] pointer-events-none transition-all duration-1000`} />

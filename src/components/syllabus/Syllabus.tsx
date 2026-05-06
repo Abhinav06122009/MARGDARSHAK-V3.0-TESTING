@@ -1439,9 +1439,18 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
             >
               <FileText className="h-20 w-20 mx-auto text-zinc-800 mb-6" />
               <h3 className="text-3xl font-black text-white tracking-tighter uppercase mb-4">Syllabi Empty</h3>
-              <p className="text-zinc-500 font-medium tracking-tight uppercase text-xs">
+              <p className="text-zinc-500 font-medium tracking-tight uppercase text-xs mb-10">
                 {syllabi.length === 0 ? 'Add your First Syllabi to Get started' : 'Search query returned no results'}
               </p>
+              {syllabi.length === 0 && (
+                <Button
+                  onClick={() => { resetForm(); setIsDialogOpen(true); }}
+                  className="h-16 px-10 bg-indigo-600 text-white hover:bg-indigo-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-[0_20px_40px_rgba(79,70,229,0.3)]"
+                >
+                  <Plus className="h-5 w-5 mr-3" />
+                  Initialize First Syllabi
+                </Button>
+              )}
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -1546,6 +1555,16 @@ const Syllabus: React.FC<SyllabusProps> = ({ onBack }) => {
           )}
         </AnimatePresence>
       </div>
+      {/* Floating Action Button */}
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: 90 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => { resetForm(); setIsDialogOpen(true); }}
+        className="fixed bottom-10 right-10 w-20 h-20 bg-white text-black rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(255,255,255,0.2)] z-[100] group overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+        <Plus size={32} className="relative z-10" />
+      </motion.button>
     </div>
   );
 };

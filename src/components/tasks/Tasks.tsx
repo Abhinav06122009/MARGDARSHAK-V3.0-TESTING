@@ -1587,6 +1587,18 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       </div>
 
 
+      </div>
+
+      {/* Floating Action Button */}
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: 90 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={openCreateDialog}
+        className="fixed bottom-10 right-10 w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(79,70,229,0.4)] z-[100] group overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+        <Plus size={32} className="relative z-10" />
+      </motion.button>
     </div>
   );
 };

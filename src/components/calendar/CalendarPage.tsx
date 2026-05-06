@@ -193,7 +193,14 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Back_to_Dashbaord</span>
           </button>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 sm:gap-8">
+            <button 
+              onClick={() => { resetForm(); setIsAddDialogOpen(true); }}
+              className="px-6 py-3 bg-emerald-500 text-black font-black uppercase tracking-widest text-[10px] rounded-2xl hover:scale-[1.05] active:scale-[0.95] transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] flex items-center gap-2"
+            >
+              <Plus size={14} /> Add_Event
+            </button>
+            
             <div className="hidden md:flex flex-col items-end">
               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Calendar_Active</span>
               <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">MARGDARSHAK V3.0</span>
@@ -322,86 +329,12 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
 
               <div className="space-y-6">
                 {/* Add Event Button */}
-                <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
-                  setIsAddDialogOpen(open);
-                  if (!open) {
-                    setIsEditing(null);
-                    setNewEvent({ title: '', description: '', category: 'personal', priority: 'medium', is_all_day: true });
-                  }
-                }}>
-                  <DialogTrigger asChild>
-                    <button className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] flex items-center justify-center gap-3">
-                      <Plus size={16} /> Add_Event
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-zinc-950 border-white/10 text-white backdrop-blur-2xl rounded-[2rem]">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">
-                        {isEditing ? 'Modify_Event' : 'Add_Event'}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-6">
-                      <div className="space-y-2">
-                        <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Event_Title</label>
-                        <Input 
-                          placeholder="e.g., Final Exam Preparation" 
-                          className="bg-white/5 border-white/10 rounded-xl h-14 text-white focus:border-emerald-500/50 transition-all"
-                          value={newEvent.title}
-                          onChange={e => setNewEvent({...newEvent, title: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Details</label>
-                        <Textarea 
-                          placeholder="Event metadata..." 
-                          className="bg-white/5 border-white/10 rounded-xl min-h-[100px] text-white focus:border-emerald-500/50 transition-all"
-                          value={newEvent.description}
-                          onChange={e => setNewEvent({...newEvent, description: e.target.value})}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Category</label>
-                          <Select 
-                            value={newEvent.category} 
-                            onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}
-                          >
-                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-white/10">
-                              <SelectItem value="personal">Personal</SelectItem>
-                              <SelectItem value="academic">Academic</SelectItem>
-                              <SelectItem value="exam">Exam</SelectItem>
-                              <SelectItem value="holiday">Holiday</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Priority</label>
-                          <Select 
-                            value={newEvent.priority} 
-                            onValueChange={(val: any) => setNewEvent({...newEvent, priority: val})}
-                          >
-                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-white/10">
-                              <SelectItem value="low">Low_Tier</SelectItem>
-                              <SelectItem value="medium">Standard</SelectItem>
-                              <SelectItem value="high">Critical</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button onClick={handleSaveEvent} className="w-full h-16 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-500 transition-all">
-                        {isEditing ? 'Update Event' : 'Add_Event'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <button 
+                  onClick={() => { resetForm(); setIsAddDialogOpen(true); }}
+                  className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] flex items-center justify-center gap-3"
+                >
+                  <Plus size={16} /> Add_Event
+                </button>
 
                 {/* Day Content List */}
                 <ScrollArea className="h-[400px] pr-4">
@@ -519,6 +452,94 @@ const EnhancedCalendar = ({ onBack }: CalendarProps) => {
           </div>
         </div>
       </div>
+
+      {/* Global Event Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+        setIsAddDialogOpen(open);
+        if (!open) {
+          setIsEditing(null);
+          setNewEvent({ title: '', description: '', category: 'personal', priority: 'medium', is_all_day: true });
+        }
+      }}>
+        <DialogContent className="bg-zinc-950 border-white/10 text-white backdrop-blur-2xl rounded-[2rem] max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">
+              {isEditing ? 'Modify_Event' : 'Add_Event'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-6">
+            <div className="space-y-2">
+              <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Event_Title</label>
+              <Input 
+                placeholder="e.g., Final Exam Preparation" 
+                className="bg-white/5 border-white/10 rounded-xl h-14 text-white focus:border-emerald-500/50 transition-all font-bold"
+                value={newEvent.title}
+                onChange={e => setNewEvent({...newEvent, title: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Details</label>
+              <Textarea 
+                placeholder="Event metadata..." 
+                className="bg-white/5 border-white/10 rounded-xl min-h-[100px] text-white focus:border-emerald-500/50 transition-all"
+                value={newEvent.description}
+                onChange={e => setNewEvent({...newEvent, description: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Category</label>
+                <Select 
+                  value={newEvent.category} 
+                  onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14 font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white font-bold">
+                    <SelectItem value="personal">Personal</SelectItem>
+                    <SelectItem value="academic">Academic</SelectItem>
+                    <SelectItem value="exam">Exam</SelectItem>
+                    <SelectItem value="holiday">Holiday</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Priority</label>
+                <Select 
+                  value={newEvent.priority} 
+                  onValueChange={(val: any) => setNewEvent({...newEvent, priority: val})}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14 font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white font-bold">
+                    <SelectItem value="low">Low_Tier</SelectItem>
+                    <SelectItem value="medium">Standard</SelectItem>
+                    <SelectItem value="high">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveEvent} className="w-full h-16 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-500 transition-all">
+              {isEditing ? 'Update Event' : 'Add_Event'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Floating Action Button */}
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: 90 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => { resetForm(); setIsAddDialogOpen(true); }}
+        className="fixed bottom-10 right-10 w-20 h-20 bg-emerald-500 text-black rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(16,185,129,0.4)] z-[100] group overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+        <Plus size={32} className="relative z-10" />
+      </motion.button>
     </div>
   );
 };

@@ -223,200 +223,132 @@ const DashboardRouteWrapper = () => {
 /**
  * AppContent handles the core UI logic and AnimatePresence synchronization.
  */
-const AppContent = () => {
+const AppRoutes = () => {
+  const { user, isVerified, loading } = useContext(AuthContext);
   const location = useLocation();
+  
+  // Determine if the user is an "Officer" (Admin/CEO/etc)
+  const isOfficer = user?.profile?.user_type?.toLowerCase().match(/admin|ceo|manager|moderator|official|hr/);
 
-  // Initialize security and tracking only once
-  useEffect(() => {
-    import('@/components/auth/AuthSecurity').then(({ securityFeatures }) => {
-      securityFeatures.initZeroThreatShield();
-    });
-    
-    // Performance monitor for high-traffic sessions
-    const checkPerformance = () => {
-      const memory = (performance as any).memory;
-      if (memory && memory.usedJSHeapSize > 500 * 1024 * 1024) { // 500MB
-        console.warn('🛡️ HIGH MEMORY USAGE DETECTED. OPTIMIZING...');
-      }
-    };
-    const perfInterval = setInterval(checkPerformance, 30000);
-    
-    return () => clearInterval(perfInterval);
-  }, []);
+  // If loading, show the global loader
+  if (loading) return <PageLoader />;
 
+  // IDENTITY GATE: For officers, hide the main app content until verified via the RankEntryOverlay
+  const showContent = !isOfficer || isVerified;
+
+  return (
+    <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden">
+      <GlobalSecurityGuard>
+        <NavigationTracker />
+        <SecurityWarningOverlay />
+        
+        {/* The Gate: Content is only rendered/visible if verified or not an officer */}
+        <div className={showContent ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95 transition-all duration-1000'}>
+          <AnimatePresence mode="wait">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* --- PUBLIC ROUTES --- */}
+                <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform." /><LandingPage /></>} />
+                <Route path="/auth" element={<Index />} />
+                <Route path="/sso-callback" element={<SSOCallback />} />
+                <Route path="/calculator" element={<Calculator onBack={() => window.history.back()} />} />
+                <Route path="/timer" element={<StudyTimer />} />
+                <Route path="/blog/*" element={<BlogPage />} />
+                <Route path="/about" element={<AboutUsPage />} />
+                <Route path="/contact" element={<ContactUsPage />} />
+                <Route path="/help" element={<HelpPage />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/gdpr" element={<GDPRCompliance />} />
+                <Route path="/download" element={<DownloadPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                {/* --- PROTECTED ROUTES --- */}
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardRouteWrapper /></ProtectedRoute>} />
+                <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+                <Route path="/ai-assistant" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
+                <Route path="/upgrade" element={<ProtectedRoute><Upgrade /></ProtectedRoute>} />
+                <Route path="/tasks" element={<ProtectedRoute><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/grades" element={<ProtectedRoute><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/notes" element={<ProtectedRoute><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/calendar" element={<ProtectedRoute><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/timetable" element={<ProtectedRoute><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/courses" element={<ProtectedRoute><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/syllabus" element={<ProtectedRoute><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/progress" element={<ProtectedRoute><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/status" element={<OfficerRoute><Status onBack={() => window.history.back()} /></OfficerRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
+                <Route path="/admin/login" element={<AdminAuthPage />} />
+                
+                <Route path="/support" element={<ClassCRoute><SupportHub /></ClassCRoute>} />
+                <Route path="/support-nexus" element={<NexusRoute><SupportNexus /></NexusRoute>} />
+                <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
+                <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
+                <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />
+                <Route path="/admin/content" element={<AdminProtectedRoute><ContentModeration /></AdminProtectedRoute>} />
+                <Route path="/admin/analytics" element={<AdminProtectedRoute><Analytics /></AdminProtectedRoute>} />
+                <Route path="/admin/support" element={<AdminProtectedRoute><SupportCenter /></AdminProtectedRoute>} />
+                <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
+
+                <Route path="/quiz" element={<PremiumEliteRoute><QuizGenerator /></PremiumEliteRoute>} />
+                <Route path="/essay-helper" element={<PremiumEliteRoute><EssayHelper /></PremiumEliteRoute>} />
+                <Route path="/study-planner" element={<PremiumEliteRoute><StudyPlanner /></PremiumEliteRoute>} />
+                <Route path="/ai-analytics" element={<PremiumEliteRoute><AIAnalytics /></PremiumEliteRoute>} />
+                <Route path="/flashcards" element={<PremiumEliteRoute><Flashcards /></PremiumEliteRoute>} />
+                <Route path="/doubt-solver" element={<PremiumEliteRoute><DoubtSolver /></PremiumEliteRoute>} />
+                <Route path="/smart-notes" element={<PremiumRoute><SmartNotes /></PremiumRoute>} />
+                <Route path="/portfolio" element={<PremiumRoute><PortfolioBuilder /></PremiumRoute>} />
+                <Route path="/deadlines" element={<PremiumRoute><DeadlineTracker /></PremiumRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AnimatePresence>
+        </div>
+
+        {/* Global persistent layers - RANK OVERLAY IS ALWAYS TOP */}
+        {isOfficer && !isVerified && <RankEntryOverlay />}
+        
+        <DevVerificationGuard />
+        <CursorProvider>
+          {showContent && (
+            <>
+              <AIWidgetWrapper />
+              <GlobalQuickActions />
+              <MobileNavbar />
+              <Suspense fallback={null}>
+                <GlobalWellnessBar />
+              </Suspense>
+              <GlobalFooter />
+            </>
+          )}
+        </CursorProvider>
+        <ShortcutsOverlay />
+        <Toaster />
+        <Sonner />
+        <CookieConsent />
+      </GlobalSecurityGuard>
+    </div>
+  );
+};
+
+const AppContent = () => {
   return (
     <TooltipProvider>
       <AuthProvider>
         <AdminProvider>
           <SecurityProvider>
             <AIProvider>
-                <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden">
-                  <GlobalSecurityGuard>
-                    <NavigationTracker />
-                    <SecurityWarningOverlay />
-                    <AnimatePresence mode="wait">
-                      <Suspense fallback={<PageLoader />}>
-                        <Routes>
-                        {/* --- PUBLIC ROUTES (AdSense & SEO Optimized) --- */}
-                        <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform. Use our smart tutoring, quiz generator, study planner, and grade tracker for academic excellence." /><LandingPage /></>} />
-                        <Route path="/auth" element={<Index />} />
-                        <Route path="/sso-callback" element={<SSOCallback />} />
-
-                        {/* Free Tools (Public Access for AdSense) */}
-                        <Route path="/calculator" element={<><SEO title="Scientific Calculator Online | MARGDARSHAK" description="Free online scientific calculator for students. Solve complex math and physics problems easily." /><Calculator onBack={() => window.history.back()} /></>} />
-                        <Route path="/timer" element={<><SEO title="Pomodoro Study Timer | MARGDARSHAK" description="Boost your focus with our customizable Pomodoro study timer. Track your study sessions and stay productive." /><StudyTimer /></>} />
-                        <Route path="/blog/*" element={<><SEO title="Student Success Blog | MARGDARSHAK" description="Expert advice on study techniques, exam preparation, and academic productivity." /><BlogPage /></>} />
-
-                        {/* Legal & Info */}
-                        <Route path="/about" element={<><SEO title="About Us | The MARGDARSHAK Mission" description="Learn about the vision behind MARGDARSHAK and how we are empowering students worldwide with AI." /><AboutUsPage /></>} />
-                        <Route path="/contact" element={<><SEO title="Contact Support | MARGDARSHAK" description="Need help? Contact the MARGDARSHAK support team for any queries or feedback." /><ContactUsPage /></>} />
-                        <Route path="/help" element={<><SEO title="Help Center | MARGDARSHAK Knowledge Base" description="Find answers to common questions and learn how to use MARGDARSHAK tools effectively." /><HelpPage /></>} />
-                        <Route path="/privacy" element={<><SEO title="Privacy Policy | MARGDARSHAK" description="How we protect your data and maintain your privacy at MARGDARSHAK." /><PrivacyPolicy /></>} />
-                        <Route path="/terms" element={<><SEO title="Terms & Conditions | MARGDARSHAK" description="The legal agreement for using the MARGDARSHAK platform." /><TermsAndConditions /></>} />
-                        <Route path="/cookies" element={<><SEO title="Cookie Policy | MARGDARSHAK" description="Information about how we use cookies to improve your experience." /><CookiePolicy /></>} />
-                        <Route path="/gdpr" element={<><SEO title="GDPR Compliance | MARGDARSHAK" description="Our commitment to GDPR and data protection standards." /><GDPRCompliance /></>} />
-                        <Route path="/download" element={<><SEO title="Download MARGDARSHAK | Desktop & Mobile Apps" description="Get the official MARGDARSHAK application for Windows and Android. Premium AI-powered educational tools on all your devices." /><DownloadPage /></>} />
-                        <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-
-
-                        {/* --- PROTECTED ROUTES (Dashboard) --- */}
-                        <Route path="/dashboard" element={
-                          <ProtectedRoute>
-                            <DashboardRouteWrapper />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/achievements" element={<ProtectedRoute><SEO title="Achievements | MARGDARSHAK" description="Your progress and badges." /><AchievementsPage /></ProtectedRoute>} />
-                        <Route path="/ai-assistant" element={<ProtectedRoute><SEO title="SAARTHI | MARGDARSHAK" description="24/7 AI-powered academic assistance." /><AIPage /></ProtectedRoute>} />
-                        <Route path="/upgrade" element={<ProtectedRoute><SEO title="Upgrade to Premium | MARGDARSHAK" description="Unlock advanced AI features and study tools with MARGDARSHAK Premium." /><Upgrade /></ProtectedRoute>} />
-
-                        {/* Core Features */}
-                        <Route path="/tasks" element={<ProtectedRoute><SEO title="Task Manager | MARGDARSHAK" description="Organize your academic tasks and deadlines efficiently." /><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/grades" element={<ProtectedRoute><SEO title="Grade Tracker | MARGDARSHAK" description="Track your academic performance and calculate your GPA automatically." /><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/notes" element={<ProtectedRoute><SEO title="Digital Notes | MARGDARSHAK" description="Create and organize your study notes in one secure place." /><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/calendar" element={<ProtectedRoute><SEO title="Academic Calendar | MARGDARSHAK" description="Sync your schedule and never miss an important event." /><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/timetable" element={<ProtectedRoute><SEO title="Timetable Maker | MARGDARSHAK" description="Create a perfect study schedule with our automated timetable generator." /><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/courses" element={<ProtectedRoute><SEO title="Course Management | MARGDARSHAK" description="Manage your subjects and courses with ease." /><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/syllabus" element={<ProtectedRoute><SEO title="Syllabus Tracker | MARGDARSHAK" description="Track your progress through your course syllabus." /><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
-
-
-                        <Route path="/progress" element={<ProtectedRoute><SEO title="Progress Tracker | MARGDARSHAK" description="Monitor your academic growth and achievements over time." /><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/profile" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/identity-node" element={<ProtectedRoute><SEO title="Identity Hub | MARGDARSHAK" description="Manage your universal holographic ID." /><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/status" element={<OfficerRoute><SEO title="System Status | MARGDARSHAK" description="Real-time matrix health monitoring." /><Status onBack={() => window.history.back()} /></OfficerRoute>} />
-                        <Route path="/sitemap" element={<><SEO title="Sitemap Index | MARGDARSHAK" description="Architectural matrix of the ecosystem." /><Sitemap onBack={() => window.history.back()} /></>} />
-                        <Route path="/wellness" element={<PremiumRoute><SEO title="Student Wellness | MARGDARSHAK" description="Tools for mental well-being and maintaining a healthy study-life balance." /><Wellness onBack={() => window.history.back()} /></PremiumRoute>} />
-                        <Route path="/settings" element={<ProtectedRoute><SEO title="Settings | MARGDARSHAK" description="Manage your account preferences and security settings." /><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
-                        <Route path="/admin/login" element={<AdminAuthPage />} />
-                        
-                        {/* Operational Support Hub (Class C) */}
-                        <Route path="/support" element={<ClassCRoute><SupportHub /></ClassCRoute>} />
-
-                        {/* Tactical Support Nexus (A+ to B) */}
-                        <Route path="/support-nexus" element={<NexusRoute><SupportNexus /></NexusRoute>} />
-
-                        {/* High-Command Admin (A+ to B) */}
-                        <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
-                        <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
-                        <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                        <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
-                        <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
-                        <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />
-                        <Route path="/admin/content" element={<AdminProtectedRoute><ContentModeration /></AdminProtectedRoute>} />
-                        <Route path="/admin/analytics" element={<AdminProtectedRoute><Analytics /></AdminProtectedRoute>} />
-                        <Route path="/admin/support" element={<AdminProtectedRoute><SupportCenter /></AdminProtectedRoute>} />
-                        <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
-
-                        {/* --- NEW AI FEATURES --- */}
-                        <Route path="/quiz" element={
-                          <PremiumEliteRoute>
-                            <SEO title="Quiz Generator | MARGDARSHAK" description="AI-powered quiz generator for any subject." />
-                            <QuizGenerator />
-                          </PremiumEliteRoute>
-                        } />
-                        <Route path="/essay-helper" element={
-                          <PremiumEliteRoute>
-                            <SEO title="Essay Helper | MARGDARSHAK" description="AI writing assistant for essays and academic papers." />
-                            <EssayHelper />
-                          </PremiumEliteRoute>
-                        } />
-                        <Route path="/study-planner" element={
-                          <PremiumEliteRoute>
-                            <SEO title="Smart Study Planner | MARGDARSHAK" description="AI-generated personalized study schedules." />
-                            <StudyPlanner />
-                          </PremiumEliteRoute>
-                        } />
-                        <Route path="/ai-analytics" element={
-                          <PremiumEliteRoute>
-                            <SEO title="AI Analytics | MARGDARSHAK" description="AI-powered insights into your academic performance." />
-                            <AIAnalytics />
-                          </PremiumEliteRoute>
-                        } />
-                        <Route path="/flashcards" element={
-                          <PremiumEliteRoute>
-                            <SEO title="AI Flashcards | MARGDARSHAK" description="AI generated flashcards with Spaced Repetition." />
-                            <Flashcards />
-                          </PremiumEliteRoute>
-                        } />
-                        <Route path="/doubt-solver" element={
-                          <PremiumEliteRoute>
-                            <SEO title="AI Doubt Solver | MARGDARSHAK" description="Step-by-step solutions for complex problems." />
-                            <DoubtSolver />
-                          </PremiumEliteRoute>
-                        } />
-
-                        {/* --- CAREER & PREP ROUTES --- */}
-                        <Route path="/smart-notes" element={
-                          <PremiumRoute>
-                            <SEO title="Smart Notes | MARGDARSHAK" description="Take notes and listen to them with Text-to-Speech." />
-                            <SmartNotes />
-                          </PremiumRoute>
-                        } />
-                        <Route path="/portfolio" element={
-                          <PremiumRoute>
-                            <SEO title="Portfolio Builder | MARGDARSHAK" description="Auto-generate a resume from your real academic data." />
-                            <PortfolioBuilder />
-                          </PremiumRoute>
-                        } />
-                        <Route path="/deadlines" element={
-                          <PremiumRoute>
-                            <SEO title="Exam Deadline Tracker | MARGDARSHAK" description="Track JEE, NEET, SAT and university application deadlines." />
-                            <DeadlineTracker />
-                          </PremiumRoute>
-                        } />
-
-
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </AnimatePresence>
-                    
-
-                    <RankEntryOverlay />
-                    <DevVerificationGuard />
-             {/* Global persistent layers - Memoized for stability */}
-      <CursorProvider>
-        <AIWidgetWrapper />
-        <GlobalQuickActions />
-        <MobileNavbar />
-        <Suspense fallback={null}>
-          <GlobalWellnessBar />
-        </Suspense>
-        <GlobalFooter />
-      </CursorProvider>
-             <ShortcutsOverlay />
-
-                    <Toaster />
-                    <Sonner />
-                    <CookieConsent />
-                  </GlobalSecurityGuard>
-                </div>
-              </AIProvider>
-            </SecurityProvider>
-          </AdminProvider>
-        </AuthProvider>
-      </TooltipProvider>
-
+              <AppRoutes />
+            </AIProvider>
+          </SecurityProvider>
+        </AdminProvider>
+      </AuthProvider>
+    </TooltipProvider>
   );
 };
 

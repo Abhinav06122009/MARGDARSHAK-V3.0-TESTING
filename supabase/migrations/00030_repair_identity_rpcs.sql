@@ -84,7 +84,55 @@ BEGIN
     END IF;
 END $$;
 
--- 4. GRANTS
+-- 5. RE-STABILIZE RLS POLICIES (Global UUID Synchronization)
+-- This ensures that all tables compare user_id against the translated UUID.
+DO $$
+DECLARE
+    v_table text;
+    v_tables text[] := ARRAY[
+        'profiles', 'courses', 'notes', 'tasks', 'grades', 'study_sessions', 
+        'user_calendar_events', 'progress_goals', 'progress_entries', 
+        'timetable_events', 'ai_neural_memory', 'exams', 'assignments', 'submissions',
+        'enrollments', 'announcements'
+    ];
+    v_user_id_col text;
+BEGIN
+    FOREACH v_table IN ARRAY v_tables LOOP
+        -- Determine user_id column name
+        IF v_table = 'profiles' THEN v_user_id_col := 'id';
+        ELSIF v_table = 'enrollments' OR v_table = 'submissions' THEN v_user_id_col := 'student_id';
+        ELSIF v_table = 'assignments' THEN v_user_id_col := 'created_by';
+        ELSIF v_table = 'announcements' THEN v_user_id_col := 'author_id';
+        ELSE v_user_id_col := 'user_id';
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = v_table AND table_schema = 'public') THEN
+            -- Check if the column actually exists in this table
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = v_table AND column_name = v_user_id_col) THEN
+            -- Standard UUID Policies
+            EXECUTE format('DROP POLICY IF EXISTS "Standard SELECT for %I" ON public.%I', v_table, v_table);
+            EXECUTE format('CREATE POLICY "Standard SELECT for %I" ON public.%I FOR SELECT USING (%I::uuid = public.requesting_user_id_uuid())', v_table, v_table, v_user_id_col);
+            
+            EXECUTE format('DROP POLICY IF EXISTS "Standard INSERT for %I" ON public.%I', v_table, v_table);
+            EXECUTE format('CREATE POLICY "Standard INSERT for %I" ON public.%I FOR INSERT WITH CHECK (%I::uuid = public.requesting_user_id_uuid())', v_table, v_table, v_user_id_col);
+            
+            EXECUTE format('DROP POLICY IF EXISTS "Standard UPDATE for %I" ON public.%I', v_table, v_table);
+            EXECUTE format('CREATE POLICY "Standard UPDATE for %I" ON public.%I FOR UPDATE USING (%I::uuid = public.requesting_user_id_uuid())', v_table, v_table, v_user_id_col);
+            
+            EXECUTE format('DROP POLICY IF EXISTS "Standard DELETE for %I" ON public.%I', v_table, v_table);
+            EXECUTE format('CREATE POLICY "Standard DELETE for %I" ON public.%I FOR DELETE USING (%I::uuid = public.requesting_user_id_uuid())', v_table, v_table, v_user_id_col);
+            
+            -- Admin Override (CEO/Admin can see all except private profiles/logs)
+            IF v_table NOT IN ('profiles', 'security_logs') THEN
+                EXECUTE format('DROP POLICY IF EXISTS "Admin Master Override for %I" ON public.%I', v_table, v_table);
+                EXECUTE format('CREATE POLICY "Admin Master Override for %I" ON public.%I FOR ALL USING (public.get_current_user_role() IN (''ceo'', ''admin''))', v_table, v_table);
+            END IF;
+        END IF;
+    END IF;
+    END LOOP;
+END $$;
+
+-- 6. GRANTS
 GRANT EXECUTE ON FUNCTION public.get_current_user_role() TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.requesting_user_id() TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.requesting_user_id_uuid() TO authenticated, service_role;
