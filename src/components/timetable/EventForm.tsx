@@ -60,7 +60,7 @@ const EventForm: React.FC<EventFormProps> = ({
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: 'spring', stiffness: 250, damping: 25 }}
-      className="fixed top-0 right-0 h-full w-full max-w-2xl bg-black/80 backdrop-blur-2xl border-l border-white/20 shadow-2xl z-50 flex flex-col"
+      className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
     >
       <div className="flex items-center justify-between p-6 border-b border-white/10">
         <div className="flex items-center gap-3 text-xl text-white font-bold">
@@ -82,7 +82,7 @@ const EventForm: React.FC<EventFormProps> = ({
       <div className="flex-grow overflow-y-auto p-6">
         <form onSubmit={handleSubmit} className="space-y-8 p-1">
           {/* Basic Event Information */}
-          <Card className="bg-black/20 border-white/10 shadow-glass-neumorphic">
+          <Card className="bg-white/5 border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-2xl font-extrabold text-white flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
               <BookOpen className="w-7 h-7 text-cyan-300" /> Event Information
@@ -141,7 +141,7 @@ const EventForm: React.FC<EventFormProps> = ({
           </Card>
 
           {/* Schedule & Location */}
-          <Card className="bg-black/20 border-white/10 shadow-glass-neumorphic">
+          <Card className="bg-white/5 border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-2xl font-extrabold text-white flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400 drop-shadow-md">
               <Clock className="w-7 h-7" /> Schedule & Location
@@ -197,7 +197,7 @@ const EventForm: React.FC<EventFormProps> = ({
           </Card>
 
           {/* Additional Details */}
-          <Card className="bg-black/20 border-white/10 shadow-glass-neumorphic">
+          <Card className="bg-white/5 border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-2xl font-extrabold text-white flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 drop-shadow-md">
               <GraduationCap className="w-7 h-7" /> Additional Details

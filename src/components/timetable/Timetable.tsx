@@ -946,7 +946,7 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsSheetOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
               />
               {/* Sheet Content */}
               <motion.div

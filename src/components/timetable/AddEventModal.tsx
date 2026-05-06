@@ -87,7 +87,7 @@ const AddEventModal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
           />
           {/* Sheet Content */}
           <motion.div
@@ -95,7 +95,7 @@ const AddEventModal = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-full w-full max-w-2xl bg-black/80 backdrop-blur-2xl border-l border-white/20 shadow-2xl z-50 flex flex-col"
+            className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div className="flex items-center gap-3 text-xl text-white font-bold">
@@ -117,7 +117,7 @@ const AddEventModal = ({
             <div className="flex-grow overflow-y-auto p-6">
               <form onSubmit={handleSubmit} className="space-y-8 p-1">
                 {/* Basic Event Information */}
-                <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10 shadow-glass-neumorphic">
+                <div className="space-y-6 p-6 bg-white/5 rounded-2xl border border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
                   <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
                     <Palette className="w-7 h-7" /> Event Information
                   </h3>
