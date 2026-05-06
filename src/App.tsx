@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState, Suspense, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { safeLazy as lazy } from '@/lib/lazy-load';
 import * as Sentry from "@sentry/react";
 import { BrowserRouter, HashRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
@@ -321,16 +322,21 @@ const AppRoutes = () => {
         </GlobalSecurityGuard>
       </div>
 
-      {/* PERSISTENT LAYERS - COMPLETELY OUTSIDE THE ROOT DIV TO BYPASS TRANSFORM RESET */}
-      {showContent && (
-        <>
+      {/* PORTAL RENDERING TO BODY - GUARANTEES VIEWPORT FIXED POSITIONING */}
+      {showContent && createPortal(
+        <div className="persistent-ui-layer">
           <AIWidgetWrapper />
           <GlobalQuickActions />
           <AmbientSoundPlayer />
           <MobileNavbar />
-        </>
+        </div>,
+        document.body
       )}
-      {isOfficer && !isVerified && <div className="fixed inset-0 z-[1000000]"><RankEntryOverlay /></div>}
+
+      {isOfficer && !isVerified && createPortal(
+        <div className="fixed inset-0 z-[2000000]"><RankEntryOverlay /></div>,
+        document.body
+      )}
     </>
   );
 };
