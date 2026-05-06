@@ -319,18 +319,22 @@ const AppRoutes = () => {
           <Toaster />
           <Sonner />
           <CookieConsent />
+            <AppRoutes />
+          </Suspense>
+
+          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
+          {showContent && (
+            <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
+              <div className="pointer-events-auto">
+                <AIWidgetWrapper />
+                <GlobalQuickActions />
+                <AmbientSoundPlayer />
+                <MobileNavbar />
+              </div>
+            </div>
+          )}
         </GlobalSecurityGuard>
       </div>
-
-      {/* PERSISTENT VIEWPORT LAYER - FORCED AT ROOT LEVEL */}
-      {showContent && (
-        <div className="viewport-lock">
-          <AIWidgetWrapper />
-          <GlobalQuickActions />
-          <AmbientSoundPlayer />
-          <MobileNavbar />
-        </div>
-      )}
 
       {isOfficer && !isVerified && (
         <div className="fixed inset-0 z-[20000000]"><RankEntryOverlay /></div>
