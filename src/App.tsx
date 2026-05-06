@@ -237,22 +237,21 @@ const AppRoutes = () => {
 
   return (
     <>
-      <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden relative">
-        {/* PERSISTENT UI OVERLAYS */}
-        {showContent && (
-          <>
-            <AmbientSoundPlayer />
-            <GlobalQuickActions />
-            
-            <div className="fixed bottom-0 left-0 z-[999998] pointer-events-none">
-              <div className="pointer-events-auto">
-                <AIWidgetWrapper />
-                <MobileNavbar />
-              </div>
+      {showContent && (
+        <div id="persistent-ui-root">
+          <AmbientSoundPlayer />
+          <GlobalQuickActions />
+          
+          <div className="fixed bottom-0 left-0 z-[999998] pointer-events-none">
+            <div className="pointer-events-auto">
+              <AIWidgetWrapper />
+              <MobileNavbar />
             </div>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
+      <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden relative">
         <GlobalSecurityGuard>
           <NavigationTracker />
           <SecurityWarningOverlay />

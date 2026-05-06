@@ -130,7 +130,7 @@ export const AmbientSoundPlayer: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed z-[999999] bottom-[140px] left-8" style={{ position: 'fixed' }}>
+    <div className="fixed z-[999999] bottom-52 left-12" style={{ position: 'fixed', bottom: '208px', left: '48px' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
