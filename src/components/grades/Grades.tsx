@@ -506,7 +506,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
                 <GradeInsights grades={grades} />
               </motion.div>
-            </div>
+            </motion.div>
           </div>
 
           <div className="lg:col-span-8 xl:col-span-9">
