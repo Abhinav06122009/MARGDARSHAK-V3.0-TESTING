@@ -333,7 +333,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
 
                 {/* Stations Grid */}
                 <div className="grid grid-cols-3 gap-2 mb-6">
-                  {allStations.slice(0, 6).map(s => {
+                  {BUILT_IN_STATIONS.map(s => {
                     const SI = s.Icon;
                     const isActive = activeId === s.id;
                     return (
@@ -347,21 +347,37 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
                       </button>
                     );
                   })}
+                  {/* Dedicated Upload Button in Grid */}
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border bg-indigo-50 border-indigo-100 text-indigo-600 hover:bg-indigo-100 transition-all border-dashed"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span className="text-[9px] font-black uppercase tracking-tighter">Add MP3</span>
+                  </button>
                 </div>
 
-                {/* My Music Section (if any) */}
+                {/* My Music Section (Enhanced) */}
                 {customTracks.length > 0 && (
-                  <div className="mb-6">
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-2 px-1">My Tracks</p>
-                    <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1 scrollbar-hide">
+                  <div className="mb-6 animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center justify-between px-1 mb-2">
+                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Local Music Library</p>
+                      <span className="text-[8px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">
+                        {customTracks.length} tracks
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
                       {customTracks.map(t => (
                         <div key={t.id} 
                           onClick={() => selectStation(t.id)}
-                          className={`flex items-center gap-2 p-2 rounded-xl border cursor-pointer transition-all ${activeId === t.id ? 'bg-pink-500/10 border-pink-500/20 text-pink-600' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.05]'}`}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${activeId === t.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-black/5 border-transparent text-zinc-500 hover:bg-black/[0.05]'}`}
                         >
-                          <Music size={12} className={activeId === t.id ? 'text-pink-500' : 'text-zinc-400'} />
-                          <span className="flex-1 text-[10px] font-bold truncate uppercase">{t.label}</span>
-                          <button onClick={(e) => removeCustomTrack(t.id, e)} className="p-1 hover:text-red-500 transition-colors">
+                          <Music size={12} className={activeId === t.id ? 'text-white' : 'text-indigo-400'} />
+                          <span className="flex-1 text-[10px] font-bold truncate uppercase tracking-tight">{t.label}</span>
+                          <button 
+                            onClick={(e) => removeCustomTrack(t.id, e)} 
+                            className={`p-1 transition-colors ${activeId === t.id ? 'text-white/70 hover:text-white' : 'text-zinc-300 hover:text-red-500'}`}
+                          >
                             <Trash2 size={12} />
                           </button>
                         </div>
@@ -372,16 +388,16 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
 
                 {/* Volume & Burnout */}
                 <div className="mt-auto space-y-4">
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => setIsMuted(!isMuted)} className="text-zinc-400 hover:text-zinc-600">
+                  <div className="flex items-center gap-3 bg-black/5 p-2 rounded-xl border border-black/[0.03]">
+                    <button onClick={() => setIsMuted(!isMuted)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
                       {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                     </button>
                     <input
                       type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume}
                       onChange={e => setVolume(parseFloat(e.target.value))}
-                      className="flex-1 h-1 bg-black/10 rounded-full appearance-none cursor-pointer accent-indigo-600"
+                      className="flex-1 h-1 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-indigo-600"
                     />
-                    <span className="text-[10px] font-bold text-zinc-500 w-8 text-right">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+                    <span className="text-[10px] font-black text-zinc-500 w-8 text-right tabular-nums">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                   </div>
 
                   {burnoutAlert && (
@@ -400,16 +416,19 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
 
           {!expanded && (
             <div className="px-5 pb-5">
-               <div className="flex items-center gap-4 p-3 bg-black/5 rounded-2xl border border-black/[0.03]">
+               <div className="flex items-center gap-4 p-3 bg-black/5 rounded-2xl border border-black/[0.03] cursor-pointer hover:bg-black/[0.08] transition-colors" onClick={() => setExpanded(true)}>
                   <button
-                    onClick={togglePlay}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all ${isPlaying ? 'bg-indigo-600' : 'bg-zinc-400'}`}
+                    onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm transition-all ${isPlaying ? 'bg-indigo-600 shadow-indigo-600/20' : 'bg-zinc-400'}`}
                   >
                     {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-black truncate text-zinc-800 uppercase tracking-wider">{station.label}</p>
-                    {burnoutAlert && <p className="text-[8px] font-bold text-red-500 uppercase">Burnout Risk detected</p>}
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <div className={`w-1 h-1 rounded-full ${isPlaying ? 'bg-indigo-600 animate-pulse' : 'bg-zinc-400'}`} />
+                      <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">{isPlaying ? 'On Air' : 'Standby'}</p>
+                    </div>
                   </div>
                </div>
             </div>
@@ -417,7 +436,7 @@ export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ isWidget
         </motion.div>
       </motion.div>
 
-      <audio key={station.url} ref={audioRef} src={station.url} loop className="hidden" />
+      <audio ref={audioRef} src={station.url} loop className="hidden" />
     </>
   );
 };
