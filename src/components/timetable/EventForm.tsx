@@ -45,7 +45,7 @@ const EventForm: React.FC<EventFormProps> = ({
   // Dynamic variants based on click position
   const formVariants = {
     hidden: { 
-      scale: 0.8,
+      scale: 0.5,
       opacity: 0,
     },
     visible: { 
@@ -53,36 +53,50 @@ const EventForm: React.FC<EventFormProps> = ({
       opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 450,
-        damping: 30,
+        stiffness: 500,
+        damping: 35,
         staggerChildren: 0.05
       }
     },
     exit: { 
-      scale: 0.9,
+      scale: 0.8,
       opacity: 0,
-      transition: { duration: 0.15 }
+      transition: { duration: 0.15, ease: "easeOut" }
     }
   };
 
-  // Logic to keep form in viewport
-  const getPosition = () => {
-    if (!clickPosition) return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' };
+  // Improved positioning logic
+  const getPositionStyle = (): React.CSSProperties => {
+    if (!clickPosition) return { 
+      left: '50%', 
+      top: '50%', 
+      transform: 'translate(-50%, -50%)',
+      position: 'fixed'
+    };
     
     const formWidth = 576; // max-w-xl
-    const formHeight = 800; // estimated
+    let left = clickPosition.x;
+    let top = clickPosition.y;
     
-    let left = clickPosition.x - (formWidth / 2);
-    let top = clickPosition.y - 100; // Offset a bit to show above click
+    // Horizontal boundary checks
+    const minLeft = (formWidth / 2) + 20;
+    const maxLeft = window.innerWidth - (formWidth / 2) - 20;
+    left = Math.max(minLeft, Math.min(left, maxLeft));
     
-    // Boundary checks
-    left = Math.max(20, Math.min(left, window.innerWidth - formWidth - 20));
-    top = Math.max(20, Math.min(top, window.innerHeight - formHeight - 20));
+    // Vertical boundary checks - conservative clamping
+    const minTop = 100;
+    const maxTop = window.innerHeight - 100;
+    top = Math.max(minTop, Math.min(top, maxTop));
     
-    return { left, top, transform: 'none' };
+    return { 
+      position: 'fixed',
+      left: `${left}px`, 
+      top: `${top}px`, 
+      transform: 'translate(-50%, -50%)',
+    };
   };
 
-  const pos = getPosition();
+  const posStyle = getPositionStyle();
 
   const handleSuggestTime = () => {
     if (!hasPremiumAccess) {
@@ -109,7 +123,7 @@ const EventForm: React.FC<EventFormProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-[#000000]/40 backdrop-blur-sm cursor-pointer pointer-events-auto"
+        className="fixed inset-0 bg-[#000000]/50 backdrop-blur-sm cursor-pointer pointer-events-auto"
       />
 
       <motion.div
@@ -117,13 +131,7 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        style={{ 
-          position: 'fixed',
-          left: pos.left,
-          top: pos.top,
-          transform: pos.transform,
-          transformOrigin: clickPosition ? `${clickPosition.x - (typeof pos.left === 'number' ? pos.left : 0)}px ${clickPosition.y - (typeof pos.top === 'number' ? pos.top : 0)}px` : 'center center' 
-        }}
+        style={posStyle}
         className="relative w-full max-w-xl h-fit max-h-[90vh] bg-zinc-950/95 backdrop-blur-3xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col rounded-[2.5rem] overflow-hidden pointer-events-auto"
       >
         {/* Animated Glow Border */}
