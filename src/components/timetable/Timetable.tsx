@@ -734,6 +734,39 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center relative overflow-hidden">
+      {/* Slide-over Panel for Event Creation/Edit - Moved to top for viewport anchoring */}
+      <AnimatePresence>
+        {isSheetOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setIsSheetOpen(false);
+                resetForm();
+                setEditingEvent(null);
+              }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-md z-[1000]"
+            />
+            <EventForm
+              formData={formData}
+              setFormData={setFormData}
+              handleSubmit={handleSubmit}
+              editingEvent={editingEvent}
+              hasPremiumAccess={hasPremiumAccess}
+              onSuggestTime={handleSuggestTime}
+              onClose={() => {
+                setIsSheetOpen(false);
+                resetForm();
+                setEditingEvent(null);
+              }}
+            />
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Enhanced Animated Background */}
       <ParallaxBackground />
       <div className="w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 z-10">
@@ -935,36 +968,6 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
             onEventSelect={handleEventSelect}
           />
         </div>
-
-        {/* Slide-over Panel for Event Creation/Edit */}
-        <AnimatePresence>
-          {isSheetOpen && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsSheetOpen(false)}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-              />
-              {/* Sheet Content */}
-                <EventForm
-                  formData={formData}
-                  setFormData={setFormData}
-                  handleSubmit={handleSubmit}
-                  editingEvent={editingEvent}
-                  hasPremiumAccess={hasPremiumAccess}
-                  onSuggestTime={handleSuggestTime}
-                  onClose={() => {
-                    setIsSheetOpen(false);
-                    resetForm();
-                    setEditingEvent(null);
-                  }}
-                />
-            </>
-          )}
-        </AnimatePresence>
 
         {/* Batch Operations Bar */}
         <AnimatePresence>
