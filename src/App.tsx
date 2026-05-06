@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, Suspense, useCallback } from 'react';
+import React, { useContext, useEffect, useState, Suspense, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { safeLazy as lazy } from '@/lib/lazy-load';
 import * as Sentry from "@sentry/react";
