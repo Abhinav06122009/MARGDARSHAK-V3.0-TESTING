@@ -95,14 +95,14 @@ const AddEventModal = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
+            className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 text-xl text-white font-bold">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
-                  <Palette className="w-6 h-6 text-white" />
+                  <Palette className="w-5 h-5 text-white" />
                 </div>
-                {editingEvent ? 'Edit Event' : 'Add New Event'}
+                {editingEvent ? 'Update Event' : 'Initialize Event'}
               </div>
               <Button
                 variant="ghost"
@@ -114,16 +114,16 @@ const AddEventModal = ({
               </Button>
             </div>
             
-            <div className="flex-grow overflow-y-auto p-6">
-              <form onSubmit={handleSubmit} className="space-y-8 p-1">
+            <div className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Basic Event Information */}
-                <div className="space-y-6 p-6 bg-white/5 rounded-2xl border border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
-                  <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
-                    <Palette className="w-7 h-7" /> Event Information
+                <div className="space-y-4 p-5 bg-white/5 rounded-2xl border border-white/10 shadow-glass-neumorphic backdrop-blur-sm">
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                    <Palette className="w-5 h-5" /> Intelligence Details
                   </h3>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-base font-semibold text-white/90">Event Title *</Label>
+                    <Label htmlFor="title" className="text-sm font-semibold text-white/90">Event Title *</Label>
                     <Input
                       id="title"
                       type="text"
@@ -131,17 +131,17 @@ const AddEventModal = ({
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="e.g., Project Meeting"
                       required
-                      className="text-base bg-black/30 border-2 border-white/15 rounded-xl text-white placeholder:text-white/60 focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300"
+                      className="text-sm bg-black/30 border-white/15 rounded-xl text-white placeholder:text-white/60 focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300 h-11"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="day" className="text-base font-semibold text-white/90">Day *</Label>
+                    <Label htmlFor="day" className="text-sm font-semibold text-white/90">Day *</Label>
                     <Select
                       value={formData.day.toString()}
                       onValueChange={(value) => setFormData({ ...formData, day: parseInt(value) })}
                     >
-                      <SelectTrigger className="text-base bg-black/30 border-2 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300">
+                      <SelectTrigger className="text-sm bg-black/30 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300 h-11">
                         <SelectValue placeholder="Select a day" />
                       </SelectTrigger>
                       <SelectContent className="bg-black/60 backdrop-blur-xl border-white/20 text-white shadow-neumorphic-lg">
@@ -152,41 +152,41 @@ const AddEventModal = ({
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label htmlFor="start_time" className="text-base font-semibold text-white/90">Start Time *</label>
+                      <label htmlFor="start_time" className="text-sm font-semibold text-white/90">Start Time *</label>
                       <input
                         id="start_time"
                         type="time"
                         value={formData.start_time}
                         onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                        className="text-base bg-black/30 border-2 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300"
+                        className="text-sm bg-black/30 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300 h-11 px-3 w-full"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <label htmlFor="end_time" className="text-base font-semibold text-white/90">End Time *</label>
+                      <label htmlFor="end_time" className="text-sm font-semibold text-white/90">End Time *</label>
                       <input
                         id="end_time"
                         type="time"
                         value={formData.end_time}
                         onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                        className="text-base bg-black/30 border-2 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300"
+                        className="text-sm bg-black/30 border-white/15 rounded-xl text-white focus:bg-black/40 focus:border-blue-500/70 shadow-neumorphic-inset-lg transition-all duration-300 h-11 px-3 w-full"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-base font-semibold text-white/90">Color</Label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <Label className="text-sm font-semibold text-white/90">Color Identifier</Label>
+                    <div className="grid grid-cols-5 gap-2">
                       {colors.map((color) => (
                         <button
                           key={color.value}
                           type="button"
                           onClick={() => setFormData({ ...formData, color: color.value })}
-                          className={`w-full h-10 rounded-lg border-2 ${
-                            formData.color === color.value ? 'border-blue-500' : 'border-white/15'
+                          className={`w-full h-8 rounded-lg border-2 ${
+                            formData.color === color.value ? 'border-blue-500 scale-105' : 'border-white/15'
                           } shadow-neumorphic-inset-sm transition-all duration-200`}
                           style={{ backgroundColor: color.value }}
                           title={color.name}
@@ -196,24 +196,27 @@ const AddEventModal = ({
                   </div>
                 </div>
                 
-                {/* Form Actions */}
-                <div className="flex justify-end gap-4 pt-6 mt-4 border-t border-white/10">
+                {/* Action Buttons Snapped to Content */}
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={onClose}
-                    className="px-8 py-3 text-base text-white/80 hover:bg-white/10 hover:text-white shadow-neumorphic-sm hover:shadow-neumorphic-lg transition-all duration-300"
+                    className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 hover:text-white shadow-neumorphic-sm transition-all duration-300"
                   >
                     Cancel
                   </Button>
                   <Button 
                     type="submit" 
-                    className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl shadow-neumorphic-lg hover:from-blue-700 hover:to-purple-700 hover:shadow-blue-500/60 transform hover:-translate-y-1 transition-all duration-300"
+                    className="px-8 h-11 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl shadow-neumorphic-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center gap-2"
                   >
-                    <Save className="w-4 h-4 mr-2" />
-                    {editingEvent ? 'Update Event' : 'Create Event'}
+                    <Save className="w-4 h-4" />
+                    {editingEvent ? 'Update' : 'Initialize'}
                   </Button>
                 </div>
+              </form>
+            </div>
+          </motion.div>
               </form>
             </div>
           </motion.div>

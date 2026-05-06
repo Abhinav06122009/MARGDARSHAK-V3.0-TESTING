@@ -46,7 +46,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-zinc-950 border-l border-white/10 z-[101] shadow-2xl flex flex-col"
+            className="fixed right-0 top-0 w-full max-w-xl h-fit max-h-screen bg-zinc-950 border-l border-white/10 z-[101] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
           >
             {/* Header */}
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 backdrop-blur-xl shrink-0">
@@ -67,8 +67,8 @@ const CourseForm: React.FC<CourseFormProps> = ({
             </div>
 
             {/* Form Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-              <form id="course-form" onSubmit={onSubmit} className="space-y-8">
+            <div className="p-6">
+              <form id="course-form" onSubmit={onSubmit} className="space-y-4">
                 {/* Basic Info */}
                 <div className="space-y-4">
                   <div className="grid gap-2">
@@ -189,27 +189,27 @@ const CourseForm: React.FC<CourseFormProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Action Buttons Snapped to Content */}
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 h-12 rounded-2xl text-xs font-black text-zinc-500 hover:text-white transition-all"
+                  >
+                    Discard Changes
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-[2] h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm shadow-xl shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
+                  >
+                    {editingCourse ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    {editingCourse ? 'Save Changes' : 'Initialize Course'}
+                  </button>
+                </div>
               </form>
             </div>
-
-            {/* Footer */}
-            <div className="p-6 bg-zinc-900/50 border-t border-white/5 flex gap-3 shrink-0">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 h-12 rounded-2xl text-xs font-black text-zinc-500 hover:text-white transition-all"
-              >
-                Discard Changes
-              </button>
-              <button
-                form="course-form"
-                type="submit"
-                className="flex-[2] h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm shadow-xl shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
-              >
-                {editingCourse ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                {editingCourse ? 'Save Changes' : 'Initialize Course'}
-              </button>
-            </div>
+          </motion.div>
           </motion.div>
         </>
       )}

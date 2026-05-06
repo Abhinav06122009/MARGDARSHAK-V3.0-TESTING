@@ -1648,61 +1648,61 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-fit max-h-[90vh] overflow-y-auto custom-scrollbar bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem]"
               >
-                {/* Header - shrink-0 */}
-                <div className="flex items-center justify-between p-8 border-b border-white/5 bg-zinc-950/20 shrink-0">
-                  <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
-                    <div className="p-3 bg-white/10 rounded-2xl border border-white/10">
-                      <Target className="w-6 h-6 text-white" />
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950/20 shrink-0">
+                  <div className="flex items-center gap-3 text-xl text-white font-black tracking-tighter uppercase">
+                    <div className="p-2 bg-white/10 rounded-xl border border-white/10">
+                      <Target className="w-5 h-5 text-white" />
                     </div>
                     {editingGoal ? 'Update Goal' : 'Add Goal'}
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setIsAddGoalModalOpen(false)} className="w-12 h-12 text-white/50 hover:text-white hover:bg-white/10 rounded-2xl transition-all">
-                    <X className="w-6 h-6" />
+                  <Button variant="ghost" size="icon" onClick={() => setIsAddGoalModalOpen(false)} className="w-10 h-10 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                    <X className="w-5 h-5" />
                   </Button>
                 </div>
 
-                {/* Body - flex-1 overflow-y-auto */}
-                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                  <form id="add-goal-form" onSubmit={handleSubmitGoal} className="space-y-8 p-1">
-                    <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
-                      <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
-                        <BookOpen className="w-7 h-7" /> Goal Information
+                {/* Body */}
+                <div className="p-6">
+                  <form id="add-goal-form" onSubmit={handleSubmitGoal} className="space-y-4 p-1">
+                    <div className="space-y-4 p-4 bg-black/20 rounded-2xl border border-white/10">
+                      <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3">
+                        <BookOpen className="w-6 h-6" /> Goal Information
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="title" className="text-base font-semibold text-white/90">Goal Title *</Label>
-                          <Input id="title" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} placeholder="e.g., Read 50 Books" required className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="title" className="text-sm font-semibold text-white/90">Goal Title *</Label>
+                          <Input id="title" value={goalForm.title} onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })} placeholder="e.g., Read 50 Books" required className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="category" className="text-base font-semibold text-white/90">Category *</Label>
-                          <Input id="category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} placeholder="e.g., Education, Fitness" required className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="category" className="text-sm font-semibold text-white/90">Category *</Label>
+                          <Input id="category" value={goalForm.category} onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value })} placeholder="e.g., Education, Fitness" required className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="description" className="text-base font-semibold text-white/90">Description</Label>
-                        <Textarea id="description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} placeholder="Why is this goal important to you?" className="min-h-[120px] text-base bg-black/30 border-2 border-white/15 text-white" />
+                        <Label htmlFor="description" className="text-sm font-semibold text-white/90">Description</Label>
+                        <Textarea id="description" value={goalForm.description} onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })} placeholder="Why is this goal important to you?" className="min-h-[100px] text-sm bg-black/30 border-white/15 text-white rounded-xl" />
                       </div>
                     </div>
 
-                    <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
-                      <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
-                        <TrendingUp className="w-7 h-7" /> Goal Metrics
+                    <div className="space-y-4 p-4 bg-black/20 rounded-2xl border border-white/10">
+                      <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3">
+                        <TrendingUp className="w-6 h-6" /> Goal Metrics
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="targetValue" className="text-base font-semibold text-white/90">Target *</Label>
-                          <Input id="targetValue" type="number" value={goalForm.target_value} onChange={(e) => setGoalForm({ ...goalForm, target_value: e.target.value })} required placeholder="50" min="0" step="0.1" className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="targetValue" className="text-sm font-semibold text-white/90">Target *</Label>
+                          <Input id="targetValue" type="number" value={goalForm.target_value} onChange={(e) => setGoalForm({ ...goalForm, target_value: e.target.value })} required placeholder="50" min="0" step="0.1" className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="unit" className="text-base font-semibold text-white/90">Unit *</Label>
-                          <Input id="unit" value={goalForm.unit} onChange={(e) => setGoalForm({ ...goalForm, unit: e.target.value })} required placeholder="books, hours, kg" className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="unit" className="text-sm font-semibold text-white/90">Unit *</Label>
+                          <Input id="unit" value={goalForm.unit} onChange={(e) => setGoalForm({ ...goalForm, unit: e.target.value })} required placeholder="books, hours, kg" className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="priority" className="text-base font-semibold text-white/90">Priority</Label>
+                          <Label htmlFor="priority" className="text-sm font-semibold text-white/90">Priority</Label>
                           <Select value={goalForm.priority} onValueChange={(value) => setGoalForm({ ...goalForm, priority: value as any })}>
-                            <SelectTrigger className="text-base bg-black/30 border-2 border-white/15 text-white"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl"><SelectValue /></SelectTrigger>
                             <SelectContent className="bg-black/60 backdrop-blur-xl border-white/20 text-white">
                               <SelectItem value="low">Low</SelectItem>
                               <SelectItem value="medium">Medium</SelectItem>
@@ -1713,33 +1713,32 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                       </div>
                     </div>
 
-                    <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
-                      <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
-                        <Calendar className="w-7 h-7" /> Timeline
+                    <div className="space-y-4 p-4 bg-black/20 rounded-2xl border border-white/10">
+                      <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3">
+                        <Calendar className="w-6 h-6" /> Timeline
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="startDate" className="text-base font-semibold text-white/90">Start Date *</Label>
-                          <Input id="startDate" type="date" value={goalForm.start_date} onChange={(e) => setGoalForm({ ...goalForm, start_date: e.target.value })} required className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="startDate" className="text-sm font-semibold text-white/90">Start Date *</Label>
+                          <Input id="startDate" type="date" value={goalForm.start_date} onChange={(e) => setGoalForm({ ...goalForm, start_date: e.target.value })} required className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="targetDate" className="text-base font-semibold text-white/90">Target Date *</Label>
-                          <Input id="targetDate" type="date" value={goalForm.target_date} onChange={(e) => setGoalForm({ ...goalForm, target_date: e.target.value })} required min={goalForm.start_date} className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                          <Label htmlFor="targetDate" className="text-sm font-semibold text-white/90">Target Date *</Label>
+                          <Input id="targetDate" type="date" value={goalForm.target_date} onChange={(e) => setGoalForm({ ...goalForm, target_date: e.target.value })} required min={goalForm.start_date} className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                         </div>
                       </div>
                     </div>
+
+                    {/* Action Buttons Snapped to Content */}
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddGoalModalOpen(false)} className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
+                      <Button type="submit" disabled={submitting} className="px-6 h-11 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                        {submitting ? 'Saving...' : (editingGoal ? 'Update Goal' : 'Create Goal')}
+                      </Button>
+                    </div>
                   </form>
                 </div>
-
-                {/* Footer - shrink-0 */}
-                <div className="shrink-0 p-8 border-t border-white/10 bg-zinc-950/20">
-                  <div className="flex justify-end gap-4">
-                    <Button type="button" variant="ghost" onClick={() => setIsAddGoalModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
-                    <Button type="submit" form="add-goal-form" disabled={submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
-                      {submitting ? 'Saving...' : (editingGoal ? 'Update Goal' : 'Create Goal')}
-                    </Button>
-                  </div>
-                </div>
+              </motion.div>
               </motion.div>
             </>
           )}
@@ -1760,32 +1759,32 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-fit max-h-[90vh] overflow-y-auto custom-scrollbar bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem]"
               >
-                {/* Header - shrink-0 */}
-                <div className="flex items-center justify-between p-8 border-b border-white/5 bg-zinc-950/20 shrink-0">
-                  <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
-                    <div className="p-3 bg-emerald-500/20 rounded-2xl border border-emerald-500/20">
-                      <Activity className="w-6 h-6 text-emerald-400" />
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950/20 shrink-0">
+                  <div className="flex items-center gap-3 text-xl text-white font-black tracking-tighter uppercase">
+                    <div className="p-2 bg-emerald-500/20 rounded-xl border border-emerald-500/20">
+                      <Activity className="w-5 h-5 text-emerald-400" />
                     </div>
                     Log Neural Progress
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setIsAddProgressModalOpen(false)} className="w-12 h-12 text-white/50 hover:text-white hover:bg-white/10 rounded-2xl transition-all">
-                    <X className="w-6 h-6" />
+                  <Button variant="ghost" size="icon" onClick={() => setIsAddProgressModalOpen(false)} className="w-10 h-10 text-white/50 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                    <X className="w-5 h-5" />
                   </Button>
                 </div>
 
-                {/* Body - flex-1 overflow-y-auto */}
-                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                  <form id="log-progress-form" onSubmit={handleAddProgress} className="space-y-8 p-1">
-                    <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
-                      <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
-                        <TrendingUp className="w-7 h-7" /> Log Details
+                {/* Body */}
+                <div className="p-6">
+                  <form id="log-progress-form" onSubmit={handleAddProgress} className="space-y-4 p-1">
+                    <div className="space-y-4 p-4 bg-black/20 rounded-2xl border border-white/10">
+                      <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3">
+                        <TrendingUp className="w-6 h-6" /> Log Details
                       </h3>
                       <div className="space-y-2">
-                        <Label className="text-base font-semibold text-white/90">Select Goal *</Label>
+                        <Label className="text-sm font-semibold text-white/90">Select Goal *</Label>
                         <Select value={selectedGoalForProgress?.id || ''} onValueChange={(value) => setSelectedGoalForProgress(goals.find(g => g.id === value) || null)}>
-                          <SelectTrigger className="text-base bg-black/30 border-2 border-white/15 text-white"><SelectValue placeholder="Choose a goal" /></SelectTrigger>
+                          <SelectTrigger className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl"><SelectValue placeholder="Choose a goal" /></SelectTrigger>
                           <SelectContent className="bg-black/60 backdrop-blur-xl border-white/20 text-white">
                             {goals.filter(g => g.status === 'active').map(goal => (<SelectItem key={goal.id} value={goal.id}>{goal.title}</SelectItem>))}
                           </SelectContent>
@@ -1794,28 +1793,27 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                       {selectedGoalForProgress && (
                         <>
                           <div className="space-y-2">
-                            <Label htmlFor="progressValue" className="text-base font-semibold text-white/90">Progress Value ({selectedGoalForProgress.unit}) *</Label>
-                            <Input id="progressValue" type="number" value={progressForm.value} onChange={(e) => setProgressForm({ ...progressForm, value: e.target.value })} required placeholder="How much progress?" min="0" step="0.1" className="text-base bg-black/30 border-2 border-white/15 text-white" />
+                            <Label htmlFor="progressValue" className="text-sm font-semibold text-white/90">Progress Value ({selectedGoalForProgress.unit}) *</Label>
+                            <Input id="progressValue" type="number" value={progressForm.value} onChange={(e) => setProgressForm({ ...progressForm, value: e.target.value })} required placeholder="How much progress?" min="0" step="0.1" className="text-sm bg-black/30 border-white/15 text-white h-11 rounded-xl" />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="progressNotes" className="text-base font-semibold text-white/90">Notes (Optional)</Label>
-                            <Textarea id="progressNotes" value={progressForm.notes} onChange={(e) => setProgressForm({ ...progressForm, notes: e.target.value })} placeholder="Add notes about this progress..." rows={3} className="min-h-[120px] text-base bg-black/30 border-2 border-white/15 text-white" />
+                            <Label htmlFor="progressNotes" className="text-sm font-semibold text-white/90">Notes (Optional)</Label>
+                            <Textarea id="progressNotes" value={progressForm.notes} onChange={(e) => setProgressForm({ ...progressForm, notes: e.target.value })} placeholder="Add notes about this progress..." rows={3} className="min-h-[100px] text-sm bg-black/30 border-white/15 text-white rounded-xl" />
                           </div>
                         </>
                       )}
                     </div>
+
+                    {/* Action Buttons Snapped to Content */}
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddProgressModalOpen(false)} className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
+                      <Button type="submit" disabled={!selectedGoalForProgress || submitting} className="px-6 h-11 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                        {submitting ? 'Logging...' : 'Log Progress'}
+                      </Button>
+                    </div>
                   </form>
                 </div>
-
-                {/* Footer - shrink-0 */}
-                <div className="shrink-0 p-8 border-t border-white/10 bg-zinc-950/20">
-                  <div className="flex justify-end gap-4">
-                    <Button type="button" variant="ghost" onClick={() => setIsAddProgressModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
-                    <Button type="submit" form="log-progress-form" disabled={!selectedGoalForProgress || submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
-                      {submitting ? 'Logging...' : 'Log Progress'}
-                    </Button>
-                  </div>
-                </div>
+              </motion.div>
               </motion.div>
             </>
           )}

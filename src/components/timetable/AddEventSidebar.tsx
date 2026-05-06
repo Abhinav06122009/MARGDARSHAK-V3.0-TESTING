@@ -196,7 +196,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
+            className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 text-xl text-white font-bold">
@@ -215,31 +215,31 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
               </Button>
             </div>
             
-            <div className="flex-grow overflow-y-auto p-6">
-              <form id="event-form" onSubmit={handleSubmit} className="space-y-6 p-1">
+            <div className="p-6">
+              <form id="event-form" onSubmit={handleSubmit} className="space-y-4 p-1">
                 {/* Basic Event Information */}
                 <div className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                  <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
-                    <BookOpen className="w-7 h-7 text-cyan-300" /> Event Information
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400">
+                    <BookOpen className="w-6 h-6 text-cyan-300" /> Event Information
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="text-base font-semibold text-white/90">Event Title *</Label>
+                      <Label htmlFor="title" className="text-sm font-semibold text-white/90">Event Title *</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="e.g., Advanced Data Structures"
                         required
-                        className="text-base bg-black/30 border border-white/15 rounded-xl text-white"
+                        className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11"
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="day" className="text-base font-semibold text-white/90">Day *</Label>
+                      <Label htmlFor="day" className="text-sm font-semibold text-white/90">Day *</Label>
                       <Select value={formData.day.toString()} onValueChange={(value) => setFormData({ ...formData, day: parseInt(value) })}>
-                        <SelectTrigger className="text-base bg-black/30 border-2 border-white/15 text-white rounded-xl">
+                        <SelectTrigger className="text-sm bg-black/30 border-2 border-white/15 text-white rounded-xl h-11">
                           <SelectValue placeholder="Select day" />
                         </SelectTrigger>
                         <SelectContent className="bg-black/60 backdrop-blur-xl border-white/20 text-white">
@@ -252,83 +252,81 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-base font-semibold text-white/90">Description</Label>
+                    <Label htmlFor="description" className="text-sm font-semibold text-white/90">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Provide detailed information about your event..."
-                      className="min-h-[120px] text-base resize-none bg-black/30 border border-white/15 rounded-xl text-white"
+                      className="min-h-[100px] text-sm resize-none bg-black/30 border border-white/15 rounded-xl text-white"
                     />
                   </div>
                 </div>
 
                 {/* Schedule & Location */}
                 <div className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                  <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">
-                    <Clock className="w-7 h-7" /> Schedule & Location
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">
+                    <Clock className="w-6 h-6" /> Schedule & Location
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="start_time" className="text-base font-semibold text-white/90">Start Time *</Label>
-                      <Input id="start_time" type="time" value={formData.start_time} onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="start_time" className="text-sm font-semibold text-white/90">Start Time *</Label>
+                      <Input id="start_time" type="time" value={formData.start_time} onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="end_time" className="text-base font-semibold text-white/90">End Time *</Label>
-                      <Input id="end_time" type="time" value={formData.end_time} onChange={(e) => setFormData({ ...formData, end_time: e.target.value })} className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="end_time" className="text-sm font-semibold text-white/90">End Time *</Label>
+                      <Input id="end_time" type="time" value={formData.end_time} onChange={(e) => setFormData({ ...formData, end_time: e.target.value })} className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="location" className="text-base font-semibold text-white/90">Location</Label>
-                      <Input id="location" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="e.g., Computer Lab 3" className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="location" className="text-sm font-semibold text-white/90">Location</Label>
+                      <Input id="location" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="e.g., Computer Lab 3" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="instructor" className="text-base font-semibold text-white/90">Instructor</Label>
-                      <Input id="instructor" value={formData.instructor} onChange={(e) => setFormData({ ...formData, instructor: e.target.value })} placeholder="e.g., Dr. Sarah Johnson" className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="instructor" className="text-sm font-semibold text-white/90">Instructor</Label>
+                      <Input id="instructor" value={formData.instructor} onChange={(e) => setFormData({ ...formData, instructor: e.target.value })} placeholder="e.g., Dr. Sarah Johnson" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                   </div>
                 </div>
 
                 {/* Additional Details */}
                 <div className="space-y-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                  <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
-                    <GraduationCap className="w-7 h-7" /> Additional Details
+                  <h3 className="text-xl font-extrabold text-white mb-2 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                    <GraduationCap className="w-6 h-6" /> Additional Details
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="course_code" className="text-base font-semibold text-white/90">Course Code</Label>
-                      <Input id="course_code" value={formData.course_code} onChange={(e) => setFormData({ ...formData, course_code: e.target.value })} placeholder="e.g., CS401" className="text-base font-mono bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="course_code" className="text-sm font-semibold text-white/90">Course Code</Label>
+                      <Input id="course_code" value={formData.course_code} onChange={(e) => setFormData({ ...formData, course_code: e.target.value })} placeholder="e.g., CS401" className="text-sm font-mono bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="credits" className="text-base font-semibold text-white/90">Credits</Label>
-                      <Input id="credits" type="number" value={formData.credits || ''} onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || undefined })} placeholder="e.g., 3" className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                      <Label htmlFor="credits" className="text-sm font-semibold text-white/90">Credits</Label>
+                      <Input id="credits" type="number" value={formData.credits || ''} onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || undefined })} placeholder="e.g., 3" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tags" className="text-base font-semibold text-white/90">Tags</Label>
-                    <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g., important, project (comma separated)" className="text-base bg-black/30 border border-white/15 rounded-xl text-white" />
+                    <Label htmlFor="tags" className="text-sm font-semibold text-white/90">Tags</Label>
+                    <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g., important, project (comma separated)" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                   </div>
-                  <div className="pt-4 border-t border-white/20">
-                    <Button type="button" variant="outline" onClick={handleSuggestTime} className="w-full text-base text-yellow-300 border-yellow-400/50 hover:bg-yellow-500/10 hover:text-yellow-200">
-                      <Zap className="w-5 h-5 mr-2" /> AI: Suggest an Optimal Time
+                  <div className="pt-2">
+                    <Button type="button" variant="outline" onClick={handleSuggestTime} className="w-full text-xs text-yellow-300 border-yellow-400/50 hover:bg-yellow-500/10 hover:text-yellow-200 h-10">
+                      <Zap className="w-4 h-4 mr-2" /> AI: Suggest an Optimal Time
                     </Button>
                   </div>
                 </div>
-                
+
+                {/* Action Buttons Snapped to Content */}
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                  <Button type="button" variant="ghost" onClick={onClose} className="px-6 h-11 text-sm text-white/80 hover:bg-white/10 rounded-xl">
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="px-6 h-11 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20">
+                    <Save className="w-4 h-4 mr-2" /> {editingEvent ? 'Update' : 'Create'} Event
+                  </Button>
+                </div>
               </form>
             </div>
-
-            {/* Sticky Footer Action Bar */}
-            <div className="shrink-0 p-6 border-t border-white/10 bg-zinc-950/80 backdrop-blur-md">
-              <div className="flex justify-end gap-4">
-                <Button type="button" variant="ghost" onClick={onClose} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">
-                  Cancel
-                </Button>
-                <Button type="submit" form="event-form" className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20">
-                  <Save className="w-5 h-5 mr-2" /> {editingEvent ? 'Update' : 'Create'} Event
-                </Button>
-              </div>
-            </div>
+          </motion.div>
           </motion.div>
         </>
       )}
