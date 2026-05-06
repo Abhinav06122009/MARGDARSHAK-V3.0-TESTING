@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Canonicalize user_type for Supabase RLS
           let canonicalRole = 'student';
           if (role.some(r => ['superadmin', 'owner'].includes(r.toLowerCase()))) canonicalRole = 'superadmin';
-          else if (role.some(r => ['admin', 'ceo', 'manager'].includes(r.toLowerCase()))) canonicalRole = 'admin';
+          else if (role.some(r => ['admin', 'ceo', 'manager', 'moderator', 'official', 'sentinel'].includes(r.toLowerCase()))) canonicalRole = 'admin';
           else if (role.some(r => r.toLowerCase() === 'bdo')) canonicalRole = 'bdo';
           else if (role.some(r => r.toLowerCase().includes('premium'))) canonicalRole = 'premium';
 
