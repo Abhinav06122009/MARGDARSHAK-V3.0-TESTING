@@ -1586,9 +1586,6 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-
-      </div>
-
       {/* Floating Action Button */}
       <motion.button
         whileHover={{ scale: 1.1, rotate: 90 }}
