@@ -147,7 +147,14 @@ export const useAdmin = () => {
         last_name: m.last_name || `#${m.id.slice(0,4)}`,
         subject: m.subject || 'INTERNAL SUPPORT TICKET'
       }));
-      
+      console.log(`[useAdmin] Data Streams Synced: 
+        Users: ${usersRes.data?.length || 0}
+        Threats: ${threatsRes.data?.length || 0}
+        Reports: ${reportsRes.data?.length || 0}
+        Tickets: ${supportTkts.length}
+        ContactMsgs: ${contactMsgs.length}
+      `);
+
       setTickets([...contactMsgs, ...supportTkts]
         .sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
         .slice(0, 50)

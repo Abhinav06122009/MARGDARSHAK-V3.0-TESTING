@@ -3,6 +3,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { LifeBuoy, Loader2, CheckCircle2, Clock, AlertCircle, Sparkles, Zap, MessageSquare, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const SupportCenter = () => {
@@ -49,10 +50,21 @@ const SupportCenter = () => {
             <p className="text-[10px] font-black text-zinc-600 tracking-[0.4em] uppercase mt-4 opacity-60 italic">Orchestrating user escalations and mission-critical support flows.</p>
           </div>
           
-          <div className="flex items-center gap-4 relative z-10">
+          <div className="flex flex-col items-end gap-4 relative z-10">
+            <Button 
+              onClick={() => refresh()} 
+              variant="outline"
+              className="h-10 bg-white/5 border-white/10 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
+            >
+              <Zap className="w-3 h-3 text-emerald-500" />
+              Force Sync
+            </Button>
             <div className="px-6 py-3 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center gap-4 shadow-2xl group">
               <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.6)]" />
-              <span className="text-[10px] font-black text-white uppercase tracking-widest group-hover:text-emerald-500 transition-colors">{activeTickets.length} Active Missions</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white uppercase tracking-widest group-hover:text-emerald-500 transition-colors">{activeTickets.length} Active Missions</span>
+                <span className="text-[7px] font-black text-zinc-600 uppercase tracking-widest">({tickets.length} total signals)</span>
+              </div>
             </div>
           </div>
         </div>
