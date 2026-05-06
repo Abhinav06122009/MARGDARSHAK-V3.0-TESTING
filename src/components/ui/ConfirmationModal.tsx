@@ -18,7 +18,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }: { isO
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="bg-black/50 border border-white/20 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            className="bg-zinc-950/90 backdrop-blur-3xl border border-white/20 rounded-2xl p-8 max-w-md w-full shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>

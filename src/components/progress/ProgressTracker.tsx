@@ -1645,13 +1645,13 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               />
               <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="relative w-full max-w-2xl h-fit max-h-[90vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
               >
-                <div className="flex items-center justify-between p-10 border-b border-white/5 bg-zinc-950/20">
+                {/* Header - shrink-0 */}
+                <div className="flex items-center justify-between p-8 border-b border-white/5 bg-zinc-950/20 shrink-0">
                   <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
                     <div className="p-3 bg-white/10 rounded-2xl border border-white/10">
                       <Target className="w-6 h-6 text-white" />
@@ -1662,8 +1662,10 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                     <X className="w-6 h-6" />
                   </Button>
                 </div>
-                <div className="overflow-y-auto p-6">
-                  <form onSubmit={handleSubmitGoal} className="space-y-8 p-1">
+
+                {/* Body - flex-1 overflow-y-auto */}
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                  <form id="add-goal-form" onSubmit={handleSubmitGoal} className="space-y-8 p-1">
                     <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
                       <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
                         <BookOpen className="w-7 h-7" /> Goal Information
@@ -1726,14 +1728,17 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex justify-end gap-4 pt-6 mt-4 border-t border-white/10">
-                      <Button type="button" variant="ghost" onClick={() => setIsAddGoalModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10">Cancel</Button>
-                      <Button type="submit" disabled={submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50">
-                        {submitting ? 'Saving...' : (editingGoal ? 'Update Goal' : 'Create Goal')}
-                      </Button>
-                    </div>
                   </form>
+                </div>
+
+                {/* Footer - shrink-0 */}
+                <div className="shrink-0 p-8 border-t border-white/10 bg-zinc-950/20">
+                  <div className="flex justify-end gap-4">
+                    <Button type="button" variant="ghost" onClick={() => setIsAddGoalModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
+                    <Button type="submit" form="add-goal-form" disabled={submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                      {submitting ? 'Saving...' : (editingGoal ? 'Update Goal' : 'Create Goal')}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </>
@@ -1752,13 +1757,13 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               />
               <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="relative w-full max-w-2xl h-fit max-h-[90vh] my-auto mr-4 bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden"
               >
-                <div className="flex items-center justify-between p-10 border-b border-white/5 bg-zinc-950/20">
+                {/* Header - shrink-0 */}
+                <div className="flex items-center justify-between p-8 border-b border-white/5 bg-zinc-950/20 shrink-0">
                   <div className="flex items-center gap-4 text-2xl text-white font-black tracking-tighter uppercase">
                     <div className="p-3 bg-emerald-500/20 rounded-2xl border border-emerald-500/20">
                       <Activity className="w-6 h-6 text-emerald-400" />
@@ -1769,8 +1774,10 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                     <X className="w-6 h-6" />
                   </Button>
                 </div>
-                <div className="overflow-y-auto p-6">
-                  <form onSubmit={handleAddProgress} className="space-y-8 p-1">
+
+                {/* Body - flex-1 overflow-y-auto */}
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                  <form id="log-progress-form" onSubmit={handleAddProgress} className="space-y-8 p-1">
                     <div className="space-y-6 p-6 bg-black/20 rounded-2xl border border-white/10">
                       <h3 className="text-2xl font-extrabold text-white mb-4 flex items-center gap-3">
                         <TrendingUp className="w-7 h-7" /> Log Details
@@ -1797,14 +1804,17 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                         </>
                       )}
                     </div>
-
-                    <div className="flex justify-end gap-4 pt-6 mt-4 border-t border-white/10">
-                      <Button type="button" variant="ghost" onClick={() => setIsAddProgressModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10">Cancel</Button>
-                      <Button type="submit" disabled={!selectedGoalForProgress || submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50">
-                        {submitting ? 'Logging...' : 'Log Progress'}
-                      </Button>
-                    </div>
                   </form>
+                </div>
+
+                {/* Footer - shrink-0 */}
+                <div className="shrink-0 p-8 border-t border-white/10 bg-zinc-950/20">
+                  <div className="flex justify-end gap-4">
+                    <Button type="button" variant="ghost" onClick={() => setIsAddProgressModalOpen(false)} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">Cancel</Button>
+                    <Button type="submit" form="log-progress-form" disabled={!selectedGoalForProgress || submitting} className="px-8 py-3 text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl disabled:opacity-50 shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                      {submitting ? 'Logging...' : 'Log Progress'}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </>

@@ -1396,8 +1396,8 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                   className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/80 backdrop-blur-3xl border-l border-white/10 z-[101] shadow-2xl overflow-hidden flex flex-col"
                 >
-                  {/* Form Header */}
-                  <div className="p-8 border-b border-white/5 relative">
+                  {/* Form Header - shrink-0 */}
+                  <div className="p-8 border-b border-white/5 relative shrink-0">
                     <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]" />
                     <div className="relative z-10 flex items-center justify-between">
                       <div>
@@ -1420,140 +1420,144 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                     </div>
                   </div>
 
-                  {/* Form Body */}
-                  <div className="flex-1 overflow-y-auto p-8 space-y-10">
-                    <div className="space-y-6">
-                      <div className="space-y-3">
-                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Task Title</Label>
-                        <Input
-                          value={formData.title}
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                          placeholder="e.g., Quantum Mechanics Problem Set #4"
-                          className="h-16 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 text-lg font-bold placeholder:text-zinc-700 transition-all duration-300"
-                        />
-                      </div>
-
-                      <div className="space-y-3 relative group">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Context & Description</Label>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!formData.title) {
-                                toast({ title: "Title Required", description: "Please enter a title for AI to generate a description.", variant: "destructive" });
-                                return;
-                              }
-                              setIsSubmitting(true);
-                              try {
-                                const userTier = authUser?.publicMetadata?.subscription?.tier || authUser?.publicMetadata?.tier || 'free';
-                                const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { 
-                                  tier: userTier,
-                                  task: 'tasks'
-                                });
-                                setFormData({ ...formData, description: desc });
-                                toast({ title: "AI Generation Complete", description: "AI has optimized your task description." });
-                              } catch (e: any) {
-                                toast({ title: "AI Error", description: e.message, variant: "destructive" });
-                              } finally {
-                                setIsSubmitting(false);
-                              }
-                            }}
-                            className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 rounded-lg border border-indigo-500/30 transition-all group/ai"
-                          >
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-400 group-hover/ai:scale-125 transition-transform" />
-                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">AI Assistant</span>
-                          </button>
+                  {/* Form Body - flex-1 overflow-y-auto */}
+                  <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                    <form id="task-form" onSubmit={handleSubmit} className="space-y-10">
+                      <div className="space-y-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Task Title</Label>
+                          <Input
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            placeholder="e.g., Quantum Mechanics Problem Set #4"
+                            className="h-16 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 text-lg font-bold placeholder:text-zinc-700 transition-all duration-300"
+                          />
                         </div>
-                        <Textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Detailed strategy for this workload..."
-                          className="min-h-[150px] bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 py-4 text-zinc-300 leading-relaxed placeholder:text-zinc-700 transition-all duration-300 resize-none"
-                        />
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3 relative group">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Context & Description</Label>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!formData.title) {
+                                  toast({ title: "Title Required", description: "Please enter a title for AI to generate a description.", variant: "destructive" });
+                                  return;
+                                }
+                                setIsSubmitting(true);
+                                try {
+                                  const userTier = authUser?.publicMetadata?.subscription?.tier || authUser?.publicMetadata?.tier || 'free';
+                                  const desc = await modelRouter.complete(`Generate a professional and detailed study task description for: ${formData.title}. Focus on actionable steps and learning objectives. Keep it under 100 words.`, { 
+                                    tier: userTier,
+                                    task: 'tasks'
+                                  });
+                                  setFormData({ ...formData, description: desc });
+                                  toast({ title: "AI Generation Complete", description: "AI has optimized your task description." });
+                                } catch (e: any) {
+                                  toast({ title: "AI Error", description: e.message, variant: "destructive" });
+                                } finally {
+                                  setIsSubmitting(false);
+                                }
+                              }}
+                              className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 rounded-lg border border-indigo-500/30 transition-all group/ai"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-indigo-400 group-hover/ai:scale-125 transition-transform" />
+                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">AI Assistant</span>
+                            </button>
+                          </div>
+                          <Textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Detailed strategy for this workload..."
+                            className="min-h-[150px] bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 py-4 text-zinc-300 leading-relaxed placeholder:text-zinc-700 transition-all duration-300 resize-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Due Date</Label>
+                          <Input
+                            type="date"
+                            value={formData.due_date}
+                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold text-white transition-all"
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Priority</Label>
+                          <Select
+                            value={formData.priority}
+                            onValueChange={(val) => setFormData({ ...formData, priority: val as any })}
+                          >
+                            <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
+                              <SelectValue placeholder="Priority" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                              <SelectItem value="low">Low Priority</SelectItem>
+                              <SelectItem value="medium">Medium Priority</SelectItem>
+                              <SelectItem value="high">High Priority</SelectItem>
+                              <SelectItem value="urgent">Urgent (SOS)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Academic Category</Label>
+                          <Select
+                            value={formData.category}
+                            onValueChange={(val) => setFormData({ ...formData, category: val as any })}
+                          >
+                            <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
+                              <SelectValue placeholder="Category" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                              {taskService.getTaskCategories().map(cat => (
+                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Link Course</Label>
+                          <Select
+                            value={formData.course_id || 'none'}
+                            onValueChange={(val) => setFormData({ ...formData, course_id: val === 'none' ? null : val })}
+                          >
+                            <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
+                              <SelectValue placeholder="Link a Course" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                              <SelectItem value="none">Independent Task</SelectItem>
+                              {courses.map(course => (
+                                <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
                       <div className="space-y-3">
-                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Due Date</Label>
+                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Estimated Time (Minutes)</Label>
                         <Input
-                          type="date"
-                          value={formData.due_date}
-                          onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                          type="number"
+                          value={formData.estimated_time || ''}
+                          onChange={(e) => setFormData({ ...formData, estimated_time: e.target.value ? parseInt(e.target.value) : null })}
+                          placeholder="e.g. 60"
                           className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold text-white transition-all"
                         />
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Priority</Label>
-                        <Select
-                          value={formData.priority}
-                          onValueChange={(val) => setFormData({ ...formData, priority: val as any })}
-                        >
-                          <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
-                            <SelectValue placeholder="Priority" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                            <SelectItem value="low">Low Priority</SelectItem>
-                            <SelectItem value="medium">Medium Priority</SelectItem>
-                            <SelectItem value="high">High Priority</SelectItem>
-                            <SelectItem value="urgent">Urgent (SOS)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Academic Category</Label>
-                        <Select
-                          value={formData.category}
-                          onValueChange={(val) => setFormData({ ...formData, category: val as any })}
-                        >
-                          <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
-                            <SelectValue placeholder="Category" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                            {taskService.getTaskCategories().map(cat => (
-                              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Link Course</Label>
-                        <Select
-                          value={formData.course_id || 'none'}
-                          onValueChange={(val) => setFormData({ ...formData, course_id: val === 'none' ? null : val })}
-                        >
-                          <SelectTrigger className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold">
-                            <SelectValue placeholder="Link a Course" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                            <SelectItem value="none">Independent Task</SelectItem>
-                            {courses.map(course => (
-                              <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label className="text-xs font-black text-zinc-500 uppercase tracking-widest ml-1">Estimated Time (Minutes)</Label>
-                      <Input
-                        type="number"
-                        value={formData.estimated_time || ''}
-                        onChange={(e) => setFormData({ ...formData, estimated_time: e.target.value ? parseInt(e.target.value) : null })}
-                        placeholder="e.g. 60"
-                        className="h-14 bg-white/5 border-2 border-white/5 focus:border-indigo-500/50 rounded-2xl px-6 font-bold text-white transition-all"
-                      />
-                    </div>
+                    </form>
                   </div>
 
-                  {/* Form Footer */}
-                  <div className="p-8 border-t border-white/5 bg-zinc-900/40">
+                  {/* Form Footer - shrink-0 */}
+                  <div className="p-8 border-t border-white/5 bg-zinc-900/40 shrink-0">
                     <div className="flex gap-4">
                       <Button
+                        type="button"
                         onClick={() => setIsSheetOpen(false)}
                         variant="ghost"
                         className="flex-1 h-16 rounded-2xl font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/5"
@@ -1561,8 +1565,9 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                         Discard Changes
                       </Button>
                       <Button
+                        type="submit"
+                        form="task-form"
                         disabled={isSubmitting || !formData.title}
-                        onClick={handleSubmit}
                         className="flex-[2] h-16 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(79,70,229,0.3)] hover:shadow-[0_0_60px_rgba(79,70,229,0.5)] transition-all duration-500 disabled:opacity-50"
                       >
                         {isSubmitting ? (

@@ -36,7 +36,7 @@ const GoalFocusView: React.FC<GoalFocusViewProps> = ({ goal, entries, onClose })
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
         className="relative w-full max-w-4xl h-[90vh] bg-black/50 border border-white/20 rounded-3xl shadow-2xl flex flex-col"
       >
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
           <h2 className="text-3xl font-bold text-white">{goal.title}</h2>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-white/70 hover:text-white">
             <X className="w-6 h-6" />

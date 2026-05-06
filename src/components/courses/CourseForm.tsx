@@ -49,7 +49,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
             className="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-zinc-950 border-l border-white/10 z-[101] shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 backdrop-blur-xl">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 backdrop-blur-xl shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-white tracking-tight">
                   {editingCourse ? 'Edit Course' : 'Create New Course'}
@@ -193,7 +193,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-6 bg-zinc-900/50 border-t border-white/5 flex gap-3">
+            <div className="p-6 bg-zinc-900/50 border-t border-white/5 flex gap-3 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
