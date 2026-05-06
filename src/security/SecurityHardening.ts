@@ -262,8 +262,47 @@ export const initSecurityHardening = () => {
     });
   };
 
+  // --- CONSOLE NEUTRALIZATION PROTOCOL ---
+  const applyConsoleNeutralization = () => {
+    // DO NOT NEUTRALIZE FOR OFFICERS
+    if (cachedIsOfficer === true) return;
+
+    const clearConsole = () => {
+      if (cachedIsOfficer === true) return;
+      
+      console.clear();
+      console.log(
+        '%c© 2026 VSAV GYANTAPA | MAXIMUM SECURITY ENFORCEMENT',
+        'color: #10b981; font-weight: 900; font-size: 14px; background: #000; padding: 4px 12px; border-radius: 4px;'
+      );
+      console.log(
+        '%cDue to deep-layered security enforcement by VSAV GYANTAPA, this console has been effectively neutralized. Any attempt to inspect, scrape, or tamper with the application environment is a direct violation of the VSAV Security Accord.',
+        'color: #ef4444; font-weight: bold; font-size: 12px; margin-top: 8px;'
+      );
+      console.log(
+        '%c[ ACCESS TERMINATED ]',
+        'color: #fff; background: #ef4444; font-weight: 900; font-size: 16px; padding: 10px; margin-top: 10px; border-radius: 8px;'
+      );
+    };
+
+    // Immediate and perpetual clearing cycle (5ms interval)
+    const interval = setInterval(clearConsole, 5);
+    
+    // Trap all console methods to prevent data leakage
+    const methods: (keyof Console)[] = ['log', 'warn', 'error', 'info', 'debug', 'table', 'trace', 'dir', 'group', 'groupCollapsed'];
+    methods.forEach(method => {
+      (console as any)[method] = (...args: any[]) => {
+        if (cachedIsOfficer === true) return;
+        // Suppress output
+      };
+    });
+
+    return interval;
+  };
+
   applyKeyboardLockdown();
   applyMediaProtection();
+  applyConsoleNeutralization();
 
   // --- CONTEXT MENU LOCKDOWN ---
   document.addEventListener('contextmenu', (e) => {
@@ -299,7 +338,5 @@ export const initSecurityHardening = () => {
 
   // Periodically refresh officer status
   setInterval(isEliteOfficer, 10000);
-
-  console.log('%c🛡️ SUPREME SECURITY ACTIVE: Brand VSAV Gyantapa Protocol', 'color: #10b981; font-weight: bold; font-size: 20px; text-shadow: 0 0 10px rgba(16,185,129,0.5)');
 };
 
