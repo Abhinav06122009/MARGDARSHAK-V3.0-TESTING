@@ -122,14 +122,24 @@ export const AmbientSoundPlayer: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
 
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="fixed z-[999999] bottom-[110px] left-6" style={{ position: 'fixed' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
         drag dragMomentum={false}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ 
+          y: scrollY * 0.05, // Dramatic parallax that moves WITH the scroll
+          opacity: 1
+        }}
+        transition={{ type: 'spring', stiffness: 200, damping: 40 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <div className={`flex flex-col bg-[#1A1A1A]/80 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[360px]' : 'w-auto'}`}>

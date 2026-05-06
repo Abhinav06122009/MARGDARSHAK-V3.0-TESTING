@@ -97,14 +97,24 @@ export const GlobalQuickActions: React.FC = () => {
     return groups;
   }, [filteredActions]);
 
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (!session) return null;
 
   return (
     <div className="fixed bottom-6 left-6 z-[999999]" style={{ position: 'fixed' }}>
       <motion.div
         drag dragMomentum={false}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ 
+          y: scrollY * 0.05, // Dramatic parallax that moves WITH the scroll
+          opacity: 1 
+        }}
+        transition={{ type: 'spring', stiffness: 200, damping: 40 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
