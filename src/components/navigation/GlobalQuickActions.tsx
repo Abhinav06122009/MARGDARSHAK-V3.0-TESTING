@@ -81,6 +81,13 @@ export const GlobalQuickActions: React.FC = () => {
     );
   }, [query]);
 
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const categories = useMemo(() => {
     const groups: Record<string, Action[]> = {};
     filteredActions.forEach(a => {
@@ -96,8 +103,8 @@ export const GlobalQuickActions: React.FC = () => {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
       <motion.div
         drag dragMomentum={false}
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        animate={{ y: Math.sin(scrollY * 0.01) * 4 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
