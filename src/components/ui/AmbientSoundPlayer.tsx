@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Music, CloudRain, Coffee, Headphones, Play, Pause,
   Volume2, VolumeX, ChevronUp, ChevronDown, X, Brain,
@@ -46,18 +46,22 @@ export const AmbientSoundPlayer: React.FC = () => {
   const { user } = useContext(AuthContext);
   const [burnout, setBurnout] = useState<BurnoutAlert | null>(null);
 
-  const { scrollY } = useScroll();
   const lastScrollY = useRef(0);
 
   // Auto hide/show on scroll
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const diff = latest - lastScrollY.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0 && latest > 100) setIsVisible(false);
-      else setIsVisible(true);
-      lastScrollY.current = latest;
-    }
-  });
+  useEffect(() => {
+    const handleScroll = () => {
+      const latest = window.scrollY;
+      const diff = latest - lastScrollY.current;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0 && latest > 100) setIsVisible(false);
+        else setIsVisible(true);
+        lastScrollY.current = latest;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
