@@ -128,25 +128,40 @@ const AIWidgetWrapper = () => {
 import GlobalFooter from '@/components/layout/GlobalFooter';
 
 const GlobalSecurityGuard = ({ children }: { children: React.ReactNode }) => {
-  const { isBlocked, blockedReason } = useContext(AuthContext);
+  const { isBlocked, blockedReason, user } = useContext(AuthContext);
   const [isPermanentlyBanned, setIsPermanentlyBanned] = useState(false);
   const [banReason, setBanReason] = useState('');
 
+  // Determine if the user is an "Officer" (Admin/CEO/etc) from AuthContext
+  const isOfficer = useMemo(() => {
+    return user?.profile?.user_type?.toLowerCase().match(/admin|superadmin|owner|sentinel|official|ceo|manager|moderator/);
+  }, [user]);
+
   useEffect(() => {
     const handleBan = (e: any) => {
+      // Officers are immune to local bans
+      if (isOfficer) {
+        console.log('🛡️ [SECURITY] Officer immune to ban event.');
+        return;
+      }
       setIsPermanentlyBanned(true);
       setBanReason(e.detail?.type || 'Security Policy Violation');
-      // Force immediate session storage lock
       sessionStorage.setItem('mg_session_locked', 'true');
     };
 
     if (sessionStorage.getItem('mg_session_locked') === 'true') {
-      setIsPermanentlyBanned(true);
+      if (isOfficer) {
+        console.log('🛡️ [SECURITY] Officer bypass: Clearing existing session lock.');
+        sessionStorage.removeItem('mg_session_locked');
+        setIsPermanentlyBanned(false);
+      } else {
+        setIsPermanentlyBanned(true);
+      }
     }
 
     window.addEventListener('security-ban', handleBan);
     return () => window.removeEventListener('security-ban', handleBan);
-  }, []);
+  }, [isOfficer]);
   
   // WHITE-LIST GOOGLE BOTS FROM GLOBAL BLOCK
   const isGoogleBot = () => {

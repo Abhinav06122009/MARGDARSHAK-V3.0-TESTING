@@ -147,6 +147,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (profile?.is_blocked) {
               setIsBlocked(true);
               setBlockedReason(profile.blocked_reason);
+            } else {
+              setIsBlocked(false);
+              setBlockedReason(null);
             }
           } catch (e) {
             console.warn('[AuthContext] Security flag check failed:', e);
