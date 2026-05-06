@@ -177,7 +177,7 @@ const GlobalFooter = React.memo(() => {
         <div className="flex flex-col md:flex-row items-center justify-between py-8 gap-4">
           <div className="flex items-center gap-2">
             <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.4em]">
-              © 2026 MARGDARSHAK. POWERED BY <span className="text-white font-black italic">VSAV GYANTAPA</span>.
+              © 2026 MARGDARSHAK. POWERED BY <a href="https://margdarshan.tech/" target="_blank" rel="noopener noreferrer" className="text-white font-black italic hover:text-emerald-500 transition-colors">VSAV GYANTAPA</a>.
             </p>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-6">
