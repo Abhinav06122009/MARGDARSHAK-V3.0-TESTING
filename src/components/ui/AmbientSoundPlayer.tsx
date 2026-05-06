@@ -121,14 +121,6 @@ export const AmbientSoundPlayer: React.FC = () => {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
-
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <div className="fixed z-[999999] bottom-52 left-12" style={{ position: 'fixed', bottom: '208px', left: '48px' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
