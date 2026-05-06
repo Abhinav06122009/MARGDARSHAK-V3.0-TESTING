@@ -97,13 +97,6 @@ export const GlobalQuickActions: React.FC = () => {
     return groups;
   }, [filteredActions]);
 
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   if (!session) return null;
 
   return (
