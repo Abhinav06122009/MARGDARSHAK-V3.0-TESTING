@@ -392,92 +392,127 @@ Requires standard resolution protocol.
         </div>
       </div>
 
-      {/* EDIT MODAL */}
+      {/* INVESTIGATION SIDEBAR (Harmonized with Timetable Gold Standard) */}
       <AnimatePresence>
         {isEditing && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <>
+            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsEditing(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" 
             />
+            
+            {/* Sidebar Content */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-[3rem] p-12 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden"
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-[101] flex flex-col overflow-y-auto custom-scrollbar"
             >
-              <div className="absolute top-0 right-0 p-8">
-                <button onClick={() => setIsEditing(false)} className="text-zinc-600 hover:text-white transition-colors"><X size={24} /></button>
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">
+                    Case <span className="text-emerald-500">Editor</span>
+                  </h3>
+                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Protocol: MARGDARSHAK-SEC-AI-V4</p>
+                </div>
+                <button 
+                  onClick={() => setIsEditing(false)} 
+                  className="p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <X size={24} />
+                </button>
               </div>
               
-              <div className="space-y-10">
-                <div className="space-y-2">
-                  <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Case <span className="text-emerald-500">Editor</span></h3>
-                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Modify the parameters of this investigation node.</p>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Category Code</label>
-                    <input 
-                      type="text" 
-                      value={editData.category}
-                      onChange={(e) => setEditData({...editData, category: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all uppercase"
-                    />
+              <div className="p-8">
+                <div className="space-y-8">
+                  {/* Category Configuration */}
+                  <div className="space-y-4 p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Shield className="w-5 h-5 text-emerald-500" />
+                      <h4 className="text-[10px] font-black text-white uppercase tracking-widest italic">Anomaly Classification</h4>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Category Code</label>
+                      <input 
+                        type="text" 
+                        value={editData.category}
+                        onChange={(e) => setEditData({...editData, category: e.target.value})}
+                        placeholder="e.g., BRUTE_FORCE_DETECTED"
+                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all uppercase placeholder:text-zinc-800"
+                      />
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Severity Protocol</label>
-                      <select 
-                        value={editData.severity || 'low'}
-                        onChange={(e) => setEditData({...editData, severity: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all"
-                      >
-                        <option value="low">LOW</option>
-                        <option value="medium">MEDIUM</option>
-                        <option value="high">HIGH</option>
-                        <option value="critical">CRITICAL</option>
-                      </select>
+                  {/* Protocol Parameters */}
+                  <div className="space-y-4 p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Activity className="w-5 h-5 text-emerald-500" />
+                      <h4 className="text-[10px] font-black text-white uppercase tracking-widest italic">Operational Metrics</h4>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Operational Status</label>
-                      <select 
-                        value={editData.status || 'open'}
-                        onChange={(e) => setEditData({...editData, status: e.target.value})}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all"
-                      >
-                        <option value="open">OPEN SIGNAL</option>
-                        <option value="resolved">RESOLVED / ARCHIVED</option>
-                      </select>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Severity Protocol</label>
+                        <select 
+                          value={editData.severity || 'low'}
+                          onChange={(e) => setEditData({...editData, severity: e.target.value})}
+                          className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="low">LOW</option>
+                          <option value="medium">MEDIUM</option>
+                          <option value="high">HIGH</option>
+                          <option value="critical">CRITICAL</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-4">Operational Status</label>
+                        <select 
+                          value={editData.status || 'open'}
+                          onChange={(e) => setEditData({...editData, status: e.target.value})}
+                          className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-black focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="open">OPEN SIGNAL</option>
+                          <option value="resolved">RESOLVED / ARCHIVED</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-6">
-                  <button
-                    onClick={editData.id ? handleUpdate : async () => {
-                      setIsSaving(true);
-                      try {
-                        await createInvestigation(editData);
-                        toast.success('Investigation Created');
-                        setIsEditing(false);
-                      } catch (err: any) {
-                        toast.error('Creation failed: ' + err.message);
-                      } finally { setIsSaving(false); }
-                    }}
-                    disabled={isSaving}
-                    className="w-full py-5 bg-emerald-500 text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all flex items-center justify-center gap-3"
-                  >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <Save size={16} />} 
-                    {editData.id ? 'Authorize Updates' : 'Formalize Creation'}
-                  </button>
+                  {/* Actions */}
+                  <div className="pt-6 flex justify-end gap-4 border-t border-white/5">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-8 py-4 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                      Abort
+                    </button>
+                    <button
+                      onClick={editData.id ? handleUpdate : async () => {
+                        setIsSaving(true);
+                        try {
+                          await createInvestigation(editData);
+                          toast.success('Investigation Created');
+                          setIsEditing(false);
+                        } catch (err: any) {
+                          toast.error('Creation failed: ' + err.message);
+                        } finally { setIsSaving(false); }
+                      }}
+                      disabled={isSaving}
+                      className="flex items-center gap-3 px-10 py-4 bg-emerald-500 text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50 shadow-2xl shadow-emerald-500/20"
+                    >
+                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />} 
+                      {editData.id ? 'Authorize Updates' : 'Formalize Creation'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
     </AdminLayout>
