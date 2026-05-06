@@ -146,7 +146,7 @@ export const GlobalQuickActions: React.FC = () => {
           >
             <Search size={16} />
           </motion.button>
-        </motion.div>
+        </div>
       </motion.div>
 
       <AnimatePresence>

@@ -232,7 +232,7 @@ export const AmbientSoundPlayer: React.FC = () => {
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       </motion.div>
       <audio ref={audioRef} src={station.url} loop className="hidden" />
     </div>
