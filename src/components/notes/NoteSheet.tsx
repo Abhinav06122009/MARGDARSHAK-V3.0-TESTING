@@ -131,9 +131,6 @@ export const NoteSheet: React.FC<NoteSheetProps> = ({
               </form>
             </div>
           </motion.div>
-              </form>
-            </div>
-          </motion.div>
         </>
       )}
     </AnimatePresence>

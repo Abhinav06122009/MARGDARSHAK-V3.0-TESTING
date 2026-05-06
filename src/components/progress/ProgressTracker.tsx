@@ -1814,7 +1814,6 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                   </form>
                 </div>
               </motion.div>
-              </motion.div>
             </>
           )}
         </AnimatePresence>

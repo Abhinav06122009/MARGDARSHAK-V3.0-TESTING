@@ -210,7 +210,6 @@ const CourseForm: React.FC<CourseFormProps> = ({
               </form>
             </div>
           </motion.div>
-          </motion.div>
         </>
       )}
     </AnimatePresence>

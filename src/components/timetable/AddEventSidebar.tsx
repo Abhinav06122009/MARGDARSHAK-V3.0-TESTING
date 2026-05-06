@@ -327,7 +327,6 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
               </form>
             </div>
           </motion.div>
-          </motion.div>
         </>
       )}
     </AnimatePresence>

@@ -1582,7 +1582,6 @@ const Tasks: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                     </form>
                   </div>
                 </motion.div>
-                </motion.div>
               </>
             )}
           </AnimatePresence>

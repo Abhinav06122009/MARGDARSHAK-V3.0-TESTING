@@ -285,7 +285,6 @@ const EventForm: React.FC<EventFormProps> = ({
           </form>
         </div>
       </motion.div>
-      </motion.div>
     </div>,
     document.body
   );

@@ -217,9 +217,6 @@ const AddEventModal = ({
               </form>
             </div>
           </motion.div>
-              </form>
-            </div>
-          </motion.div>
         </>
       )}
     </AnimatePresence>
