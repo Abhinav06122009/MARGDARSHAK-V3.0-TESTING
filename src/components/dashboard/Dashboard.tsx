@@ -28,6 +28,7 @@ import { useViewportSections, type ObservedSection } from '@/hooks/useViewportSe
 const StatsGrid = lazy(() => import('./StatsGrid'));
 const TasksPanel = lazy(() => import('./TasksPanel'));
 const AnalyticsPanel = lazy(() => import('./AnalyticsPanel'));
+const QuickActions = lazy(() => import('./QuickActions'));
 const SecurityPanel = lazy(() => import('./SecurityPanel'));
 const AIBriefingWidget = lazy(() => import('./AIBriefingWidget'));
 import UpgradeCard from '@/components/dashboard/UpgradeCard';
@@ -552,6 +553,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ onNavigate }) => {
           </main>
 
           <aside className="xl:col-span-4 flex flex-col gap-6 h-full xl:sticky xl:top-6">
+
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="w-full">
+               <Suspense fallback={<WidgetSkeleton />}>
+                 <QuickActions stats={dashboardStats} onNavigate={onNavigate} />
+               </Suspense>
+            </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }} className="h-48 w-full">
               <Suspense fallback={<WidgetSkeleton />}>
