@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,7 +78,7 @@ const EventForm: React.FC<EventFormProps> = ({
     onSuggestTime();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-8">
       {/* Dynamic Background Blur */}
       <motion.div 
@@ -93,7 +94,7 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="relative w-full max-w-3xl max-h-[85vh] bg-zinc-950/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl max-h-[90vh] bg-zinc-950/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden"
       >
         {/* Glow Effects */}
         <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/20 blur-[100px] pointer-events-none" />
@@ -280,7 +281,8 @@ const EventForm: React.FC<EventFormProps> = ({
           </motion.button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
