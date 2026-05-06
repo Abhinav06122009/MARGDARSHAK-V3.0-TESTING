@@ -262,7 +262,8 @@ const Timetable: React.FC<TimetableProps> = ({ onBack }) => {
     }
   };
 
-  const handleEditEvent = (event: TimetableEvent) => {
+  const handleEditEvent = (event: TimetableEvent, e?: React.MouseEvent) => {
+    if (e) setClickPosition({ x: e.clientX, y: e.clientY });
     setEditingEvent(event);
     // Use spread to ensure all existing data is carried over to the form
     setFormData({

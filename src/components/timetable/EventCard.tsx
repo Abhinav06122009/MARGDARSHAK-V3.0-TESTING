@@ -24,7 +24,7 @@ interface Event {
 
 interface EventCardProps {
   event: Event;
-  onEdit: (event: Event) => void;
+  onEdit: (event: Event, e?: React.MouseEvent) => void;
   onDelete: (id: string, title: string) => void;
   dayIndex?: number;
   onDragStart: (e: React.DragEvent, event: Event) => void;
@@ -108,7 +108,7 @@ const EventCard = ({ event, onEdit, onDelete, dayIndex, onDragStart, onSelect, i
     if (e.ctrlKey || e.metaKey) {
       onSelect(event.id);
     } else {
-      onEdit(event);
+      onEdit(event, e);
     }
   };
 
@@ -201,7 +201,7 @@ const EventCard = ({ event, onEdit, onDelete, dayIndex, onDragStart, onSelect, i
       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 z-[40]">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onEdit(event); }}
+          onClick={(e) => { e.stopPropagation(); onEdit(event, e); }}
           className="p-2 bg-white/10 hover:bg-white/25 rounded-xl border border-white/20 backdrop-blur-md transition-all shadow-lg hover:scale-110 active:scale-95"
         >
           <Edit className="w-3.5 h-3.5 text-white" />

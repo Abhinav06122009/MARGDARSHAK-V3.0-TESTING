@@ -43,36 +43,46 @@ const EventForm: React.FC<EventFormProps> = ({
   const categories = timetableHelpers.getEventCategories();
 
   // Dynamic variants based on click position
-  const sidebarVariants = {
+  const formVariants = {
     hidden: { 
-      x: "100%", 
+      scale: 0.8,
       opacity: 0,
-      scale: 0.9,
-      y: clickPosition ? clickPosition.y - (window.innerHeight / 2) : 0 
     },
     visible: { 
-      x: 0, 
-      opacity: 1,
       scale: 1,
-      y: 0,
+      opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 300,
+        stiffness: 450,
         damping: 30,
-        staggerChildren: 0.08
+        staggerChildren: 0.05
       }
     },
     exit: { 
-      x: "100%", 
-      opacity: 0,
       scale: 0.9,
-      transition: { 
-          type: "spring",
-          stiffness: 350,
-          damping: 35
-      }
+      opacity: 0,
+      transition: { duration: 0.15 }
     }
   };
+
+  // Logic to keep form in viewport
+  const getPosition = () => {
+    if (!clickPosition) return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' };
+    
+    const formWidth = 576; // max-w-xl
+    const formHeight = 800; // estimated
+    
+    let left = clickPosition.x - (formWidth / 2);
+    let top = clickPosition.y - 100; // Offset a bit to show above click
+    
+    // Boundary checks
+    left = Math.max(20, Math.min(left, window.innerWidth - formWidth - 20));
+    top = Math.max(20, Math.min(top, window.innerHeight - formHeight - 20));
+    
+    return { left, top, transform: 'none' };
+  };
+
+  const pos = getPosition();
 
   const handleSuggestTime = () => {
     if (!hasPremiumAccess) {
@@ -92,25 +102,29 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[999999] overflow-hidden flex justify-end items-center p-4">
+    <div className="fixed inset-0 z-[999999] overflow-hidden pointer-events-none">
       {/* Dynamic Background Blur */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-[#000000]/60 backdrop-blur-sm cursor-pointer"
+        className="fixed inset-0 bg-[#000000]/40 backdrop-blur-sm cursor-pointer pointer-events-auto"
       />
 
       <motion.div
-        variants={sidebarVariants}
+        variants={formVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         style={{ 
-          transformOrigin: clickPosition ? `${clickPosition.x}px ${clickPosition.y}px` : 'right center' 
+          position: 'fixed',
+          left: pos.left,
+          top: pos.top,
+          transform: pos.transform,
+          transformOrigin: clickPosition ? `${clickPosition.x - (typeof pos.left === 'number' ? pos.left : 0)}px ${clickPosition.y - (typeof pos.top === 'number' ? pos.top : 0)}px` : 'center center' 
         }}
-        className="relative w-full max-w-xl h-fit max-h-[95vh] my-auto bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.7)] flex flex-col rounded-[2.5rem] overflow-hidden"
+        className="relative w-full max-w-xl h-fit max-h-[90vh] bg-zinc-950/95 backdrop-blur-3xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col rounded-[2.5rem] overflow-hidden pointer-events-auto"
       >
         {/* Animated Glow Border */}
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />

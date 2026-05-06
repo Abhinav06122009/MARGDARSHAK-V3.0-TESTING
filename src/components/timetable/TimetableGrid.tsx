@@ -18,9 +18,9 @@ interface TimetableEvent {
 interface TimetableGridProps {
   currentWeekDates: Date[];
   events: TimetableEvent[];
-  onEditEvent: (event: TimetableEvent) => void;
+  onEditEvent: (event: TimetableEvent, e?: React.MouseEvent) => void;
   onDeleteEvent: (id: string, title: string) => void;
-  onDayClick: (day: number) => void;
+  onDayClick: (day: number, e?: React.MouseEvent) => void;
   colorHelpers: any;
   onEventDrop: (eventId: string, newDay: number, newStartTime: string) => void;
   draggedEvent: TimetableEvent | null;
