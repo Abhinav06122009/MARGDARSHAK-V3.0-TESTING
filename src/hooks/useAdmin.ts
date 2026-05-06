@@ -106,13 +106,16 @@ export const useAdmin = () => {
         }
       };
 
+      // MULTI-STREAM FALLBACK: Attempt to fetch from common support table variations
       const [
         usersRes, 
         threatsRes, 
         reportsRes, 
         blockedRes, 
-        contactMessagesRes, 
+        contactMessagesRes,
+        contactFallbackRes,
         supportTicketsRes, 
+        supportFallbackRes,
         settingsRes, 
         moderationRes, 
         analyticsRes
@@ -122,31 +125,35 @@ export const useAdmin = () => {
         fetchWithCatch(supabase.from('admin_reports' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Reports'),
         fetchWithCatch(supabase.from('blocked_users' as any).select('*').limit(50), 'Blocked'),
         fetchWithCatch(supabase.from('contact_messages' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Contacts'),
+        fetchWithCatch(supabase.from('contacts' as any).select('*').order('created_at', { ascending: false }).limit(50), 'ContactsFallback'),
         fetchWithCatch(supabase.from('support_tickets' as any).select('*').order('created_at', { ascending: false }).limit(50), 'Tickets'),
+        fetchWithCatch(supabase.from('tickets' as any).select('*').order('created_at', { ascending: false }).limit(50), 'TicketsFallback'),
         fetchWithCatch(supabase.from('security_settings' as any).select('*').eq('id', 'global').maybeSingle(), 'Settings'),
         fetchWithCatch(supabase.from('moderation_queue' as any).select('*').order('created_at', { ascending: false }).limit(20), 'Moderation'),
         fetchWithCatch(supabase.from('daily_metrics' as any).select('*').order('date', { ascending: false }).limit(7), 'Analytics')
       ]);
 
-      if (usersRes.data) setUsers(usersRes.data);
-      if (threatsRes.data) setThreats(threatsRes.data);
-      if (reportsRes.data) setReports(reportsRes.data);
+      const rawContacts = [...(contactMessagesRes.data || []), ...(contactFallbackRes.data || [])];
+      const rawTickets = [...(supportTicketsRes.data || []), ...(supportFallbackRes.data || [])];
 
-      const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ 
+      const contactMsgs = rawContacts.map((m: any) => ({ 
         ...m, 
         type: 'contact',
         status: m.status || 'pending',
         subject: m.subject || 'PUBLIC CONTACT INQUIRY'
       }));
       
-      const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ 
+      const supportTkts = rawTickets.map((m: any) => ({ 
         ...m, 
         type: 'ticket', 
         status: m.status || 'pending',
         first_name: m.first_name || 'Ticket', 
-        last_name: m.last_name || `#${m.id.slice(0,4)}`,
+        last_name: m.last_name || (m.id ? `#${String(m.id).slice(0,4)}` : '#N/A'),
         subject: m.subject || 'INTERNAL SUPPORT TICKET'
       }));
+      if (usersRes.data) setUsers(usersRes.data);
+      if (threatsRes.data) setThreats(threatsRes.data);
+      if (reportsRes.data) setReports(reportsRes.data);
       console.log(`[useAdmin] Data Streams Synced: 
         Users: ${usersRes.data?.length || 0}
         Threats: ${threatsRes.data?.length || 0}
