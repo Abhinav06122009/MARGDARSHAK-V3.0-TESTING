@@ -949,11 +949,6 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
                 className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
               />
               {/* Sheet Content */}
-              <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-              >
                 <EventForm
                   formData={formData}
                   setFormData={setFormData}
@@ -967,7 +962,6 @@ Return ONLY this JSON: {"eventTitle": "exact event title", "fromDay": <0-6>, "to
                     setEditingEvent(null);
                   }}
                 />
-              </motion.div>
             </>
           )}
         </AnimatePresence>

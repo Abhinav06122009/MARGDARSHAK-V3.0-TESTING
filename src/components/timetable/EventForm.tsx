@@ -55,13 +55,14 @@ const EventForm: React.FC<EventFormProps> = ({
   };
 
   return (
-    <motion.div
-      initial={{ x: "100%" }}
-      animate={{ x: 0 }}
-      exit={{ x: "100%" }}
-      transition={{ type: 'spring', stiffness: 250, damping: 25 }}
-      className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="relative w-full max-w-2xl max-h-[90vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[2.5rem] flex flex-col overflow-hidden"
+      >
       <div className="flex items-center justify-between p-6 border-b border-white/10">
         <div className="flex items-center gap-3 text-xl text-white font-bold">
           <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
@@ -248,7 +249,8 @@ const EventForm: React.FC<EventFormProps> = ({
           </div>
         </form>
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 
