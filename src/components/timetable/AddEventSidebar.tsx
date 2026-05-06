@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Palette, Clock, MapPin, User, BookOpen, TrendingUp, AlertTriangle, Star, GraduationCap, Tag } from 'lucide-react';
+import { X, Save, Palette, Clock, MapPin, User, BookOpen, TrendingUp, AlertTriangle, Star, GraduationCap, Tag, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ interface TimetableEvent {
   attendance_required?: boolean;
   is_exam?: boolean;
   credits?: number;
+  description?: string;
 }
 
 interface AddEventSidebarProps {
@@ -89,6 +90,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
     attendance_required: false,
     is_exam: false,
     credits: undefined,
+    description: '',
   });
 
   const { toast } = useToast();
@@ -110,6 +112,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
         attendance_required: editingEvent.attendance_required || false,
         is_exam: editingEvent.is_exam || false,
         credits: editingEvent.credits || undefined,
+        description: editingEvent.description || '',
       });
     } else {
       setFormData({
@@ -127,6 +130,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
         attendance_required: false,
         is_exam: false,
         credits: undefined,
+        description: '',
       });
     }
   }, [editingEvent, selectedDay]);
@@ -188,15 +192,15 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="gold-sidebar-backdrop"
           />
           {/* Sheet Content */}
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+            className="gold-sidebar"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 text-xl text-white font-bold">
@@ -306,7 +310,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="tags" className="text-sm font-semibold text-white/90">Tags</Label>
-                    <Input id="tags" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} placeholder="e.g., important, project (comma separated)" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
+                    <Input id="tags" value={formData.tags?.join(', ')} onChange={handleTagInputChange} placeholder="e.g., important, project (comma separated)" className="text-sm bg-black/30 border border-white/15 rounded-xl text-white h-11" />
                   </div>
                   <div className="pt-2">
                     <Button type="button" variant="outline" onClick={handleSuggestTime} className="w-full text-xs text-yellow-300 border-yellow-400/50 hover:bg-yellow-500/10 hover:text-yellow-200 h-10">

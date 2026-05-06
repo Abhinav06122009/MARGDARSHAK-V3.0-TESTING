@@ -43,19 +43,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <div className="flex-1">
               {children}
             </div>
-
-            {/* Admin Footer */}
-            <footer className="mt-16 pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em]">
-                  © 2025 <span className="text-white">MARGDARSHAK</span>. PROTOTYPE_v3.0.5
-                </p>
-              </div>
-              <div className="flex items-center gap-3 px-5 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-lg">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                <span className="text-emerald-400 text-[9px] font-black uppercase tracking-[0.3em] italic">Network Core Active</span>
-              </div>
-            </footer>
           </main>
         </ScrollArea>
       </div>

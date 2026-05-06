@@ -19,7 +19,6 @@ import ShortcutsOverlay from '@/components/ui/ShortcutsOverlay';
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
 import { ClerkSupabaseBridge } from '@/contexts/ClerkSupabaseBridge';
 import { courseService } from '@/components/dashboard/courseService';
-import MobileNavbar from '@/components/navigation/MobileNavbar';
 import GlobalQuickActions from '@/components/navigation/GlobalQuickActions';
 // Pages - eagerly loaded (critical path)
 import LandingPage from '@/pages/LandingPage';
@@ -325,16 +324,14 @@ const AppRoutes = () => {
 
         {/* CENTRALIZED PERSISTENT UI LAYER - ANCHORED TO VIEWPORT */}
         {showContent && (
-          <div className="fixed bottom-24 left-8 z-[99999999] pointer-events-none flex flex-col items-start gap-6">
-            <AmbientSoundPlayer />
-            <GlobalQuickActions />
+          <div className="fixed bottom-6 left-6 z-[99999999] pointer-events-none flex items-end gap-4">
+            <div className="pointer-events-auto flex flex-col items-start gap-4">
+              <AmbientSoundPlayer />
+              <GlobalQuickActions />
+            </div>
             
-            {/* Auxiliary fixed elements */}
-            <div className="fixed bottom-0 left-0 z-[99999998] pointer-events-none">
-              <div className="pointer-events-auto">
-                <AIWidgetWrapper />
-                <MobileNavbar />
-              </div>
+            <div className="pointer-events-auto">
+              <AIWidgetWrapper />
             </div>
           </div>
         )}

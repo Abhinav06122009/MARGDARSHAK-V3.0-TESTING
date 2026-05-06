@@ -45,117 +45,7 @@ const FacebookLogo = () => (
   </svg>
 );
 
-const Footer = () => (
-  <footer className="w-full mt-24 border-t border-white/5 relative z-10 overflow-hidden bg-black">
-    <div className="absolute inset-0 pointer-events-none opacity-20">
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.2, 0.1]
-        }}
-        transition={{ duration: 8, repeat: Infinity }}
-        className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px]"
-      />
-    </div>
 
-    <div className="relative max-w-7xl mx-auto px-8 py-16">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-        <div className="space-y-6">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="inline-block"
-          >
-            <h3 className="text-3xl font-black tracking-tighter text-white flex items-center gap-2">
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">MARGDARSHAK</span>
-            </h3>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] mt-1">by VSAV GYANTAPA</p>
-          </motion.div>
-          <p className="text-zinc-400 text-sm leading-relaxed max-w-xs font-medium">
-            Empowering students with AI-driven scheduling and intelligent academic orchestration. Built for the next generation of learners.
-          </p>
-          <div className="flex items-center gap-4">
-            {[
-              { icon: TwitterLogo, href: "https://x.com/gyantappas", label: "Twitter" },
-              { icon: FacebookLogo, href: "https://www.facebook.com/profile.php?id=61584618795158", label: "Facebook" },
-              { icon: linkedinLogo, href: "https://www.linkedin.com/in/vsav-gyantapa-33893a399/", label: "LinkedIn" }
-            ].map((social, i) => (
-              <motion.a
-                key={i}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.2, y: -4, backgroundColor: 'rgba(255,255,255,0.1)' }}
-                whileTap={{ scale: 0.9 }}
-                className="p-3 bg-white/5 rounded-xl border border-white/10 transition-all text-zinc-400 hover:text-white"
-              >
-                <social.icon />
-              </motion.a>
-            ))}
-          </div>
-        </div>
-
-        {[
-          {
-            title: "Platform",
-            links: [
-              { name: "Scheduler", href: "/timetable" },
-              { name: "AI Assistant", href: "/ai-assistant" },
-              { name: "Quiz Gen", href: "/quiz" },
-              { name: "Wellness", href: "/wellness" }
-            ]
-          },
-          {
-            title: "Legal",
-            links: [
-              { name: "Terms of Service", href: "/terms" },
-              { name: "Privacy Policy", href: "/privacy" },
-              { name: "Cookie Policy", href: "/cookies" },
-              { name: "GDPR Compliance", href: "/gdpr" }
-            ]
-          },
-          {
-            title: "Support",
-            links: [
-              { name: "Help Center", href: "/help" },
-              { name: "Contact Us", href: "mailto:support@margdarshan.tech" }
-            ]
-          }
-        ].map((section, i) => (
-          <div key={i} className="space-y-6">
-            <h4 className="text-white font-black text-sm uppercase tracking-widest">{section.title}</h4>
-            <ul className="space-y-4">
-              {section.links.map((link, j) => (
-                <li key={j}>
-                  <Link
-                    to={link.href}
-                    className="text-zinc-500 hover:text-white transition-colors text-sm font-medium flex items-center group"
-                  >
-                    <motion.span
-                      whileHover={{ x: 4 }}
-                      className="flex items-center gap-2"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 opacity-0 group-hover:opacity-100 transition-all" />
-                      {link.name}
-                    </motion.span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-        <p className="text-zinc-500 text-sm font-medium">
-          © 2025 <span className="text-white font-bold">VSAV GYANTAPA</span>. All rights reserved.
-        </p>
-        <div className="flex items-center gap-6">
-          <p className="text-zinc-600 text-xs font-black uppercase tracking-widest">Version 2.4.0-AI</p>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
 
 const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -188,9 +78,10 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     semester: '',
     grade_type: 'assignment',
     notes: '',
-    weight: 1.0,
     is_extra_credit: false,
+    weight: 1.0,
   });
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(true);
 
   const { toast } = useToast();
 
@@ -253,7 +144,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         if (!currentUser) return;
         try {
           await gradeService.bulkDeleteGrades(selectedGrades, currentUser.id);
-          toast({ title: <span className="font-bold text-red-400">Bulk Delete Successful</span>, description: `${selectedGrades.length} grades have been removed.` });
+          toast({ title: "Bulk Delete Successful", description: `${selectedGrades.length} grades have been removed.` });
           setSelectedGrades([]);
           const userGrades = await gradeService.fetchUserGrades(currentUser.id);
           setGrades(userGrades);
@@ -286,7 +177,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast({ title: <span className="font-bold text-green-400">Export Successful</span>, description: `${gradesToExport.length} grades exported to grades.csv.` });
+    toast({ title: "Export Successful", description: `${gradesToExport.length} grades exported to grades.csv.` });
   };
 
   const initializeSecureGrades = async () => {
@@ -324,7 +215,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       setAchievements(achievementResult.all);
 
       toast({
-        title: <span className="font-bold text-emerald-400">Grades Loaded!</span>,
+        title: "Grades Loaded!",
         description: `Welcome back ${user.profile?.full_name}! Your grades are loaded.`,
         icon: <Shield className="text-emerald-400" />
       });
@@ -357,11 +248,11 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       };
 
       if (editingGrade) {
-        await gradeService.updateGrade(editingGrade.id, updatableFormData, currentUser.id);
-        toast({ title: <span className="font-bold text-emerald-400">Grade Updated!</span>, description: `${formData.assignment_name} has been updated.` });
+        await gradeService.updateGrade(editingGrade.id, updatableFormData as GradeFormData, currentUser.id);
+        toast({ title: "Grade Updated!", description: `${formData.assignment_name} has been updated.` });
       } else {
-        await gradeService.createGrade(updatableFormData, currentUser.id);
-        toast({ title: <span className="font-bold text-emerald-400">Grade Created!</span>, description: `${formData.assignment_name} has been added.` });
+        await gradeService.createGrade(updatableFormData as GradeFormData, currentUser.id);
+        toast({ title: "Grade Created!", description: `${formData.assignment_name} has been added.` });
       }
 
       setIsSheetOpen(false);
@@ -379,7 +270,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       if (achievementResult.unlocked.length > 0) {
         achievementResult.unlocked.forEach(achievement => {
           toast({
-            title: <span className="font-bold text-yellow-400">Achievement Unlocked!</span>,
+            title: "Achievement Unlocked!",
             description: `${achievement.name}: ${achievement.description}`,
             icon: <Award className="text-yellow-400" />
           });
@@ -414,7 +305,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         if (!currentUser) return;
         try {
           await gradeService.deleteGrade(gradeId, currentUser.id);
-          toast({ title: <span className="font-bold text-red-400">Grade Deleted</span>, description: `${gradeName} has been removed.` });
+          toast({ title: "Grade Deleted", description: `${gradeName} has been removed.` });
           const userGrades = await gradeService.fetchUserGrades(currentUser.id);
           setGrades(userGrades);
           const stats = gradeService.calculateStats(userGrades);
@@ -551,7 +442,28 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
           <div className="lg:col-span-4 xl:col-span-3">
-            <div className="sticky top-6 space-y-8">
+            <div className="lg:hidden mb-6">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFilterCollapsed(!isFilterCollapsed)}
+                className="w-full h-14 bg-zinc-950/20 border-white/5 text-zinc-400 hover:text-white rounded-2xl flex items-center justify-between px-8"
+              >
+                <div className="flex items-center gap-3">
+                  <Filter className="w-4 h-4" />
+                  <span className="font-black text-[10px] uppercase tracking-widest">Toggle Filters</span>
+                </div>
+                <div className={`w-2 h-2 rounded-full ${isFilterCollapsed ? 'bg-zinc-800' : 'bg-indigo-500 animate-pulse'}`} />
+              </Button>
+            </div>
+            <motion.div 
+              initial={false}
+              animate={{ 
+                height: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'auto' : (isFilterCollapsed ? 0 : 'auto'),
+                opacity: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 1 : (isFilterCollapsed ? 0 : 1),
+                marginBottom: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 0 : (isFilterCollapsed ? 0 : 24)
+              }}
+              className="sticky top-6 space-y-8 overflow-hidden lg:overflow-visible"
+            >
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
                 <Card className="bg-zinc-950/40 backdrop-blur-3xl border-2 border-white/5 rounded-[2.5rem] overflow-hidden">
                   <CardHeader className="bg-white/5 border-b border-white/5">
@@ -646,7 +558,83 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                   ))}
                 </motion.div>
               )}
-              {/* Add table view here if needed */}
+              {viewMode === 'table' && (
+                <motion.div 
+                  key="table" 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  className="bg-zinc-950/20 rounded-[2.5rem] border border-white/5 overflow-hidden"
+                >
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-white/5">
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                            <Checkbox 
+                              checked={selectedGrades.length === filteredGrades.length && filteredGrades.length > 0} 
+                              onCheckedChange={handleSelectAllGrades}
+                              className="h-5 w-5 bg-black/40 border-white/10"
+                            />
+                          </th>
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Assignment</th>
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Subject</th>
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Grade</th>
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Date</th>
+                          <th className="p-6 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {filteredGrades.map((grade) => {
+                          const percentage = (grade.grade / grade.total_points) * 100;
+                          const letterGrade = gradeService.getLetterGrade(percentage);
+                          const gradeColor = gradeService.getGradeColor(percentage);
+                          return (
+                            <tr key={grade.id} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="p-6">
+                                <Checkbox 
+                                  checked={selectedGrades.includes(grade.id)} 
+                                  onCheckedChange={() => handleSelectGrade(grade.id)}
+                                  className="h-5 w-5 bg-black/40 border-white/10"
+                                />
+                              </td>
+                              <td className="p-6">
+                                <div className="font-bold text-white text-sm">{grade.assignment_name}</div>
+                                <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{grade.grade_type}</div>
+                              </td>
+                              <td className="p-6">
+                                <Badge variant="secondary" className="text-[9px] font-black uppercase tracking-widest bg-white/5 text-zinc-400 border-white/5 px-3 py-1">
+                                  {grade.subject}
+                                </Badge>
+                              </td>
+                              <td className="p-6">
+                                <div className="flex items-center gap-3">
+                                  <div className={`text-lg font-black bg-clip-text text-transparent bg-gradient-to-r ${gradeColor}`}>
+                                    {letterGrade}
+                                  </div>
+                                  <div className="text-xs text-zinc-500 font-medium">({percentage.toFixed(0)}%)</div>
+                                </div>
+                              </td>
+                              <td className="p-6 text-sm text-zinc-500 font-medium">
+                                {new Date(grade.date_recorded).toLocaleDateString()}
+                              </td>
+                              <td className="p-6">
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="icon" onClick={() => handleEdit(grade)} className="h-8 w-8 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => handleDelete(grade.id, grade.assignment_name)} className="h-8 w-8 rounded-lg text-red-500/50 hover:text-red-400 hover:bg-red-500/10">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {filteredGrades.length === 0 && (
@@ -674,10 +662,13 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         <AnimatePresence>
           {isSheetOpen && (
             <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSheetOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100]" />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSheetOpen(false)} className="gold-sidebar-backdrop" />
               <motion.div
-                initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: 'spring', stiffness: 300, damping: 35 }}
-                className="fixed top-0 right-0 h-full w-full max-w-2xl bg-zinc-950/80 backdrop-blur-3xl border-l border-white/5 shadow-[0_0_100px_rgba(0,0,0,1)] z-[101] flex flex-col overflow-hidden"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+                transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                className="gold-sidebar"
               >
                 {/* Header Decoration */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 opacity-50" />
@@ -808,7 +799,7 @@ const Grades: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           )}
         </AnimatePresence>
       </div>
-      <Footer />
+      {/* Removed Redundant Footer */}
     </div>
   );
 };

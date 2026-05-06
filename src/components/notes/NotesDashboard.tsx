@@ -121,7 +121,7 @@ export const NotesDashboard: React.FC<NotesDashboardProps> = (props) => {
                                 <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent italic px-2 drop-shadow-[0_10px_30px_rgba(52,211,153,0.3)]">Archive</span>
                                 <Shield className="w-10 h-10 text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.5)]" />
                             </motion.h1>
-                            <p className="text-zinc-400 text-lg font-medium">Welcome back, {currentUser.profile?.full_name}.</p>
+                            <p className="text-zinc-400 text-lg font-medium">Welcome back, {currentUser.profile?.full_name || currentUser.email || 'Scholar'}.</p>
                         </div>
                     </div>
                     <motion.button

@@ -15,11 +15,15 @@ const navItems = [
   { to: '/admin/settings', label: 'System Config', icon: Settings },
 ];
 
-const AdminSidebar = () => {
+interface AdminSidebarProps {
+  isMobile?: boolean;
+}
+
+const AdminSidebar = ({ isMobile }: AdminSidebarProps) => {
   const navigate = useNavigate();
 
   return (
-    <aside className="hidden lg:flex w-72 flex-col p-8 border-r border-white/5 bg-[#050505]/50 backdrop-blur-3xl relative z-20 overflow-hidden">
+    <aside className={`${isMobile ? 'flex' : 'hidden lg:flex'} w-72 h-full flex-col p-8 border-r border-white/5 bg-[#050505]/50 backdrop-blur-3xl relative z-20 overflow-hidden`}>
       <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-emerald-500/10 to-transparent" />
       
       <div className="mb-12 space-y-6">

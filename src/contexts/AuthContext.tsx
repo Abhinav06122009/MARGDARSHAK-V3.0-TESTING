@@ -64,13 +64,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const translatedId = await translateClerkIdToUUID(clerkUser.id);
           console.log('⚡ [AUTH] Identity Translation Success:', translatedId);
           
-          const metadata = clerkUser.publicMetadata || {};
-          const subscription = (metadata.subscription as any) || {};
-          let tier = (subscription.tier || 'free').toLowerCase();
-          const roleArray = Array.isArray(metadata.role) ? metadata.role : [metadata.role || 'student'];
-          const role = roleArray.map(r => String(r).trim().toLowerCase()).join(', ');
+          const metadata = (clerkUser.publicMetadata || {}) as any;
+          const role = (metadata.role || metadata.public?.role || []) as string[];
+          const subscription = (metadata.subscription || metadata.public?.subscription || {}) as any;
           
-          if (role.includes('ceo') || role.includes('admin')) tier = 'premium_elite';
+          let tier = (subscription.tier || 'free').toLowerCase();
+          
+          const isPowerUser = role.some(r => 
+            ['ceo', 'admin', 'superadmin', 'owner', 'manager', 'moderator'].includes(r.toLowerCase())
+          );
+
+          if (isPowerUser) {
+            tier = 'premium_elite';
+          }
+          
+          // Canonicalize user_type for Supabase RLS
+          let canonicalRole = 'student';
+          if (role.some(r => ['superadmin', 'owner'].includes(r.toLowerCase()))) canonicalRole = 'superadmin';
+          else if (role.some(r => ['admin', 'ceo', 'manager'].includes(r.toLowerCase()))) canonicalRole = 'admin';
+          else if (role.some(r => r.toLowerCase() === 'bdo')) canonicalRole = 'bdo';
+          else if (role.some(r => r.toLowerCase().includes('premium'))) canonicalRole = 'premium';
 
           const profileData = {
             id: translatedId,
@@ -78,9 +91,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             full_name: clerkUser.fullName || clerkUser.username || 'Scholar',
             avatar_url: clerkUser.imageUrl,
-            user_type: role,
+            user_type: canonicalRole, // Use canonical role for RLS consistency
             subscription_tier: tier,
-            subscription_status: subscription.status || 'inactive',
+            subscription_status: subscription.status || 'active',
             updated_at: new Date().toISOString()
           };
 
@@ -95,34 +108,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setLoading(false);
 
           // Perform Database Sync
-          try {
-            console.log('[AuthContext] Syncing profile for', clerkUser.id, '->', translatedId);
-            const { error: syncError } = await supabase
-              .from('profiles')
-              .upsert(profileData, { onConflict: 'id' });
+          console.log('[AuthContext] Syncing profile for', clerkUser.id, '->', translatedId);
+          const { error: syncError } = await supabase
+            .from('profiles')
+            .upsert(profileData, { onConflict: 'id' });
 
-            if (syncError) {
-              console.error('[AuthContext] Sync Error:', syncError.message);
-              // Recovery: If there's an ID mismatch or syntax error, attempt email match
-              const isUuidError = syncError.message.toLowerCase().includes('uuid') || syncError.message.toLowerCase().includes('syntax');
-              const isConflict = syncError.message.toLowerCase().includes('unique') || syncError.message.toLowerCase().includes('conflict');
+          if (syncError) {
+            console.error('[AuthContext] Sync Error:', syncError.message);
+            // Recovery: If there's an ID mismatch or syntax error, attempt email match
+            const isUuidError = syncError.message.toLowerCase().includes('uuid') || syncError.message.toLowerCase().includes('syntax');
+            const isConflict = syncError.message.toLowerCase().includes('unique') || syncError.message.toLowerCase().includes('conflict');
+            
+            if (isUuidError || isConflict) {
+              console.log('[AuthContext] Identity mismatch detected. Attempting recovery by email match...');
+              const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ id: translatedId, clerk_id: clerkUser.id, user_type: canonicalRole })
+                .eq('email', profileData.email);
               
-              if (isUuidError || isConflict) {
-                console.log('[AuthContext] Identity mismatch detected. Attempting recovery by email match...');
-                const { error: updateError } = await supabase
-                  .from('profiles')
-                  .update({ id: translatedId, clerk_id: clerkUser.id })
-                  .eq('email', profileData.email);
-                
-                if (!updateError) {
-                  console.log('[AuthContext] Recovery success. Identity harmonized.');
-                } else {
-                  console.error('[AuthContext] Recovery failed:', updateError.message);
-                }
+              if (!updateError) {
+                console.log('[AuthContext] Recovery success. Identity harmonized.');
+              } else {
+                console.error('[AuthContext] Recovery failed:', updateError.message);
               }
-            } else {
-              console.log('[AuthContext] Sync success for', translatedId);
             }
+          } else {
+            console.log('[AuthContext] Sync success for', translatedId);
+          }
           } catch (e) {
             console.error('[AuthContext] Profile sync exception:', e);
           }

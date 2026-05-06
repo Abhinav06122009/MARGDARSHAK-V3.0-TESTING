@@ -505,17 +505,7 @@ const Calculator: React.FC<CalculatorProps> = ({ onBack }) => {
         </div>
       </main>
 
-      <footer className="relative bg-black border-t border-white/5 py-20 px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo" className="w-8 h-8 rounded" />
-              <span className="font-black text-2xl tracking-tighter">MARGDARSHAK</span>
-            </div>
-            <p className="text-zinc-500 text-xs font-black tracking-[0.4em] uppercase">BY VSAV GYANTAPA</p>
-          </div>
-        </div>
-      </footer>
+      {/* Removed Redundant Footer */}
     </div>
   );
 };

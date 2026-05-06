@@ -92,7 +92,7 @@ const EventForm: React.FC<EventFormProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+        className="gold-sidebar-backdrop"
       />
 
       <motion.div
@@ -100,7 +100,7 @@ const EventForm: React.FC<EventFormProps> = ({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-[550px] bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col overflow-y-auto custom-scrollbar pointer-events-auto z-50"
+        className="gold-sidebar"
       >
         {/* Animated Glow Border */}
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />

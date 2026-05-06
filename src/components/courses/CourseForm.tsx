@@ -39,14 +39,14 @@ const CourseForm: React.FC<CourseFormProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="gold-sidebar-backdrop"
           />
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 w-full max-w-xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 z-[101] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
+            className="gold-sidebar"
           >
             {/* Header */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">

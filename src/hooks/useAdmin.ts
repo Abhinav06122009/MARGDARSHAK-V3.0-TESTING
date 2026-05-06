@@ -91,7 +91,21 @@ export const useAdmin = () => {
     setLoading(true);
 
     try {
-      // RESILIENT DATA INGESTION: Query each table with strict limits to prevent monolithic failure
+      // RESILIENT DATA INGESTION: Fetch each stream independently to prevent monolithic failure
+      const fetchWithCatch = async (query: any, name: string) => {
+        try {
+          const res = await query;
+          if (res.error) {
+            console.warn(`⚠️ [ADMIN] ${name} fetch restricted:`, res.error.message);
+            return { data: null, error: res.error };
+          }
+          return res;
+        } catch (e: any) {
+          console.error(`❌ [ADMIN] ${name} fetch fatal:`, e.message);
+          return { data: null, error: e };
+        }
+      };
+
       const [
         usersRes, 
         threatsRes, 
@@ -103,46 +117,39 @@ export const useAdmin = () => {
         moderationRes, 
         analyticsRes
       ] = await Promise.all([
-        (supabase.from('profiles' as any).select('*').limit(100) as any),
-        (supabase.from('security_threats' as any).select('*').order('created_at', { ascending: false }).limit(20) as any),
-        (supabase.from('admin_reports' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
-        (supabase.from('blocked_users' as any).select('*').limit(50) as any),
-        (supabase.from('contact_messages' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
-        (supabase.from('support_tickets' as any).select('*').order('created_at', { ascending: false }).limit(50) as any),
-        (supabase.from('security_settings' as any).select('*').eq('id', 'global').maybeSingle() as any),
-        (supabase.from('moderation_queue' as any).select('*').order('created_at', { ascending: false }).limit(20) as any),
-        (supabase.from('daily_metrics' as any).select('*').order('date', { ascending: false }).limit(7) as any)
+        fetchWithCatch(supabase.from('profiles').select('*').limit(100), 'Users'),
+        fetchWithCatch(supabase.from('security_threats').select('*').order('created_at', { ascending: false }).limit(20), 'Threats'),
+        fetchWithCatch(supabase.from('admin_reports').select('*').order('created_at', { ascending: false }).limit(50), 'Reports'),
+        fetchWithCatch(supabase.from('blocked_users').select('*').limit(50), 'Blocked'),
+        fetchWithCatch(supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(50), 'Contacts'),
+        fetchWithCatch(supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(50), 'Tickets'),
+        fetchWithCatch(supabase.from('security_settings').select('*').eq('id', 'global').maybeSingle(), 'Settings'),
+        fetchWithCatch(supabase.from('moderation_queue').select('*').order('created_at', { ascending: false }).limit(20), 'Moderation'),
+        fetchWithCatch(supabase.from('daily_metrics').select('*').order('date', { ascending: false }).limit(7), 'Analytics')
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
+      if (threatsRes.data) setThreats(threatsRes.data);
+      if (reportsRes.data) setReports(reportsRes.data);
+
+      const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ 
+        ...m, 
+        type: 'contact',
+        subject: m.subject || 'PUBLIC CONTACT INQUIRY'
+      }));
       
-      if (threatsRes.data) {
-        setThreats(threatsRes.data);
-      }
-
-      if (reportsRes.data) {
-        setReports(reportsRes.data);
-      }
-
-      if (contactMessagesRes.data || supportTicketsRes.data) {
-        const contactMsgs = (contactMessagesRes.data || []).map((m: any) => ({ 
-          ...m, 
-          type: 'contact',
-          subject: m.subject || 'PUBLIC CONTACT INQUIRY'
-        }));
-        const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ 
-          ...m, 
-          type: 'ticket', 
-          first_name: m.first_name || 'Ticket', 
-          last_name: m.last_name || `#${m.id.slice(0,4)}`,
-          subject: m.subject || 'INTERNAL SUPPORT TICKET'
-        }));
-        
-        setTickets([...contactMsgs, ...supportTkts]
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 50)
-        );
-      }
+      const supportTkts = (supportTicketsRes.data || []).map((m: any) => ({ 
+        ...m, 
+        type: 'ticket', 
+        first_name: m.first_name || 'Ticket', 
+        last_name: m.last_name || `#${m.id.slice(0,4)}`,
+        subject: m.subject || 'INTERNAL SUPPORT TICKET'
+      }));
+      
+      setTickets([...contactMsgs, ...supportTkts]
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 50)
+      );
 
       if (settingsRes.data) setSettings(settingsRes.data as any);
 

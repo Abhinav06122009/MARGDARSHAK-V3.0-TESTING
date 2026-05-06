@@ -186,7 +186,7 @@ Requires standard resolution protocol.
               <Network className="w-4 h-4 text-emerald-500 animate-pulse" />
               <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">Central Command Matrix Active</span>
             </motion.div>
-            <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
               Command <span className="text-emerald-500">Center</span>
             </h1>
             <div className="flex items-center gap-2">
@@ -212,27 +212,29 @@ Requires standard resolution protocol.
           </div>
         </header>
 
-        {/* NAVIGATION TABS */}
-        <nav className="flex items-center gap-4 p-2 bg-white/[0.02] border border-white/5 rounded-3xl w-fit">
-          {[
-            { id: 'matrix', label: 'Incident Matrix', icon: Network },
-            { id: 'forensics', label: 'AI Forensics', icon: Search },
-            { id: 'intelligence', label: 'Intelligence Hub', icon: BarChart3 },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-3 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all ${
-                activeTab === tab.id 
-                ? 'bg-emerald-500 text-black shadow-2xl' 
-                : 'text-zinc-500 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+        {/* NAVIGATION TABS (Scrollable on Mobile) */}
+        <div className="overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          <nav className="flex items-center gap-2 sm:gap-4 p-1.5 bg-white/[0.02] border border-white/5 rounded-2xl sm:rounded-3xl w-fit whitespace-nowrap">
+            {[
+              { id: 'matrix', label: 'Matrix', icon: Network },
+              { id: 'forensics', label: 'Forensics', icon: Search },
+              { id: 'intelligence', label: 'Intelligence', icon: BarChart3 },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest italic transition-all ${
+                  activeTab === tab.id 
+                  ? 'bg-emerald-500 text-black shadow-2xl' 
+                  : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
         {/* DYNAMIC CONTENT AREA */}
         <div className="relative min-h-[600px]">
@@ -276,9 +278,9 @@ Requires standard resolution protocol.
                                 }`}>
                                   {isInvestigation ? <FileText size={24} /> : <MessageSquare size={24} />}
                                 </div>
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-xl font-black text-white italic uppercase tracking-tighter group-hover:text-emerald-400 transition-colors">
+                                <div className="space-y-1 min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-3">
+                                    <h3 className="text-lg sm:text-xl font-black text-white italic uppercase tracking-tighter group-hover:text-emerald-400 transition-colors truncate max-w-[200px] sm:max-w-none">
                                       {incident.subject || incident.category?.replace(/_/g, ' ') || 'Investigation'}
                                     </h3>
                                     <span className={`px-2 py-0.5 rounded-md text-[7px] font-black tracking-widest uppercase ${isInvestigation ? 'bg-blue-500/10 text-blue-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
@@ -342,8 +344,8 @@ Requires standard resolution protocol.
                 key="forensics"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-12"
               >
                 <div className="lg:col-span-2 space-y-6">
                   {isGenerating ? (
@@ -396,20 +398,18 @@ Requires standard resolution protocol.
       <AnimatePresence>
         {isEditing && (
           <>
-            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsEditing(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" 
+              className="gold-sidebar-backdrop" 
             />
             
-            {/* Sidebar Content */}
             <motion.div
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-fit max-h-screen w-full max-w-2xl bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-[101] flex flex-col overflow-y-auto custom-scrollbar"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+              className="gold-sidebar"
             >
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">

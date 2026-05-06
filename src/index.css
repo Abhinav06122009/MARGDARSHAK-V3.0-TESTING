@@ -494,6 +494,14 @@
 }
 
 
+.gold-sidebar {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] md:w-full max-w-2xl h-fit max-h-[90dvh] bg-[#0A0A0A]/95 backdrop-blur-3xl border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[200000000] flex flex-col overflow-y-auto custom-scrollbar rounded-[2.5rem] md:rounded-[3.5rem];
+}
+
+.gold-sidebar-backdrop {
+    @apply fixed inset-0 bg-black/80 backdrop-blur-xl z-[199999999];
+}
+
 /* Custom scrollbar enhancement */
 ::-webkit-scrollbar {
   width: 12px;

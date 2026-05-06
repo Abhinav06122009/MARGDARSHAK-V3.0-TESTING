@@ -87,15 +87,15 @@ const AddEventModal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="gold-sidebar-backdrop"
           />
           {/* Sheet Content */}
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+            className="gold-sidebar"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 text-xl text-white font-bold">

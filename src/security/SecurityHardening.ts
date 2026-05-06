@@ -39,15 +39,35 @@ export const initSecurityHardening = () => {
       
       const metadata = clerk.user.publicMetadata || {};
       const subscription = (metadata.subscription as any) || {};
-      const rawRoles = subscription.role || (metadata as any).role || [];
+      
+      // DEEP ROLE SCAN: Check multiple possible locations for roles
+      const rawRoles = subscription.role || 
+                       (metadata as any).role || 
+                       (metadata.public as any)?.role || 
+                       [];
+      
       const roles = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
       const normalizedRoles = roles.map((r: any) => String(r).toLowerCase().replace(/_/g, ''));
 
+      // Officer definition: Owners, Admins, or multiple high-level roles
       const isAplusPlus = normalizedRoles.length >= 2;
-      const isAClass = normalizedRoles.some((r: string) => ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio'].includes(r));
-      const isBClass = normalizedRoles.some((r: string) => ['admin', 'superadmin', 'owner'].includes(r));
+      const isAClass = normalizedRoles.some((r: string) => ['ceo', 'cto', 'cfo', 'coo', 'cmo', 'cio', 'sentinel'].includes(r));
+      const isBClass = normalizedRoles.some((r: string) => ['admin', 'superadmin', 'owner', 'official'].includes(r));
 
       cachedIsOfficer = isAplusPlus || isAClass || isBClass;
+
+      // RECOVERY PROTOCOL: If they are an officer, clear any existing bans
+      if (cachedIsOfficer) {
+        if (sessionStorage.getItem('mg_session_locked') === 'true') {
+          console.log('🛡️ [SECURITY] Officer detected. Clearing session lock.');
+          sessionStorage.removeItem('mg_session_locked');
+        }
+        if (parseInt(localStorage.getItem('mg_security_strikes') || '0') > 0) {
+          console.log('🛡️ [SECURITY] Officer detected. Resetting security strikes.');
+          localStorage.setItem('mg_security_strikes', '0');
+        }
+      }
+
       return cachedIsOfficer;
     } catch { 
       return false; 

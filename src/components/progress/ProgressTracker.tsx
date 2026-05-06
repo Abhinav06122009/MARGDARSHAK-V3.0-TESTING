@@ -1638,11 +1638,18 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
           {isAddGoalModalOpen && (
             <>
               <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsAddGoalModalOpen(false)}
+                className="gold-sidebar-backdrop"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                className="gold-sidebar"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
@@ -1746,14 +1753,14 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsAddProgressModalOpen(false)}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+                className="gold-sidebar-backdrop"
               />
               <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="fixed top-0 right-0 w-full max-w-2xl h-fit max-h-screen bg-zinc-950/40 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-50 flex flex-col overflow-y-auto custom-scrollbar"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                className="gold-sidebar"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
@@ -1812,96 +1819,7 @@ CREATE INDEX IF NOT EXISTS idx_progress_entries_date ON progress_entries(date_re
           )}
         </AnimatePresence>
 
-        <footer className="w-full mt-32 border-t border-white/5 relative overflow-hidden">
-          {/* Subtle aurora background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px]" />
-            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px]" />
-          </div>
-
-          <div className="relative max-w-7xl mx-auto px-8 py-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-              {/* Branding Column */}
-              <div className="space-y-6">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="inline-block"
-                >
-                  <h3 className="text-3xl font-black tracking-tighter text-white flex items-center gap-2">
-                    <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">MARGDARSHAK</span>
-                  </h3>
-                  <p className="text-zinc-500 text-sm font-bold uppercase tracking-[0.3em] mt-1">by VSAV GYANTAPA</p>
-                </motion.div>
-                <p className="text-zinc-400 text-sm leading-relaxed max-w-xs">
-                  Empowering students with AI-driven scheduling and intelligent academic orchestration. Built for the next generation of learners.
-                </p>
-
-              </div>
-
-              {/* Links Columns */}
-              {[
-                {
-                  title: "Platform",
-                  links: [
-                    { name: "Scheduler", href: "/timetable" },
-                    { name: "AI Assistant", href: "/ai-assistant" },
-                    { name: "Quiz Gen", href: "/quiz" },
-                    { name: "Wellness", href: "/wellness" }
-                  ]
-                },
-                {
-                  title: "Legal",
-                  links: [
-                    { name: "Terms of Service", href: "/terms" },
-                    { name: "Privacy Policy", href: "/privacy" },
-                    { name: "Cookie Policy", href: "/cookies" },
-                    { name: "GDPR Compliance", href: "/gdpr" }
-                  ]
-                },
-                {
-                  title: "Support",
-                  links: [
-                    { name: "Help Center", href: "/help" },
-                    { name: "Contact Us", href: "mailto:support@margdarshan.tech" }
-                  ]
-                }
-              ].map((section, i) => (
-                <div key={i} className="space-y-6">
-                  <h4 className="text-white font-black text-sm uppercase tracking-widest">{section.title}</h4>
-                  <ul className="space-y-4">
-                    {section.links.map((link, j) => (
-                      <li key={j}>
-                        <Link
-                          to={link.href}
-                          className="text-zinc-500 hover:text-white transition-colors text-sm font-medium flex items-center group"
-                        >
-                          <motion.span
-                            whileHover={{ x: 4 }}
-                            className="flex items-center gap-2"
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/40 group-hover:bg-indigo-400 opacity-0 group-hover:opacity-100 transition-all" />
-                            {link.name}
-                          </motion.span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Bar */}
-            <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-              <p className="text-zinc-500 text-sm">
-                © 2025 <span className="text-white font-bold">VSAV GYANTAPA</span>. All rights reserved.
-              </p>
-              <div className="flex items-center gap-6">
-
-                <p className="text-zinc-600 text-xs font-medium">Version 3.0</p>
-              </div>
-            </div>
-          </div>
-        </footer>
+        {/* Removed Redundant Footer */}
       </motion.div>
     </div>
   );

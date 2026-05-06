@@ -258,9 +258,7 @@ const Settings: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           </div>
         </div>
 
-        <div className="mt-64 pt-24 border-t border-white/5 text-center">
-          <SettingsFooter />
-        </div>
+        {/* Removed Redundant Settings Footer */}
       </div>
     </div>
   );

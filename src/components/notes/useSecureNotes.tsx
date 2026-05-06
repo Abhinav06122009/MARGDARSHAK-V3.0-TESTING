@@ -121,9 +121,17 @@ const notesHelpers = {
       last_accessed: new Date().toISOString()
     };
     
-    const { data, error } = await supabase.from('notes').insert(newNote).select().single();
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase.from('notes').insert(newNote).select().single();
+      if (error) {
+        console.error('Supabase Error creating note:', error);
+        throw error;
+      }
+      return data;
+    } catch (e: any) {
+      console.error('Internal Error in createNote:', e);
+      throw e;
+    }
   },
 
   updateNote: async (noteId: string, noteData: any, userId: string) => {
