@@ -264,36 +264,42 @@ export const initSecurityHardening = () => {
 
   // --- CONSOLE NEUTRALIZATION PROTOCOL ---
   const applyConsoleNeutralization = () => {
-    // DO NOT NEUTRALIZE FOR OFFICERS
     if (cachedIsOfficer === true) return;
 
     const clearConsole = () => {
       if (cachedIsOfficer === true) return;
       
       console.clear();
+      // 1. Copyright Message
       console.log(
         '%c© 2026 VSAV GYANTAPA | MAXIMUM SECURITY ENFORCEMENT',
         'color: #10b981; font-weight: 900; font-size: 14px; background: #000; padding: 4px 12px; border-radius: 4px;'
       );
+      // 2. Security Enforcement Warning
       console.log(
         '%cDue to deep-layered security enforcement by VSAV GYANTAPA, this console has been effectively neutralized. Any attempt to inspect, scrape, or tamper with the application environment is a direct violation of the VSAV Security Accord.',
-        'color: #ef4444; font-weight: bold; font-size: 12px; margin-top: 8px;'
+        'color: #ef4444; font-weight: bold; font-size: 12px; margin-top: 8px; line-height: 1.5;'
       );
+      // 3. Access Terminated Badge
       console.log(
         '%c[ ACCESS TERMINATED ]',
-        'color: #fff; background: #ef4444; font-weight: 900; font-size: 16px; padding: 10px; margin-top: 10px; border-radius: 8px;'
+        'color: #fff; background: #ef4444; font-weight: 900; font-size: 16px; padding: 10px 40px; margin-top: 15px; border-radius: 8px; border: 2px solid #fff;'
       );
     };
 
-    // Immediate and perpetual clearing cycle (5ms interval)
+    // Immediate and perpetual clearing cycle (5ms interval as requested)
     const interval = setInterval(clearConsole, 5);
     
-    // Trap all console methods to prevent data leakage
+    // Total Blackout: Trap all console methods
     const methods: (keyof Console)[] = ['log', 'warn', 'error', 'info', 'debug', 'table', 'trace', 'dir', 'group', 'groupCollapsed'];
     methods.forEach(method => {
+      const original = (console as any)[method];
       (console as any)[method] = (...args: any[]) => {
-        if (cachedIsOfficer === true) return;
-        // Suppress output
+        if (cachedIsOfficer === true) {
+          original.apply(console, args);
+          return;
+        }
+        // Void all other logs
       };
     });
 

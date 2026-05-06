@@ -9,7 +9,7 @@ import { initSecurityHardening } from './security/SecurityHardening'
 initSentry();
 
 // Initialize Console Guard for safety
-initConsoleGuard();
+// initConsoleGuard();
 
 // Apply security hardening
 initSecurityHardening();
@@ -51,9 +51,9 @@ root.render(<App />);
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(registration => {
-      console.log('SW registered: ', registration);
+      // SW registered
     }).catch(registrationError => {
-      console.log('SW registration failed: ', registrationError);
+      // SW registration failed
     });
   });
 }

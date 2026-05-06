@@ -5,7 +5,6 @@ import * as Sentry from "@sentry/react";
  * Optimized for core stability and PII collection.
  */
 export const initSentry = () => {
-  console.log("🛡️ Sentry: Attempting to initialize...");
   
   Sentry.init({
     dsn: "https://bbf03485b3c84be48acc4182e1a62991@o4511286169108480.ingest.us.sentry.io/4511286186344448",
@@ -35,5 +34,4 @@ export const initSentry = () => {
   });
   
   Sentry.captureMessage("Sentry initialized in Margdarshak", "info");
-  console.log("🛡️ Sentry: Initialized and ready");
 };

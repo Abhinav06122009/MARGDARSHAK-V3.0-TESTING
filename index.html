@@ -105,12 +105,11 @@
     <div id="app"></div>
     <script>
       window.addEventListener('error', (e) => {
-        console.error('[FORENSIC-ERROR]', e.message, 'at', e.filename, ':', e.lineno);
+        // Suppress or log silently
       });
       window.addEventListener('unhandledrejection', (e) => {
-        console.error('[FORENSIC-PROMISE]', e.reason);
+        // Suppress or log silently
       });
-      console.log('[MARGDARSHAK-LOG] Forensic Logger Initialized');
     </script>
     <script type="module" src="/src/main.tsx?v=5"></script>
   </body>
