@@ -266,7 +266,7 @@ const EventForm: React.FC<EventFormProps> = ({
         </div>
 
         {/* Footer Action Bar */}
-        <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0 flex items-center justify-between gap-4">
+        <div className="px-6 pt-3 pb-1 border-t border-white/5 bg-white/[0.02] backdrop-blur-xl shrink-0 flex items-center justify-between gap-4">
           <Button
             variant="ghost"
             onClick={onClose}

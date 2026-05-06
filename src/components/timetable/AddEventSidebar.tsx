@@ -316,7 +316,7 @@ const AddEventSidebar: React.FC<AddEventSidebarProps> = ({
                 </div>
                 
                 {/* Form Actions */}
-                <div className="flex justify-end gap-3 pt-2 mt-0 border-t border-white/10">
+                <div className="flex justify-end gap-3 pt-2 pb-2 px-6 border-t border-white/10">
                   <Button type="button" variant="ghost" onClick={onClose} className="px-8 py-3 text-base text-white/80 hover:bg-white/10 rounded-xl">
                     Cancel
                   </Button>
