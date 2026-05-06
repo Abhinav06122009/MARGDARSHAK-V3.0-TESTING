@@ -131,13 +131,15 @@ export const AmbientSoundPlayer: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, syncBurnout]);
 
+  console.log('[DEBUG] AmbientSoundPlayer rendered, isVisible:', isVisible);
+
   return (
     <div className="fixed z-[9999] bottom-6 left-6 pointer-events-none">
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
         drag dragMomentum={false}
-        animate={{ y: isVisible ? 0 : 150, opacity: isVisible ? 1 : 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >

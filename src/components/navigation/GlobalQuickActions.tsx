@@ -106,13 +106,14 @@ export const GlobalQuickActions: React.FC = () => {
     return groups;
   }, [filteredActions]);
 
-  if (!session) return null;
+  // Debug visibility
+  console.log('[DEBUG] GlobalQuickActions rendered, isVisible:', isVisible);
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
       <motion.div
         drag dragMomentum={false}
-        animate={{ y: isVisible ? 0 : 150, opacity: isVisible ? 1 : 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
