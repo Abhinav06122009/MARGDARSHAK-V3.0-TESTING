@@ -234,104 +234,104 @@ const AppRoutes = () => {
   const showContent = !isOfficer || isVerified;
 
   return (
-    <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden">
-      {/* Global persistent layers - ALWAYS ON TOP AND OUTSIDE FLOW */}
-      {isOfficer && !isVerified && <RankEntryOverlay />}
-      
+    <>
+      <div className="bg-[#050505] min-h-screen text-white w-full overflow-x-hidden relative">
+        <GlobalSecurityGuard>
+          <NavigationTracker />
+          <SecurityWarningOverlay />
+          
+          <div className={showContent ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95 transition-all duration-1000'}>
+            <AnimatePresence mode="wait">
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* --- PUBLIC ROUTES --- */}
+                  <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform." /><LandingPage /></>} />
+                  <Route path="/auth" element={<Index />} />
+                  <Route path="/sso-callback" element={<SSOCallback />} />
+                  <Route path="/calculator" element={<Calculator onBack={() => window.history.back()} />} />
+                  <Route path="/timer" element={<StudyTimer />} />
+                  <Route path="/blog/*" element={<BlogPage />} />
+                  <Route path="/about" element={<AboutUsPage />} />
+                  <Route path="/contact" element={<ContactUsPage />} />
+                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsAndConditions />} />
+                  <Route path="/cookies" element={<CookiePolicy />} />
+                  <Route path="/gdpr" element={<GDPRCompliance />} />
+                  <Route path="/download" element={<DownloadPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                  {/* --- PROTECTED ROUTES --- */}
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardRouteWrapper /></ProtectedRoute>} />
+                  <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+                  <Route path="/ai-assistant" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
+                  <Route path="/upgrade" element={<ProtectedRoute><Upgrade /></ProtectedRoute>} />
+                  <Route path="/tasks" element={<ProtectedRoute><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/grades" element={<ProtectedRoute><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/notes" element={<ProtectedRoute><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/calendar" element={<ProtectedRoute><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/timetable" element={<ProtectedRoute><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/courses" element={<ProtectedRoute><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/syllabus" element={<ProtectedRoute><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/progress" element={<ProtectedRoute><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/wellness" element={<ProtectedRoute><Wellness onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/status" element={<OfficerRoute><Status onBack={() => window.history.back()} /></OfficerRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
+                  <Route path="/admin/login" element={<AdminAuthPage />} />
+                  
+                  <Route path="/support" element={<ClassCRoute><SupportHub /></ClassCRoute>} />
+                  <Route path="/support-nexus" element={<NexusRoute><SupportNexus /></NexusRoute>} />
+                  <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                  <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
+                  <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                  <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
+                  <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
+                  <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />
+                  <Route path="/admin/content" element={<AdminProtectedRoute><ContentModeration /></AdminProtectedRoute>} />
+                  <Route path="/admin/analytics" element={<AdminProtectedRoute><Analytics /></AdminProtectedRoute>} />
+                  <Route path="/admin/support" element={<AdminProtectedRoute><SupportCenter /></AdminProtectedRoute>} />
+                  <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
+
+                  <Route path="/quiz" element={<PremiumEliteRoute><QuizGenerator /></PremiumEliteRoute>} />
+                  <Route path="/essay-helper" element={<PremiumEliteRoute><EssayHelper /></PremiumEliteRoute>} />
+                  <Route path="/study-planner" element={<PremiumEliteRoute><StudyPlanner /></PremiumEliteRoute>} />
+                  <Route path="/ai-analytics" element={<PremiumEliteRoute><AIAnalytics /></PremiumEliteRoute>} />
+                  <Route path="/flashcards" element={<PremiumEliteRoute><Flashcards /></PremiumEliteRoute>} />
+                  <Route path="/doubt-solver" element={<PremiumEliteRoute><DoubtSolver /></PremiumEliteRoute>} />
+                  <Route path="/smart-notes" element={<PremiumRoute><SmartNotes /></PremiumRoute>} />
+                  <Route path="/portfolio" element={<PremiumRoute><PortfolioBuilder /></PremiumRoute>} />
+                  <Route path="/deadlines" element={<PremiumRoute><DeadlineTracker /></PremiumRoute>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </AnimatePresence>
+          </div>
+
+          <DevVerificationGuard />
+          <CursorProvider>
+            {showContent && (
+               <GlobalFooter />
+            )}
+          </CursorProvider>
+          <ShortcutsOverlay />
+          <Toaster />
+          <Sonner />
+          <CookieConsent />
+        </GlobalSecurityGuard>
+      </div>
+
+      {/* PERSISTENT LAYERS - COMPLETELY OUTSIDE THE ROOT DIV TO BYPASS TRANSFORM RESET */}
       {showContent && (
-        <div className="fixed inset-0 pointer-events-none z-[9999]">
+        <div className="fixed inset-0 pointer-events-none z-[999999]">
           <AIWidgetWrapper />
           <GlobalQuickActions />
           <AmbientSoundPlayer />
           <MobileNavbar />
         </div>
       )}
-
-      <GlobalSecurityGuard>
-        <NavigationTracker />
-        <SecurityWarningOverlay />
-        
-        {/* The Gate: Content is only rendered/visible if verified or not an officer */}
-        <div className={showContent ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95 transition-all duration-1000'}>
-          <AnimatePresence mode="wait">
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* --- PUBLIC ROUTES --- */}
-                <Route path="/" element={<><SEO title="MARGDARSHAK | Best AI Student Platform & Study Management" description="MARGDARSHAK is the top-rated AI-powered student platform." /><LandingPage /></>} />
-                <Route path="/auth" element={<Index />} />
-                <Route path="/sso-callback" element={<SSOCallback />} />
-                <Route path="/calculator" element={<Calculator onBack={() => window.history.back()} />} />
-                <Route path="/timer" element={<StudyTimer />} />
-                <Route path="/blog/*" element={<BlogPage />} />
-                <Route path="/about" element={<AboutUsPage />} />
-                <Route path="/contact" element={<ContactUsPage />} />
-                <Route path="/help" element={<HelpPage />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsAndConditions />} />
-                <Route path="/cookies" element={<CookiePolicy />} />
-                <Route path="/gdpr" element={<GDPRCompliance />} />
-                <Route path="/download" element={<DownloadPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-                {/* --- PROTECTED ROUTES --- */}
-                <Route path="/dashboard" element={<ProtectedRoute><DashboardRouteWrapper /></ProtectedRoute>} />
-                <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
-                <Route path="/ai-assistant" element={<ProtectedRoute><AIPage /></ProtectedRoute>} />
-                <Route path="/upgrade" element={<ProtectedRoute><Upgrade /></ProtectedRoute>} />
-                <Route path="/tasks" element={<ProtectedRoute><Tasks onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/grades" element={<ProtectedRoute><Grades onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/notes" element={<ProtectedRoute><Notes onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/calendar" element={<ProtectedRoute><Calendar onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/timetable" element={<ProtectedRoute><Timetable onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/courses" element={<ProtectedRoute><CourseManagement onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/syllabus" element={<ProtectedRoute><Syllabus onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/progress" element={<ProtectedRoute><ProgressTracker onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/wellness" element={<ProtectedRoute><Wellness onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/status" element={<OfficerRoute><Status onBack={() => window.history.back()} /></OfficerRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings onBack={() => window.history.back()} /></ProtectedRoute>} />
-                <Route path="/admin/login" element={<AdminAuthPage />} />
-                
-                <Route path="/support" element={<ClassCRoute><SupportHub /></ClassCRoute>} />
-                <Route path="/support-nexus" element={<NexusRoute><SupportNexus /></NexusRoute>} />
-                <Route path="/admin" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
-                <Route path="/admin/command-center" element={<AdminProtectedRoute><CommandCenter /></AdminProtectedRoute>} />
-                <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                <Route path="/admin/users" element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
-                <Route path="/admin/security" element={<AdminProtectedRoute><SecurityCenter /></AdminProtectedRoute>} />
-                <Route path="/admin/reports" element={<AdminProtectedRoute><ReportsInvestigation /></AdminProtectedRoute>} />
-                <Route path="/admin/content" element={<AdminProtectedRoute><ContentModeration /></AdminProtectedRoute>} />
-                <Route path="/admin/analytics" element={<AdminProtectedRoute><Analytics /></AdminProtectedRoute>} />
-                <Route path="/admin/support" element={<AdminProtectedRoute><SupportCenter /></AdminProtectedRoute>} />
-                <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
-
-                <Route path="/quiz" element={<PremiumEliteRoute><QuizGenerator /></PremiumEliteRoute>} />
-                <Route path="/essay-helper" element={<PremiumEliteRoute><EssayHelper /></PremiumEliteRoute>} />
-                <Route path="/study-planner" element={<PremiumEliteRoute><StudyPlanner /></PremiumEliteRoute>} />
-                <Route path="/ai-analytics" element={<PremiumEliteRoute><AIAnalytics /></PremiumEliteRoute>} />
-                <Route path="/flashcards" element={<PremiumEliteRoute><Flashcards /></PremiumEliteRoute>} />
-                <Route path="/doubt-solver" element={<PremiumEliteRoute><DoubtSolver /></PremiumEliteRoute>} />
-                <Route path="/smart-notes" element={<PremiumRoute><SmartNotes /></PremiumRoute>} />
-                <Route path="/portfolio" element={<PremiumRoute><PortfolioBuilder /></PremiumRoute>} />
-                <Route path="/deadlines" element={<PremiumRoute><DeadlineTracker /></PremiumRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </AnimatePresence>
-        </div>
-
-        <DevVerificationGuard />
-        <CursorProvider>
-          {showContent && (
-             <GlobalFooter />
-          )}
-        </CursorProvider>
-        <ShortcutsOverlay />
-        <Toaster />
-        <Sonner />
-        <CookieConsent />
-      </GlobalSecurityGuard>
-    </div>
+      {isOfficer && !isVerified && <div className="fixed inset-0 z-[1000000]"><RankEntryOverlay /></div>}
+    </>
   );
 };
 
