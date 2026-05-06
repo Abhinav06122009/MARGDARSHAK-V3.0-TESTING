@@ -321,16 +321,27 @@ const AppRoutes = () => {
           <Sonner />
           <CookieConsent />
 
-          {/* PERSISTENT UI LAYER - ANCHORED INSIDE APP CONTEXT */}
+          {/* PERSISTENT UI LAYER - ANCHORED BOTTOM-LEFT */}
           {showContent && (
-            <div className="fixed bottom-0 left-0 z-[999999] pointer-events-none">
-              <div className="pointer-events-auto">
-                <AIWidgetWrapper />
-                <GlobalQuickActions />
-                <AmbientSoundPlayer />
-                <MobileNavbar />
+            <>
+              {/* Left-Bottom Corner Stack */}
+              <div className="fixed bottom-8 left-8 z-[999999] pointer-events-none flex flex-col gap-4 items-start">
+                <div className="pointer-events-auto">
+                  <AmbientSoundPlayer />
+                </div>
+                <div className="pointer-events-auto">
+                  <GlobalQuickActions />
+                </div>
               </div>
-            </div>
+
+              {/* Other Global Overlays */}
+              <div className="fixed bottom-0 left-0 z-[999998] pointer-events-none">
+                <div className="pointer-events-auto">
+                  <AIWidgetWrapper />
+                  <MobileNavbar />
+                </div>
+              </div>
+            </>
           )}
         </GlobalSecurityGuard>
       </div>
