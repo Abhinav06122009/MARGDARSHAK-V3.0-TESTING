@@ -57,7 +57,6 @@ const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const AdminAuthPage = lazy(() => import("@/components/auth/AdminAuthPage"));
 // Lazy load heavy global components
 const GlobalAIAssistant = lazy(() => import('@/components/ai/GlobalAIAssistant'));
-const GlobalWellnessBar = lazy(() => import('@/components/wellness/GlobalWellnessBar'));
 
 
 
@@ -321,9 +320,6 @@ const AppRoutes = () => {
               <GlobalQuickActions />
               <AmbientSoundPlayer />
               <MobileNavbar />
-              <Suspense fallback={null}>
-                <GlobalWellnessBar />
-              </Suspense>
               <GlobalFooter />
             </>
           )}
