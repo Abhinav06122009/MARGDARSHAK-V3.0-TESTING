@@ -39,7 +39,7 @@ const ProgressTracker = lazy(() => import("@/components/progress/ProgressTracker
 const Wellness = lazy(() => import("@/components/wellness/Wellness"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Status = lazy(() => import("@/pages/Status"));
-const Sitemap = lazy(() => import("@/pages/Sitemap"));
+const SitemapPage = lazy(() => import("@/pages/SitemapPage"));
 const AIPage = lazy(() => import("@/pages/AIPage"));
 const Upgrade = lazy(() => import("@/pages/Upgrade"));
 const AboutUsPage = lazy(() => import("@/pages/AboutUsPage"));
@@ -275,6 +275,7 @@ const AppRoutes = () => {
                   <Route path="/cookies" element={<CookiePolicy />} />
                   <Route path="/gdpr" element={<GDPRCompliance />} />
                   <Route path="/download" element={<DownloadPage />} />
+                  <Route path="/sitemap" element={<SitemapPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                   {/* --- PROTECTED ROUTES --- */}

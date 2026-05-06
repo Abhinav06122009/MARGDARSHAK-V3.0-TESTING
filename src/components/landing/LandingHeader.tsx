@@ -4,7 +4,6 @@ import { Volume2, VolumeX, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSound } from './SoundContext';
 import { MagneticButton } from './MagneticButton';
-import logo from '@/components/logo/logo.png';
 import { Badge } from '@/components/ui/badge';
 
 /**
@@ -63,7 +62,7 @@ export const LandingHeader = React.memo(() => {
         <div className="flex items-center gap-4 cursor-pointer group" onClick={() => handleLinkClick('home')}>
           <div className="relative">
             <div className="p-1 rounded-xl bg-white/5 border border-white/10 relative z-10 group-hover:scale-105 transition-transform duration-300">
-              <img src={logo} alt="Margdarshak Logo" className="h-10 w-10 rounded-lg object-contain" />
+              <img src="/logo.png" alt="Margdarshak Logo" className="h-10 w-10 rounded-lg object-contain" />
             </div>
           </div>
           

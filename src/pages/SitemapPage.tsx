@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Map, FileText, Lock, Layout, BookOpen, Calculator as CalcIcon, Briefcase, Users, LayoutGrid, Globe, Shield, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import logo from "@/components/logo/logo.png";
+
 
 const SitemapPage = () => {
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ const SitemapPage = () => {
               </button>
               <div className="flex items-center gap-4">
                 <div className="p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                  <img src={logo} alt="Margdarshak" className="h-6 w-6 object-contain" />
+                  <img src="/logo.png" alt="Margdarshak" className="h-6 w-6 object-contain" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-black flex items-center gap-3 tracking-tighter uppercase italic text-white leading-none">

@@ -20,7 +20,7 @@ import {
   Mail,
   Facebook
 } from 'lucide-react';
-import logo from "@/components/logo/logo.png";
+
 
 const GlobalFooter = React.memo(() => {
   const socialLinks = [
@@ -74,7 +74,7 @@ const GlobalFooter = React.memo(() => {
                   whileHover={{ rotate: 15, scale: 1.1 }}
                   className="p-4 bg-white rounded-[1.8rem] border border-white/20 group-hover:border-emerald-500/30 transition-all duration-700 shadow-2xl shadow-emerald-500/10"
                 >
-                  <img src={logo} alt="Margdarshak" className="w-8 h-8 object-contain" />
+                  <img src="/logo.png" alt="Margdarshak" className="w-8 h-8 object-contain" />
                 </motion.div>
                 <div>
                   <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
