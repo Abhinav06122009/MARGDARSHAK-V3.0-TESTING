@@ -321,22 +321,22 @@ const AppRoutes = () => {
           <Sonner />
           <CookieConsent />
 
-          {/* PERSISTENT UI OVERLAYS */}
-          {showContent && (
-            <>
-              <AmbientSoundPlayer />
-              <GlobalQuickActions />
-              
-              <div className="fixed bottom-0 left-0 z-[99999998] pointer-events-none">
-                <div className="pointer-events-auto">
-                  <AIWidgetWrapper />
-                  <MobileNavbar />
-                </div>
-              </div>
-            </>
-          )}
-
         </GlobalSecurityGuard>
+
+        {/* PERSISTENT UI OVERLAYS - Moved outside guard for stability */}
+        {showContent && (
+          <>
+            <AmbientSoundPlayer />
+            <GlobalQuickActions />
+            
+            <div className="fixed bottom-0 left-0 z-[99999998] pointer-events-none">
+              <div className="pointer-events-auto">
+                <AIWidgetWrapper />
+                <MobileNavbar />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {isOfficer && !isVerified && (

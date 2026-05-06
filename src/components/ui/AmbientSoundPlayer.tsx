@@ -48,12 +48,7 @@ export const AmbientSoundPlayer: React.FC = () => {
   const allStations = [...BUILT_IN_STATIONS, ...customTracks];
   const station = allStations.find(s => s.id === activeId) ?? allStations[0];
 
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
@@ -130,7 +125,7 @@ export const AmbientSoundPlayer: React.FC = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={{ 
           opacity: 1, 
-          y: scrollY * 0.05 
+          y: 0 
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
