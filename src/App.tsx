@@ -323,12 +323,12 @@ const AppRoutes = () => {
 
       {/* PERSISTENT LAYERS - COMPLETELY OUTSIDE THE ROOT DIV TO BYPASS TRANSFORM RESET */}
       {showContent && (
-        <div className="fixed inset-0 pointer-events-none z-[999999]">
+        <>
           <AIWidgetWrapper />
           <GlobalQuickActions />
           <AmbientSoundPlayer />
           <MobileNavbar />
-        </div>
+        </>
       )}
       {isOfficer && !isVerified && <div className="fixed inset-0 z-[1000000]"><RankEntryOverlay /></div>}
     </>

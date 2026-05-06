@@ -123,7 +123,7 @@ export const AmbientSoundPlayer: React.FC = () => {
   }, [user?.id, syncBurnout]);
 
   return (
-    <div className="fixed z-[9999] bottom-[110px] left-6 pointer-events-none">
+    <div className="fixed z-[99999] bottom-[110px] left-6 pointer-events-none" style={{ position: 'fixed' }}>
       <input ref={fileInputRef} type="file" accept="audio/*" multiple className="hidden" onChange={handleFileImport} />
 
       <motion.div
@@ -135,7 +135,6 @@ export const AmbientSoundPlayer: React.FC = () => {
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
-          layout
           className={`flex flex-col bg-[#1A1A1A]/80 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden text-white ${expanded ? 'w-[360px]' : 'w-auto'}`}
         >
           {expanded ? (

@@ -100,7 +100,7 @@ export const GlobalQuickActions: React.FC = () => {
   if (!session) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-[9999] pointer-events-none">
+    <div className="fixed bottom-6 left-6 z-[99999] pointer-events-none" style={{ position: 'fixed' }}>
       <motion.div
         drag dragMomentum={false}
         animate={{ y: Math.sin(scrollY * 0.01) * 4 }}
@@ -108,7 +108,6 @@ export const GlobalQuickActions: React.FC = () => {
         className="pointer-events-auto cursor-grab active:cursor-grabbing"
       >
         <motion.div
-          layout
           className="flex items-center gap-1 p-2 bg-[#1A1A1A]/90 backdrop-blur-3xl border border-white/10 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
         >
           <div className="relative group">
